@@ -56,6 +56,8 @@ if ! config_mark
 then
     config_add <<-EOF
 alias vi=nvim
+export VISUAL=nvim
+export EDITOR="$VISUAL"
 EOF
 fi
 git config --global core.editor "nvim"

@@ -114,6 +114,17 @@ log_verbsoe "PlugInstall and then PlugUpgrade in vim"
 # bundle_install othree yajs.vim
 # https://github.com/lifepillar/vim-mucomplete
 # bundle_install lifepillar vim-mucomplete
+git config --global core.editor "vim"
+
+log_verbose looking for personal spell checker files
+# if spell is symlinked the mkdir will fail
+if [[ ! -e "$HOME/.vim/spell" ]]
+then
+    if [[ -e "$WS_DIR/git/personal/$USER/vim/spell" ]]
+    then
+        ln -s "$WS_DIR/git/personal/$USER/vim/spell" "$HOME/.vim/spell"
+    fi
+fi
 
 # the {-} says replace with "" if not present so set -u is not tripped
 if ! config_mark "${FLAGS[@]}"
@@ -122,6 +133,7 @@ then
     config_add <<EOF
 VISUAL="$(command -v vi)"
 export VISUAL
+export EDITOR="$VISUAL"
 EOF
 log_verbose "source $(config_profile) to enable vi as default editor or relogin"
 fi
@@ -215,15 +227,4 @@ Plug 'dense-analysis/ale'
 " Initialize plugin system
 call plug#end()
 EOF
-fi
-
-log_verbose looking for personal spell checker files
-
-# if spell is symlinked the mkdir will fail
-if [[ ! -e "$HOME/.vim/spell" ]]
-then
-    if [[ -e "$WS_DIR/git/personal/$USER/vim/spell" ]]
-    then
-        ln -s "$WS_DIR/git/personal/$USER/vim/spell" "$HOME/.vim/spell"
-    fi
 fi
