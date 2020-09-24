@@ -43,11 +43,11 @@ shift $((OPTIND-1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
-source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
+source_lib lib-install.sh lib-util.sh lib-config.sh
 
 pip_install powerline-status
 
-location="$()pip show powerline-status | grep Location | awk '{print $2}'])"
+location="$(pip show powerline-status | grep Location | awk '{print $2}')"
 log_verbose "powerline completion script at $location"
 
 powerline="$location/powerline/bindings/bash/powerline.sh"
@@ -63,6 +63,5 @@ then
     export POWERLINE_BASH_CONTINUATION=1 && \
     export POWERLINE_BASH_SELECT=1 && \
     source "$powerline" || true
-
-
 EOF
+fi
