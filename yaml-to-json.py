@@ -1,8 +1,8 @@
 #!/usr/bin/env python
+"""Convert yaml at stdin to json on stdout.
 
-"""@package install-sshd
-    @author Rich Tong
-    Convert yaml at stdin to json on stdout
+@package install-sshd
+@author Rich Tong
 """
 
 # http://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python
@@ -16,19 +16,12 @@ import json
 import logging
 import argparse
 
-# http://bugs.python.org/issue23223
-try:
-    import subprocess32 as subprocess
-except ImportError:
-    import subprocess
-
 
 def main(args):
-    """Runs the dumper
+    """Runs the dumper.
 
     @param args command line
     """
-
     #    logging.basicConfig(level=logging.DEBUG)
     logging.debug("Main arguments: %s", args)
 

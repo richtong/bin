@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-"""@package install-sshd
-    @author Rich Tong
-    Automatic installation of ssh daemon
+"""Automatic installation of ssh daemon.
+
+@package install-sshd
+@author Rich Tong
 """
 
 # http://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python
@@ -11,33 +12,26 @@ from __future__ import print_function
 import sys
 
 import os
-import shutil
 
 # Need expanduser to interpret the ~ in filenames
 import logging
 import argparse
 
-# http://bugs.python.org/issue23223
-try:
-    import subprocess32 as subprocess
-except ImportError:
-    import subprocess
+import subprocess
 from time import strftime, gmtime
-from os.path import expanduser
 
 # http://stackoverflow.com/questions/415511/how-to-get-current-time-in-python
 from datetime import datetime
 
 
 def main(args):
-    """Parse command line arguments and run it for a single file
+    """Parse command line arguments and run it for a single file.
 
     @param args command line
     """
-
     #    logging.basicConfig(level=logging.DEBUG)
     #    logging.debug("Main arguments: %s", args)
-    if not "linux" in sys.platform:
+    if "linux" not in sys.platform:
         print("only runs on linux", file=sys.stderr)
         sys.exit(os.EX_CONFIG)
 
@@ -56,7 +50,6 @@ def main(args):
         logging.info("Debug on, got arguments: %s", args)
 
     logging.debug("set variables")
-    home = os.path.expanduser("~")
     script = os.path.basename(__file__)
     sshdConfig = os.path.abspath("/etc/ssh/sshd_config")
     added = "".join(

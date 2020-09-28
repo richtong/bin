@@ -1,9 +1,11 @@
 #!/usr/bin/env python2.7
 
-"""@package install-vim
+"""Install vim.
 
-    Automatic installation of vim and it"s packages
-    Rich learning to write python
+@package install-vim
+
+Automatic installation of vim and it"s packages
+Rich learning to write python
 """
 
 import sys
@@ -12,22 +14,15 @@ import os
 # Need expanduser to interpret the ~ in filenames
 import logging
 import argparse
-
-# http://bugs.python.org/issue23223
-try:
-    import subprocess32 as subprocess
-except ImportError:
-    import subprocess
+import subprocess
 from time import strftime, gmtime
-from os.path import expanduser
 
 
 def main(args):
-    """Parse command line arguments and run it for asingle file
+    """Parse command line arguments and run it for a single file.
 
     @param args command line
     """
-
     logging.basicConfig(level=logging.DEBUG)
     logging.debug("Main arguments: %s", args)
 
@@ -208,7 +203,7 @@ def main(args):
                     "let g:syntastic_check_on_open = 1\n",
                     "let g:syntastic_check_on_wq = 1\n",
                     "let g:syntastic_mode_map = { 'mode' : 'passive' }\n",
-                    "let g:syntastic_javascript_checkers = ['eslint', 'jshint']\n",
+                    "let g:syntastic_javascript_checkers=['eslint']\n",
                     "au BufRead,BufNewFile *.json set filetype=json",
                 ]
             )
