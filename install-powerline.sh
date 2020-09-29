@@ -45,12 +45,12 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh lib-config.sh
 
-pip_install powerline-status
+pip_install powerline-status powerline-gitstatus
 
-location="$(pip show powerline-status | grep Location | awk '{print $2}')"
+location="$(pip show powerline-status | grep Location | awk '{print $2}')"/powerline
 log_verbose "powerline completion script at $location"
 
-powerline="$location/powerline/bindings/bash/powerline.sh"
+powerline="$location/bindings/bash/powerline.sh"
 if [[ ! -e $powerline ]]
 then
     log_error 2 "cannot fine powerline at $powerline"
@@ -65,3 +65,30 @@ then
     source "$powerline" || true
 EOF
 fi
+
+config="$location/config_files"
+PROFILE="${PROFILE:-"$HOME/.config/powerline"}"
+if [[ ! -e $PROFILE/config.json ]]
+then
+    log_verbose "copying from $config to $PROFILE"
+    cp -r "$config/"* "$PROFILE"
+fi
+
+log_verbose "installing powerline fonts add to config.json"
+cask_install font-fira-mono-for-powerline
+
+VIM_PROFILE="${VIM_PROFILE:"$HOME/.vimrc"}"
+if ! config_mark "$VIM_PROFILE"
+then
+    log_verbose "adding to $VIM_PROFILE"
+    config_add "$VIM_PROFILE" "'" <<-EOF
+set rtp+="$location/bindings/vim"
+set laststatus=2
+EOF
+fi
+
+# https://github.com/gravyboat/powerline-config
+
+log_verbose "change config at $PROFILE"
+log_verbose "run powerline-lint to check and then powerline-daemon --replace"
+log_verbose "on python version changes, need to delete the files and reset"
