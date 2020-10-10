@@ -103,7 +103,7 @@ then
 fi
 
 log_verbose "now using vim-plug these installs are done in .vimrc, use"
-log_verbsoe "PlugInstall and then PlugUpgrade in vim"
+log_verbose "PlugInstall and then PlugUpgrade in vim"
 # scrooloose syntax checker
 # bundle_install vim-syntastic syntastic
 # terminal colors
@@ -142,7 +142,7 @@ log_verbose checking .vimrc which should be synced, but if not put in a default
 if ! config_mark "${FLAGS[@]}" "$HOME/.vimrc" '"'
 then
     log_verbose adding to .vimrc
-    config_add "$HOME/.vimrc" <<EOF
+    config_add "$HOME/.vimrc" <<-'EOF'
 set autoread
 set incsearch
 set showmatch
