@@ -22,17 +22,19 @@ FDIR="${FDIR:-"/usr/local/Caskroom/flutter/latest"}"
 while getopts "hdvnf:" opt; do
     case "$opt" in
         h)
-            echo $SCRIPTNAME: install aws
-            echo "flags: -d : debug, -v : verbose, -h :help"
-            echo "       -n Disable Web applications (default: $NOWEB)"
-            echo "       -f location of the flutter SDK (default: $FDIR)"
+            cat <<-EOF
+$SCRIPTNAME: install aws
+flags: -d : debug, -v : verbose, -h :help
+       -n Disable Web applications (default: $NOWEB)
+       -f location of the flutter SDK (default: $FDIR)
+EOF
             exit 0
             ;;
         d)
-            DEBUGGING=true
+            export DEBUGGINtrue
             ;;
         v)
-            VERBOSE=true
+            export VERBOSE=true
             ;;
         n)
             NOWEB=true
@@ -40,9 +42,12 @@ while getopts "hdvnf:" opt; do
         f)
             FDIR="$OPTARG"
             ;;
+        *)
+            echo "No -$opt" >&2
     esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 shift $((OPTIND-1))
 source_lib lib-install.sh lib-util.sh lib-config.sh
@@ -82,9 +87,8 @@ done
 
 # dart install conflicts with flutter now
 # https://github.com/dart-lang/homebrew-dart
-# log_verbose install dart
-# tap_install dart-lang/dart
-# brew_install dart
+log_verbose install dart
+brew_install dart
 
 # java required for certain android tools like the keyfinder
 # https://stackoverflow.com/questions/24342886/how-to-install-java-8-on-mac#28635465

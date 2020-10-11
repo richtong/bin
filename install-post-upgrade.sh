@@ -40,9 +40,12 @@ EOF
         i)
             INCOMPATIBLE_CASKS="$OPTARG"
             ;;
+        *)
+            echo "no -$opt" >&2
     esac
 done
 shift $((OPTIND-1))
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
@@ -60,11 +63,12 @@ brew upgrade
 log_verbose now reinstall incompatibles
 for c in $INCOMPATIBLE_CASKS
 do
-    brew cask reinstall $INCOMPATIBLE_CASKS
+    brew cask reinstall "$c"
 done
 
-if ! brew cask upgrade
-log_verbose brew cask failed with $?
+if ! brew upgrade --cask
+then
+    log_verbose brew cask failed with $?
 fi
 
 log_warning you should now reboot
