@@ -68,6 +68,7 @@ npm_install -g "${NODE_PACKAGES[@]}"
 PIP_PACKAGES+=(
     jedi
     vim-vint
+    beautysh
 )
 
 pip_install "${PIP_PACKAGES[@]}"
@@ -77,7 +78,6 @@ BREW_PACKAGES+=(
     shellcheck
     shfmt
     yamllint
-    beautysh
 )
 
 brew_install "${BREW_PACKAGES[@]}"
@@ -107,9 +107,13 @@ fi
 # eslint-plugin-react only, this is translated from the eslint.js that comes
 # with create-react-app this is a snapshot of the eslint used by that app
 # this enables the import checks that are off for create-react-app
-if ! config_mark "${FLAGS[@]}" "$HOME/.eslintrc.js" "//"
+# We do not want flags to exist if they are null
+log_verbose "checking $HOME/.eslintrc.js"
+# shellcheck disable=SC2086
+if ! config_mark "$HOME/.eslintrc.js" "//"
 then
-    config_add "$HOME/.eslintrc.js" <<EOF
+    log_verbose "Addint to $HOME/.eslintrc.js"
+    config_add "$HOME/.eslintrc.js" <<-'EOF'
 {
   root: true,
   parser: 'babel-eslint',

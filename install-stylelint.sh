@@ -70,7 +70,6 @@ log_verbose "NODE_ROOT is $NODE_ROOT"
 # https://www.sitepoint.com/improving-the-quality-of-your-css-with-postcss/
 npm_install -g stylelint stylelint-config-standard
 
-echo config_mark "${LINT_FLAGS[@]}" "$HOME/.stylelintrc" "added:"
 # we want the flag to not exist and be globbed
 # shellcheck disable=SC2086
 if ! config_mark $LINT_FLAGS "$HOME/.stylelintrc" "added:"

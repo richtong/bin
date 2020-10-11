@@ -127,7 +127,7 @@ then
 fi
 
 # the {-} says replace with "" if not present so set -u is not tripped
-if ! config_mark "${FLAGS[@]}"
+if ! config_mark
 then
     # note we escape the command line so we check the path of vi at run time
     config_add <<EOF
@@ -139,7 +139,8 @@ log_verbose "source $(config_profile) to enable vi as default editor or relogin"
 fi
 
 log_verbose checking .vimrc which should be synced, but if not put in a default
-if ! config_mark "${FLAGS[@]}" "$HOME/.vimrc" '"'
+# shellcheck disable=SC2086
+if ! config_mark "$HOME/.vimrc" '"'
 then
     log_verbose adding to .vimrc
     config_add "$HOME/.vimrc" <<-'EOF'
