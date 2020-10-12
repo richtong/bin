@@ -6,12 +6,14 @@
 ##
 ##
 #
-set -u && SCRIPTNAME=$(basename $0)
+set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 # need to use trap and not -e so bashdb works
 trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-ANACONDA="${ANACONDA:-false}"
+NO_ANACONDA="${NO_ANACONDA:-false}"
 NO_PIPENV="${NO_PIPENV:-false}"
+PYTHON_VERSION="${PYTHON_VERSION:-3.9}"
+STABLE_PYTHON="${STABLE_PYTHON:-3.7}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
@@ -28,7 +30,7 @@ usage: $SCRIPTNAME [flags...]
   -h help
   -v verbose
   -d single step debugging
-  -a install anaconda to manage python and packages (default: $ANACONDA)
+  -a disable anaconda to manage python and packages (default: $NO_ANACONDA)
   -e disable pipenv to manage packages (default: $NO_PIPENV)
   -y install pyenv to manage python versions (default: $PYENV)
 EOF
@@ -36,13 +38,13 @@ EOF
             exit 0
             ;;
         d)
-            DEBUGGING=true
+            export DEBUGGING=true
             ;;
         v)
-            VERBOSE=true
+            export VERBOSE=true
             ;;
         a)
-            ANACONDA=true
+            NO_ANACONDA=true
             ;;
         e)
             NO_PIPENV=true
@@ -50,10 +52,12 @@ EOF
         y)
             PYENV=true
             ;;
+        *)
+            echo "no -$opt flag" >&2
     esac
 done
+# shellcheck source=./include.sh
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
-log_verbose WS_DIR is $WS_DIR
 source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND-1))
 
@@ -62,7 +66,7 @@ then
     log_exit "Mac only"
 fi
 
-PACKAGES=" python@3.7 python@3.8 "
+PACKAGES=" python@$STABLE_PYTHON python@$PYTHON_VERSION "
 
 if ! $NO_PIPENV
 then
@@ -70,17 +74,17 @@ then
 fi
 
 # Note do not quote, want to process each as separate arguments
-log_verbose installing $PACKAGES
+log_verbose "installing $PACKAGES"
+# packages are ok globbed
+# shellcheck disable=SC2086
 package_install $PACKAGES
 
-# https://stackoverflow.com/questions/19340871/how-to-link-home-brew-python-version-and-set-it-as-default
-# this defeats the homebrew strategy that python is the default MacOS while python2 and pip2 are homebrew
 # we need it to be python and pip for compatibility with Linux
 if ! config_mark
 then
-    log_verbose adding homebrew python $(config_profile)
+    log_verbose "adding homebrew python $(config_profile)"
     config_add <<-"EOF"
-[[ $PATH =~ /usr/local/opt/python/libexec/bin ]] || export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+[[ $PATH =~ /usr/local/opt/python@$PYTHON_VERSION/libexec/bin ]] || export PATH="/usr/local/opt/python@$PYTHON_VERSION/libexec/bin:$PATH"
 EOF
 fi
 
@@ -90,8 +94,8 @@ then
     "$SCRIPT_DIR/install-pyenv.sh"
 fi
 
-if $ANACONDA
+if ! $NO_ANACONDA
 then
-    log_verbose  use anaconda
+    log_verbose "use anaconda"
     "$SCRIPT_DIR/install-anaconda.sh"
 fi

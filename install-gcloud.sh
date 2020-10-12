@@ -62,10 +62,10 @@ log_verbose install additional packages "$PACKAGES" "$@"
 gcloud components install $PACKAGES "$@"
 
 PROFILE="${PROFILE:-"$HOME/.bashrc"}"
-log_verbose "installing google-cloud-sdk completions into $PROFILE""
+log_verbose "installing google-cloud-sdk completions into $PROFILE"
 if ! config_mark "$PROFILE"
 then
-    config_add "$PROFILE" <<-EOF
+    config_add "$PROFILE" <<-"EOF"
 if [[ -e /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc ]]
 then
   source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"
@@ -74,7 +74,7 @@ EOF
 fi
 
 # https://stackoverflow.com/questions/42379685/can-i-automate-google-cloud-sdk-gcloud-init-interactive-command
-if [[ $(gcloud config configurations list | wc -l ) < 2 ]]
+if [[ $(gcloud config configurations list | wc -l ) -lt 2 ]]
 then
     log_verbose no configuration exists so init
     gcloud init
