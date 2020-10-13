@@ -56,18 +56,20 @@ fi
 
 if ! config_mark "$(config_profile_shell)"; then
 	config_add "$(config_profile_shell)" <<-EOF
-		[[ -r $powerline ]] && powerline-daemon -q && \
-		    export POWERLINE_BASH_CONTINUATION=1 && \
-		    export POWERLINE_BASH_SELECT=1 && \
-		    source "$powerline" || true
- EOF
+		if [[ -r $powerline ]]; then
+			powerline-daemon -q
+			export POWERLINE_BASH_CONTINUATION=1
+			export POWERLINE_BASH_SELECT=1
+			source "$powerline" || true
+		fi
+	EOF
 fi
 
 config="$location/config_files"
 PROFILE="${PROFILE:-"$HOME/.config/powerline"}"
 if [[ ! -e $PROFILE/config.json ]]; then
- log_verbose "copying from $config to $PROFILE"
- cp -r "$config/"* "$PROFILE"
+	log_verbose "copying from $config to $PROFILE"
+	cp -r "$config/"* "$PROFILE"
 fi
 
 log_verbose "installing powerline fonts add to config.json"
@@ -75,11 +77,11 @@ cask_install font-fira-mono-for-powerline
 
 VIM_PROFILE="${VIM_PROFILE:"$HOME/.vimrc"}"
 if ! config_mark "$VIM_PROFILE"; then
- log_verbose "adding to $VIM_PROFILE"
- config_add "$VIM_PROFILE" "'" <<-EOF
+	log_verbose "adding to $VIM_PROFILE"
+	config_add "$VIM_PROFILE" "'" <<-EOF
 		set rtp+="$location/bindings/vim"
 		set laststatus=2
- EOF
+	EOF
 fi
 
 # https://github.com/gravyboat/powerline-config
