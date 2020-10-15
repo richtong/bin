@@ -12,8 +12,9 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
 OPTIND=1
 MINICONDA="${MINICONDA:-false}"
+PYTHON="${PYTHON:-3.9}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvf" opt; do
+while getopts "hdvfp:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -21,6 +22,7 @@ while getopts "hdvf" opt; do
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 			           -f install miniconda and not full (default: $MINICONDA)
+					   -p install python version (default: $PYTHON)
 		EOF
 		exit 0
 		;;
@@ -70,5 +72,7 @@ log_verbose take all the updates
 # Need this for a bug in 4.8.3
 log_verbose get latest anaconda
 conda update conda
+
+conda install "python=$PYTHON"
 
 log_verbose to use Anaconda make sure to source your profile
