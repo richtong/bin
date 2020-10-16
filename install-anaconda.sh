@@ -11,17 +11,19 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
-MINICONDA="${MINICONDA:-false}"
-PYTHON="${PYTHON:-3.9}"
+FULLCONDA="${FULLCONDA:-false}"
+NOFORGE="${NOFORGE:-false}"
+PYTHON="${PYTHON:-3.8}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvfp:" opt; do
+while getopts "hdvacf" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs Anaconda
+			Installs Miniconda (you can install anaconda but more dependency issues)
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
-			           -f install miniconda and not full (default: $MINICONDA)
+			           -a install miniconda and not full (default: $FULLCONDA)
+					   -c do not install conda-forge (defualt: NOFORGE)
 					   -p install python version (default: $PYTHON)
 		EOF
 		exit 0
@@ -34,8 +36,11 @@ while getopts "hdvfp:" opt; do
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
 		;;
+	c)
+		NOFORGE=true
+		;;
 	f)
-		MINICONDA=true
+		FULLCONDA=true
 		;;
 	*)
 		echo "no -$opt flag" >&2
@@ -51,15 +56,15 @@ if ! in_os mac; then
 	log_exit "mac only"
 fi
 
-if ! $MINICONDA; then
+if $FULLCONDA; then
 	cask_install anaconda
-	# https://github.com/Homebrew/homebrew-cask/issues/66490
-	if ! config_mark; then
-		# shellcheck disable=SC2016
-		config_add <<<'[[ $PATH =~ /usr/local/anaconda3/bin ]] || export PATH="/usr/local/anaconda3/bin:$PATH'
-	fi
 else
 	cask_install miniconda
+fi
+
+if ! $NOFORGE; then
+	conda config --env --add channels conda-forge
+	conda config --env --set channel_priority strict
 fi
 
 # return true in case there are errors in the source
@@ -70,9 +75,8 @@ log_verbose take all the updates
 
 # https://github.com/conda/conda/issues/9589
 # Need this for a bug in 4.8.3
-log_verbose get latest anaconda
-conda update conda
-
+log_verbose get latest anaconda and packages
+conda update conda --all
 conda install "python=$PYTHON"
 
-log_verbose to use Anaconda make sure to source your profile
+log_warning "you should not install into base create your own environment"
