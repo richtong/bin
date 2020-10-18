@@ -76,7 +76,7 @@ log_verbose take all the updates
 # https://github.com/conda/conda/issues/9589
 # Need this for a bug in 4.8.3
 log_verbose get latest anaconda and packages
-conda update conda --all
+conda update conda --all -y
 conda install "python=$PYTHON"
 
 log_warning "you should not install into base create your own environment"

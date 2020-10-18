@@ -11,7 +11,7 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 # July 2020
 VERSION="${VERSION:-12}"
-NO_BREW="${NO_BREW:-false}"
+BREW="${BREW:-true}"
 OPTIND=1
 while getopts "hdvr:x" opt
 do
@@ -21,7 +21,7 @@ do
 $SCRIPTNAME: Install Node and NPM
     "flags: -d debug, -v verbose, -h help"
 	       -r release of node [default: $VERSION]"
-           -x do not use brew install (default:$NO_BREW)"
+           -x set to disable brew (brew is normally $BREW)"
 EOF
             exit 0
             ;;
@@ -35,7 +35,7 @@ EOF
             VERSION="$OPTARG"
             ;;
         x)
-            NO_BREW=true
+            BREW=false
             ;;
         *)
             log_warning "invalid flag $opt"
@@ -48,7 +48,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-version-compare.sh lib-util.sh
 shift $((OPTIND-1))
 
-if ! $NO_BREW
+if $BREW
 then
     # Now assumes brew is in linux
     # the old way was node 4.0, now using node 6

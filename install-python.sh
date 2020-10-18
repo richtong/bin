@@ -10,8 +10,8 @@ set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 # need to use trap and not -e so bashdb works
 trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-NO_ANACONDA="${NO_ANACONDA:-false}"
-NO_PIPENV="${NO_PIPENV:-false}"
+ANACONDA="${ANACONDA:-true}"
+PIPENV="${PIPENV:-true}"
 PYTHON_VERSION="${PYTHON_VERSION:-3.8}"
 STABLE_PYTHON="${STABLE_PYTHON:-3.7}"
 PYENV="${PYENV:-false}"
@@ -29,8 +29,8 @@ while getopts "hdvaey" opt; do
 			  -h help
 			  -v verbose
 			  -d single step debugging
-			  -a disable anaconda to manage python and packages (default: $NO_ANACONDA)
-			  -e disable pipenv to manage packages (default: $NO_PIPENV)
+              -a disable anaconda (normally installed)
+              -e disable pipenv (normally installed)
 			  -y install pyenv to manage python versions (default: $PYENV)
 		EOF
 
@@ -43,10 +43,10 @@ while getopts "hdvaey" opt; do
 		export VERBOSE=true
 		;;
 	a)
-		NO_ANACONDA=true
+		ANACONDA=false
 		;;
 	e)
-		NO_PIPENV=true
+		PIPENV=false
 		;;
 	y)
 		PYENV=true
@@ -67,8 +67,9 @@ fi
 
 PACKAGES=" python@$STABLE_PYTHON python@$PYTHON_VERSION "
 
-if ! $NO_PIPENV; then
+if $PIPENV; then
 	PACKAGES+=" pipenv "
+    log_verbose "use pipenv per directory pipenv install"
 fi
 
 # Note do not quote, want to process each as separate arguments
@@ -77,20 +78,22 @@ log_verbose "installing $PACKAGES"
 # shellcheck disable=SC2086
 package_install $PACKAGES
 
-# we need it to be python and pip for compatibility with Linux
-if ! config_mark; then
-	log_verbose "adding homebrew python $(config_profile)"
-	config_add <<-"EOF"
-		[[ $PATH =~ /usr/local/opt/python@$PYTHON_VERSION/libexec/bin ]] || export PATH="/usr/local/opt/python@$PYTHON_VERSION/libexec/bin:$PATH"
-	EOF
-fi
-
 if $PYENV; then
 	log_verbose using pyenv
 	"$SCRIPT_DIR/install-pyenv.sh"
 fi
 
-if ! $NO_ANACONDA; then
+if $ANACONDA; then
 	log_verbose "use anaconda"
 	"$SCRIPT_DIR/install-anaconda.sh"
+fi
+
+# we need it to be python and pip for compatibility with Linux
+if ! config_mark; then
+	log_verbose "adding homebrew python $(config_profile)"
+    # note we want $PATH not quoted, but set the python version
+	config_add <<-EOF
+		[[ \$PATH =~ /usr/local/opt/python@$PYTHON_VERSION/libexec/bin ]] || export PATH="/usr/local/opt/python@$PYTHON_VERSION/libexec/bin:\$PATH"
+	EOF
+    log_warning "source $(config_profile) to get the correct python"
 fi
