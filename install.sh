@@ -318,10 +318,10 @@ fi
 
 # Note do not quote, want to process each as separate arguments
 log_verbose installing "$PACKAGES"
-# need an array here to quote properly
 if [[ -n $PACKAGES ]]
 then
-    package_install "${PACKAGES[@]}"
+    # shellcheck disable=SC2086
+    package_install $PACKAGES
 fi
 
 
