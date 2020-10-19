@@ -8,59 +8,60 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -u && SCRIPTNAME=$(basename $0)
+set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+
 trap 'exit $?' ERR
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 EXTENSIONS="${EXTENSIONS:-"googlechart googlemaps plantuml exceltable httpdomain"}"
 
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-Installs sphinx the document generation tool and associated products
+while getopts "hdve:" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			Installs sphinx the document generation tool and associated products
 
-Usage  $SCRIPTNAME [flags...]
+			Usage  $SCRIPTNAME [flags...]
 
-flags: -d debug, -h help
-       -e extensions
-          (default: $EXTENSIONS)
+			flags: -d debug, -h help
+			       -e extensions
+			          (default: $EXTENSIONS)
 
-To use these extensions add to your conf.py. Note that if the files are named
-different from their extension names, in the conf.py use a dot
+			To use these extensions add to your conf.py. Note that if the files are named
+			different from their extension names, in the conf.py use a dot
 
-For example, we pip install using a dash to separate:
+			For example, we pip install using a dash to separate:
 
-EOF
-            for ext in $EXTENSIONS
-            do
-                echo pip install sphinxcontrib-$ext
-            done
+		EOF
+		for ext in $EXTENSIONS; do
+			echo "pip install sphinxcontrib-$ext"
+		done
 
-            printf "\nBut in conf.py set extensions using a dot to separate\n"
-            for ext in $EXTENSIONS
-            do
-                echo "extensions.append('sphinxcontrib.$ext)"
-            done
+		printf "\nBut in conf.py set extensions using a dot to separate\n"
+		for ext in $EXTENSIONS; do
+			echo "extensions.append('sphinxcontrib.$ext)"
+		done
 
-
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            FLAGS+=" -v "
-            ;;
-        e)
-            EXTENSIONS="$OPTARG"
-            ;;
-    esac
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		FLAGS+=" -v "
+		;;
+	e)
+		EXTENSIONS="$OPTARG"
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-config.sh
 
@@ -98,47 +99,42 @@ source_lib lib-install.sh lib-config.sh
 log_verbose pip install sphinx-doc globally
 pip_install --user --upgrade sphinx
 # https://scicomp.stackexchange.com/questions/2987/what-is-the-simplest-way-to-do-a-user-local-install-of-a-python-package
-log_verbose install extensions $EXTENSIONS
-for ext in $EXTENSIONS
-do
-    # if you want to be only local
-    # pip install --user "$USER" sphinx-contrib-$ext
-    log_verbose install extension $ext globally
-    pip_install --user --upgrade sphinxcontrib-$ext
+log_verbose "install extensions $EXTENSIONS"
+for ext in $EXTENSIONS; do
+	# if you want to be only local
+	# pip install --user "$USER" sphinx-contrib-$ext
+	log_verbose "install extension $ext globally"
+	pip_install --user --upgrade "sphinxcontrib-$ext"
 done
 
 log_verbose install graphviz
 package_install graphviz
 
 log_verbose install plantuml
-if ! package_install plantuml
-then
-    log_debug create plantuml for protocol diagrams
-    my_bin="/usr/local/bin"
-    mkdir -p "$my_bin"
-    plantuml="$my_bin/plantuml.jar"
-    if [[ ! -e $plantuml ]]
-    then
-        curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download -o "$plantuml"
-    fi
+if ! package_install plantuml; then
+	log_debug create plantuml for protocol diagrams
+	my_bin="/usr/local/bin"
+	mkdir -p "$my_bin"
+	plantuml="$my_bin/plantuml.jar"
+	if [[ ! -e $plantuml ]]; then
+		curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download -o "$plantuml"
+	fi
 fi
 
 log_verbose install tex
-if [[ $OSTYPE =~ darwin ]]
-then
-    log_verbose install mactex
-    if ! cask_install mactex
-    then
-        log_verbose brew mactex not found trying mac prots texlive
-        package_install texlive
-    fi
-    # should never need this but leave just in case
-    # log_verbose checking for py27-sphinx
-    # if port installed py27-sphinx | grep "not installed"
-    # then
-    #     sudo port select --set sphinx py27-sphinx
-    # fi
+if [[ $OSTYPE =~ darwin ]]; then
+	log_verbose install mactex
+	if ! cask_install mactex; then
+		log_verbose brew mactex not found trying mac prots texlive
+		package_install texlive
+	fi
+	# should never need this but leave just in case
+	# log_verbose checking for py27-sphinx
+	# if port installed py27-sphinx | grep "not installed"
+	# then
+	#     sudo port select --set sphinx py27-sphinx
+	# fi
 else
-    log_verbose installing texlive
-    package_install texlive
+	log_verbose installing texlive
+	package_install texlive
 fi
