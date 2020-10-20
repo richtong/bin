@@ -248,7 +248,7 @@ fi
 
 PYTHON_PACKAGES="${PYTHON_PACKAGES:-""}"
 log_verbose development shell/python packages normally use pipenv but use anaconda instead
-PYTHON_PACKAGES+=" nptyping
+PYTHON_PACKAGES+=(nptyping
 pydocstyle
 pdoc3
 flake8
@@ -261,7 +261,7 @@ pytest-cov
 pytest-xdist
 tox
 pyyaml
-"
+)
 
 # these python packages do not always install command line argument stuff
 
@@ -269,21 +269,21 @@ pyyaml
 # mmv - multiple file mov
 # curl - not clear if needed but MacOS doesn't have the latest
 # bfg - remove passwords and big files you didn't mean to commit
-PACKAGES+="black
+PACKAGES+=(black
     pydocstyle
 mmv
 curl
 bfg
 sudo
 git
-"
+)
 
 if ! in_os mac; then
 	log_verbose install linux packages
 	# qemu-user-static let's docker run arm containers
 	# note that bootstrap-dev now install python-pip and python-yaml and uuid-runtime
 	# but we repeat here so not dependent on bootstrap-dev
-	PACKAGES+=" uuid-runtime python3-pip python-yaml "
+	PACKAGES+=( uuid-runtime python3-pip python-yaml )
 	# qemu-user-static allows qemu to run non-Intel binaries as does bin-fmt-supprt
 	# ppa-purge to remove ubuntu repos
 	# v4l-utils for usb cameras
@@ -292,9 +292,9 @@ if ! in_os mac; then
 	# This needs to be installed before docker-py which is no longer needed
 	# PYTHON_PACKAGES+=" requests[security] "
 	# find members of a group needed by ZFS tools
-	PACKAGES+=" members "
+	PACKAGES+=( members )
 	# password generator
-	PACKAGES+=" pwgen "
+	PACKAGES+=( pwgen )
 
 	# Note that http://stackoverflow.com/questions/29099404/ssl-insecureplatform-error-when-using-requests-package
 	# So this docker-py used to requires requests[security]
@@ -306,16 +306,15 @@ if ! in_os mac; then
 fi
 
 # Note do not quote, want to process each as separate arguments
-log_verbose installing "$PACKAGES"
-if [[ -n $PACKAGES ]]
+log_verbose "installing ${PACKAGES[*]}"
+if [[ -v PACKAGES ]]
 then
-    # shellcheck disable=SC2086
-    package_install $PACKAGES
+    package_install "${PACKAGES[@]}"
 fi
 
 # currently no python packages are needed
-log_verbose "installing python packages $PYTHON_PACKAGES in user mode and upgrade dependencies"
-if [[ -n $PYTHON_PACKAGES ]]; then
+log_verbose "installing python packages ${PYTHON_PACKAGES[*]} in user mode and upgrade dependencies"
+if [[ -v PYTHON_PACKAGES ]]; then
 	pip_install --user --upgrade "${PYTHON_PACKAGES[@]}"
 fi
 
