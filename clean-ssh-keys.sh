@@ -28,28 +28,32 @@ while getopts "hdv" opt
 do
     case "$opt" in
         h)
-            echo $SCRIPTNAME: Clean ssh keys from .ssh, archive and remove from ssh-add
-            echo "flags: -d debug, -v verbose, -h help"
-            echo positionals [user [group [ source [ destination ]]]]
-            echo "       user (default: $USER)"
-            echo "       group (default: $GROUP)"
-            echo "       source (default: $SOURCE)"
-            echo "       destination (default: $DEST)"
+            cat <<-EOF
+$SCRIPTNAME: Clean ssh keys from .ssh, archive and remove from ssh-add
+flags: -d debug, -v verbose, -h help
+        positionals [user [group [ source [ destination ]]]]
+        user (default: $USER)
+        group (default: $GROUP)
+        source (default: $SOURCE)
+        destination (default: $DEST)
+EOF
             exit 0
             ;;
         d)
-            DEBUGGING=true
+            export DEBUGGING=true
             ;;
         v)
-            VERBOSE=true
+            export VERBOSE=true
             ;;
+        *)
+            echo "no -$opt"
     esac
 done
 
-
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-ssh.sh
-log_verbose defaults  user $USER, group $GROUP, source $SOURCE, dest $DEST
+log_verbose "defaults  user $USER, group $GROUP, source $SOURCE, dest $DEST"
 
 set -u
 shift $((OPTIND-1))
@@ -78,7 +82,7 @@ then
     DEST="$1"
     shift
 fi
-log_verbose after positionals processed user $USER, group $GROUP, source $SOURCE, dest $DEST
+log_verbose "after positionals processed user $USER, group $GROUP, source $SOURCE, dest $DEST"
 
 
 
