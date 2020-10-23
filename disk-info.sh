@@ -24,64 +24,62 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 ALL=${ALL:-false}
 INDENT=${INDENT:-8}
 OPTIND=1
-while getopts "hdvaw:" opt
-do
-    case "$opt" in
-        h)
-            echo Detailed information on valid disks
-            echo
-            echo "usage: $SCRIPTNAME [flags]"
-            echo "flags: -d debug, -v verbose, -h help"
-            echo "       -a print out all the information (default: $ALL)"
-            echo "       -w indent width for pretty output (default: $INDENT)"
-            echo
-            echo "In VMWare Fusion, use /dev/disk/by-uuid or /dev/sd?"
-            echo "On Ubuntu, use /dev/disk/by-id"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-        f)
-            FORCE=true
-            ;;
-        a)
-            ALL=true
-            ;;
-        w)
-            INDENT="$OPTARG"
-            ;;
-    esac
+while getopts "hdvaw:" opt; do
+	case "$opt" in
+	h)
+		echo Detailed information on valid disks
+		echo
+		echo "usage: $SCRIPTNAME [flags]"
+		echo "flags: -d debug, -v verbose, -h help"
+		echo "       -a print out all the information (default: $ALL)"
+		echo "       -w indent width for pretty output (default: $INDENT)"
+		echo
+		echo "In VMWare Fusion, use /dev/disk/by-uuid or /dev/sd?"
+		echo "On Ubuntu, use /dev/disk/by-id"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	a)
+		ALL=true
+		;;
+	w)
+		INDENT="$OPTARG"
+		;;
+	*)
+		echo "no -$opt flag" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh lib-fs.sh
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-if in_mac
-then
-    name=disk
-else
-    # sd is default name for modern linux devices actually stands for scsi disk
-    name=sd
-fi
+# if in_mac
+# then
+#     name=disk
+# else
+#     # sd is default name for modern linux devices actually stands for scsi disk
+#     name=sd
+# fi
+# basename -a $(find /dev -name "$name?" 2>/dev/null) | indent_output "$INDENT"
 
 log_verbose find valid names of disks
 # instead of this command, use more sophisticated version
 disks_list_possible | indent_output "$INDENT"
-# basename -a $(find /dev -name "$name?" 2>/dev/null) | indent_output "$INDENT"
 
-if $ALL
-then
-    echo
-    if in_os mac
-    then
-        diskutil list | indent_output "$INDENT"
-    else
-        package_install lshw
-        log_warning lshw can take a long time on ubuntu real machine
-        sudo lshw -short -C disk
-    fi
+if $ALL; then
+	echo
+	if in_os mac; then
+		diskutil list | indent_output "$INDENT"
+	else
+		package_install lshw
+		log_warning lshw can take a long time on ubuntu real machine
+		sudo lshw -short -C disk
+	fi
 fi

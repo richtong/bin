@@ -13,31 +13,32 @@ set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
-while getopts "hdvw:" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: List remote tags from a docker public registry
-            echo flags: -d debug, -h help
-            echo "      repo/image repo/image repo/image..."
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: List remote tags from a docker public registry"
+		echo flags: -d debug, -h help
+		echo "      repo/image repo/image repo/image..."
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt flag"
+		;;
+	esac
 done
 
-
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 set -u
 
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
-for item in "$@"
-do
-    curl --silent "https://registry.hub.docker.com/v2/repositories/$item/tags/" | jq -c '.results[]["name"]'
+for item in "$@"; do
+	curl --silent "https://registry.hub.docker.com/v2/repositories/$item/tags/" | jq -c '.results[]["name"]'
 done

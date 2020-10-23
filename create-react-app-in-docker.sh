@@ -11,40 +11,40 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
 DESTS="${DESTS:-"$PWD"}"
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTDESTS: Creates a basic react template
-            echo "flags; -v verbose -d debug"
-            echo "positional: location of applications... (default: $DESTS)"
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			$SCRIPTNAME: Creates a basic react template
+			    flags; -v verbose -d debug"
+			    positional: location of applications... (default: $DESTS)"
+		EOF
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt flag" >&2
+		;;
+	esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 set -u
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-
-
-if ! command -v create-react-app
-then
-    sudo npm install -g create-react-app
+if ! command -v create-react-app; then
+	sudo npm install -g create-react-app
 fi
 
-if (($# > 0 ))
-then
-    DESTS="$@"
+if (($# > 0)); then
+	DESTS="$*"
 fi
-
 
 # So we remmeber the dotglob state and temporarily set it so we can get globals
 # http://www.gnu.org/software/bash/manual/html_node/The-Shopt-Builtin.html
@@ -52,15 +52,14 @@ fi
 # not need to check as we always reset to the previous state
 previous_dot_glob="$(shopt -p dotglob || true)"
 shopt -s dotglob
-log_verbose creating apps in $DESTS
-for dest in "$DESTS"
-do
-    base="$(basename "$dest")"
-    cd "$dest"
-    log_verbose create app in $dest
-    create-react-app "$base"
-    mv "$base/"* .
-    rmdir "$base"
-    cd -
+log_verbose "creating apps in $DESTS"
+for dest in $DESTS; do
+	base="$(basename "$dest")"
+	cd "$dest"
+	log_verbose "create app in $dest"
+	create-react-app "$base"
+	mv "$base/"* .
+	rmdir "$base"
+	cd -
 done
-eval $previous_dot_glob
+eval "$previous_dot_glob"
