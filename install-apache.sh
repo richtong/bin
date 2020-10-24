@@ -10,28 +10,28 @@ set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
-while getopts "hdvw:" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: flags: -d debug, -h help
-            echo "    -w WS directory"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-        w)
-            WS_DIR="$OPTARG"
-            ;;
-        g)
-            GIT_REPOS="$OPTARG"
-            ;;
-    esac
+while getopts "hdvw:" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: flags: -d debug, -h help"
+		echo "    -w WS directory"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	w)
+		export WS_DIR="$OPTARG"
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 set -u
