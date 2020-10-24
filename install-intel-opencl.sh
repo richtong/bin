@@ -8,21 +8,23 @@ set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Install Intel OpenCL SRB 5 Debian 9/Ubuntu 16, 4.8 kernel
-            echo "flags: -d debug, -v verbose, -h help"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Install Intel OpenCL SRB 5 Debian 9/Ubuntu 16, 4.8 kernel"
+		echo "flags: -d debug, -v verbose, -h help"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
 
 set -u
@@ -30,9 +32,10 @@ set -u
 cd /tmp
 mkdir -p intelopencl
 cd intelopencl
-rm -fr *
+# need ./ to prevent root erasure
+rm -fr ./*
 
-echo Downloaing an archive ...
+echo Downloading an archive ...
 sudo apt-get -y update
 sudo apt-get -y install xz-utils
 
