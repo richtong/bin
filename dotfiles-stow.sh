@@ -17,50 +17,51 @@ VERBOSE_FLAG=${VERBOSE_FLAG:-" -v "}
 # directory exists
 DOTFILES_ROOT=${DOTFILES_ROOT:-"$(cd "$SCRIPT_DIR/../user/$USER/dotfiles" 2>/dev/null && pwd -P || echo "")"}
 TARGET="${TARGET:-"$HOME"}"
-while getopts "hdvt:" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
+while getopts "hdvt:" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
 
-Install Dotfiles into a target directory using version layering
+			Install Dotfiles into a target directory using version layering
 
-usage: $SCRIPTNAME [ flags ] [ destinition directory ]
+			usage: $SCRIPTNAME [ flags ] [ destinition directory ]
 
-flags: -d debug, -v verbose, -h help
-       -t dotfile root (default: $DOTFILES_ROOT)
+			flags: -d debug, -v verbose, -h help
+			       -t dotfile root (default: $DOTFILES_ROOT)
 
 
-positional: the target directory (default: "$TARGET")
+			positional: the target directory (default: "$TARGET")
 
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            # add the -v which works for many commands
-            export VFLAG+=" -v "
-            ;;
-        t)
-            DOTFILES_ROOT="$OPTARG"
-            ;;
-    esac
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		# add the -v which works for many commands
+		export VFLAG+=" -v "
+		;;
+	t)
+		DOTFILES_ROOT="$OPTARG"
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh
 
-shift $((OPTIND-1))
-if (( $# > 0 ))
-then
-    TARGET="$1"
+shift $((OPTIND - 1))
+if (($# > 0)); then
+	TARGET="$1"
 fi
 
-if [[ -z $DOTFILES_ROOT ]]
-then
-    log_exit no dotfiles found skipping stow
+if [[ -z $DOTFILES_ROOT ]]; then
+	log_exit no dotfiles found skipping stow
 fi
 
 mkdir -p "$TARGET"

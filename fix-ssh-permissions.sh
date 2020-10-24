@@ -13,65 +13,65 @@ set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
-while getopts "hdvw:" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Fix ssh keys
-            echo "flags: -d debug, -h help"
-            echo "       -w workspace directory"
-            echo "positionals: ssh_directories..."
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-        w)
-            WS_DIR="$OPTARG"
-            ;;
-    esac
+while getopts "hdvw:" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Fix ssh keys"
+		echo "flags: -d debug, -h help"
+		echo "       -w workspace directory"
+		echo "positionals: ssh_directories..."
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	w)
+		export WS_DIR="$OPTARG"
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-config.sh lib-util.sh
 
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-paths=${@:-"$HOME/.ssh"}
-
+paths=${*:-"$HOME/.ssh"}
 
 log_verbose recurse down into all and make sure directories
-for path in $paths
-do
-    log_verbose closing up $path
-    # .ssh requires the parent not have write permissions
-    # If there are symlinks, then follow them and change the app there
-    # note that with gnu chmod this should correctly change everything
-    # including the target of symlinked files
-    # chmod -R og-rwx "$path"
-    # use the -L so we look at the real types under the symlinks otherwise
-    # symlinks will not match -type f
-    if ! config_mark
-    then
-        log_verbose $(config_profile) does not have ssh fixes add them
-        # tighten up all directories use -exec and not -execdir because -execdir
-        # gives you only file relative inside that directory
-        # https://stackoverflow.com/questions/19126297/using-both-basename-and-full-path-in-find-exec
-        # execdir is more secure since exec command can't see outside the
-        # subdirectory but does not seem to work with chmod in .bash_profile not
-        # sure why
-        config_add <<-EOF
-chmod og-w "$path/.." "$path"
-find -L "$path" -type d -exec chmod og-rwx {} \;
-# closing up all it $path children recursively note that -R does not follow symlinks properly so we run it ourselves
-find -L "$path" -type f -exec chmod 600 {} \;
-# tighten up all keys to just readonly
-find -L "$path" \( -name "*.id_rsa" -o -name "*.id_ed25519" \) -exec chmod 400 {} \;
-EOF
-    fi
+for path in $paths; do
+	log_verbose "closing up $path"
+	# .ssh requires the parent not have write permissions
+	# If there are symlinks, then follow them and change the app there
+	# note that with gnu chmod this should correctly change everything
+	# including the target of symlinked files
+	# chmod -R og-rwx "$path"
+	# use the -L so we look at the real types under the symlinks otherwise
+	# symlinks will not match -type f
+	if ! config_mark; then
+		log_verbose "$(config_profile) does not have ssh fixes add them"
+		# tighten up all directories use -exec and not -execdir because -execdir
+		# gives you only file relative inside that directory
+		# https://stackoverflow.com/questions/19126297/using-both-basename-and-full-path-in-find-exec
+		# execdir is more secure since exec command can't see outside the
+		# subdirectory but does not seem to work with chmod in .bash_profile not
+		# sure why
+		config_add <<-EOF
+			chmod og-w "$path/.." "$path"
+			find -L "$path" -type d -exec chmod og-rwx {} \;
+			# closing up all it $path children recursively note that -R does not follow symlinks properly so we run it ourselves
+			find -L "$path" -type f -exec chmod 600 {} \;
+			# tighten up all keys to just readonly
+			find -L "$path" \( -name "*.id_rsa" -o -name "*.id_ed25519" \) -exec chmod 400 {} \;
+		EOF
+	fi
 done
 
-log_verbose source $profile
+log_verbose "source $(config_profile)"
 source_profile

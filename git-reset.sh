@@ -9,23 +9,26 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 # over kill for a single flag to debug, but good practice
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Post prebuild installation of packages
-            echo "flags: -d debug, -h help -v verbose"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;&
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Post prebuild installation of packages"
+		echo "flags: -d debug, -h help -v verbose"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;&
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 # The default is ws and others, you can either set in flags
@@ -35,15 +38,13 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 SOURCE_DIR=${SOURCE_DIR:-"$WS_DIR/git/src"}
 PERSONAL_DIR=${PERSONAL_DIR:-"$WS_DIR/git/user"}
 
-
 set -u
 
-for repo in "$SOURCE_DIR" "$PERSONAL_DIR"
-do
-    log_verbose resetting $repo
-    pushd "$repo" > /dev/null
-    git fetch
-    git checkout master
-    git reset --hard origin/master
-    popd
+for repo in "$SOURCE_DIR" "$PERSONAL_DIR"; do
+	log_verbose "resetting $repo"
+	pushd "$repo" >/dev/null
+	git fetch
+	git checkout master
+	git reset --hard origin/master
+	popd
 done
