@@ -13,44 +13,44 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Install Divvy for MacOS
-            echo "flags: -d debug, -v verbose, -h help"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Install Divvy for MacOS"
+		echo "flags: -d debug, -v verbose, -h help"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh
 
 set -u
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-if ! in_os mac
-then
-    log_exit "Only for Mac"
+if ! in_os mac; then
+	log_exit "Only for Mac"
 fi
 
-if [[ -e /Applications/Divvy.app ]]
-then
-    log_exit "Divvy already installed"
+if [[ -e /Applications/Divvy.app ]]; then
+	log_exit "Divvy already installed"
 fi
 
 log_verbose try brew cask to install divvy
-if ! cask_install divvy
-then
-    log_verbose cask install failed trying direct download
-    download_url_open  "http://mizage.com/downloads/Divvy.zip"
+if ! cask_install divvy; then
+	log_verbose cask install failed trying direct download
+	download_url_open "http://mizage.com/downloads/Divvy.zip"
 fi
 
 open "/Applications/Divvy.app"

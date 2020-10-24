@@ -11,48 +11,49 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
 HOMEBREW_USER="${HOMEBREW_USER:-"$USER"}"
-while getopts "hdvu:" opt
-do
-    case "$opt" in
-        h)
-            cat <<EOF
+while getopts "hdvu:" opt; do
+	case "$opt" in
+	h)
+		cat <<EOF
 $SCRIPTNAME: Install homebrew
 
         flags: -d debug, -h help -v verbose
                -u homebrew must have a single user (default: $HOMEBREW_USER)
 
 EOF
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-        u)
-            HOMEBREW_USER="$OPTARG"
-            ;;
-    esac
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	u)
+		HOMEBREW_USER="$OPTARG"
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-util.sh lib-config.sh lib-install.sh
 
-if command -v brew
-then
-    log_exit brew already installed
+if command -v brew; then
+	log_exit brew already installed
 fi
 
-if ! in_os mac
-then
-    log_verbose installing linuxbrew
-    package_install build-essential curl file git
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-    test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
-    test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-    test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
-    echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile
-    log_exit "Linux brew installed"
+if ! in_os mac; then
+	log_verbose installing linuxbrew
+	package_install build-essential curl file git
+	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+	test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
+	test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+	test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
+	echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile
+	log_exit "Linux brew installed"
 fi
 
 # since High Sierra /usr/local/sbin for system bin that is files
@@ -60,17 +61,15 @@ fi
 # resolver that opencv uses
 # https://github.com/Homebrew/homebrew-php/issues/4527
 SBIN="${SBIN:-"/usr/local/sbin"}"
-log_verbose creating $SBIN if needed
-if [[ ! -e $SBIN ]]
-then
-    # only use sudo if necessary
-    $(config_sudo "$SBIN") mkdir -p "$SBIN"
+log_verbose "creating $SBIN if needed"
+if [[ ! -e $SBIN ]]; then
+	# only use sudo if necessary
+	$(config_sudo "$SBIN") mkdir -p "$SBIN"
 fi
-log_verbose adding $SBIN to the profile if needed
-if ! config_mark
-then
-    # this no longer seems to work in Bash 5.0
-    config_add <<<"export PATH+=:/usr/local/sbin"
+log_verbose "adding $SBIN to the profile if needed"
+if ! config_mark; then
+	# this no longer seems to work in Bash 5.0
+	config_add <<<"export PATH+=:/usr/local/sbin"
 fi
 
 # make sure we can write the brew files you can have access problems
@@ -94,32 +93,28 @@ HOMEBREW_DIRS="${HOMEBREW_DIRS:-"
 /usr/local/etc
 /usr/local/sbin
 "}"
-for HOMEBREW in $HOMEBREW_DIRS
-do
-    log_verbose checking $HOMEBREW
-    if [[ ! -e $HOMEBREW ]]
-    then
-        log_verbose $HOMEBREW does not exist skipping
-        mkdir -p $HOMEBREW
-    fi
-    # https://apple.stackexchange.com/questions/130685/understanding-the-staff-user-group
-    members="$(dscacheutil -q group -a name $(util_group "$HOMEBREW") | grep ^users: | awk '{$1= ""; print $0}')"
-    log_verbose $members can access $HOMEBREW
-    if [[ $members =~ $USER ]]
-    then
-        sudo chmod -R g+w $HOMEBREW
-        log_verbose cannot write to $HOMEBREW as user but made group writeable
-    fi
-    log_verbose need to change these to your $HOMEBREW_USER
-    sudo find "$HOMEBREW" \! -user "$HOMEBREW_USER" -a \! -type l -exec chown "$HOMEBREW_USER" {} \;
+for HOMEBREW in $HOMEBREW_DIRS; do
+	log_verbose "checking $HOMEBREW"
+	if [[ ! -e $HOMEBREW ]]; then
+		log_verbose "$HOMEBREW does not exist skipping"
+		mkdir -p "$HOMEBREW"
+	fi
+	# https://apple.stackexchange.com/questions/130685/understanding-the-staff-user-group
+	members="$(dscacheutil -q group -a name "$(util_group "$HOMEBREW")" | grep ^users: | awk '{$1= ""; print $0}')"
+	log_verbose "$members can access $HOMEBREW"
+	if [[ $members =~ $USER ]]; then
+		sudo chmod -R g+w "$HOMEBREW"
+		log_verbose "cannot write to $HOMEBREW as user but made group writeable"
+	fi
+	log_verbose "need to change these to your $HOMEBREW_USER"
+	sudo find "$HOMEBREW" \! -user "$HOMEBREW_USER" -a \! -type l -exec chown "$HOMEBREW_USER" {} \;
 done
 
 # https://apple.stackexchange.com/questions/175069/how-to-accept-xcode-license
 xcode_license_accept
 
-if ! command -v brew >/dev/null
-then
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+if ! command -v brew >/dev/null; then
+	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 
 log_assert "command -v brew > /dev/null" "brew installed"

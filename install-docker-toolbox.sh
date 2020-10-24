@@ -13,39 +13,40 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 DOCKER_VERSION=${DOCKER_VERSION:-1.12.0}
 DOCKER_TOOLBOX_URL=${DOCKER_TOOLBOX_URL:-"https://github.com/docker/toolbox/releases/download/v$DOCKER_VERSION/DockerToolbox-$DOCKER_VERSION.pkg"}
 OPTIND=1
-while getopts "hdvr:u:" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Install docker toolbox
-            echo "flags: -d debug, -v verbose, -h help"
-            echo "       -r docker version (default: $DOCKER_VERSION)"
-            echo "       -u docker download url (default: $DOCKER_TOOLBOX_URL)"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdvr:u:" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Install docker toolbox"
+		echo "flags: -d debug, -v verbose, -h help"
+		echo "       -r docker version (default: $DOCKER_VERSION)"
+		echo "       -u docker download url (default: $DOCKER_TOOLBOX_URL)"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-version-compare.sh lib-install.sh lib-util.sh
 
 set -u
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 # pulls things assuming your git directory is $WS_DIR/git a la Sam's convention
 # There is an optional 2nd parameter for the repo defaults to organization repo
 
-
 # http://blog.docker.com/2015/07/new-apt-and-yum-repos/#more-6860
-if  ! in_os mac
-then
-    log_verbose only for Mac
-    exit 0
+if ! in_os mac; then
+	log_verbose only for Mac
+	exit 0
 fi
 
 # we do not install from packages because docker toolbox gives us
@@ -54,10 +55,9 @@ fi
 #package_install docker docker-machine curl
 log_warning this installs docker toolbox for most macs you want docker for mac
 
-if command -v docker && vergte "$(docker -v | cut -d ' ' -f3)" "$DOCKER_VERSION"
-then
-    log_verbose at the latest version
-    exit
+if command -v docker && vergte "$(docker -v | cut -d ' ' -f3)" "$DOCKER_VERSION"; then
+	log_verbose at the latest version
+	exit
 fi
 
 log_verbose uninstall MacPorts versions if they are present
