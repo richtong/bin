@@ -14,36 +14,38 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 trap 'exit $?' ERR
 OPTIND=1
 export FLAGS="${FLAGS:-" -v "}"
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-Installs grub so it is not silent
-    usage: $SCRIPTNAME [ flags ]
-    flags: -d debug, -v verbose, -h help"
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			Installs grub so it is not silent
+			    usage: $SCRIPTNAME [ flags ]
+			    flags: -d debug, -v verbose, -h help"
 
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            # add the -v which works for many commands
-            export FLAGS+=" -v "
-            ;;
-    esac
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		# add the -v which works for many commands
+		export FLAGS+=" -v "
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-config.sh lib-util.sh
 
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-if ! in_os linux
-then
-    log_exit Linux only
+if ! in_os linux; then
+	log_exit Linux only
 fi
 
 log_verbose when booting try to get to the terminal window by typing CTRL-ALT-F1
