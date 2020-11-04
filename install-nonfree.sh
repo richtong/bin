@@ -12,39 +12,41 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
 REPOS="${REPOS:-"contrib non-free"}"
 LIST="${LIST:-"/etc/apt/sources.list"}"
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Install Non-free repositories
-            echo "flags: -d debug, -v verbose, -h help"
-            echo "       -r repositories to add (default: $REPOS)"
-            echo "       -a apt source list (default: $LIST)"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Install Non-free repositories"
+		echo "flags: -d debug, -v verbose, -h help"
+		echo "       -r repositories to add (default: $REPOS)"
+		echo "       -a apt source list (default: $LIST)"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh
 
 set -u
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-if ! in_linux debian
-then
-    log_exit "not in debian"
+if ! in_linux debian; then
+	log_exit "not in debian"
 fi
 
 # massive hack, but need to make sure not to duplicate $REPO if already there
 # sudo sed -i /etc/apt/sources.list \
-    #          -e "/^deb/s/$ $REPOS/"
+#          -e "/^deb/s/$ $REPOS/"
 #          -e "s/$REPOS $REPOS/$REPOS/"
 
 # More elegant is to use Perl and typeaheads
@@ -59,7 +61,7 @@ fi
 # And saves all the escapes of parentheses
 # Note that if REPOS has a space, you need to quote the entire thing
 
-log_verbose installing $REPOS into $LIST
+log_verbose "installing $REPOS into $LIST"
 sudo perl -i -pe 's/(^deb)(?!.*'"$REPOS"'$)(.*)/\1\2 '"$REPOS"'/' "$LIST"
 
 sudo apt-get update

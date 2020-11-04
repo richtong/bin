@@ -32,11 +32,16 @@ while getopts "hdv" opt; do
 done
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-util.sh lib-install.sh lib-config.sh
+source_lib lib-util.sh lib-install.sh lib-config.sh lib-version-compare.sh
 shift $((OPTIND - 1))
 
 log_verbose attempt update install
-package_install bash-completion
+if vergte "$(version_extract "$(bash --version)")" 4.0; then
+	log_verbose "install v2 for bash $(version_extract "$(bash --version)")"
+	package_install bash-completion@2
+else
+	package_install bash-completion
+fi
 # http://davidalger.com/development/bash-completion-on-os-x-with-brew/
 # this is now deprecated as of Aug 2017
 #if brew list bash-completion > /dev/null
@@ -50,5 +55,19 @@ if ! config_mark "$(config_profile_shell)"; then
 	log_verbose "adding bash_completion to $(config_profile_shell)"
 	# We need to quote this since it is going into the profile
 	# shellcheck disable=SC2016
-	config_add "$(config_profile_shell)" <<<'source "$(brew --prefix)/etc/bash_completion"'
+	# config_add "$(config_profile_shell)" <<<'source "$(brew --prefix)/etc/bash_completion"'
+	# latest for brew completions
+	# https://docs.brew.sh/Shell-Completion
+	config_add "$(config_profile_shell)" <<-'EOF'
+		if type brew &>/dev/null; then
+			HOMEBREW_PREFIX="$(brew --prefix)"
+			if [[ -r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]]; then
+				source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
+			else
+				for COMPLETION in ":$HOMEBREW_PREFIX/etc/bash_completion.d"/*; do
+					[[ -r "$COMPLETION" ]] && source "$COMPLETION"
+				done
+			fi
+		fi
+	EOF
 fi

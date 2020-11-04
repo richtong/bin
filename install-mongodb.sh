@@ -16,38 +16,40 @@ trap 'exit $?' ERR
 OPTIND=1
 VERSION="${VERSION:-7}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvr:" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-Install Monbo DB
-    usage: $SCRIPTNAME [ flags ]
-    flags: -d debug, -v verbose, -h help"
-           -r version number (default: $VERSION)
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            # add the -v which works for many commands
-            export FLAGS+=" -v "
-            ;;
-        r)
-            VERSION="$OPTARG"
-            ;;
-    esac
+while getopts "hdvr:" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			Install Monbo DB
+			    usage: $SCRIPTNAME [ flags ]
+			    flags: -d debug, -v verbose, -h help"
+			           -r version number (default: $VERSION)
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		# add the -v which works for many commands
+		export FLAGS+=" -v "
+		;;
+	r)
+		VERSION="$OPTARG"
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
-if ! in_os mac
-then
-    log_exit "mac only"
+if ! in_os mac; then
+	log_exit "mac only"
 fi
 
 tap_install mongodb/brew
