@@ -152,7 +152,7 @@ $argadd zfs-fix.sh
 $argadd zfs-rename.sh
 $argadd zfs-shapshot-rm.sh
 $argadd zfs-snapshot.sh
-edit secrets-generate.sh
+edit secrets-mount.sh
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -168,7 +168,7 @@ set winwidth=1
 exe '1resize ' . ((&lines * 37 + 25) / 50)
 exe '2resize ' . ((&lines * 10 + 25) / 50)
 argglobal
-110argu
+113argu
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -178,15 +178,15 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 18) / 37)
+let s:l = 56 - ((34 * winheight(0) + 18) / 37)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
-normal! 0
+56
+normal! 013|
 wincmd w
 argglobal
-110argu
+113argu
 enew
 setlocal fdm=manual
 setlocal fde=0
@@ -354,6 +354,7 @@ if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
+nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :

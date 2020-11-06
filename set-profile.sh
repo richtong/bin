@@ -26,70 +26,71 @@
 ## Also assumes that SOURCE_DIR is set
 ##
 ##
-set -u && SCRIPTNAME=$(basename $0)
+set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
 PROFILE_DIR="${PROFILE_DIR:-"$HOME"}"
 FORCE="${FORCE:-false}"
-while getopts "hdvp:f" opt
-do
-    case "$opt" in
-        h)
-            echo set the profile for logins
-            echo "usage: $SCRIPTNAME [flags...] [keys...]"
-            echo "flags: -d debug, -h help -v verbose"
-            echo "       -p where you want to put the profiles (default: $PROFILE_DIR)"
-            echo "       -f force add settings (default: $FORCE)"
-            echo
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-        p)
-            PROFILE_DIR="$OPTARG"
-            ;;
-        f)
-            FORCE=true
-            FLAGS+=" -f "
-            ;;
-    esac
+while getopts "hdvp:f" opt; do
+	case "$opt" in
+	h)
+		echo set the profile for logins
+		echo "usage: $SCRIPTNAME [flags...] [keys...]"
+		echo "flags: -d debug, -h help -v verbose"
+		echo "       -p where you want to put the profiles (default: $PROFILE_DIR)"
+		echo "       -f force add settings (default: $FORCE)"
+		echo
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	p)
+		PROFILE_DIR="$OPTARG"
+		;;
+	f)
+		FORCE=true
+		FLAGS+=" -f "
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh lib-config.sh
-shift $((OPTIND-1))
-if [[ $OSTYPE =~ darwin ]]
-then
-    ## On Mac
-    ## http://stackoverflow.com/questions/18773051/how-to-make-os-x-to-read-bash-profile-not-profile-file
-    ## when it boots or when a new Terminal Windows is created, or an ssh sessions
-    ## started, looks for profiles in this order and *stops* on
-    ## on the first one it finds
-    ##   /etc/.profile ##   ~/.bash_profile ##   ~/.bash_login ##   ~/.profile
-    # Note that ~/.bashrc is never sourced
-    ## Install the profiles into the folder $1 which defaults to $HOME  assumes SCRIPTNAME is set
-    ## Also assumes that SOURCE_DIR is set
-    ##
-    # usage: set_mac_profile [ use_secret [ home_directory [ keys ]]]
-    # note we do not currently need the key list on the mac
-    profile="$PROFILE_DIR/.bash_profile"
-    log_verbose Mac profile setting of $profile
-    if ! config_mark "$profile" && ! $FORCE
-    then
-        # need to echo so variable substitution occures
-        # we allow variable substitution here
-        # Use the backslash to escape
-        config_add "$profile" <<-EOF
-[[ \$PATH =~ "$SOURCE_DIR/bin" ]] || PATH+=":$SOURCE_DIR/bin"
+shift $((OPTIND - 1))
+if [[ $OSTYPE =~ darwin ]]; then
+	## On Mac
+	## http://stackoverflow.com/questions/18773051/how-to-make-os-x-to-read-bash-profile-not-profile-file
+	## when it boots or when a new Terminal Windows is created, or an ssh sessions
+	## started, looks for profiles in this order and *stops* on
+	## on the first one it finds
+	##   /etc/.profile ##   ~/.bash_profile ##   ~/.bash_login ##   ~/.profile
+	# Note that ~/.bashrc is never sourced
+	## Install the profiles into the folder $1 which defaults to $HOME  assumes SCRIPTNAME is set
+	## Also assumes that SOURCE_DIR is set
+	##
+	# usage: set_mac_profile [ use_secret [ home_directory [ keys ]]]
+	# note we do not currently need the key list on the mac
+	profile="$PROFILE_DIR/.bash_profile"
+	log_verbose "Mac profile setting of $profile"
+	if ! config_mark "$profile" && ! $FORCE; then
+		# need to echo so variable substitution occures
+		# we allow variable substitution here
+		# Use the backslash to escape
+		config_add "$profile" <<-EOF
+			[[ \$PATH =~ "$SOURCE_DIR/bin" ]] || PATH+=":$SOURCE_DIR/bin"
 
-EOF
-    fi
-    exit
+		EOF
+	fi
+	exit
 fi
 
 ## Setting up the profiles correctly
@@ -144,34 +145,31 @@ package_install keychain
 profiles=0
 log_verbose checking to .bash_profile used when you ssh into linux
 profile="$PROFILE_DIR/.bash_profile"
-if ! config_mark  "$profile"
-then
-    log_verbose add to .bash profile which runs on ssh inbound session
-    config_add "$profile" <<-"EOF"
-# run profile if you find it for an inbound ssh session on ubuntu
-[[ -e $HOME/.profile ]] && . "$HOME/.profile"
-EOF
-    # never use profiles++ because (( )) fails if the value is a zero
-    # https://askubuntu.com/questions/385528/how-to-increment-a-variable-in-bash
-    ((++profiles))
+if ! config_mark "$profile"; then
+	log_verbose add to .bash profile which runs on ssh inbound session
+	config_add "$profile" <<-"EOF"
+		# run profile if you find it for an inbound ssh session on ubuntu
+		[[ -e $HOME/.profile ]] && . "$HOME/.profile"
+	EOF
+	# never use profiles++ because (( )) fails if the value is a zero
+	# https://askubuntu.com/questions/385528/how-to-increment-a-variable-in-bash
+	((++profiles))
 fi
 
 log_verbose changing .profile runs once at boot time when the graphical desktop
 log_verbose environment starts must be non-interactive
 profile="$PROFILE_DIR/.profile"
-if ! config_mark  "$profile"
-then
-    config_add "$profile" <<<"[[ \$PATH =~ \"$SOURCE_DIR/bin\" ]] || PATH+=\":$SOURCE_DIR/bin\""
-    ((++profiles))
+if ! config_mark "$profile"; then
+	config_add "$profile" <<<"[[ \$PATH =~ \"$SOURCE_DIR/bin\" ]] || PATH+=\":$SOURCE_DIR/bin\""
+	((++profiles))
 fi
 
 log_verbose checking .bashrc which is run for every new terminal window start in
 profile="$PROFILE_DIR/.bashrc"
-log_verbose currently we do not add to profile
-    if ! config_mark "$profile"
-    then
-        config_add "$profile" <<<"# No $profile entries from $SCRIPTNAME"
-        ((++profiles))
-    fi
+log_verbose "currently we do not add to profile"
+if ! config_mark "$profile"; then
+	config_add "$profile" <<<"# No $profile entries from $SCRIPTNAME"
+	((++profiles))
+fi
 
-    log_warning profiles have changed, make sure to source source_profile in scripts or reboot the system
+log_warning profiles have changed, make sure to source source_profile in scripts or reboot the system

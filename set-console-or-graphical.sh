@@ -15,61 +15,61 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
 MODE="${MODE:-console}"
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo Switch between consoler and graphical mode
-            echo usage: $SCRIPTNAME [ flags ] [ positionals...]
-            echo
-            echo "flags: -d debug, -v verbose, -h help"
-            echo
-            echo "positionals: multi-user | graphical"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo Switch between consoler and graphical mode
+		echo "usage: $SCRIPTNAME [ flags ] [ positionals...]"
+		echo
+		echo "flags: -d debug, -v verbose, -h help"
+		echo
+		echo "positionals: multi-user | graphical"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 # set mode to first argument take the default if $1 not supplied
 MODE="${1:-"$MODE"}"
 
-if [[ ! $OSTYPE =~ linux ]]
-then
-    log_exit linux only
+if [[ ! $OSTYPE =~ linux ]]; then
+	log_exit linux only
 fi
 
-if ! is_linux ubuntu ||  [[ ! $(linux_version) =~ ^16 ]]
-then
-    log_exit Ubuntu 16.x onluy
+if ! is_linux ubuntu || [[ ! $(linux_version) =~ ^16 ]]; then
+	log_exit Ubuntu 16.x onluy
 fi
 
 current_mode=$(sudo systemctl get-default)
-log_verbose set-default currently set to $current_mode
+log_verbose "set-default currently set to $current_mode"
 case "$MODE" in
-    m*)
-        MODE=multi-user
-        ;;
-    g*)
-        MODE=graphical
-        ;;
-    f*)
-        log_verbose flipping to other mode
-        if [[ $current_mode =~ ^g ]]
-        then
-            MODE=multi-user
-        else
-            MODE=graphical
-        fi
-        ;;
+m*)
+	MODE=multi-user
+	;;
+g*)
+	MODE=graphical
+	;;
+f*)
+	log_verbose flipping to other mode
+	if [[ $current_mode =~ ^g ]]; then
+		MODE=multi-user
+	else
+		MODE=graphical
+	fi
+	;;
 esac
 
 sudo systemctl set-default $MODE.target
@@ -85,4 +85,4 @@ log_verbose to start graphical when in a console
 log_verbose surn sudo systemctl start lightdm.service
 
 log_assert "[[ $MODE.target == $(sudo systemctl get-default) =~ graphical.target ]]" \
-    "systemctl get-default matched $MODE"
+	"systemctl get-default matched $MODE"
