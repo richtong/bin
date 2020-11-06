@@ -152,7 +152,7 @@ $argadd zfs-fix.sh
 $argadd zfs-rename.sh
 $argadd zfs-shapshot-rm.sh
 $argadd zfs-snapshot.sh
-edit secrets-mount.sh
+edit zfs-add.sh
 set splitbelow splitright
 wincmd _ | wincmd |
 split
@@ -168,7 +168,7 @@ set winwidth=1
 exe '1resize ' . ((&lines * 37 + 25) / 50)
 exe '2resize ' . ((&lines * 10 + 25) / 50)
 argglobal
-113argu
+137argu
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -178,15 +178,15 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 56 - ((34 * winheight(0) + 18) / 37)
+let s:l = 1 - ((0 * winheight(0) + 18) / 37)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-56
-normal! 013|
+1
+normal! 0
 wincmd w
 argglobal
-113argu
+137argu
 enew
 setlocal fdm=manual
 setlocal fde=0
@@ -312,15 +312,15 @@ badd +67 secrets-find-file-sharing.sh
 badd +1 secrets-generate.sh
 badd +1 secrets-keygen.sh
 badd +1 secrets-mount-ecryptfs-and-dmg.sh
-badd +1 secrets-mount.sh
-badd +1 secrets-op.sh
-badd +1 secrets-passwd.sh
+badd +133 secrets-mount.sh
+badd +78 secrets-op.sh
+badd +2 secrets-passwd.sh
 badd +1 secrets-stow.sh
 badd +1 secrets-to-veracrypt.sh
-badd +1 set-console-or-graphical.sh
-badd +1 set-hostname.sh
-badd +1 set-passwd.sh
-badd +1 set-profile.sh
+badd +37 set-console-or-graphical.sh
+badd +54 set-hostname.sh
+badd +50 set-passwd.sh
+badd +25 set-profile.sh
 badd +1 set-ssh-agent.sh
 badd +1 sphinx-configure.sh
 badd +1 ssh-copy-ids.sh
@@ -331,11 +331,11 @@ badd +1 surround.sh
 badd +1 system-run.sh
 badd +1 system-test.sh
 badd +1 test-lib-config.sh
-badd +1 upgrade-release.sh
-badd +1 veracrypt-create.sh
-badd +1 veracrypt-find.sh
-badd +1 veracrypt-mount.sh
-badd +1 verify-docker.sh
+badd +33 upgrade-release.sh
+badd +142 veracrypt-create.sh
+badd +47 veracrypt-find.sh
+badd +80 veracrypt-mount.sh
+badd +43 verify-docker.sh
 badd +1 zfs-add.sh
 badd +1 zfs-fix.sh
 badd +1 zfs-rename.sh
