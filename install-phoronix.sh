@@ -7,49 +7,51 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -e && SCRIPTNAME=$(basename $0)
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 OPTIND=1
 VERSION=${VERSION:-7.2.1}
-while getopts "hdvr:" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Install Phoronix Test Suite
-            echo "flags: -d debug, -v verbose -h help"
-            echo "       -r version to load (default: $VERSION)"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-        r)
-            RELEASE="$OPTARG"
-            ;;
-    esac
+while getopts "hdvr:" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Install Phoronix Test Suite"
+		echo "flags: -d debug, -v verbose -h help"
+		echo "       -r version to load (default: $VERSION)"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	r)
+		RELEASE="$OPTARG"
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh
 
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 set -u
 
-if ! in_os linux
-then
-    log_error 1 "only runs on linux"
+if ! in_os linux; then
+	log_error 1 "only runs on linux"
 fi
 
 log_verbose installing phoronix
 
-if in_linux ubuntu
-then
-    package_install phoronix-test-suite
+if in_linux ubuntu; then
+	package_install phoronix-test-suite
 else
-    deb_install phoronix-test-suite "http://phoronix-test-suite.com/releases/repo/pts.debian/files/phoronix-test-suite_$RELEASE_all.deb"
+	deb_install phoronix-test-suite
+	"http://phoronix-test-suite.com/releases/repo/pts.debian/files/phoronix-test-suite_${RELEASE}_all.deb"
 fi

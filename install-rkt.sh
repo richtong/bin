@@ -13,64 +13,63 @@ RKT_FILE="${RKT_FILE:-"rkt_$RKT_REL-1_amd64.deb"}"
 RKT_URL="${RKT_URL:-"https://github.com/coreos/rkt/release/download/v$RKT_REL/$RKT_FILE"}"
 
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Install CoreOS rkt
-            echo "flags: -d debug, -v verbose, -h help"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Install CoreOS rkt"
+		echo "flags: -d debug, -v verbose, -h help"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-util.sh
 set -u
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-if command -v rkt
-then
-    log_verbose rkt already installed
+if command -v rkt; then
+	log_verbose rkt already installed
 fi
 
-if in_os mac
-then
-    log_verbose Installing for Mac
-    pushd  "$WS_DIR/git" > /dev/null
-    git_install_or_update "https://github.com/coreos/rkt" rkt
-    pushd rkt > /dev/null
-    popd
-    popd
+if in_os mac; then
+	log_verbose Installing for Mac
+	pushd "$WS_DIR/git" >/dev/null
+	git_install_or_update "https://github.com/coreos/rkt" rkt
+	pushd rkt >/dev/null
+	popd
+	popd
 else
-    # note that to make gpg work on Mac http://blog.ghostinthemachines.com/2015/03/01/how-to-use-gpg-command-line/
-    # you run `brew install gnupg2`
-    log_verbose assumes we are ubuntu so need to wget
-    mkdir -p "$WS_DIR/cache"
-    cd "$WS_DIR/cache"
-    if [[ ! -e $RKT_FILE ]]
-    then
-        gpg --recv-key "$RKT_KEY"
-        wget "$RKT_URL"
-        wget "$RKT_URL.asc"
-        gpg --verfity "$RKT_FILE.asc"
-    fi
-    sudo dpkg -i "$RKT_FILE"
-    cd -
+	# note that to make gpg work on Mac http://blog.ghostinthemachines.com/2015/03/01/how-to-use-gpg-command-line/
+	# you run `brew install gnupg2`
+	log_verbose assumes we are ubuntu so need to wget
+	mkdir -p "$WS_DIR/cache"
+	cd "$WS_DIR/cache"
+	if [[ ! -e $RKT_FILE ]]; then
+		gpg --recv-key "$RKT_KEY"
+		wget "$RKT_URL"
+		wget "$RKT_URL.asc"
+		gpg --verfity "$RKT_FILE.asc"
+	fi
+	sudo dpkg -i "$RKT_FILE"
+	cd -
 fi
 
 log_verbose testing configuration
 
-if [[ $OSTYPE =~ darwin ]]
-then
-    RKT=${RKT:-"vagrant ssh -c sudo rkt"}
+if [[ $OSTYPE =~ darwin ]]; then
+	RKT=${RKT:-"vagrant ssh -c sudo rkt"}
 else
-    RKT=${RKT:-"sudo rkt"}
+	RKT=${RKT:-"sudo rkt"}
 fi
 
 # Give more memory https://www.virtualbox.org/manual/ch08.html#idm3792

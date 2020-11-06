@@ -99,15 +99,19 @@ fi
 # need for convenience with git and used in workflows so get used to it
 # https://github.com/github/hub
 # Git hub
-PACKAGES+=" hub
-gh "
+PACKAGES+=(
+	hub
+	gh
+)
 
 # meld is ugly compared with the default
 # https://stackoverflow.com/questions/43317697/setting-up-and-using-meld-as-your-git-difftool-and-mergetool-on-a-mac
 # PACKAGES+=" meld "
 
 # shellcheck disable=SC2086
-cask_install $PACKAGES
+cask_install "${PACKAGES[@]}"
+
+gh config set git_protocol ssh
 
 # gh completion has a bug cannot source direction so create a file
 log_verbose adding github gh completion

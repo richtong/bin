@@ -152,7 +152,7 @@ $argadd zfs-fix.sh
 $argadd zfs-rename.sh
 $argadd zfs-shapshot-rm.sh
 $argadd zfs-snapshot.sh
-edit install-nonfree.sh
+edit install-solarized.sh
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -162,8 +162,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-21argu
-if bufexists("install-nonfree.sh") | buffer install-nonfree.sh | else | edit install-nonfree.sh | endif
+44argu
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -173,11 +172,11 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 67 - ((47 * winheight(0) + 25) / 50)
+let s:l = 1 - ((0 * winheight(0) + 24) / 48)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-67
+1
 normal! 0
 tabnext 1
 badd +53 install-lfs.sh
@@ -195,32 +194,34 @@ badd +1 install-ml.sh
 badd +57 install-modular-boost.sh
 badd +1 install-mongodb.sh
 badd +1 install-mysql.sh
+badd +0 install-neon.sh
 badd +1 install-neovim.sh
 badd +64 install-nfs-client.sh
 badd +1 install-node.sh
-badd +67 install-nonfree.sh
-badd +1 install-nosleep.sh
-badd +1 install-nvidia-docker.sh
-badd +1 install-nvidia-drv.sh
-badd +1 install-nvidia.sh
-badd +1 install-nvm.sh
-badd +1 install-openssh-server.sh
-badd +1 install-packages.sh
-badd +1 install-phoronix.sh
-badd +1 install-pia.sh
+badd +1 install-nonfree.sh
+badd +1 install-norton.sh
+badd +15 install-nosleep.sh
+badd +83 install-nvidia-docker.sh
+badd +106 install-nvidia-drv.sh
+badd +224 install-nvidia.sh
+badd +48 install-nvm.sh
+badd +118 install-openssh-server.sh
+badd +48 install-packages.sh
+badd +33 install-phoronix.sh
+badd +112 install-pia.sh
 badd +1 install-post-upgrade.sh
 badd +1 install-powerline.sh
-badd +1 install-pyenv.sh
+badd +63 install-pyenv.sh
 badd +1 install-python.sh
-badd +1 install-quicktile.sh
-badd +1 install-repos.sh
-badd +1 install-rkt.sh
-badd +1 install-rstudio.sh
+badd +162 install-quicktile.sh
+badd +2 install-repos.sh
+badd +35 install-rkt.sh
+badd +55 install-rstudio.sh
 badd +1 install-ruby.sh
-badd +1 install-secrets.sh
-badd +1 install-selfhost.sh
+badd +176 install-secrets.sh
+badd +63 install-selfhost.sh
 badd +1 install-shiftit.sh
-badd +1 install-slack.sh
+badd +2 install-slack.sh
 badd +1 install-solarized.sh
 badd +1 install-sphinx.sh
 badd +1 install-spotify.sh
@@ -332,7 +333,6 @@ if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &so = s:so_save | let &siso = s:siso_save
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :
