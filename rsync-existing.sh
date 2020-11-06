@@ -19,56 +19,57 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
 FORCE="${FORCE:-false}"
 FLAGS="${FLAGS:-"-av --update --existing "}"
-while getopts "hdvfu:" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-Rsync only files that are already present in destination
-    usage: $SCRIPTNAME [ flags ] source destination
-    flags: -d debug, -v verbose, -h help"
-           -f force the copy (default: $FORCE)
-           -u use these flags (default: $FLAGS)
+while getopts "hdvfu:" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			Rsync only files that are already present in destination
+			    usage: $SCRIPTNAME [ flags ] source destination
+			    flags: -d debug, -v verbose, -h help"
+			           -f force the copy (default: $FORCE)
+			           -u use these flags (default: $FLAGS)
 
-This only copies files that are already present in the destination
-but which are new in the source.
+			This only copies files that are already present in the destination
+			but which are new in the source.
 
-This is most useful when you have a few scripts in say ~/ws/git/src/bin
-And you want to just copy the updates into say ~/ws.restartus/git/src/bin
+			This is most useful when you have a few scripts in say ~/ws/git/src/bin
+			And you want to just copy the updates into say ~/ws.restartus/git/src/bin
 
-Because this is a big change it defaults to a dry run, run -f to really
-copy
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            # add the -v which works for many commands
-            export FLAGS+=" -v "
-            ;;
-        f)
-            FORCE=true
-            ;;
-        u)
-            FLAGS="$OPTARG"
-            ;;
-    esac
+			Because this is a big change it defaults to a dry run, run -f to really
+			copy
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		# add the -v which works for many commands
+		export FLAGS+=" -v "
+		;;
+	f)
+		FORCE=true
+		;;
+	u)
+		FLAGS="$OPTARG"
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
-if ! $FORCE
-then
-    FLAGS+="-n"
+if ! $FORCE; then
+	FLAGS+="-n"
 fi
 
-if [[ $# < 2 ]]
-then
-    log_error 1 "Need source and destination"
+if (($# < 2)); then
+	log_error 1 "Need source and destination"
 fi
 
 rsync $FLAGS "$1/" "$2"

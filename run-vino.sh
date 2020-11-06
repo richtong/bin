@@ -9,67 +9,66 @@
 #
 set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
-
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Install VNC Server
-            echo "flags: -d debug, -v verbose, -h help"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Install VNC Server"
+		echo "flags: -d debug, -v verbose, -h help"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 set -u
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-
-if [[ $OSTYPE =~ darwin ]]
-then
-    log_verbose only for Linux
-    exit
+if [[ $OSTYPE =~ darwin ]]; then
+	log_verbose only for Linux
+	exit
 fi
-
 
 # get_env variable [user] [gui]
 # gui is nautilus for ubuntu
 #        gnome for others
 get_env() {
-    if (($# < 1 )); then return; fi
-    local variable="$1"
-    local user="${2:-"$USER"}"
-    local gui="${3:-nautilus}"
-    local pid=$(pgrep -u "$user" "$gui" | head -1)
-    echo $(grep -z "$variable" "/proc/$pid/environ" | cut -d= -f2-)
+	if (($# < 1)); then return; fi
+	local variable="$1"
+	local user="${2:-"$USER"}"
+	local gui="${3:-nautilus}"
+	local pid
+	pid=$(pgrep -u "$user" "$gui" | head -1)
+	grep -z "$variable" "/proc/$pid/environ" | cut -d= -f2-
 }
 
 # http://stackoverflow.com/questions/23415117/shell-script-with-export-command-and-notify-send-via-crontab-not-working-export
-if [[ -z $DBUS_SESSION_BUS_ADDRESS ]]
-then
-    log_verbose looking for active gnome seeion and its DBUS for user $USER
-    export DBUS_SESSION_BUS_ADDRESS="$(get_env DBUS_SESSION_BUS_ADDRESS)"
-    log_verbose found $DBUS_SESSION_BUS_ADDRESS
+if [[ -z $DBUS_SESSION_BUS_ADDRESS ]]; then
+	log_verbose "looking for active gnome seeion and its DBUS for user $USER"
+	DBUS_SESSION_BUS_ADDRESS="$(get_env DBUS_SESSION_BUS_ADDRESS)"
+	export DBUS_SESSION_BUS_ADDRESS
+	log_verbose "found $DBUS_SESSION_BUS_ADDRESS"
 fi
 
-if [[ -z $DISPLAY ]]
-then
-    log_verbose looking for active display for user $USER
-    export DISPLAY="$(get_env DISPLAY)"
+if [[ -z $DISPLAY ]]; then
+	log_verbose "looking for active display for user $USER"
+	DISPLAY="$(get_env DISPLAY)"
+	export DISPLAY
 fi
 
-if pgrep vino > /dev/null
-then
-    pkill vino
+if pgrep vino >/dev/null; then
+	pkill vino
 fi
 gsettings set org.gnome.Vino enabled true
 gsettings set org.gnome.Vino prompt-enabled false

@@ -8,35 +8,38 @@
 ## @author Rich Tong
 ## @returns 0 on success
 #
-set -e && SCRIPTNAME=$(basename $0)
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME create an encrypted password ready for chpasswd
-            echo flags: -d debug, -h help, -v verbose
-            echo parameter: the clear text password
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME create an encrypted password ready for chpasswd"
+		echo flags: -d debug, -h help, -v verbose
+		echo parameter: the clear text password
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 set -u
 
 # http://unix.stackexchange.com/questions/81240/manually-generate-password-for-etc-shadow/81248#81248
-if ! command -v makepasswd
-sudo apt-get install -y makepasswd
+if ! command -v makepasswd; then
+	sudo apt-get install -y makepasswd
 fi
 SALT=$(makepasswd --chars 16)
 # Using SHA 512 with lots of rounds
@@ -45,8 +48,7 @@ SALT=$(makepasswd --chars 16)
 # But the --rounds=10000 does not seem to work
 #
 
-if ! command -v mkpasswd
-then
-sudo apt-get whois
-if
-mkpasswd --method=sha-512 --salt="$SALT" --stdin <<< "$1"
+if ! command -v mkpasswd; then
+	sudo apt-get mkpasswd
+fi
+mkpasswd --method=sha-512 --salt="$SALT" --stdin <<<"$1"

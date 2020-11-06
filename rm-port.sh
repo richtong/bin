@@ -15,41 +15,41 @@ set -u && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo Remove all Mac Ports
-            echo usage: $SCRIPTNAME [ flags ]
-            echo
-            echo "flags: -d debug, -v verbose, -h help"
-            echo
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo Remove all Mac Ports
+		echo "usage: $SCRIPTNAME [ flags ]"
+		echo
+		echo "flags: -d debug, -v verbose, -h help"
+		echo
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-if [[ ! $OSTYPE =~ darwin ]]
-then
-    log_exit "Mac only"
+if [[ ! $OSTYPE =~ darwin ]]; then
+	log_exit "Mac only"
 fi
 
-if ! command -v port > /dev/null ]]
-then
-    log_exit "No Mac Ports installed"
+if ! command -v port >/dev/null; then
+	log_exit "No Mac Ports installed"
 fi
 
-if ! port installed | grep "No ports"
-then
-    sudo port -fp uninstall --follow-dependents installed
+if ! port installed | grep "No ports"; then
+	sudo port -fp uninstall --follow-dependents installed
 fi
 
 log_assert "port installed | grep "No ports"" "Ports uninstalled"

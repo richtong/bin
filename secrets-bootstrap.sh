@@ -25,39 +25,42 @@ SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 trap 'exit $?' ERR
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-$SCRIPTNAME does the following:
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			$SCRIPTNAME does the following:
 
-1. Creates a Veracrypt volume on Dropbox
-2. Moves the current .ssh to the Veracrypt/secrets for stowing
-3. Generates new keys for the company
-4 Modifies the .ssh/config to use the keys for our main assets (the company, github and amazon)
+			1. Creates a Veracrypt volume on Dropbox
+			2. Moves the current .ssh to the Veracrypt/secrets for stowing
+			3. Generates new keys for the company
+			4 Modifies the .ssh/config to use the keys for our main assets (the company, github and amazon)
 
-After this step which only needs to be done once per hire time (or when you want refreshed keys
+			After this step which only needs to be done once per hire time (or when you want refreshed keys
 
-Then on a per machine install basis run $SCRIPT_DIR/install.sh to use it
+			Then on a per machine install basis run $SCRIPT_DIR/install.sh to use it
 
-    usage: $SCRIPTNAME [ flags ]
-    flags: -d debug, -v verbose, -h help"
+			    usage: $SCRIPTNAME [ flags ]
+			    flags: -d debug, -v verbose, -h help"
 
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            # add the -v which works for many commands
-            export FLAGS+=" -v "
-            ;;
-    esac
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		# add the -v which works for many commands
+		export FLAGS+=" -v "
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 log_verbose Create a new VeraCrypt volume

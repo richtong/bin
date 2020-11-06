@@ -14,29 +14,32 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
-while getopts "hdvr:" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-Run Ubuntu (under Docker)
-    usage: $SCRIPTNAME [ flags ]
-    flags: -d debug, -v verbose, -h help"
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            # add the -v which works for many commands
-            export FLAGS+=" -v "
-            ;;
-    esac
+while getopts "hdvr:" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			Run Ubuntu (under Docker)
+			    usage: $SCRIPTNAME [ flags ]
+			    flags: -d debug, -v verbose, -h help"
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		# add the -v which works for many commands
+		export FLAGS+=" -v "
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
-docker run --name ubuntu -v $PWD:/src -ti ubuntu /bin/bash
+docker run --name ubuntu -v "$PWD:/src" -ti ubuntu /bin/bash

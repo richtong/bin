@@ -152,8 +152,12 @@ $argadd zfs-fix.sh
 $argadd zfs-rename.sh
 $argadd zfs-shapshot-rm.sh
 $argadd zfs-snapshot.sh
-edit macports-migrate.sh
+edit secrets-generate.sh
 set splitbelow splitright
+wincmd _ | wincmd |
+split
+1wincmd k
+wincmd w
 set nosplitbelow
 set nosplitright
 wincmd t
@@ -161,8 +165,10 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
+exe '1resize ' . ((&lines * 37 + 25) / 50)
+exe '2resize ' . ((&lines * 10 + 25) / 50)
 argglobal
-82argu
+110argu
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -172,12 +178,27 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 48 - ((38 * winheight(0) + 24) / 48)
+let s:l = 1 - ((0 * winheight(0) + 18) / 37)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-48
+1
 normal! 0
+wincmd w
+argglobal
+110argu
+enew
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=20
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+wincmd w
+exe '1resize ' . ((&lines * 37 + 25) / 50)
+exe '2resize ' . ((&lines * 10 + 25) / 50)
 tabnext 1
 badd +53 install-lfs.sh
 badd +1 install-lint.sh
@@ -260,34 +281,34 @@ badd +1 install-zfs-quotas.sh
 badd +401 install-zfs.sh
 badd +2 install-zsh.sh
 badd +1 mac-install.sh
-badd +1 macports-migrate.sh
+badd +48 macports-migrate.sh
 badd +1 make-bin.sh
-badd +1 make-password.sh
-badd +1 mk-sshfs-files.sh
-badd +1 mkdir-accounts.sh
-badd +1 mount-and-copy-ecryptfs.sh
-badd +1 mount-ecryptfs.sh
-badd +1 mount-nfs.sh
-badd +1 mount-private-dmg.sh
-badd +1 mount-sshfs.sh
-badd +1 mount-volume.sh
-badd +1 phoronix-run.sh
-badd +1 prebuild.sh
-badd +1 propagate-ssh-keys.sh
-badd +1 remove-accounts.sh
-badd +1 remove-agents.sh
-badd +1 remove-all.sh
-badd +1 remove-crontab.sh
-badd +1 remove-nvidia.sh
-badd +1 remove-prebuild.sh
-badd +1 rm-port.sh
-badd +1 rsync-and-hash.sh
-badd +1 rsync-existing.sh
-badd +1 run-ubuntu.sh
-badd +1 run-vino.sh
-badd +1 secrets-bootstrap.sh
-badd +1 secrets-create.sh
-badd +1 secrets-find-file-sharing.sh
+badd +57 make-password.sh
+badd +108 mk-sshfs-files.sh
+badd +115 mkdir-accounts.sh
+badd +140 mount-and-copy-ecryptfs.sh
+badd +93 mount-ecryptfs.sh
+badd +53 mount-nfs.sh
+badd +49 mount-private-dmg.sh
+badd +190 mount-sshfs.sh
+badd +76 mount-volume.sh
+badd +76 phoronix-run.sh
+badd +82 prebuild.sh
+badd +57 propagate-ssh-keys.sh
+badd +103 remove-accounts.sh
+badd +84 remove-agents.sh
+badd +33 remove-all.sh
+badd +27 remove-crontab.sh
+badd +32 remove-nvidia.sh
+badd +66 remove-prebuild.sh
+badd +49 rm-port.sh
+badd +123 rsync-and-hash.sh
+badd +73 rsync-existing.sh
+badd +46 run-ubuntu.sh
+badd +65 run-vino.sh
+badd +64 secrets-bootstrap.sh
+badd +87 secrets-create.sh
+badd +67 secrets-find-file-sharing.sh
 badd +1 secrets-generate.sh
 badd +1 secrets-keygen.sh
 badd +1 secrets-mount-ecryptfs-and-dmg.sh
