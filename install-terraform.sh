@@ -16,41 +16,41 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-Installs Terraform
-    usage: $SCRIPTNAME [ flags ]
-    flags: -d debug, -v verbose, -h help"
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            # add the -v which works for many commands
-            export FLAGS+=" -v "
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			Installs Terraform
+			    usage: $SCRIPTNAME [ flags ]
+			    flags: -d debug, -v verbose, -h help"
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		# add the -v which works for many commands
+		export FLAGS+=" -v "
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-util.sh lib-install.sh lib-config.sh
 
-
-if ! in_os mac
-then
-    log_exit "only tested on the mac"
+if ! in_os mac; then
+	log_exit "only tested on the mac"
 fi
 
 package_install terraform
 
-if ! terraform -install-autocomplete
-then
-    log_verbose autocomplete already installed
+if ! terraform -install-autocomplete; then
+	log_verbose autocomplete already installed
 fi
 log_verbose source ~/.bashrc to install autocomplete

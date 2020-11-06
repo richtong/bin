@@ -16,56 +16,54 @@ set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: Install Travis Command line interface
-            echo "flags: -d debug, -v verbose, -h help"
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: Install Travis Command line interface"
+		echo "flags: -d debug, -v verbose, -h help"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
 
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-version-compare.sh
 
 set -u
 
-if command -v travis && vergte $(travis version) 1.8.0
-then
-    exit 0
+if command -v travis && vergte "$(travis version)" 1.8.0; then
+	exit 0
 fi
 
 # Here we go
 bash "$SCRIPT_DIR/install-ruby.sh"
 
-if verlt $(ruby -v | cut -d' ' -f 2) 1.9.3
-then
-    echo $SCRIPTNAME: Need ruby at least 1.93, got $(ruby -v)
-    exit 1
+if verlt "$(ruby -v | cut -d' ' -f 2)" 1.9.3; then
+	echo "$SCRIPTNAME: Need ruby at least 1.93, got $(ruby -v)"
+	exit 1
 fi
 
 # Do not need to lock to version 1.8 anymore
 #sudo gem install travis -v 1.8.0 --no-rdoc --no-ri
 sudo gem install travis --no-rdoc --no-ri
 
-if verlt $(travis version) 1.8
-then
-    echo $SCRIPTNAME: Need travis 1.8 or greater, got $(travis version)
-    exit 2
+if verlt "$(travis version)" 1.8; then
+	log_exit 2 "$SCRIPTNAME: Need travis 1.8 or greater, got $(travis version)"
 fi
 
 log_verbose login so you can access private repos
-if ! travis accounts
-then
-    log_verbose now login with github and your password and two factor authentication if enabled
-    travis login --pro
+if ! travis accounts; then
+	log_verbose now login with github and your password and two factor authentication if enabled
+	travis login --pro
 fi

@@ -15,64 +15,61 @@ VERSION=${VERSION:-2.7.9}
 CONFIG="${CONFIG:-/etc/ssh/sshd_config}"
 DOWNLOAD_URL="${DOWNLOAD_URL:-"https://dl.bintray.com/xquartz/downloads/XQuartz-$VERSION.dmg"}"
 OPTIND=1
-while getopts "hdvr:c:" opt
-do
-    case "$opt" in
-        h)
-            cat <<EOF
+while getopts "hdvr:c:" opt; do
+	case "$opt" in
+	h)
+		cat <<EOF
 Install XQuartz
 usage: $SCRIPTNAME [ flags ]
 flags: -d debug, -v verbose, -h help
        -r release to download (default: $VERSION)
        -c location of sshd_config and ssh_config (default: $CONFIG)
 EOF
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-        r)
-            VERSION="$OPTARG"
-            ;;
-        c)
-            CONFIG="$OPTARG"
-            ;;
-    esac
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	r)
+		VERSION="$OPTARG"
+		;;
+	c)
+		CONFIG="$OPTARG"
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-config.sh
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-
-if [[ ! $OSTYPE =~ darwin ]]
-then
-    log_exit Only for Mac
+if [[ ! $OSTYPE =~ darwin ]]; then
+	log_exit Only for Mac
 fi
 
 log_verbose install using brew
 # https://apple.stackexchange.com/questions/224373/install-xquartz-using-homebrew-on-mac-os-x-el-capitan
-if ! command -v brew > /dev/null
-then
-    "$SCRIPT_DIR/install-brew.sh"
+if ! command -v brew >/dev/null; then
+	"$SCRIPT_DIR/install-brew.sh"
 fi
 
 cask_install xquartz
-if [[ ! -e /Applications/Utilities/XQuartz.app ]]
-then
-    log_verbose falling back to dmg installation
-    download_url_open "$DOWNLOAD_URL"
-    # look for XQuartz in a volume prefixed by the name XQuartz
-    find_in_volume_open_then_detach XQuartz.pkg XQuartz
+if [[ ! -e /Applications/Utilities/XQuartz.app ]]; then
+	log_verbose falling back to dmg installation
+	download_url_open "$DOWNLOAD_URL"
+	# look for XQuartz in a volume prefixed by the name XQuartz
+	find_in_volume_open_then_detach XQuartz.pkg XQuartz
 fi
 
+log_assert "[[ -e /Applications/Utilities/XQuartz.app ]]" "XQuartz installed"
 
-log_assert "[[ -e /Applications/Utilities/XQuartz.app ]]" "XQuartz installed" ]]
-
-
-log_verbose making sure the $CONFIG allows X11 forwarding which can be reset on MacOS upgrades
+log_verbose "making sure the $CONFIG allows X11 forwarding which can be reset on MacOS upgrades"
 
 # https://stackoverflow.com/questions/39622173/cant-run-ssh-x-on-macos-sierra
 # note that when you are passing this, you need to make sure not to quote the

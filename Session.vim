@@ -152,7 +152,7 @@ $argadd zfs-fix.sh
 $argadd zfs-rename.sh
 $argadd zfs-shapshot-rm.sh
 $argadd zfs-snapshot.sh
-edit install-solarized.sh
+edit macports-migrate.sh
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -162,7 +162,7 @@ set winheight=1
 set winminwidth=0
 set winwidth=1
 argglobal
-44argu
+82argu
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -172,11 +172,11 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 24) / 48)
+let s:l = 48 - ((38 * winheight(0) + 24) / 48)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-1
+48
 normal! 0
 tabnext 1
 badd +53 install-lfs.sh
@@ -194,7 +194,7 @@ badd +1 install-ml.sh
 badd +57 install-modular-boost.sh
 badd +1 install-mongodb.sh
 badd +1 install-mysql.sh
-badd +0 install-neon.sh
+badd +1 install-neon.sh
 badd +1 install-neovim.sh
 badd +64 install-nfs-client.sh
 badd +1 install-node.sh
@@ -247,18 +247,18 @@ badd +1 install-virtualbox.sh
 badd +1 install-vmware-tools.sh
 badd +1 install-vpn.sh
 badd +1 install-vscode.sh
-badd +1 install-wordpress.sh
-badd +1 install-wxpython.sh
-badd +1 install-xhyve.sh
-badd +1 install-xquartz.sh
+badd +39 install-wordpress.sh
+badd +11 install-wxpython.sh
+badd +36 install-xhyve.sh
+badd +43 install-xquartz.sh
 badd +1 install-xrdp-custom.sh
-badd +1 install-yay.sh
+badd +47 install-yay.sh
 badd +1 install-yeoman.sh
-badd +1 install-zfs-auto-snapshot.sh
-badd +1 install-zfs-datasets.sh
+badd +89 install-zfs-auto-snapshot.sh
+badd +188 install-zfs-datasets.sh
 badd +1 install-zfs-quotas.sh
-badd +1 install-zfs.sh
-badd +1 install-zsh.sh
+badd +401 install-zfs.sh
+badd +2 install-zsh.sh
 badd +1 mac-install.sh
 badd +1 macports-migrate.sh
 badd +1 make-bin.sh

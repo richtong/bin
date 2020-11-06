@@ -16,51 +16,51 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 trap 'exit $?' ERR
 OPTIND=1
 export FLAGS="${FLAGS:-" -v "}"
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-Installs Veracrypt the file encryption tool based on TrueCrypt
-    usage: $SCRIPTNAME [ flags ]
-    flags: -d debug, -v verbose, -h help"
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			Installs Veracrypt the file encryption tool based on TrueCrypt
+			    usage: $SCRIPTNAME [ flags ]
+			    flags: -d debug, -v verbose, -h help"
 
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            # add the -v which works for many commands
-            export FLAGS+=" -v "
-            ;;
-    esac
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		# add the -v which works for many commands
+		export FLAGS+=" -v "
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-mac.sh lib-version-compare.sh
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-if [[ $OSTYPE =~ darwin ]]
-then
-    log_verbose brew cask installation
-    if vergte "$(mac_version)" 10.13 && command -v virtualbox
-    then
-        log_warning on High Sierra, virtualbox and osxfuse used by veracrypt and sshfs cannot run together
-        log_warning or remove a kext that uses a file driver slot see https://github.com/osxfuse/osxfuse/issues/315#issuecomment-258456598
-        log_warning 1 "you need to uninstall brew cask uninstall virtualbox"
-    fi
+if [[ $OSTYPE =~ darwin ]]; then
+	log_verbose brew cask installation
+	if vergte "$(mac_version)" 10.13 && command -v virtualbox; then
+		log_warning on High Sierra, virtualbox and osxfuse used by veracrypt and sshfs cannot run together
+		log_warning or remove a kext that uses a file driver slot see https://github.com/osxfuse/osxfuse/issues/315#issuecomment-258456598
+		log_warning 1 "you need to uninstall brew cask uninstall virtualbox"
+	fi
 
-    cask_install veracrypt
-    if [[ ! -e /usr/local/bin/veracrypt ]]
-    then
-        mkdir -p /usr/local/bin
-        ln -s "/Applications/VeraCrypt.app/Contents/MacOS/VeraCrypt" "/usr/local/bin/veracrypt"
-    fi
+	cask_install veracrypt
+	if [[ ! -e /usr/local/bin/veracrypt ]]; then
+		mkdir -p /usr/local/bin
+		ln -s "/Applications/VeraCrypt.app/Contents/MacOS/VeraCrypt" "/usr/local/bin/veracrypt"
+	fi
 
-    log_assert "[[ -e /Applications/VeraCrypt.app ]]" "VeraCrypt installed"
-    exit
+	log_assert "[[ -e /Applications/VeraCrypt.app ]]" "VeraCrypt installed"
+	exit
 fi
 
 # https://www.linuxbabe.com/ubuntu/install-veracrypt-ubuntu-16-04-16-10
@@ -68,10 +68,9 @@ log_verbose installing repo
 repository_install ppa:unit193/encryption
 log_verbose installing veracrypt
 
-if vergte "$(mac_version)" 10.13
-then
-    log_warning require OSXFuse kext and you will see a dialog but may not
-    log_warning see the checkbox, you will need to reboot and to see it
+if vergte "$(mac_version)" 10.13; then
+	log_warning require OSXFuse kext and you will see a dialog but may not
+	log_warning see the checkbox, you will need to reboot and to see it
 fi
 
 package_install veracrypt

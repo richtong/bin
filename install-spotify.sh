@@ -6,25 +6,28 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -e && SCRIPTNAME=$(basename $0)
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 OPTIND=1
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            echo $SCRIPTNAME: flags: -d debug, -h help
-            exit 0
-            ;;
-        d)
-            DEBUGGING=true
-            ;;
-        v)
-            VERBOSE=true
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		echo "$SCRIPTNAME: flags: -d debug, -h help"
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 set -u

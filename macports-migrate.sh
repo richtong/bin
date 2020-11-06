@@ -17,44 +17,46 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-Uninstall and the reInstalls Mac Ports and all its packages
-Note this does not work on an OS upgrade.
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			Uninstall and the reInstalls Mac Ports and all its packages
+			Note this does not work on an OS upgrade.
 
-    usage: $SCRIPTNAME [ flags ]
-    flags: -d debug, -v verbose, -h help"
+			    usage: $SCRIPTNAME [ flags ]
+			    flags: -d debug, -v verbose, -h help"
 
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            # add the -v which works for many commands
-            export FLAGS+=" -v "
-            ;;
-    esac
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		# add the -v which works for many commands
+		export FLAGS+=" -v "
+		;;
+	*)
+		echo "no -$opt" >&2
+		;;
+	esac
 done
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
+# shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh
 
-if [[ ! $OSTYPE =~ darwin ]]
-then
-    log_verbose git install
-    ## https://www.npmjs.com/package/onepass-cli for npm package
-    git_install_or_update 1pass georgebrock
-    exit
+if [[ ! $OSTYPE =~ darwin ]]; then
+	log_verbose git install
+	## https://www.npmjs.com/package/onepass-cli for npm package
+	git_install_or_update 1pass georgebrock
+	exit
 fi
 
 temp=$(mktemp)
-port -qv installed > "$temp"
+port -qv installed >"$temp"
 log_verbose uninstall all mac ports
 sudo port -f uninstall installed
 sudo rm -rf /opt/local/var/macports/build/*
