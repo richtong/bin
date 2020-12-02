@@ -20,42 +20,42 @@ OPTIND=1
 NOWEB="${NOWEB:-false}"
 FDIR="${FDIR:-"/usr/local/Caskroom/flutter/latest"}"
 while getopts "hdvnf:" opt; do
-    case "$opt" in
-        h)
-            cat <<-EOF
-$SCRIPTNAME: install aws
-flags: -d : debug, -v : verbose, -h :help
-       -n Disable Web applications (default: $NOWEB)
-       -f location of the flutter SDK (default: $FDIR)
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGINtrue
-            ;;
-        v)
-            export VERBOSE=true
-            ;;
-        n)
-            NOWEB=true
-            ;;
-        f)
-            FDIR="$OPTARG"
-            ;;
-        *)
-            echo "No -$opt" >&2
-    esac
+	case "$opt" in
+	h)
+		cat <<-EOF
+			$SCRIPTNAME: install aws
+			flags: -d : debug, -v : verbose, -h :help
+			       -n Disable Web applications (default: $NOWEB)
+			       -f location of the flutter SDK (default: $FDIR)
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	n)
+		NOWEB=true
+		;;
+	f)
+		FDIR="$OPTARG"
+		;;
+	*)
+		echo "No -$opt" >&2
+		;;
+	esac
 done
 
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 source_lib lib-install.sh lib-util.sh lib-config.sh
 
-if in_os linux
-then
-    log_warning "Linux install not complete"
-    exit
+if in_os linux; then
+	log_warning "Linux install not complete"
+	exit
 fi
 
 # https://github.com/MiderWong/homebrew-flutter/blob/master/README.md
@@ -76,19 +76,17 @@ tap_install probablykasper/tap
 cask_install flutter
 
 log_verbose Defeating MacOS quarantine
-for file in idevice_id ideviceinfo idevicesyslog
-do
-    log_verbose remove quarantine for $file
-    if ! sudo xattr -d com.apple.quarantine "$FDIR/flutter/bin/cache/artifacts/libimobiledevice/$file"
-    then
-        log_verbose no quarantine set on $file
-    fi
+for file in idevice_id ideviceinfo idevicesyslog; do
+	log_verbose remove quarantine for $file
+	if ! sudo xattr -d com.apple.quarantine "$FDIR/flutter/bin/cache/artifacts/libimobiledevice/$file"; then
+		log_verbose no quarantine set on $file
+	fi
 done
 
-# dart install conflicts with flutter now
+# dart installed with flutter now
 # https://github.com/dart-lang/homebrew-dart
-log_verbose install dart
-brew_install dart
+# log_verbose install dart
+# brew_install dart
 
 # java required for certain android tools like the keyfinder
 # https://stackoverflow.com/questions/24342886/how-to-install-java-8-on-mac#28635465
@@ -100,13 +98,13 @@ brew_install dart
 # Also install google cloud so firebase can be used with flutter
 log_verbose install android studio and other casks
 cask_install \
-    android-studio \
-    cocoapods \
-    java
+	android-studio \
+	cocoapods \
+	java
 
-
-log_verbose flutter precache
-flutter precache
+# this generates an error on Big Sur
+#log_verbose flutter precache
+#flutter precache
 
 # https://flutter.dev/docs/get-started/install/macos
 log_verbose install Xcode
@@ -126,32 +124,28 @@ sudo xcodebuild -license accept
 # but is not in the homebrew/cask
 #brew tap homebrew/cask
 #           android-ndk \
-    #           android-sdk \
-    #           intel-haxm \
-    #           adoptopenjdk8 \
-    #
-
+#           android-sdk \
+#           intel-haxm \
+#           adoptopenjdk8 \
+#
 
 flutter doctor --android-licenses
 
 # https://flutter.dev/docs/get-started/web
-if ! $NOWEB
-then
-    log_verbose enabling beta feature web support
-    log_warning currently must use Chrome to see web apps
-    cask_install google-chrome
+if ! $NOWEB; then
+	log_verbose enabling beta feature web support
+	log_warning currently must use Chrome to see web apps
+	cask_install google-chrome
 
-    if ! flutter channel beta
-    then
-        log_warning flutter no longer has a beta channel
-    fi
-    flutter upgrade
-    flutter config --enable-web
-    flutter devices
-    log_warning to add to an existing project run flutter create . in that project dir
-    log_warning using flutter run -d chrome and look at http://localhost
+	if ! flutter channel beta; then
+		log_warning flutter no longer has a beta channel
+	fi
+	flutter upgrade
+	flutter config --enable-web
+	flutter devices
+	log_warning to add to an existing project run flutter create . in that project dir
+	log_warning using flutter run -d chrome and look at http://localhost
 fi
-
 
 # From flutter doctor but these are already installed above
 # log_verbose workaround until next release of libimobiledevice 1.1.0
@@ -164,18 +158,17 @@ fi
 #https://gist.github.com/patrickhammond/4ddbe49a67e5eb1b9c03
 # log_warning ant requires adoptopenjdk8 first
 # brew_install \
-    #            ant \
-    #           maven \
-    #          gradle \
-    #           ios-deploy \
-    #           ideviceinstaller
-
+#            ant \
+#           maven \
+#          gradle \
+#           ios-deploy \
+#           ideviceinstaller
 
 # Java 9 workaround so don't install java
 # export SDKMANAGER_OPTS="-XX:+IgnoreUnrecognizedVMOptions --add-modules java.se.ee"
 # caskroom/versions/java8 \
 
-    # This update is deprecated
+# This update is deprecated
 # android update sk --no-ui
 # need to touch this before
 #mkdir -p "$HOME/.android"
@@ -183,7 +176,6 @@ fi
 #sdkmanager --update
 # note build tools are not installed by default
 #sdkmanager "platform-tools" "platforms;android-28" "build-tools;28.0.3"
-
 
 # All profiles are adding automtically
 #if ! config_mark

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 ##
 ## Install file system access over ssh
+## With fuse licensing changes, homebrew no longer supports it so this is
+## deprecated. See https://github.com/Homebrew/homebrew-core/pull/64491
 ##
 ## This tunnels your file system access over ssh so you do not need kerberos
 ## and can protect file system access by NFS easily. The client just needs ssh
