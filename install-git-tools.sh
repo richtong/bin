@@ -128,3 +128,7 @@ EOF
 # git config --global diff.guitool meld
 # log_verbose "to use a graphical tool use for merges use git mergetool and for"
 # log_verbose "diffs then use git difftool"
+
+# https://github.blog/2020-07-27-highlights-from-git-2-28/#introducing-init-defaultbranch
+log_verbose "main is now the default branch for all new repos"
+git config --global init.defaultBranch main
