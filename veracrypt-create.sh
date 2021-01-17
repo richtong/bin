@@ -14,7 +14,7 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 trap 'exit $?' ERR
 export FLAGS="${FLAGS:-""}"
 SECRET_USER="${SECRET_USER:-"$USER"}"
-SECRET_DIR="${SECRET_DIR:-"$HOME/Dropbox"}"
+SECRET_DIR="${SECRET_DIR:-"$HOME/Google Drive"}"
 SECRET_MOUNTPOINT_DIR="${SECRET_MOUNTPOINT_DIR:-"/media"}"
 OPTIONS="${OPTIONS:-(--keyfiles "" --encryption=(Serpent(Twofish(AES)) --hash=sha=512 --pim=0 --random-source=/dev/urandom --filesystem=fat )}"
 SIZE="${SIZE:-32}"
@@ -23,7 +23,7 @@ while getopts "hdvu:fs:o:z:m:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Create a Veracrypt hidden volume for your secrets at $HOME/Dropbox/$SECRET_USER
+			Create a Veracrypt hidden volume for your secrets at $SECRET_DIR/$SECRET_USER.vc
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help
 			           -u user whose secrets are being saved (default: $SECRET_USER)
@@ -85,6 +85,11 @@ if [[ $SECRET_DIR =~ Dropbox ]]; then
 	"$SCRIPT_DIR/install-dropbox.sh"
 	if ! dropbox_find; then
 		log_error 1 "no Dropbox folders found did you install and sync?"
+	fi
+elif [[ $SECRET_DIR =~ "Google Drive" ]]; then
+	"$SCRIPT_DIR/install-google-backup-and-sync.sh"
+	if ! google_drive_find; then
+		log_error 1 "no Google Drive found did you install and sync"
 	fi
 fi
 

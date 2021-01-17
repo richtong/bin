@@ -21,59 +21,58 @@ MACPORTS_INSTALL="${MACPORTS_INSTALL:-false}"
 # The other choice is zsh but this is not working yet
 DESIRED_SHELL="${DESIRED_SHELL:-bash}"
 OPTIND=1
-while getopts "hdvw:fu:b:mpa:" opt
-do
-    case "$opt" in
-        h)
+while getopts "hdvw:fu:b:mpa:" opt; do
+	case "$opt" in
+	h)
 
-            # use old style echo because this might run in MacOS Bash 3.x
-            cat <<-EOF
-Install mac specific components
-usage: $SCRIPTNAME [flags]
-flags: -d debug, -v verbose, -h help
-       -w WS directory
-       -f force Mac system software update takes a long time "(default: $FORCE)"
-       -a Use VMware Fusion (default: $VMWARE)
-       -u Ubuntu version for Fusion "(default: $UBUNTU)"
-       -b Debian version for Fusion "(default: $DEBIAN)"
-       -m MacOS Software Update beware takes a long time "(default: $SOFTWAREUPDATE)"
-       -p Install Macports as well as Homebrew "(default: $MACPORTS_INSTALL)"
-       -s Install a new default shell either bash or zsh "(default: $DESIRED_SHELL)"
-EOF
+		# use old style echo because this might run in MacOS Bash 3.x
+		cat <<-EOF
+			Install mac specific components
+			usage: $SCRIPTNAME [flags]
+			flags: -d debug, -v verbose, -h help
+			       -w WS directory
+			       -f force Mac system software update takes a long time "(default: $FORCE)"
+			       -a Use VMware Fusion (default: $VMWARE)
+			       -u Ubuntu version for Fusion "(default: $UBUNTU)"
+			       -b Debian version for Fusion "(default: $DEBIAN)"
+			       -m MacOS Software Update beware takes a long time "(default: $SOFTWAREUPDATE)"
+			       -p Install Macports as well as Homebrew "(default: $MACPORTS_INSTALL)"
+			       -s Install a new default shell either bash or zsh "(default: $DESIRED_SHELL)"
+		EOF
 
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            ;;
-        w)
-            WS_DIR="$OPTARG"
-            ;;
-        f)
-            FORCE=true
-            ;;
-        u)
-            UBUNTU="$OPTARG"
-            ;;
-        b)
-            DEBIAN="$OPTARG"
-            ;;
-        m)
-            SOFTWAREUPDATE=true
-            ;;
-        p)
-            MACPORTS_INSTALL="$OPTARG"
-            ;;
-        a)
-            VMWARE=true
-            ;;
-        *)
-            echo "-$opt flag invalid" >&2
-            ;;
-    esac
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	w)
+		WS_DIR="$OPTARG"
+		;;
+	f)
+		FORCE=true
+		;;
+	u)
+		UBUNTU="$OPTARG"
+		;;
+	b)
+		DEBIAN="$OPTARG"
+		;;
+	m)
+		SOFTWAREUPDATE=true
+		;;
+	p)
+		MACPORTS_INSTALL="$OPTARG"
+		;;
+	a)
+		VMWARE=true
+		;;
+	*)
+		echo "-$opt flag invalid" >&2
+		;;
+	esac
 done
 
 # shellcheck source=./include.sh
@@ -82,9 +81,8 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 # must be after the include since WS_DIR defined there
 DOWNLOADS=${DOWNLOADS:-"$WS_DIR/cache"}
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
-if [[ ! $OSTYPE =~ darwin ]]
-then
-    log_exit Must be on OS X does nothing otherwise
+if [[ ! $OSTYPE =~ darwin ]]; then
+	log_exit Must be on OS X does nothing otherwise
 fi
 
 # https://github.com/mathiasbynens/dotfiles/blob/master/.macos
@@ -102,9 +100,8 @@ defaults write com.apple.finder ShowPathbar -bool true
 # https://derflounder.wordpress.com/2018/06/10/updated-xcode-command-line-tools-installer-script-now-available/
 # Now check first
 # https://apple.stackexchange.com/questions/337744/installing-xcode-command-line-tools
-if [[ $(xcode-select -p) == "" ]]
-then
-    xcode-select --install
+if [[ $(xcode-select -p) == "" ]]; then
+	xcode-select --install
 fi
 
 # Mac OS X uses Bash 3.2, we need 4.x
@@ -147,10 +144,9 @@ log_verbose mas search app_name will return the application identifier
 log_verbose mas install app_number will install a specific app
 
 # do not run softwareupdate takes too long to list
-if $SOFTWAREUPDATE && ! softwareupdate -l | grep "No new software available"
-then
-    log_verbose update your Mac with all system changes
-    sudo softwareupdate -ia
+if $SOFTWAREUPDATE && ! softwareupdate -l | grep "No new software available"; then
+	log_verbose update your Mac with all system changes
+	sudo softwareupdate -ia
 fi
 
 "$SCRIPT_DIR/install-python.sh"
@@ -162,18 +158,16 @@ PACKAGES+=" jq "
 # rsync-and-hash keeps crashing with old v2.6
 PACKAGES+=" rsync "
 
-if $MACPORTS_INSTALL && ! command -v port > /dev/null
-then
-    log_verbose also install mac ports for compatibility
-    "$SCRIPT_DIR/install-macports.sh"
-    log_verbose Pick up the new port instructions
-    source_profile
+if $MACPORTS_INSTALL && ! command -v port >/dev/null; then
+	log_verbose also install mac ports for compatibility
+	"$SCRIPT_DIR/install-macports.sh"
+	log_verbose Pick up the new port instructions
+	source_profile
 
-    log_verbose "Prefer brew so first uninstall all Macports of $PACKAGES"
-    if ! sudo port uninstalled "$PACKAGES"
-    then
-        log_verbose "no Macports $PACKAGES found"
-    fi
+	log_verbose "Prefer brew so first uninstall all Macports of $PACKAGES"
+	if ! sudo port uninstalled "$PACKAGES"; then
+		log_verbose "no Macports $PACKAGES found"
+	fi
 
 fi
 
@@ -198,11 +192,10 @@ source_profile
 hash -r
 
 log_verbose checking to see if should update .bash_profile
-if ! config_mark
-then
-    # put a guard in so we don't keep adding path variables
-    # shellcheck disable=SC2016
-    config_add <<<'[[ $PATH =~ /usr/local/bin ]] || export PATH="/usr/local/bin:$PATH"'
+if ! config_mark; then
+	# put a guard in so we don't keep adding path variables
+	# shellcheck disable=SC2016
+	config_add <<<'[[ $PATH =~ /usr/local/bin ]] || export PATH="/usr/local/bin:$PATH"'
 fi
 
 log_verbose make sure we have the lastest paths loaded
@@ -224,7 +217,6 @@ source_profile
 #brew_install --with-override-system-vim --with-lua --with-python3 vim
 brew_install vim
 
-
 log_verbose hash -r to use the new packages
 hash -r
 
@@ -236,16 +228,17 @@ hash -r
 log_verbose install complete Mac apps via brew
 #
 # VLC - video viewer
-# iTermv2 - Terminal that's tide to tmux and has 24-bit color
+# google-backup-and-sync - super set of gdrive and also does photo uploads used
+# for veracrypt
 #
-CASKS+=" vlc
-"
+CASKS+=(vlc
+	google-backup-and-sync
+)
 
-log_verbose "cask install $CASKS"
+log_verbose "cask install ${CASKS[*]}"
 
-if ! cask_install "${CASKS[@]}"
-then
-    log_warning "some installs of $CASKS failed"
+if ! cask_install "${CASKS[@]}"; then
+	log_warning "some installs of ${CASKS[*]}failed"
 fi
 
 # install flutter and dart and android studio and google cloud
@@ -261,7 +254,6 @@ fi
 log_verbose installing xquartz for remoting linux graphical sessions with ssh -Y
 "$SCRIPT_DIR/install-xquartz.sh"
 
-
 # causes loop don't need
 # log_verbose get rid of need to cite for gnu parallel
 # parallel --bibtex
@@ -271,95 +263,81 @@ log_verbose installing xquartz for remoting linux graphical sessions with ssh -Y
 # because this replaces the Mac version of ssh-add which uses the
 # Mac keychain, so instead use alternative install
 # https://github.com/beautifulcode/ssh-copy-id-for-OSX
-if ! command -v ssh-copy-id
-then
-    log_verbose installing ssh-copy-id
-    if ! package_install ssh-copy-id
-    then
-        curl -L https://raw.githubusercontent.com/beautifulcode/ssh-copy-id-for-OSX/master/install.sh | sh
-    fi
+if ! command -v ssh-copy-id; then
+	log_verbose installing ssh-copy-id
+	if ! package_install ssh-copy-id; then
+		curl -L https://raw.githubusercontent.com/beautifulcode/ssh-copy-id-for-OSX/master/install.sh | sh
+	fi
 fi
 
-if command -v port >/dev/null 2>&1
-then
-    log_verbose Fix up for python to make the defaults work
-    if port installed python27 | grep -q "python27.*active"
-    then
-        log_verbose "set python and then hash -r to rebuild command cache"
-        sudo port select --set python python27
-        sudo port select --set python2 python27
-        hash -r
-    fi
-    if port installed pip27 | grep -q "pip27.*active"
-    then
-        sudo port select --set pip pip27
-        hash -r
-    fi
+if command -v port >/dev/null 2>&1; then
+	log_verbose Fix up for python to make the defaults work
+	if port installed python27 | grep -q "python27.*active"; then
+		log_verbose "set python and then hash -r to rebuild command cache"
+		sudo port select --set python python27
+		sudo port select --set python2 python27
+		hash -r
+	fi
+	if port installed pip27 | grep -q "pip27.*active"; then
+		sudo port select --set pip pip27
+		hash -r
+	fi
 fi
 
 log_verbose Install Homebrew Bash over the obsolete default bash v3 in OSX
-if brew list bash >/dev/null && [[ ! $(command -v bash) =~ ^/usr/local/bin ]]
-then
-    log_verbose found Homebrew bash so link it to /usr/local
-    brew link --overwrite bash
+if brew list bash >/dev/null && [[ ! $(command -v bash) =~ ^/usr/local/bin ]]; then
+	log_verbose found Homebrew bash so link it to /usr/local
+	brew link --overwrite bash
 fi
 # http://stackoverflow.com/questions/791227/unable-to-update-my-bash-in-mac-by-macports
 # https://johndjameson.com/blog/updating-your-shell-with-homebrew/
 # This works for both macports bash and homebrew bash, they install into the same place
 # The BASH_PATH check no longer works, so always chsh
 DESIRED_SHELL_PATH="$(command -v "$DESIRED_SHELL")"
-if [[ -e $DESIRED_SHELL_PATH ]]
-then
-    if ! grep "$DESIRED_SHELL_PATH" /etc/shells
-    then
-        sudo tee -a /etc/shells <<<"$DESIRED_SHELL_PATH" >/dev/null
-    fi
-    log_warning "checking $SHELL is same a $DESIRED_SHELL_PATH chsh if not"
-    if [[ $SHELL != "$DESIRED_SHELL_PATH" ]]
-    then
-        log_warning you only get one login opportunity to change the shell so type carefully.
-        log_warning "if you make a mistake just rerun $SCRIPTNAME"
-        chsh -s "$DESIRED_SHELL_PATH"
-    fi
+if [[ -e $DESIRED_SHELL_PATH ]]; then
+	if ! grep "$DESIRED_SHELL_PATH" /etc/shells; then
+		sudo tee -a /etc/shells <<<"$DESIRED_SHELL_PATH" >/dev/null
+	fi
+	log_warning "checking $SHELL is same a $DESIRED_SHELL_PATH chsh if not"
+	if [[ $SHELL != "$DESIRED_SHELL_PATH" ]]; then
+		log_warning you only get one login opportunity to change the shell so type carefully.
+		log_warning "if you make a mistake just rerun $SCRIPTNAME"
+		chsh -s "$DESIRED_SHELL_PATH"
+	fi
 fi
 
 # log_verbose install oh-my-zsh
 # "$SOURCE_DIR/install-zsh.sh"
 
 log_verbose Enable ssh so you can get into this machine
-if ! sudo launchctl list | grep -q sshd
-then
-    sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
-    log_warning "sshd enabled, turn off in System Preferences/Sharing/Remote Login if you don't need it"
+if ! sudo launchctl list | grep -q sshd; then
+	sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
+	log_warning "sshd enabled, turn off in System Preferences/Sharing/Remote Login if you don't need it"
 fi
 
-if $VMWARE
-then
-  mkdir -p "$DOWNLOADS"
-  pushd "$DOWNLOADS" >/dev/null || return
-  log_verbose Install VMware Fusion
-  if [[ ! -e "/Applications/VMware Fusion.app" ]]
-  then
-      log_verbose first try brew
-      if ! cask_install vmware-fusion
-      then
-          log_verbose brew failed, trying dmg download
-          download_url_open https://www.vmware.com/go/try-fusion-en "VMware Fusion.dmg"
-          # no longer need to copy, it has it's own installed
-          # cp -r "/Volumes/VMware Fusion/VMware Fusion.app" /Applications
-          # Need to use find because we could end up with multiple /Volumes with " 2"
-          # appended so a simple open does not work
-          find_in_volume_open_then_detach "VMware Fusion.app" "VMware Fusion"
-      fi
-  fi
-  log_verbose get Ubuntu
-  download_url "http://releases.ubuntu.com/$UBUNTU/ubuntu-$UBUNTU-desktop-amd64.iso"
-  log_verbose get Debian
-  download_url "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-$DEBIAN-amd64-netinst.iso"
-  log_message "ISOs available to Fusion in $DOWNLOADS"
-  popd >/dev/null || return
+if $VMWARE; then
+	mkdir -p "$DOWNLOADS"
+	pushd "$DOWNLOADS" >/dev/null || return
+	log_verbose Install VMware Fusion
+	if [[ ! -e "/Applications/VMware Fusion.app" ]]; then
+		log_verbose first try brew
+		if ! cask_install vmware-fusion; then
+			log_verbose brew failed, trying dmg download
+			download_url_open https://www.vmware.com/go/try-fusion-en "VMware Fusion.dmg"
+			# no longer need to copy, it has it's own installed
+			# cp -r "/Volumes/VMware Fusion/VMware Fusion.app" /Applications
+			# Need to use find because we could end up with multiple /Volumes with " 2"
+			# appended so a simple open does not work
+			find_in_volume_open_then_detach "VMware Fusion.app" "VMware Fusion"
+		fi
+	fi
+	log_verbose get Ubuntu
+	download_url "http://releases.ubuntu.com/$UBUNTU/ubuntu-$UBUNTU-desktop-amd64.iso"
+	log_verbose get Debian
+	download_url "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-$DEBIAN-amd64-netinst.iso"
+	log_message "ISOs available to Fusion in $DOWNLOADS"
+	popd >/dev/null || return
 fi
-
 
 # Install kubernetes not used it is now in docker desktop
 # "$SCRIPT_DIR/install-kubernetes.sh"
