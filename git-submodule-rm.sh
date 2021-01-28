@@ -49,7 +49,8 @@ while getopts "hdvm:fr:" opt; do
 			    flags: -d debug, -v verbose, -h help
 			           -m location of the submodules the default is SOURCEDIR/extern
 			           -f the default is dry run this is so destructive force to do the work
-			           -r root of the repo the default is SOURCE_DIR
+			           -r root of the repo the default is SOURCE_DIR note if
+						  you are using a different source then set like ~/wsn/git/src
 		EOF
 		exit 0
 		;;
@@ -125,12 +126,14 @@ module_path="$(realpath --relative-to="$ROOT" "$MAIN")"
 log_verbose ".git modules relative path is module_path=$module_path"
 
 for repo_path in $REPOS; do
+	log_verbose "In directory $PWD"
 	repo="$(realpath --relative-to="$MAIN" "$repo_path")"
 	log_verbose cleaning "$repo relative to $MAIN"
-	if ! $FORCE; then
-		log_warning dryrun: git submodule deinit -f "$repo"
-	elif ! git submodule deinit -f "$repo"; then
-		log_warning could not git submodule deinit -f "$repo"
+	log_warning "about to run git submodule deinit -f $repo"
+	if $FORCE; then
+		if ! git submodule deinit -f "$repo"; then
+			log_error 1 "could not git submodule deinit -f $repo"
+		fi
 	fi
 
 	if [[ ! -e $repo ]]; then
