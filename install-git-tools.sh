@@ -73,6 +73,16 @@ if [[ -z $(git config --global user.email) ]]; then
 	git config --global user.email "${GIT_EMAIL,,}"
 fi
 
+if [[ -z $(git config --global checkout.defaultRemote) ]]; then
+	log_verbose "no checkout.defaultRemote changing to origin"
+	git config --global checkout.defaultRemote origin
+fi
+
+if [[ -z $(git config --global pull.ff) ]]; then
+	log_verbose "no pull.ff set turn fast forward only"
+	git config --global pull.ff only
+fi
+
 # Git is changing its default and this gets rid of warning messages
 # There is no simple in git 1.7
 if vergte "$(git version | cut -f3 -d' ')" 1.8; then
