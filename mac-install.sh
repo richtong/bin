@@ -243,6 +243,7 @@ fi
 
 # install flutter and dart and android studio and google cloud
 "$SCRIPT_DIR/install-flutter.sh"
+exit
 "$SCRIPT_DIR/install-gcloud.sh"
 "$SCRIPT_DIR/install-terraform.sh"
 

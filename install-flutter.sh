@@ -73,6 +73,9 @@ log_verbose brew tap socheatsok78/flutter using had an error
 # tap_install socheatsok78/flutter
 log_verbose brew tap probablykasper/tap
 tap_install probablykasper/tap
+log_verbose "installation uninstall required"
+cask_uninstall flutter
+log_verbose "install flutter"
 cask_install flutter
 
 log_verbose Defeating MacOS quarantine
@@ -128,7 +131,7 @@ sudo xcodebuild -license accept
 #           intel-haxm \
 #           adoptopenjdk8 \
 #
-
+exit
 flutter doctor --android-licenses
 
 # https://flutter.dev/docs/get-started/web

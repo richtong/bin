@@ -53,5 +53,5 @@ if $VERBOSE; then
 fi
 
 log_verbose "to login run netlify login"
-log_verbose "to connect a repo to netlify run netlifyj init in the directory"
+log_verbose "to connect a repo to netlify run netlify init in the directory"
 log_verbose "store $HOME/.netlify/config.json in secure storage"
