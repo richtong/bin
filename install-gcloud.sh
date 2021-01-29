@@ -54,6 +54,19 @@ fi
 log_verbose install google cloud sdk
 cask_install google-cloud-sdk
 
+log_verbose "checking for gcloud in $(config_profile)"
+if ! config_mark
+then
+    log_verbose "installing into $(config_profile)"
+    config_add <<-EOF
+    source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"
+    source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc"
+EOF
+    log_verbose "now source the changes to $(config_profile)"
+    source_profile
+    hash -r
+fi
+
 log_verbose install additional packages "$PACKAGES" "$@"
 
 
