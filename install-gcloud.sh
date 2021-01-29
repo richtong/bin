@@ -72,19 +72,7 @@ log_verbose install additional packages "$PACKAGES" "$@"
 
 # all packages cannot contain spaces
 # shellcheck disable=SC2086
-gcloud components install $PACKAGES "$@"
-
-PROFILE="${PROFILE:-"$HOME/.bashrc"}"
-log_verbose "installing google-cloud-sdk completions into $PROFILE"
-if ! config_mark "$PROFILE"
-then
-    config_add "$PROFILE" <<-"EOF"
-if [[ -e /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc ]]
-then
-  source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"
-fi
-EOF
-fi
+gcloud components install --quiet $PACKAGES "$@"
 
 # https://stackoverflow.com/questions/42379685/can-i-automate-google-cloud-sdk-gcloud-init-interactive-command
 if [[ $(gcloud config configurations list | wc -l ) -lt 2 ]]
