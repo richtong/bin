@@ -76,7 +76,9 @@ tap_install probablykasper/tap
 log_verbose "installation uninstall required"
 cask_uninstall flutter
 log_verbose "install flutter"
-cask_install flutter
+if ! cask_install flutter; then
+	log_error cask_install flutter failed
+fi
 
 log_verbose Defeating MacOS quarantine
 for file in idevice_id ideviceinfo idevicesyslog; do
