@@ -81,9 +81,11 @@ if ! cask_install flutter; then
 fi
 
 log_verbose Defeating MacOS quarantine
+idevice_path="$FDIR/flutter/bin/cache/artifacts/libimobiledevice"
 for file in idevice_id ideviceinfo idevicesyslog; do
-	log_verbose remove quarantine for $file
-	if ! sudo xattr -d com.apple.quarantine "$FDIR/flutter/bin/cache/artifacts/libimobiledevice/$file"; then
+	file_path="$idevice_path/$file"
+	log_verbose "looking for $file_path"
+	if [[ -e $file_path ]] && ! sudo xattr -d com.apple.quarantine "$file_path"; then
 		log_verbose no quarantine set on $file
 	fi
 done
@@ -108,8 +110,8 @@ cask_install \
 	java
 
 # this generates an error on Big Sur
-#log_verbose flutter precache
-#flutter precache
+log_verbose flutter precache
+flutter precache
 
 # https://flutter.dev/docs/get-started/install/macos
 log_verbose install Xcode
