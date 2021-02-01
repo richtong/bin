@@ -54,4 +54,5 @@ fi
 
 log_verbose "to login run netlify login"
 log_verbose "to connect a repo to netlify run netlify init in the directory"
+log_verbose "if you have already connected it then run netlify link"
 log_verbose "store $HOME/.netlify/config.json in secure storage"
