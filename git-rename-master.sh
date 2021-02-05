@@ -76,6 +76,10 @@ fi
 
 log_verbose "getting with git fetch $REMOTE $OLD_BRANCH"
 $DRY_RUN_PREFIX git fetch "$REMOTE" "$OLD_BRANCH"
+log_verbse "fast forwarding git pull --ff-only $OLD_BRANCH"
+$DRY_RUN_PREFIX git merge --ff-only "$OLD_BRANCH"
+log_verbose "send updates to $REMOTE"
+$DRY_RUN_PREFIX git push "$REMOTE" "$OLD_BRANCH"
 log_verbose "creating new with git push -u $REMOTE $OLD_BRANCH:$NEW_BRANCH"
 $DRY_RUN_PREFIX git push --set-upstream "$REMOTE" "$OLD_BRANCH:$NEW_BRANCH"
 
