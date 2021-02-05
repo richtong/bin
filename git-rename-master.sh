@@ -76,7 +76,7 @@ fi
 
 log_verbose "getting with git fetch $REMOTE $OLD_BRANCH"
 $DRY_RUN_PREFIX git fetch "$REMOTE" "$OLD_BRANCH"
-log_verbse "fast forwarding git pull --ff-only $OLD_BRANCH"
+log_verbose "fast forwarding git pull --ff-only $OLD_BRANCH"
 $DRY_RUN_PREFIX git merge --ff-only "$OLD_BRANCH"
 log_verbose "send updates to $REMOTE"
 $DRY_RUN_PREFIX git push "$REMOTE" "$OLD_BRANCH"
@@ -92,7 +92,8 @@ for pr_count in $(gh pr list -B "$OLD_BRANCH" -L 999 | cut -f 1); do
 	$DRY_RUN_PREFIX gh api -XPATCH "repos/:owner/:repo/pulls/$pr_count" -f base="NEW_BRANCH"
 done
 
+log_verbose "switch to $NEW_BRANCH"
+$DRY_RUN_PREFIX git checkout "$NEW_BRANCH"
 log_verbose "deleting $OLD_BRANCH with git push --delete $REMOTE $OLD_BRANCH"
 $DRY_RUN_PREFIX git push --delete "$REMOTE" "$OLD_BRANCH"
-$DRY_RUN_PREFIX git checkout "$NEW_BRANCH"
 $DRY_RUN_PREFIX git branch -d "$OLD_BRANCH"
