@@ -76,7 +76,7 @@ fi
 
 log_verbose "getting with git fetch $REMOTE $OLD_BRANCH"
 $DRY_RUN_PREFIX git fetch "$REMOTE" "$OLD_BRANCH"
-log_verbose "creating new with git push-u $REMOTE $OLD_BRANCH:$NEW_BRANCH"
+log_verbose "creating new with git push -u $REMOTE $OLD_BRANCH:$NEW_BRANCH"
 $DRY_RUN_PREFIX git push --set-upstream "$REMOTE" "$OLD_BRANCH:$NEW_BRANCH"
 
 log_verbose "changing default with gh api -XPATCH repos/:owner/:repo -f default_branch=$NEW_BRANCH"
