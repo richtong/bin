@@ -51,7 +51,7 @@ log_verbose "powerline completion script at $location"
 
 powerline="$location/bindings/bash/powerline.sh"
 if [[ ! -e $powerline ]]; then
-	log_error 2 "cannot fine powerline at $powerline"
+	log_error 2 "cannot find powerline at $powerline"
 fi
 
 if ! config_mark "$(config_profile_shell)"; then
@@ -75,10 +75,10 @@ fi
 log_verbose "installing powerline fonts add to config.json"
 cask_install font-fira-mono-for-powerline
 
-VIM_PROFILE="${VIM_PROFILE:"$HOME/.vimrc"}"
-if ! config_mark "$VIM_PROFILE"; then
+VIM_PROFILE="${VIM_PROFILE:-"$HOME/.vimrc"}"
+if ! config_mark "$VIM_PROFILE" "'"; then
 	log_verbose "adding to $VIM_PROFILE"
-	config_add "$VIM_PROFILE" "'" <<-EOF
+	config_add "$VIM_PROFILE" <<-EOF
 		set rtp+="$location/bindings/vim"
 		set laststatus=2
 	EOF
