@@ -18,14 +18,16 @@ GITHUB_URL="${GITHUB_URL:-"git@github.com:"}"
 UPSTREAM_ORG="${UPSTREAM_ORG:-richtong}"
 REPOS="${REPOS:-"bin lib docker user/rich"}"
 DEST_REPO_PATH="${DEST_REPO_PATH:-"$PWD"}"
+DRY_RUN_FLAG="${DRY_RUN_FLAG:-"false"}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvug:u:r:p:" opt; do
+while getopts "hdvug:u:r:p:n" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Creates a new organization while adding submodules to shared repos
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
+					   -n dry ruN of commands (default: $DRY_RUN_FLAG)
 			           -u Upstream Org to clone from (default: $UPSTREAM_ORG)
 			           -g Git repo Url (default: $GITHUB_URL)
 			           -r list of repos to use (default:$REPOS)
@@ -41,6 +43,9 @@ while getopts "hdvug:u:r:p:" opt; do
 		export VERBOSE=true
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
+		;;
+	n)
+		DRY_RUN_FLAG=true
 		;;
 	u)
 		UPSTREAM_ORG="$OPTARG"
@@ -74,20 +79,26 @@ if ! git_repo; then
 	log_error 2 "$DEST_REPO_PATH is not a git repo"
 fi
 
+DRY_RUN=""
+if $DRY_RUN_FLAG; then
+	DRY_RUN="echo"
+fi
+
 for repo in $REPOS; do
 	log_verbose "forking $UPSTREAM_ORG/$repo"
-	if ! gh fork "$GITHUB_URL:$UPSTREAM_ORG/$repo" --clone=false; then
+	if ! $DRY_RUN gh fork "$GITHUB_URL:$UPSTREAM_ORG/$repo" --clone=false; then
 		log_warning "could not fork $repo it may already exist"
 	fi
-	if ! git submodule add "$GITHUB_URL:$(git_organization)/$repo" "$repo"; then
+	if ! $DRY_RUN git submodule add "$GITHUB_URL:$(git_organization)/$repo" "$repo"; then
 		log_warning "could not add the submodule it may already exist"
 	fi
-	if ! push "$repo" >/dev/null; then
+	if ! $DRY_RUN push "$repo" >/dev/null; then
 		log_error 3 "$repo could not be created"
 	fi
-	if ! git remote add upstream "$GITHUB_URL:$UPSTREAM_ORG/$repo"; then
+	if ! $DRY_RUN git remote add upstream "$GITHUB_URL:$UPSTREAM_ORG/$repo"; then
 		log_warning "could not create upstream may already exist"
 	fi
-	git fetch upstream
-	git fetch
+	if ! $DRY_RUN git fetch upstream; then
+		log_warning "could not fetch upstream"
+	fi
 done

@@ -6,6 +6,9 @@
 ##
 ##
 ## Updates the helper repos and prepares them for a commit
+## So for each of the submodules that are helpers
+## Pull in the upstream changes and the changes on the dev branch
+## and put all of these into the origin/main. And then update upstream/main
 ##
 ##@author Rich Tong
 ##@returns 0 on success

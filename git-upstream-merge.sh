@@ -15,8 +15,8 @@ trap 'exit $?' ERR
 OPTIND=1
 UPSTREAM_DEFAULT="${UPSTREAM_DEFAULT:-master}"
 UPSTREAM="${UPSTREAM:-upstream}"
-DRY_RUN="${DRY_RUN:-false}"
-DRY_RUN_PREFIX="${DRY_RUN_PREFIX:-"echo "}"
+DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
+DRY_RUN="${DRY_RUN:-"echo "}"
 MERGE_FLAGS="${MERGE_FLAGS:-"--ff-only"}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvnm:u:g:" opt; do
@@ -28,7 +28,7 @@ while getopts "hdvnm:u:g:" opt; do
 			    flags: -d debug, -v verbose, -h help"
 			           -u Name of the upstream remote set with git remote add (default: $UPSTREAM)
 			           -m The default main/master branch of upstream  (default: $UPSTREAM_DEFAULT)
-			           -n dry run of the commands (default: $DRY_RUN)
+			           -n dry run of the commands (default: $DRY_RUN_FLAG)
 			           -g Git hub flags on merge (default: $MERGE_FLAGS)
 		EOF
 		exit 0
@@ -51,7 +51,7 @@ while getopts "hdvnm:u:g:" opt; do
 		MERGE_FLAGS="$OPTARG"
 		;;
 	n)
-		DRY_RUN=false
+		DRY_RUN_FLAG=false
 		;;
 	*)
 		echo "not flag -$opt"
@@ -64,15 +64,15 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-git.sh
 
-if $DRY_RUN; then
-	DRY_RUN_PREFIX=""
+if $DRY_RUN_FLAG; then
+	DRY_RUN=""
 fi
 
 log_verbose "get latest with git fetch $UPSTREAM"
-$DRY_RUN_PREFIX git fetch "$UPSTREAM"
+$DRY_RUN git fetch "$UPSTREAM"
 
 log_verbose "do a git merge $MERGE_FLAGS $UPSTREAM/$UPSTREAM_DEFAULT"
 
 # disable shellcheck in case there are no flags
 # shellcheck disable=SC2086
-$DRY_RUN_PREFIX git merge $MERGE_FLAGS "$UPSTREAM/$UPSTREAM_DEFAULT"
+$DRY_RUN git merge $MERGE_FLAGS "$UPSTREAM/$UPSTREAM_DEFAULT"
