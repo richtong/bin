@@ -24,7 +24,7 @@ OPTIND=1
 GITHUB_URL="${GITHUB_URL:-"git@github.com:"}"
 UPSTREAM_REMOTE="${UPSTREAM_REMOTE:-upstream}"
 UPSTREAM_DEFAULT="${UPSTREAM_DEFAULT:-main}"
-ORIGIN_REMOTE="${UPSTREAM_REMOTE:-origin}"
+ORIGIN_REMOTE="${ORIGIN_REMOTE:-origin}"
 ORIGIN_DEFAULT="${ORIGIN_DEFAULT:-main}"
 REPOS="${REPOS:-"bin lib docker user/rich"}"
 DEST_REPO_PATH="${DEST_REPO_PATH:-"$PWD"}"
@@ -119,6 +119,9 @@ if ! git_repo; then
 	log_error 2 "$DEST_REPO_PATH is not a git repo"
 fi
 
+log_verbose "upstream remote=$UPSTREAM_REMOTE default=$UPSTREAM_DEFAULT"
+log_verbose "origin remote=$ORIGIN_REMOTE default=$ORIGIN_DEFAULT"
+
 # note this assumes repos names do not have special characters
 # https://www.c-sharpcorner.com/article/how-to-merge-upstream-repository-changes-with-your-fork-repository-using-git/
 for repo in $REPOS; do
@@ -140,9 +143,10 @@ for repo in $REPOS; do
 		"git push"
 		"git checkout $ORIGIN_DEFAULT"
 		"git pull --rebase"
-		"git push"
-		"git checkout $dev_branch"
 		"git rebase $UPSTREAM_REMOTE/$UPSTREAM_DEFAULT"
+		"git push $FORCE"
+		"git checkout $dev_branch"
+		"git rebase $ORIGIN_DEFAULT"
 		"git push $FORCE"
 		"git push $ORIGIN_REMOTE $dev_branch:$ORIGIN_DEFAULT"
 		"git push $UPSTREAM_REMOTE $dev_branch:$UPSTREAM_DEFAULT"
