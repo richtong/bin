@@ -67,7 +67,7 @@ while getopts "hdvug:u:r:p:w:m:l:fn" opt; do
 		export FORCE_FLAG=" -f "
 		;;
 	n)
-		DRY_RUN_FLAG="$OPT_ARG"
+		DRY_RUN_FLAG=true
 		;;
 	u)
 		UPSTREAM_REMOTE="$OPTARG"
@@ -103,6 +103,7 @@ source_lib lib-git.sh lib-util.sh
 if $DRY_RUN_FLAG; then
 	DRY_RUN="echo"
 fi
+log_verbose "DRY_RUN is $DRY_RUN"
 
 if ! pushd "$DEST_REPO_PATH" >/dev/null; then
 	log_error 1 "no $DEST_REPO_PATH"
@@ -118,38 +119,20 @@ for repo in $REPOS; do
 	dev_branch="$(git branch --show-current)"
 	log_verbose "In $repo assuming current branch $dev_branch is development branch"
 
-	log_verbose "fetching $UPSTREAM_ORG"
-	if ! $DRY_RUN git fetch --all; then
-		log_error 1 "could git fetch --all"
-	fi
-	if ! $DRY_RUN git checkout "$ORIGIN_DEFAULT"; then
-		log_error 4 "could not checkout $ORIGIN_DEFAULT"
-	fi
-	if ! $DRY_RUN git pull --rebase; then
-		log_error 5 "could not pull from $ORIGIN_REMOTE/$ORIGIN_DEFAULT"
-	fi
-	if ! $DRY_RUN git push $FORCE; then
-		log_error 6 "could not push local changes on $ORIGIN_DEFAULT to $ORIGIN_REMOTE"
-	fi
-	if ! $DRY_RUN git merge --ff-only "$UPSTREAM_REMOTE/$UPSTREAM_DEFAULT"; then
-		log_error 2 "could not fast forward $ORIGIN_DEFAULT to $UPSTREAM_REMOTE/$UPSTREAM_DEFAULT"
-	fi
-	if ! $DRY_RUN git push $FORCE_FLAG; then
-		log_error 3 "could not push $FORCE_FLAG to $ORIGIN_REMOTE/$ORIGIN_DEFAULT"
-	fi
-	if ! $DRY_RUN git checkout "$dev_branch"; then
-		log_error 6 "could not checkout $dev_branch"
-	fi
-	if ! $DRY_RUN git rebase "$ORIGIN_DEFAULT"; then
-		log_error 7 "rebasing $dev_branch against $ORIGIN_DEFAULT"
-	fi
-	if ! $DRY_RUN git push $FORCE_FLAG; then
-		log_error 8 "could not push to $dev_branch"
-	fi
-	if ! $DRY_RUN git push "$ORIGIN_REPO" "$dev_branch:$ORIGIN_DEFAULT"; then
-		log_error 9 "pushing $ORIGIN_REPO $dev_branch to $DEFAULT_BRANCH"
-	fi
-	if ! $DRY_RUN git push "$UPSTREAM_REPO" "$dev_branch:$UPSTREAM_DEFAULT"; then
-		log_error 10 "pushing change to upstream"
-	fi
+	cmds=("git fetch --all -p"
+		"git pull --rebase"
+		"git push"
+		"git checkout $ORIGIN_DEFAULT"
+		"git pull --rebase"
+		"git push"
+		"git rebase $UPSTREAM_REMOTE/$UPSTREAM_DEFAULT"
+		"git push $FORCE"
+		"git push $ORIGIN_REMOTE $dev_branch:$ORIGIN_DEFAULT"
+		"git push $UPSTREAM_REMOTE $dev_branch:$UPSTREAM_DEFAULT")
+	for cmd in "${cmds[@]}"; do
+		log_verbose "running $cmd"
+		if ! $DRY_RUN $cmd; then
+			log_error 1 "Failed with $?: $cmd"
+		fi
+	done
 done
