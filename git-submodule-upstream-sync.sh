@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2086
 # https://github.com/koalaman/shellcheck/issues/779
 # Note this needs to be right after shebang to disable
 # the check we need to do this for DRY_RUN since we don't want to glob
@@ -107,6 +106,8 @@ log_verbose "DRY_RUN is $DRY_RUN"
 
 FORCE=""
 if $FORCE_FLAG; then
+	# shellcheck disable=SC2034
+	# only appear unused but is used in the eval
 	FORCE="-f"
 fi
 
@@ -136,24 +137,28 @@ for repo in $REPOS; do
 	dev_branch="$(git branch --show-current)"
 	log_verbose "Repo=$repo current_branch=$dev_branch"
 
-	# we do not handle quoting correctly here so no special characters
+	# do not need expansion, the eval takes care of this
+	# shellcheck disable=SC2016
 	cmds=(
-		"git fetch --all -p"
-		"git pull --rebase"
-		"git push"
-		"git checkout $ORIGIN_DEFAULT"
-		"git pull --rebase"
-		"git rebase $UPSTREAM_REMOTE/$UPSTREAM_DEFAULT"
-		"git push $FORCE"
-		"git checkout $dev_branch"
-		"git rebase $ORIGIN_DEFAULT"
-		"git push $FORCE"
-		"git push $ORIGIN_REMOTE $dev_branch:$ORIGIN_DEFAULT"
-		"git push $UPSTREAM_REMOTE $dev_branch:$UPSTREAM_DEFAULT"
+		'git fetch --all -p'
+		'git pull --rebase'
+		'git push'
+		'git checkout "$ORIGIN_DEFAULT"'
+		'git pull --rebase'
+		'git rebase "$UPSTREAM_REMOTE/$UPSTREAM_DEFAULT"'
+		'git push $FORCE'
+		'git checkout "$dev_branch"'
+		'git rebase "$ORIGIN_DEFAULT"'
+		'git push $FORCE'
+		'git push "$ORIGIN_REMOTE" "$dev_branch:$ORIGIN_DEFAULT"'
+		'git push "$UPSTREAM_REMOTE" "$dev_branch:$UPSTREAM_DEFAULT"'
 	)
 	for cmd in "${cmds[@]}"; do
-		log_verbose "run $cmd"
-		if ! $DRY_RUN $cmd; then
+		# need to do the eval so to force variable parsing
+		# shellcheck disable=SC2086
+		log_verbose "run $(eval echo $cmd)"
+		# shellcheck disable=SC2086
+		if ! eval $DRY_RUN $cmd; then
 			log_error 2 "Failed with $?: $cmd"
 		fi
 	done

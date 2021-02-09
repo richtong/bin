@@ -122,6 +122,12 @@ PACKAGES+=(
 cask_install "${PACKAGES[@]}"
 
 gh config set git_protocol ssh
+# https://dev.to/softprops/digitally-unmastered-the-github-cli-edition-1cc4
+# make it easy to set default-branch disable check as gh will interpret later
+# shellcheck disable=SC2016
+# this does not appear to work anymore
+gh alias set default-branch \
+	'api -X PATCH repos:/:owner/:repo --raw-field default_branch=$1'
 
 # gh completion has a bug cannot source direction so create a file
 log_verbose adding github gh completion
