@@ -28,7 +28,7 @@ ORIGIN_REMOTE="${UPSTREAM_REMOTE:-origin}"
 ORIGIN_DEFAULT="${ORIGIN_DEFAULT:-main}"
 REPOS="${REPOS:-"bin lib docker user/rich"}"
 DEST_REPO_PATH="${DEST_REPO_PATH:-"$PWD"}"
-FORCE="${FORCE:-false}"
+FORCE_FLAG="${FORCE_FLAG:-false}"
 DRY_RUN="${DRY_RUN:-""}"
 DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
 export FLAGS="${FLAGS:-""}"
@@ -41,7 +41,7 @@ while getopts "hdvug:u:r:p:w:m:l:fn" opt; do
 			Rebase current branches to origin/$MAIN and push the changes to origin/$MAIN
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
-					   -f force pushs (default: $FORCE)
+					   -f force pushs (default: $FORCE_FLAG)
 					   -n dry run (default: $DRY_RUN_FLAG)
 			           -u Upstream remote name to clone from (default: $UPSTREAM_REMOTE)
 			           -w Upstream branch to clone from (default: $UPSTREAM_DEFAULT)
@@ -63,8 +63,7 @@ while getopts "hdvug:u:r:p:w:m:l:fn" opt; do
 		export FLAGS+=" -v "
 		;;
 	f)
-		export FORCE=true
-		export FORCE_FLAG=" -f "
+		FORCE_FLAG=true
 		;;
 	n)
 		DRY_RUN_FLAG=true
@@ -100,14 +99,21 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-util.sh
 
+DRY_RUN=""
 if $DRY_RUN_FLAG; then
 	DRY_RUN="echo"
 fi
 log_verbose "DRY_RUN is $DRY_RUN"
 
+FORCE=""
+if $FORCE_FLAG; then
+	FORCE="-f"
+fi
+
 if ! pushd "$DEST_REPO_PATH" >/dev/null; then
 	log_error 1 "no $DEST_REPO_PATH"
 fi
+log_verbose "in $PWD"
 
 if ! git_repo; then
 	log_error 2 "$DEST_REPO_PATH is not a git repo"
@@ -116,23 +122,39 @@ fi
 # note this assumes repos names do not have special characters
 # https://www.c-sharpcorner.com/article/how-to-merge-upstream-repository-changes-with-your-fork-repository-using-git/
 for repo in $REPOS; do
-	dev_branch="$(git branch --show-current)"
-	log_verbose "In $repo assuming current branch $dev_branch is development branch"
 
-	cmds=("git fetch --all -p"
+	if ! pushd "$repo" >/dev/null; then
+		log_error 1 "$repo does not exist"
+	fi
+	log_verbose "in $PWD"
+	if ! git_repo; then
+		log_error 2 "$repo is not a git repo"
+	fi
+	dev_branch="$(git branch --show-current)"
+	log_verbose "Repo=$repo current_branch=$dev_branch"
+
+	# we do not handle quoting correctly here so no special characters
+	cmds=(
+		"git fetch --all -p"
 		"git pull --rebase"
 		"git push"
 		"git checkout $ORIGIN_DEFAULT"
 		"git pull --rebase"
 		"git push"
+		"git checkout $dev_branch"
 		"git rebase $UPSTREAM_REMOTE/$UPSTREAM_DEFAULT"
 		"git push $FORCE"
 		"git push $ORIGIN_REMOTE $dev_branch:$ORIGIN_DEFAULT"
-		"git push $UPSTREAM_REMOTE $dev_branch:$UPSTREAM_DEFAULT")
+		"git push $UPSTREAM_REMOTE $dev_branch:$UPSTREAM_DEFAULT"
+	)
 	for cmd in "${cmds[@]}"; do
-		log_verbose "running $cmd"
+		log_verbose "run $cmd"
 		if ! $DRY_RUN $cmd; then
-			log_error 1 "Failed with $?: $cmd"
+			log_error 2 "Failed with $?: $cmd"
 		fi
 	done
+
+	if ! popd >/dev/null; then
+		log_error 3 "could not popd"
+	fi
 done
