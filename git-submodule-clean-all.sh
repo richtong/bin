@@ -46,10 +46,6 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh
 
-if ! in_os mac; then
-	log_warning only tested on the Mac
-fi
-
 git reset --hard
 git submodule foreach --recursive git clean -xfd
 git submodule update --init --recursive
