@@ -276,6 +276,7 @@ PACKAGES+=(black
 	bfg
 	sudo
 	git
+	pre-commit
 )
 
 if ! in_os mac; then
