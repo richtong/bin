@@ -241,11 +241,6 @@ if ! cask_install "${CASKS[@]}"; then
 	log_warning "some installs of ${CASKS[*]}failed"
 fi
 
-# install flutter and dart and android studio and google cloud
-"$SCRIPT_DIR/install-flutter.sh"
-exit
-"$SCRIPT_DIR/install-gcloud.sh"
-"$SCRIPT_DIR/install-terraform.sh"
 
 # XQuartz is the Mac X-server which you need to see ubuntu apps on a mac client
 # via ssh -Y _remote_ _graphical_program_
