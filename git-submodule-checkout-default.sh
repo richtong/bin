@@ -99,4 +99,4 @@ fi
 log_verbose "assume the remote origin is the default remote $ORIGIN_REMOTE"
 # shellcheck disable=SC2016
 git submodule foreach \
-	'git remote set-head origin --auto && git checkout $(basename $(git rev-parse --abbrev-ref $ORIGIN_REMOTE/HEAD)) && git pull --rebase'
+	'git remote set-head origin --auto && git checkout $(basename $(git rev-parse --abbrev-ref ${ORIGIN_REMOTE}/HEAD)) && git pull --rebase'
