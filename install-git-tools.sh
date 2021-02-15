@@ -109,8 +109,9 @@ fi
 # need for convenience with git and used in workflows so get used to it
 # https://github.com/github/hub
 # Git hub
+#	hub : deprecated and break git completions
+log_verbose "do not installed hub the completions interfer with git and it is deprecated"
 PACKAGES+=(
-	hub
 	gh
 )
 
