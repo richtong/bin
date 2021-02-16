@@ -130,22 +130,32 @@ gh config set git_protocol ssh
 gh alias set default-branch \
 	'api -X PATCH repos:/:owner/:repo --raw-field default_branch=$1'
 
-# gh completion has a bug cannot source direction so create a file
-log_verbose adding github gh completion
-gh completion --shell bash >"$SCRIPT_DIR/gh-completion-bash.sh"
-exit
-config_add <<-EOF
-	# source $$(gh completion --shell bash)
-	# Note this generates an error with an incorrect line at the end
-	source "$SCRIPT_DIR/gh-completion-bash.sh"
-EOF
+# gh completion now handled by homebrew
+# https://cli.github.com/manual/gh_completion
+# eval "$(gh completion -s bash)"
+# for old gh completion has bug where cannot source direction so create a file
+#gh completion --shell bash >"$SCRIPT_DIR/gh-completion-bash.sh"
+#if ! config_mark; then
+#config_add <<-EOF
+#source $$(gh completion --shell bash)
+#Note this generates an error with an incorrect line at the end
+#source "$SCRIPT_DIR/gh-completion-bash.sh"
+#EOF
+#fi
 
+# do not like meld that much
 # https://stackoverflow.com/questions/43317697/setting-up-and-using-meld-as-your-git-difftool-and-mergetool-on-a-mac
 # git config --global merge.tool meld
 # git config --global diff.guitool meld
 # log_verbose "to use a graphical tool use for merges use git mergetool and for"
 # log_verbose "diffs then use git difftool"
+# https://medium.com/usevim/git-and-vimdiff-a762d72ced86
 
 # https://github.blog/2020-07-27-highlights-from-git-2-28/#introducing-init-defaultbranch
+log_verbose "install vimdiff can edit all files with vi \$(git diff --name-only)"
+git config --global diff.tool vimdiff
+git config --global merge.tool vimdiff
+# no prompting for next file
+git config --global difftool.prompt false
 log_verbose "main is now the default branch for all new repos"
 git config --global init.defaultBranch main
