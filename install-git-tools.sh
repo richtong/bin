@@ -83,6 +83,15 @@ if [[ -z $(git config --global pull.ff) ]]; then
 	git config --global pull.ff only
 fi
 
+# https://stackoverflow.com/questions/10418975/how-to-change-line-ending-settings
+if [[ -z $(git config --global core.autocrlf input) ]]; then
+	autocrlf=input
+	if in_os windows; then
+		autocrlf=true
+	fi
+	git config --global core.autocrlf "$autocrlf"
+fi
+
 # Git is changing its default and this gets rid of warning messages
 # There is no simple in git 1.7
 if vergte "$(git version | cut -f3 -d' ')" 1.8; then

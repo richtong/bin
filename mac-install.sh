@@ -171,6 +171,8 @@ if $MACPORTS_INSTALL && ! command -v port >/dev/null; then
 
 fi
 
+# file conversion
+PACKAGES+=" unix2dos "
 log_verbose update all package repos
 package_update
 
@@ -200,7 +202,7 @@ fi
 
 log_verbose make sure we have the lastest paths loaded
 source_profile
-log_assert "! command -v python | grep /usr/bin" "Using Homebrew Python"
+/usr/bin/env pythonlog_assert "! command -v python | grep /usr/bin" "Using Homebrew Python"
 
 log_verbose make sure brew is in the path
 
@@ -240,7 +242,6 @@ log_verbose "cask install ${CASKS[*]}"
 if ! cask_install "${CASKS[@]}"; then
 	log_warning "some installs of ${CASKS[*]}failed"
 fi
-
 
 # XQuartz is the Mac X-server which you need to see ubuntu apps on a mac client
 # via ssh -Y _remote_ _graphical_program_
