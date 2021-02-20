@@ -18,8 +18,9 @@ OPTIND=1
 ORIGIN_REMOTE="${ORIGIN_REMOTE:-origin}"
 ORIGIN_DEFAULT="${ORIGIN_DEFAULT:-main}"
 FORCE_FLAG="${FORCE_FLAG:-false}"
-DRY_RUN="${DRY_RUN:-""}"
-DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
+FORCE="${FORCE:-""}"
+DRY_RUN_ARG="${DRY_RUN_ARG:-""}"
+DRY_RUN="${DRY_RUN:-false}"
 DEST_REPO_PATH="${DEST_REPO_PATH:-"$PWD"}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvfng:p:m:l:" opt; do
@@ -32,7 +33,7 @@ while getopts "hdvfng:p:m:l:" opt; do
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 					   -f force pushs (default: $FORCE_FLAG)
-					   -n dry run (default: $DRY_RUN_FLAG)
+					   -n dry run (default: $DRY_RUN)
 					   -l Origin remote name (default: $ORIGIN_REMOTE)
 					   -m Origin branch that is the default (default: $ORIGIN_DEFAULT)
 			           -g Git repo Url extension (default: $GITHUB_URL)
@@ -51,9 +52,11 @@ while getopts "hdvfng:p:m:l:" opt; do
 		;;
 	f)
 		FORCE_FLAG=true
+		FORCE="-$opt"
 		;;
 	n)
-		DRY_RUN_FLAG=true
+		DRY_RUN=true
+		DRY_RUN_ARG="-$opt"
 		;;
 	l)
 		ORIGIN_REMOTE="$OPTARG"
@@ -74,19 +77,6 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-util.sh
 
-DRY_RUN=""
-if $DRY_RUN_FLAG; then
-	DRY_RUN="echo"
-fi
-log_verbose "DRY_RUN is $DRY_RUN"
-
-FORCE=""
-if $FORCE_FLAG; then
-	# shellcheck disable=SC2034
-	# only appear unused but is used in the eval
-	FORCE="-f"
-fi
-
 if ! pushd "$DEST_REPO_PATH" >/dev/null; then
 	log_error 1 "no $DEST_REPO_PATH"
 fi
@@ -96,8 +86,8 @@ if ! git_repo; then
 	log_error 2 "$DEST_REPO_PATH is not a git repo"
 fi
 
-# shellcheck disable=SC2016
-$DRY_RUN git submodule foreach "git remote set-head origin -a &&
+# shellcheck disable=SC2086
+util_cmd -s $DRY_RUN_ARG "git remote set-head origin -a &&
 					   git checkout \$(basename
 					   \$(git rev-parse --abbrev-ref $ORIGIN_REMOTE/HEAD)) &&
 					   git pull --rebase"

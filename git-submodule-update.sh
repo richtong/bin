@@ -118,8 +118,13 @@ fi
 # https://stackoverflow.com/questions/10168449/git-update-submodules-recursively
 cmds=(
 	'git submodule update --init --recursive --rebase'
-	'git submodule foreach --recursive "git fetch -p --all && git pull --ff-only && git push"'
+)
+foreach=(
+	'"git fetch -p --all && git pull --ff-only && git push"'
 )
 # do not need expansion, the eval takes care of this
 # shellcheck disable=SC2086
 util_cmd $DRY_RUN_ARG "${cmds[@]}"
+
+# shellcheck disable=SC2086
+util_cmd -s $DRY_RUN_ARG "${foreach[@]}"

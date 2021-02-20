@@ -91,12 +91,9 @@ if ! git_repo; then
 fi
 
 # shellcheck disable=SC2016,SC2154
-CMDS=("git submodule foreach
-		\"git submodule set-branch
-			--branch \$(basename
-						\$(git rev-parse --abbrev-ref $REMOTE_DEFAULT/HEAD))
-	        -- \"\\\$sm_path\"\"
-   ")
+CMDS=(
+	"git submodule set-branch --branch \$(basename \$(git rev-parse --abbrev-ref $REMOTE_DEFAULT/HEAD)) -- \$name"
+)
 
 # shellcheck disable=SC2086
-util_cmd $DRY_RUN_ARG "${CMDS[@]}"
+util_cmd -s $DRY_RUN_ARG "${CMDS[@]}"

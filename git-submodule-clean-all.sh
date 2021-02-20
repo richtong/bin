@@ -17,14 +17,17 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
 OPTIND=1
 FORCE="${FORCE:-false}"
+DRY_RUN="${DRY_RUN:-false}"
+DRY_RUN_FLAG="${DRY_RUN_FLAG:-""}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt; do
+while getopts "hdvn:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Delete a submodule
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help
+				-n Dry run (default: DRY_RUN)
 		EOF
 		exit 0
 		;;
@@ -36,6 +39,10 @@ while getopts "hdv" opt; do
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
 		;;
+	n)
+		DRY_RUN=true
+		DRY_RUN_FLAG="-$opt"
+		;;
 	*)
 		echo "no -$opt" >&2
 		;;
@@ -46,8 +53,17 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh
 
-git reset --hard
-git submodule foreach --recursive git clean -xfd
-git submodule update --init --recursive
-git submodule foreach --recursive git reset --hard
-git clean -xfd
+# shellcheck disable=SC2086
+util_cmd $DRY_RUN_FLAG "git rest --hard"
+
+# shellcheck disable=SC2086
+util_cmd -s $DRY_RUN_FLAG "git clean -xfd"
+
+# shellcheck disable=SC2086
+util_cmd $DRY_RUN_FLAG "git submodule update --init --recursive"
+
+# shellcheck disable=SC2086
+util_cmd -s $DRY_RUN_FLAG "git reset --hard"
+
+# shellcheck disable=SC2086
+util_cmd $DRY_RUN_FLAG "git clean -xfd"
