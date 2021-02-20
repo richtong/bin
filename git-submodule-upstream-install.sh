@@ -18,7 +18,8 @@ GITHUB_URL="${GITHUB_URL:-"git@github.com:"}"
 UPSTREAM_ORG="${UPSTREAM_ORG:-richtong}"
 REPOS="${REPOS:-"bin lib docker user/rich"}"
 DEST_REPO_PATH="${DEST_REPO_PATH:-"$PWD"}"
-DRY_RUN_FLAG="${DRY_RUN_FLAG:-"false"}"
+DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
+DRY_RUN_ARG="${DRY_RUN_ARG:-""}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvug:u:r:p:n" opt; do
 	case "$opt" in
@@ -46,6 +47,7 @@ while getopts "hdvug:u:r:p:n" opt; do
 		;;
 	n)
 		DRY_RUN_FLAG=true
+		DRY_RUN_ARG="-$opt"
 		;;
 	u)
 		UPSTREAM_ORG="$OPTARG"
@@ -79,26 +81,15 @@ if ! git_repo; then
 	log_error 2 "$DEST_REPO_PATH is not a git repo"
 fi
 
-DRY_RUN=""
-if $DRY_RUN_FLAG; then
-	DRY_RUN="echo"
-fi
+COMMANDS=(
+	"gh fork \"$GITHUB_URL:$UPSTREAM_ORG/$repo\" --clone=false"
+	"git submodule add \"$GITHUB_URL:$(git_organization)/$repo\" \"$repo\""
+	"push \"$repo\" >/dev/null"
+	"git remote add upstream \"$GITHUB_URL:$UPSTREAM_ORG/$repo\""
+	"git fetch upstream"
+)
 
 for repo in $REPOS; do
-	log_verbose "forking $UPSTREAM_ORG/$repo"
-	if ! $DRY_RUN gh fork "$GITHUB_URL:$UPSTREAM_ORG/$repo" --clone=false; then
-		log_warning "could not fork $repo it may already exist"
-	fi
-	if ! $DRY_RUN git submodule add "$GITHUB_URL:$(git_organization)/$repo" "$repo"; then
-		log_warning "could not add the submodule it may already exist"
-	fi
-	if ! $DRY_RUN push "$repo" >/dev/null; then
-		log_error 3 "$repo could not be created"
-	fi
-	if ! $DRY_RUN git remote add upstream "$GITHUB_URL:$UPSTREAM_ORG/$repo"; then
-		log_warning "could not create upstream may already exist"
-	fi
-	if ! $DRY_RUN git fetch upstream; then
-		log_warning "could not fetch upstream"
-	fi
+	# shellcheck disable=SC2086
+	util_cmd $DRY_RUN_ARG "${COMMANDS[@]}"
 done

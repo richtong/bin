@@ -29,6 +29,7 @@ REPOS="${REPOS:-"bin lib docker user/rich"}"
 DEST_REPO_PATH="${DEST_REPO_PATH:-"$PWD"}"
 FORCE_FLAG="${FORCE_FLAG:-false}"
 DRY_RUN="${DRY_RUN:-""}"
+DRY_RUN_ARG="${DRY_RUN_ARG:-""}"
 DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvug:u:r:p:w:m:l:fn" opt; do
@@ -36,8 +37,8 @@ while getopts "hdvug:u:r:p:w:m:l:fn" opt; do
 	h)
 		cat <<-EOF
 			Gets the organization ready for a commit to main by
-			Merge upstream changes from $UPSTREAM_ORG/$UPSTREAM_DEFAULT to origin/$ORIGIN_DEFAULT
-			Rebase current branches to origin/$MAIN and push the changes to origin/$MAIN
+			Merge upstream changes from $UPSTREAM_REMOTE/$UPSTREAM_DEFAULT to $ORIGIN_REMOTE/$ORIGIN_DEFAULT
+			Rebase current branches to $ORIGIN_REMOTE/$ORIGIN_DEFAULT and push the changes
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 					   -f force pushs (default: $FORCE_FLAG)
@@ -66,6 +67,8 @@ while getopts "hdvug:u:r:p:w:m:l:fn" opt; do
 		;;
 	n)
 		DRY_RUN_FLAG=true
+		DRY_RUN_ARG="-$opt"
+		DRY_RUN="echo"
 		;;
 	u)
 		UPSTREAM_REMOTE="$OPTARG"
@@ -98,10 +101,6 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-util.sh
 
-DRY_RUN=""
-if $DRY_RUN_FLAG; then
-	DRY_RUN="echo"
-fi
 log_verbose "DRY_RUN is $DRY_RUN"
 
 FORCE=""
@@ -153,15 +152,8 @@ for repo in $REPOS; do
 		'git push "$ORIGIN_REMOTE" "$dev_branch:$ORIGIN_DEFAULT"'
 		'git push "$UPSTREAM_REMOTE" "$dev_branch:$UPSTREAM_DEFAULT"'
 	)
-	for cmd in "${cmds[@]}"; do
-		# need to do the eval so to force variable parsing
-		# shellcheck disable=SC2086
-		log_verbose "run $(eval echo $cmd)"
-		# shellcheck disable=SC2086
-		if ! eval $DRY_RUN $cmd; then
-			log_error 2 "Failed with $?: $cmd"
-		fi
-	done
+	# shellcheck disable=SC2086
+	util_cmd $DRY_RUN_ARG "${cmds[@]}"
 
 	if ! popd >/dev/null; then
 		log_error 3 "could not popd"

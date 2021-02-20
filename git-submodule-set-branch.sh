@@ -2,7 +2,7 @@
 # the check we need to do this for DRY_RUN since we don't want to glob
 ##
 ##
-## Checks out all submodules and rebase in commits
+## For git submodule which do not have a default branch set
 ##
 ##@author Rich Tong
 ##@returns 0 on success
@@ -15,27 +15,23 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
-ORIGIN_REMOTE="${ORIGIN_REMOTE:-origin}"
-ORIGIN_DEFAULT="${ORIGIN_DEFAULT:-main}"
+REMOTE_DEFAULT="${REMOTE_DEFAULT:-origin}"
 FORCE_FLAG="${FORCE_FLAG:-false}"
-DRY_RUN="${DRY_RUN:-""}"
+DRY_RUN_ARG="${DRY_RUN_ARG:-""}"
 DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
 DEST_REPO_PATH="${DEST_REPO_PATH:-"$PWD"}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvfng:p:m:l:" opt; do
+while getopts "hdvfnl:p:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Gets the organization ready for a commit to main by
-			Merge upstream changes from $UPSTREAM_ORG/$UPSTREAM_DEFAULT to origin/$ORIGIN_DEFAULT
-			Rebase current branches to origin/$MAIN and push the changes to origin/$MAIN
+			For all modules, set their submodule branch to the repo's default
+			branch
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 					   -f force pushs (default: $FORCE_FLAG)
 					   -n dry run (default: $DRY_RUN_FLAG)
-					   -l Origin remote name (default: $ORIGIN_REMOTE)
-					   -m Origin branch that is the default (default: $ORIGIN_DEFAULT)
-			           -g Git repo Url extension (default: $GITHUB_URL)
+					   -l Set the default remote (default: $REMOTE_DEFAULT)
 			           -p The path to the repo being created (default: $DEST_REPO_PATH)
 			    Note that repos cannot have white space in their names
 		EOF
@@ -54,12 +50,10 @@ while getopts "hdvfng:p:m:l:" opt; do
 		;;
 	n)
 		DRY_RUN_FLAG=true
+		DRY_RUN_ARG="-$opt"
 		;;
 	l)
-		ORIGIN_REMOTE="$OPTARG"
-		;;
-	m)
-		ORIGIN_DEFAULT="$OPTARG"
+		REMOTE_DEFAULT="$OPTARG"
 		;;
 	p)
 		DEST_REPO_PATH="$OPTARG"
@@ -96,8 +90,13 @@ if ! git_repo; then
 	log_error 2 "$DEST_REPO_PATH is not a git repo"
 fi
 
-# shellcheck disable=SC2016
-$DRY_RUN git submodule foreach "git remote set-head origin -a &&
-					   git checkout \$(basename
-					   \$(git rev-parse --abbrev-ref $ORIGIN_REMOTE/HEAD)) &&
-					   git pull --rebase"
+# shellcheck disable=SC2016,SC2154
+CMDS=("git submodule foreach
+		\"git submodule set-branch
+			--branch \$(basename
+						\$(git rev-parse --abbrev-ref $REMOTE_DEFAULT/HEAD))
+	        -- \"\\\$sm_path\"\"
+   ")
+
+# shellcheck disable=SC2086
+util_cmd $DRY_RUN_ARG "${CMDS[@]}"

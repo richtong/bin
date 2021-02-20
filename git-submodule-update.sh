@@ -19,6 +19,7 @@ ORIGIN_REMOTE="${ORIGIN_REMOTE:-origin}"
 DEST_REPO_PATH="${DEST_REPO_PATH:-"$PWD"}"
 FORCE_FLAG="${FORCE_FLAG:-false}"
 DRY_RUN="${DRY_RUN:-""}"
+DRY_RUN_ARG="${DRY_RUN_ARG:-""}"
 DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvunfg:p:l:" opt; do
@@ -51,6 +52,7 @@ while getopts "hdvunfg:p:l:" opt; do
 		;;
 	n)
 		DRY_RUN_FLAG=true
+		DRY_RUN_ARG="$opt"
 		;;
 	l)
 		ORIGIN_REMOTE="$OPTARG"
@@ -119,12 +121,5 @@ cmds=(
 	'git submodule foreach --recursive "git fetch -p --all && git pull --ff-only && git push"'
 )
 # do not need expansion, the eval takes care of this
-for cmd in "${cmds[@]}"; do
-	# need to do the eval so to force variable parsing
-	# shellcheck disable=SC2086
-	log_verbose "run $(eval echo $cmd)"
-	# shellcheck disable=SC2086
-	if ! eval $DRY_RUN $cmd; then
-		log_error 2 "Failed with $?: $cmd"
-	fi
-done
+# shellcheck disable=SC2086
+util_cmd $DRY_RUN_ARG "${cmds[@]}"
