@@ -125,7 +125,15 @@ log_verbose "looking for $REPOS"
 module_path="$(realpath --relative-to="$ROOT" "$MAIN")"
 log_verbose ".git modules relative path is module_path=$module_path"
 
+log_verbose "As of 2021, git rm does the many steps"
 for repo_path in $REPOS; do
+	log_verbose "git rm $repo_path"
+	if $FORCE && git rm "$repo_path"; then
+		log_verbose "git rm $repo_path succeeded"
+		continue
+	fi
+	log_warning "git rm $repo_path failed using manual"
+
 	log_verbose "In directory $PWD"
 	repo="$(realpath --relative-to="$MAIN" "$repo_path")"
 	log_verbose cleaning "$repo relative to $MAIN"
