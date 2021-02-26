@@ -14,6 +14,7 @@ ANACONDA="${ANACONDA:-true}"
 PIPENV="${PIPENV:-true}"
 PYTHON_VERSION="${PYTHON_VERSION:-3.9}"
 STABLE_PYTHON="${STABLE_PYTHON:-3.8}"
+OLD_PYTHON="${OLD_PYTHON:-3.8}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
@@ -65,7 +66,7 @@ if ! in_os mac; then
 	log_exit "Mac only"
 fi
 
-PACKAGES=" python@$STABLE_PYTHON python@$PYTHON_VERSION "
+PACKAGES=" python@$OLD_PYTHON python@$STABLE_PYTHON python@$PYTHON_VERSION "
 
 if $PIPENV; then
 	PACKAGES+=" pipenv "

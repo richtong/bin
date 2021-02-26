@@ -202,7 +202,8 @@ fi
 
 log_verbose make sure we have the lastest paths loaded
 source_profile
-/usr/bin/env pythonlog_assert "! command -v python | grep /usr/bin" "Using Homebrew Python"
+/usr/bin/env python
+log_assert "! command -v python | grep /usr/bin" "Using Homebrew Python"
 
 log_verbose make sure brew is in the path
 
