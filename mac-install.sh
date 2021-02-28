@@ -200,13 +200,6 @@ if ! config_mark; then
 	config_add <<<'[[ $PATH =~ /usr/local/bin ]] || export PATH="/usr/local/bin:$PATH"'
 fi
 
-log_verbose make sure we have the lastest paths loaded
-source_profile
-/usr/bin/env python
-log_assert "! command -v python | grep /usr/bin" "Using Homebrew Python"
-
-log_verbose make sure brew is in the path
-
 # or just do a full source
 log_verbose pick up path changes from gnu
 source_profile

@@ -320,10 +320,12 @@ fi
 
 log_verbose installing development and devops systems
 "$SCRIPT_DIR/install-node.sh"
-"$SCRIPT_DIR/install-flutter.sh"
 "$SCRIPT_DIR/install-gcloud.sh"
 "$SCRIPT_DIR/install-netlify.sh"
 "$SCRIPT_DIR/install-terraform.sh"
+
+log_verbose "skipping install-flutter but somehow"
+#"$SCRIPT_DIR/install-flutter.sh"
 
 log_verbose install secrets will work with ssh now that we can use dropbox cli
 if $INSTALL_SECRETS; then
