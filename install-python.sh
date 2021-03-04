@@ -14,7 +14,7 @@ ANACONDA="${ANACONDA:-true}"
 PIPENV="${PIPENV:-true}"
 PYTHON_VERSION="${PYTHON_VERSION:-3.9}"
 STABLE_PYTHON="${STABLE_PYTHON:-3.8}"
-OLD_PYTHON="${OLD_PYTHON:-3.8}"
+OLD_PYTHON="${OLD_PYTHON:-3.7}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
