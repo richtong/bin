@@ -90,12 +90,69 @@ if ! git_repo; then
 	log_error 2 "$DEST_REPO_PATH is not a git repo"
 fi
 
+# To make the git submodule foreach to work you must
+# concatenate strings together so it is handled as a single argument
+# these strings should be a single command
+# https://stackoverflow.com/questions/3260920/how-to-quotes-in-bash-function-parameters
+# To make this work, if you wrap "" then you need "\"\"" but not for single
+# quotes this does not work for single quotes where \' does not work
+# And that each $ has to be done as \$ since we are wrapped in a "
+# https://git-scm.com/docs/git-submodule/en
+# https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch
+# https://stackoverflow.com/questions/49929938/how-to-inject-variables-to-git-submodule-foreach
+# https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch
+# https://stackoverflow.com/questions/8254120/how-to-escape-a-single-quote-in-single-quote-string-in-bash
+# need the special $'string' to make this work so that you can quote single
+# quotes
 # shellcheck disable=SC2016,SC2154
-CMDS=("git submodule foreach
-			\$(basename
-						\$(git rev-parse --abbrev-ref $REMOTE_DEFAULT/HEAD))
-	        -- \"\\\$name\"\""
-	"git submodule set-branch --branch ")
+
+# https://stackoverflow.com/questions/1777854/how-can-i-specify-a-branch-tag-when-adding-a-git-submodule
+# The update pulls from the remote branch you set previously and checks it out
+# which git submodule update --init --recursive does not
+# note when we get the remote branch, we have to cd to the toplevel
+# to actually run the set-branch as the branches are set in the parent repo
+# we need the true because set-branch will return false if the
+# change has already been made
+log_verbose add the test commands
+if $VERBOSE; then
+	CMDS=(
+		# test variables in foreach
+		"git submodule foreach \"echo origin=$ORIGIN_REMOTE\"' sm_path=\$sm_path
+		name=\$name displaypath=\$displaypath sha1=\$sha1 toplevel=\$toplevel'"
+		# test correct syntax for passing variables
+		"git submodule foreach 'default=$ORIGIN_REMOTE && echo \$default'"
+		# test using ANSI strings with single quote escapes
+		$'git submodule foreach \'default=foo && echo $default\''
+		# test single quotes inside double quotes
+		"git submodule foreach $'default=\'foo\' && echo \$default'"
+		# test running commands and going to top level
+		"git submodule foreach 'cd \$toplevel && pwd && echo \$sm_path'"
+
+		# test quoting of double quotes inside double quotes
+		#"git submodule foreach \"git remote set-head $ORIGIN_REMOTE -a\""
+		# test setting defaults and trapping the errors
+		"git submodule foreach
+		'cd \$toplevel && pwd && echo \$sm_path &&
+		 git submodule set-branch --default -- \$sm_path || true'"
+		# test getting the right default branch (expensive)
+		#"git submodule foreach
+		#\$'default=\$(git remote set-head $ORIGIN_REMOTE -a |
+		#awk \'{print \$NF}\') && echo \$default'"
+		# now set to the right master
+	)
+fi
+log_verbose adding the real working command
+CMDS+=(
+	"git submodule foreach
+
+		\$'default=\$(git remote set-head $ORIGIN_REMOTE -a |
+			awk \'{print \$NF}\') && echo \$default &&
+		[[ -n \$default ]] &&
+		cd \$toplevel && git submodule set-branch -b \$default -- \$sm_path'"
+	'git submodule update --init --recursive --remote'
+)
 
 # shellcheck disable=SC2086
 util_cmd $DRY_RUN_ARG "${CMDS[@]}"
+
+log_warning "look at .gitmodules and you can commit the changes"
