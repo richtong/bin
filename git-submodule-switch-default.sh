@@ -86,8 +86,11 @@ if ! git_repo; then
 	log_error 2 "$DEST_REPO_PATH is not a git repo"
 fi
 
+CMDS+=(
+	"\$'default=\$(git remote set-head $ORIGIN_REMOTE -a |
+			awk \'{print \$NF}\') && echo \$default &&
+		[[ -n \$default ]] && git switch \$default'"
+)
+
 # shellcheck disable=SC2086
-util_cmd -s $DRY_RUN_ARG "git remote set-head origin -a &&
-					   git checkout \$(basename
-					   \$(git rev-parse --abbrev-ref $ORIGIN_REMOTE/HEAD)) &&
-					   git pull --rebase"
+util_cmd -s $DRY_RUN_ARG "${CMDS[@]}"

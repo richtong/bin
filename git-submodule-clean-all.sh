@@ -53,17 +53,21 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh
 
-# shellcheck disable=SC2086
-util_cmd $DRY_RUN_FLAG "git rest --hard"
+CMDS=(
+	"git reset --hard"
+	"git clean -xfd"
+)
+PARENT_CMDS=(
+	"git submodule update --init --recursive --remote"
+)
+
+log_verbose "clean the parent repo"
 
 # shellcheck disable=SC2086
-util_cmd -s $DRY_RUN_FLAG "git clean -xfd"
-
+util_cmd $DRY_RUN_FLAG "${CMDS[@]}"
 # shellcheck disable=SC2086
-util_cmd $DRY_RUN_FLAG "git submodule update --init --recursive"
+util_cmd $DRY_RUN_FLAG "${PARENT_CMDS[@]}"
 
+log_verbose "now clean the subdirectories"
 # shellcheck disable=SC2086
-util_cmd -s $DRY_RUN_FLAG "git reset --hard"
-
-# shellcheck disable=SC2086
-util_cmd $DRY_RUN_FLAG "git clean -xfd"
+util_cmd -s $DRY_RUN_FLAG "${CMDS[@]}"

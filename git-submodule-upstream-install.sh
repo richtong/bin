@@ -93,3 +93,10 @@ for repo in $REPOS; do
 	# shellcheck disable=SC2086
 	util_cmd $DRY_RUN_ARG "${COMMANDS[@]}"
 done
+
+log_verbose "add remote default"
+"$SCRIPT_DIR/git-submodules-set-branch.sh"
+log_verbose "switch to remote default branches"
+"$SCRIPT_DIR/git-submodules-switch-default.sh"
+log_verbose "get latest from default branches"
+"$SCRIPT_DIR/git-submodules-update.sh"

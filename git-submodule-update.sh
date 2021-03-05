@@ -116,15 +116,18 @@ fi
 #
 #  this looks like duplication to me but I do not understand what update is for
 # https://stackoverflow.com/questions/10168449/git-update-submodules-recursively
-cmds=(
-	'git submodule update --init --recursive --rebase'
+# if the submodule was created by with git submodule --set-branch then
+# we can use the --remote to pull from the main branch
+# Note that we are still running in detached mode so need to git switch
+CMDS=(
+	'git submodule update --init --recursive --rebase --remote'
 )
-foreach=(
+FOREACH=(
 	'"git fetch -p --all && git pull --ff-only && git push"'
 )
 # do not need expansion, the eval takes care of this
 # shellcheck disable=SC2086
-util_cmd $DRY_RUN_ARG "${cmds[@]}"
+util_cmd $DRY_RUN_ARG "${CMDS[@]}"
 
 # shellcheck disable=SC2086
-util_cmd -s $DRY_RUN_ARG "${foreach[@]}"
+util_cmd -s $DRY_RUN_ARG "${FOREACH[@]}"

@@ -144,7 +144,6 @@ fi
 log_verbose adding the real working command
 CMDS+=(
 	"git submodule foreach
-
 		\$'default=\$(git remote set-head $ORIGIN_REMOTE -a |
 			awk \'{print \$NF}\') && echo \$default &&
 		[[ -n \$default ]] &&
