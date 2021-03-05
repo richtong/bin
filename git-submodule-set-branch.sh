@@ -15,7 +15,7 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
-REMOTE_DEFAULT="${REMOTE_DEFAULT:-origin}"
+ORIGIN_DEFAULT="${ORIGIN_DEFAULT:-origin}"
 FORCE_FLAG="${FORCE_FLAG:-false}"
 DRY_RUN_ARG="${DRY_RUN_ARG:-""}"
 DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
@@ -31,7 +31,7 @@ while getopts "hdvfnl:p:" opt; do
 			    flags: -d debug, -v verbose, -h help"
 					   -f force pushs (default: $FORCE_FLAG)
 					   -n dry run (default: $DRY_RUN_FLAG)
-					   -l Set the default remote (default: $REMOTE_DEFAULT)
+					   -l Set the default remote (default: $ORIGIN_DEFAULT)
 			           -p The path to the repo being created (default: $DEST_REPO_PATH)
 			    Note that repos cannot have white space in their names
 		EOF
@@ -53,7 +53,7 @@ while getopts "hdvfnl:p:" opt; do
 		DRY_RUN_ARG="-$opt"
 		;;
 	l)
-		REMOTE_DEFAULT="$OPTARG"
+		ORIGIN_DEFAULT="$OPTARG"
 		;;
 	p)
 		DEST_REPO_PATH="$OPTARG"
