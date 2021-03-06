@@ -246,9 +246,10 @@ fi
 
 "$BIN_DIR/install-anaconda.sh"
 
-PYTHON_PACKAGES="${PYTHON_PACKAGES:-""}"
+# argparse complete
 log_verbose development shell/python packages normally use pipenv but use anaconda instead
-PYTHON_PACKAGES+=(nptyping
+PYTHON_PACKAGES+=(
+	nptyping
 	pydocstyle
 	pdoc3
 	flake8
@@ -259,6 +260,8 @@ PYTHON_PACKAGES+=(nptyping
 	pytest
 	pytest-cov
 	pytest-xdist
+	pytest-timeout
+	argcomplete
 	tox
 	pyyaml
 )
@@ -269,7 +272,8 @@ PYTHON_PACKAGES+=(nptyping
 # mmv - multiple file mov
 # curl - not clear if needed but MacOS doesn't have the latest
 # bfg - remove passwords and big files you didn't mean to commit
-PACKAGES+=(black
+PACKAGES+=(
+	black
 	pydocstyle
 	mmv
 	curl
@@ -317,6 +321,11 @@ log_verbose "installing python packages ${PYTHON_PACKAGES[*]} in user mode and u
 if [[ -v PYTHON_PACKAGES ]]; then
 	pip_install --user --upgrade "${PYTHON_PACKAGES[@]}"
 fi
+
+# https://kislyuk.github.io/argcomplete/ for pytest
+log_verbose "complete argcomplete parse"
+# this is not found in the instalation
+#activate-global-python-argcomplete
 
 log_verbose installing development and devops systems
 "$SCRIPT_DIR/install-node.sh"

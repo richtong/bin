@@ -117,11 +117,15 @@ fi
 
 # need for convenience with git and used in workflows so get used to it
 # https://github.com/github/hub
+# https://github.blog/2021-03-04-4-things-you-didnt-know-you-could-do-with-github-actions/
 # Git hub
+# act : run github actions locally
+# gh : official github cli
 #	hub : deprecated and break git completions
 log_verbose "do not installed hub the completions interfer with git and it is deprecated"
 PACKAGES+=(
 	gh
+	act
 )
 
 # meld is ugly compared with the default
