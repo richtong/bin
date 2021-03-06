@@ -37,15 +37,19 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 shift $((OPTIND - 1))
 source_lib lib-install.sh lib-util.sh
 
-if command -v aws >/dev/null; then
-	log_exit "installed already $(aws --version)"
-fi
+#if command -v aws >/dev/null; then
+#log_exit "installed already $(aws --version)"
+#fi
 
-if ! brew_install awscli; then
-	log_warning brew error in installation
-fi
+NODE_PACKAGE=(
+	aws-cdk
+)
+log_verbose "Install ${NODE_PACKAGE[*]}"
+npm_install -g "${NODE_PACKAGE[@]}"
 
 if in_os mac; then
+	log_verbose "installing awscli"
+	package_install awscli
 	if ! command -v aws && [[ $(command -v python) =~ /opt/local ]]; then
 		log_warning running with Macport python and this does not seem to work but try anyway
 		# https://trac.macports.org/ticket/50063
@@ -55,16 +59,16 @@ if in_os mac; then
 			sudo port select awscli py27-awscli
 		fi
 	fi
-	log_exit aws install complete
+	log_exit "aws install complete"
 fi
 
-log_verbose brew failed, try docker install
+log_verbose "Linux installation started"
 if $APT_INSTALL; then
 	# https://stackoverflow.com/questions/36969391/how-to-upgrade-aws-cli-to-the-latest-version
 	log_verbose package install
 	package_install awscli
 	# pip_install --user --upgrade awscli
-	log_exit apt-get used to install awscli
+	log_exit "install awscli"
 fi
 
 if ! in_os docker; then

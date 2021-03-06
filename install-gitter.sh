@@ -15,7 +15,7 @@ LINUX_URL=${LINUX_URL:-"https://update.gitter.im/linux/latest"}
 while getopts "hdv" opt; do
 	case "$opt" in
 	h)
-		echo "$SCRIPTNAME: Install Gitter"
+		echo "$SCRIPTNAME: Install Gitter instant messaging tool"
 		echo "flags: -d debug, -h help"
 		exit 0
 		;;
@@ -37,6 +37,10 @@ set -u
 shift $((OPTIND - 1))
 
 if in_os mac; then
+	if package_install gitter; then
+		exit
+	fi
+
 	if [[ ! -e /Applications/$APP ]]; then
 		# note that the url basename is not meaningful for slack for mac
 		log_verbose installing gitter on Mac
