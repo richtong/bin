@@ -66,18 +66,25 @@ if ! in_os mac; then
 	log_exit "Mac only"
 fi
 
-PACKAGES=" python@$OLD_PYTHON python@$STABLE_PYTHON python@$PYTHON_VERSION "
+PACKAGES=(
+	"python@$OLD_PYTHON"
+	"python@$STABLE_PYTHON"
+	"python@$PYTHON_VERSION"
+	black
+	pydocstyle
+)
 
 if $PIPENV; then
-	PACKAGES+=" pipenv "
+	PACKAGES+=(pipenv)
 	log_verbose "use pipenv per directory pipenv install"
 fi
 
 # Note do not quote, want to process each as separate arguments
-log_verbose "installing $PACKAGES"
+log_verbose "installing ${PACKAGES[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
-package_install $PACKAGES
+
+package_install "${PACKAGES[@]}"
 
 if $PYENV; then
 	log_verbose using pyenv
@@ -99,6 +106,32 @@ if ! config_mark; then
 		[[ \$PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:\$PATH"
 	EOF
 	log_warning "source $(config_profile) to get the correct python"
+fi
+
+# argparse complete
+log_verbose development shell/python packages normally use pipenv but use anaconda instead
+PYTHON_PACKAGES+=(
+	argcomplete
+	bandit
+	black
+	flake8
+	mypy
+	nptyping
+	pdoc3
+	pydocstyle
+	pytest
+	pytest-cov
+	pytest-timeout
+	pytest-xdist
+	pyyaml
+	tox
+)
+
+# currently no python packages are needed
+log_verbose "installing python packages ${PYTHON_PACKAGES[*]} in user mode and upgrade dependencies"
+
+if [[ -n ${PYTHON_PACKAGES[*]} ]]; then
+	pip_install --upgrade "${PYTHON_PACKAGES[@]}"
 fi
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"

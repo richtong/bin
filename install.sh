@@ -246,24 +246,7 @@ fi
 
 "$BIN_DIR/install-anaconda.sh"
 
-# argparse complete
-log_verbose development shell/python packages normally use pipenv but use anaconda instead
-PYTHON_PACKAGES+=(
-	nptyping
-	pydocstyle
-	pdoc3
-	flake8
-	mypy
-	bandit
-	black
-	tox
-	pytest
-	pytest-cov
-	pytest-xdist
-	pytest-timeout
-	argcomplete
-	tox
-	pyyaml
+PYTHON_PACKAGES=(
 )
 
 # these python packages do not always install command line argument stuff
@@ -273,8 +256,6 @@ PYTHON_PACKAGES+=(
 # curl - not clear if needed but MacOS doesn't have the latest
 # bfg - remove passwords and big files you didn't mean to commit
 PACKAGES+=(
-	black
-	pydocstyle
 	mmv
 	curl
 	bfg
