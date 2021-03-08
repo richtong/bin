@@ -17,18 +17,20 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
 OPTIND=1
 GIT_USERNAME="${GIT_USERNAME:-"${USER^}"}"
+GIT_PRIVATE_EMAIL="${GIT_PRIVATE_EMAIL:-"1782087+richtong@users.noreply.github.com"}"
 GIT_EMAIL="${GIT_EMAIL:-"$USER@tongfamily.com"}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvu:e:r:" opt; do
+while getopts "hdvu:e:p:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs Github Tools
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
-			           -r version number (default: $VERSION)
-				         -u pretty git user name for git log (default $GIT_USERNAME )"
-				         -e git email extension (default $GIT_EMAIL)"
+			    flags: -d debug, -v verbose, -h help
+				       -u pretty git user name for git log (default $GIT_USERNAME )
+				       -e git email extension (default $GIT_EMAIL)
+					   -p git private email (default $GIT_PRIVATE_EMAIL)
+			we use the private email by default
 		EOF
 		exit 0
 		;;
@@ -46,8 +48,8 @@ while getopts "hdvu:e:r:" opt; do
 	e)
 		GIT_EMAIL="$OPTARG"
 		;;
-	r)
-		VERSION="$OPTARG"
+	p)
+		GIT_PRIVATE_EMAIL="$OPTARG"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -62,6 +64,7 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh \
 
 # Put title case on the user name
 if [[ -z $(git config --global user.name) ]]; then
+	# https://jeffbailey.us/blog/2020/01/20/push-declined-due-to-email-privacy-restrictions-on-github/
 	log_verbose "no user name set changing to $GIT_USERNAME"
 	# the caret converts to title case
 	# https://stackoverflow.com/questions/11392189/converting-string-from-uppercase-to-lowercase-in-bash
@@ -69,8 +72,8 @@ if [[ -z $(git config --global user.name) ]]; then
 fi
 
 if [[ -z $(git config --global user.email) ]]; then
-	log_verbose "no email set changing to $GIT_EMAIL"
-	git config --global user.email "${GIT_EMAIL,,}"
+	log_verbose "no email set changing to $GIT_PRIVATE_EMAIL"
+	git config --global user.email "${GIT_PRIVATE_EMAIL,,}"
 fi
 
 if [[ -z $(git config --global checkout.defaultRemote) ]]; then
