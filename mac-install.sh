@@ -15,7 +15,6 @@ VMWARE="${VMWARE:-false}"
 UBUNTU="${UBUNTU:-"20.04"}"
 # https://www.debian.org/releases/ as of August 2020
 DEBIAN="${DEBIAN:-"10.5"}"
-PACKAGES="${PACKAGES:-""}"
 SOFTWAREUPDATE="${SOFTWAREUPDATE:-false}"
 MACPORTS_INSTALL="${MACPORTS_INSTALL:-false}"
 # The other choice is zsh but this is not working yet
@@ -100,25 +99,30 @@ defaults write com.apple.finder ShowPathbar -bool true
 # https://derflounder.wordpress.com/2018/06/10/updated-xcode-command-line-tools-installer-script-now-available/
 # Now check first
 # https://apple.stackexchange.com/questions/337744/installing-xcode-command-line-tools
-if [[ $(xcode-select -p) == "" ]]; then
+# https://stackoverflow.com/questions/15371925/how-to-check-if-command-line-tools-is-installed
+# note that the -p path may exist but not be up to date so check for the
+# package
+if ! xcode-select -p || ! pkgutil --pkg-info=com.apple.pkg.CLTools_Executables; then
+    log_verbose "installing Apple command line tools will throw up a gui"
 	xcode-select --install
 fi
 
 # Mac OS X uses Bash 3.2, we need 4.x
-PACKAGES+=" bash "
+declare -a PACKAGES
+PACKAGES+=( bash )
 
 # For lib-debug.sh gettext is in install-gnu.sh
 # PACKAGES+=" gettext "
 
 # For lib-config.sh
-PACKAGES+=" lua "
+PACKAGES+=( lua )
 
 # These are gnu utilities so installed by install-gnu.sh
 # Updated basic as Mac OS X does not like GPL 3, need -i for sed
 # PACKAGES+=" grep "
 # PACKAGES+=" gnu-sed "
 # gsed is the mac ports name
-#PACKAGES+=" gsed "
+#PACKAGES+=( gsed )
 
 # For editing and diagnosing videos vlc currently fails to build on Mac OS X
 # on macports and is a cask on brew
@@ -126,17 +130,20 @@ PACKAGES+=" lua "
 
 # To run commands in parallel across the cluster do not need anymore
 # PACKAGES+=" parallel "
+# parallel is in moreutils so do not install both
+# And this is part of moreutils
+PACKAGES+=(moreutils)
 
 # http://blog.hypriot.com/post/introducing-hypriot-cluster-lab-docker-clustering-as-easy-as-it-gets/
 # For hypriot RPI cluster searching
-PACKAGES+=" nmap "
+PACKAGES+=( nmap )
 
 # docker users this for installation
-PACKAGES+=" wget "
+PACKAGES+=( wget )
 
 # use Brew for command line management of Mac App Store apps
 # https://lifehacker.com/mas-updates-and-installs-mac-app-store-apps-from-the-co-1791919584
-PACKAGES+=" mas "
+PACKAGES+=( mas )
 log_verbose mas list for all installed apps
 log_verbose mas outdated for apps needing upgrade
 log_verbose "mas upgrade to update then all"
@@ -153,32 +160,35 @@ fi
 
 # aws need this
 # aws cli needs python and uses jq to parse output from it in bash scripts
-PACKAGES+=" jq "
+PACKAGES+=( jq )
+
+# yq is the yaml parsing equivalent of jq
+"$SCRIPT_DIR/install-yq.sh"
 
 # rsync-and-hash keeps crashing with old v2.6
-PACKAGES+=" rsync "
+PACKAGES+=( rsync )
+
+
+# file conversion
+PACKAGES+=( unix2dos )
 
 if $MACPORTS_INSTALL && ! command -v port >/dev/null; then
 	log_verbose also install mac ports for compatibility
 	"$SCRIPT_DIR/install-macports.sh"
 	log_verbose Pick up the new port instructions
 	source_profile
-
-	log_verbose "Prefer brew so first uninstall all Macports of $PACKAGES"
-	if ! sudo port uninstalled "$PACKAGES"; then
-		log_verbose "no Macports $PACKAGES found"
+	log_verbose "Prefer brew so first uninstall all Macports of ${PACKAGES[*]}"
+	if ! sudo port uninstalled "${PACKAGES[@]}"; then
+		log_verbose "no Macports ${PACKAGES[*]}found"
 	fi
-
 fi
 
-# file conversion
-PACKAGES+=" unix2dos "
 log_verbose update all package repos
 package_update
 
 log_verbose rehash commands updated packages
 hash -r
-log_verbose "install $PACKAGES"
+log_verbose "install ${PACKAGES[*]}"
 package_install "${PACKAGES[@]}"
 
 hash -r
