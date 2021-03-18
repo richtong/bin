@@ -67,7 +67,14 @@ fi
 if in_os mac; then
 	log_verbose "Installing on MacOS"
 	# also need sponge in moreutils to prevent redirect problems
-	package_install kubernetes-cli krew moreutils
+	package_install kubernetes-cli krew helm
+
+	log_verbose "configring helm"
+	# stable is deprecated use artifactory hub to find the right repos
+	#helm repo add stable https://charts.helm.sh/stable
+	helm repo add bitnami https://charts.bitnami.com/bitnami
+	log_verbose "to use helm install rich-wp bitnami/wordpress"
+
 	log_verbose "installing bash autocomplete and krew into $(config_profile)"
 	if ! config_mark; then
 		# https://github.com/corneliusweig/konfig
@@ -119,6 +126,17 @@ if in_os mac; then
 		kubectl konfig import --save "$TEMP"
 		rm "$TEMP"
 		log_verbose "to use the microk8s cluster run kubectl config use-contest microk8s"
+		# https://microk8s.io/docs/addon-kubeflow
+		log_verbose "workaround for kubeflow adding user groups"
+		# note we need an eval to delay finding these shell variable in the VM
+		# because microk8s does sudo for everything and kubeflow does not want
+		# that https://github.com/ubuntu/microk8s/issues/1763#issuecomment-731999949
+		# shellcheck disable=SC2016
+		multipass exec microk8s-vm -- eval 'sudo usermod -a -G microk8s $USER'
+		# shellcheck disable=SC2016
+		multipass exec microk8s-vm -- eval 'sudo chown -f -R $USER $HOME/.kubd'
+
+		microk8s enable kubeflow --ignore-min-mem --bundle=lite
 
 	fi
 else
