@@ -190,6 +190,20 @@ elif in_linux ubuntu; then
 
 fi
 
+NPM_PACKAGES=(dockerfilelint)
+#shellcheck disable=SC2086
+npm_install -g "${NPM_PACKAGES[@]}"
+log_verbose "turn off sudo checks they do not work for sudo group"
+if ! config_mark "$HOME/.dockerfilelintrc"; then
+	config_add "$HOME/.dockerfilelintrc" <<-EOF
+		rules:
+		  disable_sudo: off
+	EOF
+fi
+
+log_verbose "Install hub-tools for Docker Hub CLI login with hub-tool login"
+GO111MODULE=on go get github.com/docker/hub-tool
+
 # https://docs.docker.com/security/trust/content_trust/
 if $DOCKER_CONTENT_TRUST && ! grep "$DOCKER_CONTENT_TRUST" ~/.bashrc; then
 	echo "# Added by $SCRIPTNAME on $(date)" >>"$HOME/.bashrc"
@@ -226,18 +240,6 @@ echo If you want to be safer run but you always need to sudo docker but certain 
 echo "sudo deluser $USER docker"
 echo note that this is superceded if you are a using iamuser sync and are in the iamusers group
 sudo usermod -aG docker "$USER"
-
-NPM_PACKAGES+=" dockerfilelint "
-
-#shellcheck disable=SC2086
-npm_install -g $NPM_PACKAGES
-log_verbose "turn off sudo checks they do not work for sudo group"
-if ! config_mark "$HOME/.dockerfilelintrc"; then
-	config_add "$HOME/.dockerfilelintrc" <<-EOF
-		rules:
-		  disable_sudo: off
-	EOF
-fi
 
 log_verbose see if you can use docker if not see if it is running and see if you are in the right group
 if ! docker_available; then
