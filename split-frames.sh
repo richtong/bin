@@ -11,7 +11,7 @@ OUTPUT_FORMAT='jpg'
 while getopts "hf:o:" opt; do
 	case "$opt" in
 	h)
-  		cat <<-EOF
+		cat <<-EOF
 			Split a video into a set number of frames using ffmpeg
 			usage: $SCRIPTNAME [ flags ] [ inputs ]
 			flags:
@@ -20,23 +20,25 @@ while getopts "hf:o:" opt; do
 			    -o output format (default: $OUTPUT_FORMAT)
 
 		EOF
-  		exit 0
-  		;;
+		exit 0
+		;;
 	f)
-	  	FRAMES="${OPTARG}"
+		FRAMES="${OPTARG}"
 		;;
 	o)
-	  	OUTPUT_FORMAT=$OPTARG
+		OUTPUT_FORMAT=$OPTARG
 		;;
 
+	*)
+		echo "no -$opt"
+		;;
 	esac
 done
 
 shift $((OPTIND - 1))
 
 # Split each input video into frames
-for fname in "$@"
-do
-  base="$(cut -d'.' -f1 <<<"$fname")"
-  ffmpeg -i $fname -vf "select=not(mod(n\, $FRAMES))" -vsync vfr frames/${base}_%03d.${OUTPUT_FORMAT}
+for fname in "$@"; do
+	base="$(cut -d'.' -f1 <<<"$fname")"
+	ffmpeg -i "$fname" -vf "select=not(mod(n\, $FRAMES))" -vsync vfr "frames/${base}_%03d.${OUTPUT_FORMAT}"
 done

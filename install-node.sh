@@ -13,66 +13,60 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 VERSION="${VERSION:-12}"
 BREW="${BREW:-true}"
 OPTIND=1
-while getopts "hdvr:x" opt
-do
-    case "$opt" in
-        h)
-            cat <<EOF
+while getopts "hdvr:x" opt; do
+	case "$opt" in
+	h)
+		cat <<EOF
 $SCRIPTNAME: Install Node and NPM
     "flags: -d debug, -v verbose, -h help"
 	       -r release of node [default: $VERSION]"
            -x set to disable brew (brew is normally $BREW)"
 EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            ;;
-        r)
-            VERSION="$OPTARG"
-            ;;
-        x)
-            BREW=false
-            ;;
-        *)
-            log_warning "invalid flag $opt"
-            ;;
-    esac
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	r)
+		VERSION="$OPTARG"
+		;;
+	x)
+		BREW=false
+		;;
+	*)
+		log_warning "invalid flag $opt"
+		;;
+	esac
 done
 
 # shellcheck disable=SC1090
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-version-compare.sh lib-util.sh
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-if $BREW
-then
-    # Now assumes brew is in linux
-    # the old way was node 4.0, now using node 6
-    # package_install nodejs4 npm 2
-    # change from package to brew
-    # package_install nodejs6 npm2
-    log_verbose install brew
-    brew_install node
-    log_exit brew complete
+if $BREW; then
+	# Now assumes brew is in linux
+	# the old way was node 4.0, now using node 6
+	# package_install nodejs4 npm 2
+	# change from package to brew
+	# package_install nodejs6 npm2
+	log_verbose install brew
+	brew_install node
+	log_exit brew complete
 fi
 
 log_exit using package instal now
 
-
-if command -v node > /dev/null && vergte "$(node --version)" "v$VERSION"
-then
-    log_verbose "have node $VERSION or higher no need to install over it"
-    exit
+if command -v node >/dev/null && vergte "$(node --version)" "v$VERSION"; then
+	log_verbose "have node $VERSION or higher no need to install over it"
+	exit
 fi
-
 
 # make sure to purge the old installation
 package_uninstall nodejs
-
 
 # regular node install works
 # This install node 0.1 and npm 1.1 on ubuntu 14.04 from standard repo
@@ -85,7 +79,6 @@ package_uninstall nodejs
 curl -sL "https://deb.nodesource.com/setup_${VERSION}.x" | sudo -E bash -
 package_install nodejs
 
-if ! log_assert "[[ $(node -v) =~ ^v$VERSION ]]" "node installed to $VERSION"
-then
-    exit $?
+if ! log_assert "[[ $(node -v) =~ ^v$VERSION ]]" "node installed to $VERSION"; then
+	exit $?
 fi

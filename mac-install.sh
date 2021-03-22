@@ -103,19 +103,19 @@ defaults write com.apple.finder ShowPathbar -bool true
 # note that the -p path may exist but not be up to date so check for the
 # package
 if ! xcode-select -p || ! pkgutil --pkg-info=com.apple.pkg.CLTools_Executables; then
-    log_verbose "installing Apple command line tools will throw up a gui"
+	log_verbose "installing Apple command line tools will throw up a gui"
 	xcode-select --install
 fi
 
 # Mac OS X uses Bash 3.2, we need 4.x
 declare -a PACKAGES
-PACKAGES+=( bash )
+PACKAGES+=(bash)
 
 # For lib-debug.sh gettext is in install-gnu.sh
 # PACKAGES+=" gettext "
 
 # For lib-config.sh
-PACKAGES+=( lua )
+PACKAGES+=(lua)
 
 # These are gnu utilities so installed by install-gnu.sh
 # Updated basic as Mac OS X does not like GPL 3, need -i for sed
@@ -136,14 +136,14 @@ PACKAGES+=(moreutils)
 
 # http://blog.hypriot.com/post/introducing-hypriot-cluster-lab-docker-clustering-as-easy-as-it-gets/
 # For hypriot RPI cluster searching
-PACKAGES+=( nmap )
+PACKAGES+=(nmap)
 
 # docker users this for installation
-PACKAGES+=( wget )
+PACKAGES+=(wget)
 
 # use Brew for command line management of Mac App Store apps
 # https://lifehacker.com/mas-updates-and-installs-mac-app-store-apps-from-the-co-1791919584
-PACKAGES+=( mas )
+PACKAGES+=(mas)
 log_verbose mas list for all installed apps
 log_verbose mas outdated for apps needing upgrade
 log_verbose "mas upgrade to update then all"
@@ -160,17 +160,16 @@ fi
 
 # aws need this
 # aws cli needs python and uses jq to parse output from it in bash scripts
-PACKAGES+=( jq )
+PACKAGES+=(jq)
 
 # yq is the yaml parsing equivalent of jq
 "$SCRIPT_DIR/install-yq.sh"
 
 # rsync-and-hash keeps crashing with old v2.6
-PACKAGES+=( rsync )
-
+PACKAGES+=(rsync)
 
 # file conversion
-PACKAGES+=( unix2dos )
+PACKAGES+=(unix2dos)
 
 if $MACPORTS_INSTALL && ! command -v port >/dev/null; then
 	log_verbose also install mac ports for compatibility

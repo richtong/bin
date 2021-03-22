@@ -22,38 +22,37 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
 FORCE=${FORCE:-false}
 LINT_FLAGS="${LINT_FLAGS:-""}"
-while getopts "hdvf" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-$SCRIPTNAME: Install Stylelint
-flags: -d debug, -v verbose, -h help
-       -f force install (default: $FORCE)
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            ;;
-        f)
-            FORCE=true
-            LINT_FLAGS=" -f "
-            ;;
-        *)
-            >&2 echo "$SCRIPTNAME: -$opt not valid"
-            ;;
-    esac
+while getopts "hdvf" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			$SCRIPTNAME: Install Stylelint
+			flags: -d debug, -v verbose, -h help
+			       -f force install (default: $FORCE)
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	f)
+		FORCE=true
+		LINT_FLAGS=" -f "
+		;;
+	*)
+		echo >&2 "$SCRIPTNAME: -$opt not valid"
+		;;
+	esac
 done
 
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-config.sh
 
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
 NODE_ROOT="$(command -v node)"
 NODE_ROOT="${NODE_ROOT%/*/*}"
@@ -72,21 +71,19 @@ npm_install -g stylelint stylelint-config-standard
 
 # we want the flag to not exist and be globbed
 # shellcheck disable=SC2086
-if ! config_mark $LINT_FLAGS "$HOME/.stylelintrc" "added:"
-then
-    log_verbose adding lines to .stylelintrc
-    config_add "$HOME/.stylelintrc" <<<"extends : $NODE_ROOT/lib/node_modules/stylelint-config-standard"
+if ! config_mark $LINT_FLAGS "$HOME/.stylelintrc" "added:"; then
+	log_verbose adding lines to .stylelintrc
+	config_add "$HOME/.stylelintrc" <<<"extends : $NODE_ROOT/lib/node_modules/stylelint-config-standard"
 fi
 # old interface moved to new
 #config_add_lines "$FORCE" "Added by $SCRIPTNAME" "$HOME/.vimrc" \
-    #    '"' \
-    #    "let g:syntastic_css_checkers = [ 'stylelint' ]"
+#    '"' \
+#    "let g:syntastic_css_checkers = [ 'stylelint' ]"
 log_verbose checking .vimrc
 
 # we want the flag to not exist and be globbed
 # shellcheck disable=SC2086
-if ! config_mark $LINT_FLAGS "$HOME/.vimrc" '"'
-then
-    log_verbose adding lines to .vimrc
-    config_add "$HOME/.vimrc" <<<"let g:syntastic_css_checkers = [ 'stylelint' ]"
+if ! config_mark $LINT_FLAGS "$HOME/.vimrc" '"'; then
+	log_verbose adding lines to .vimrc
+	config_add "$HOME/.vimrc" <<<"let g:syntastic_css_checkers = [ 'stylelint' ]"
 fi

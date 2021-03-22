@@ -128,5 +128,5 @@ log_verbose start network
 sudo start networking
 
 if $VERBOSE; then
- cat proc/net/bonding/bond0
+	cat proc/net/bonding/bond0
 fi

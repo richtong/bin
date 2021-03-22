@@ -57,7 +57,7 @@ popd || true
 # validate the installation
 
 if [ ! -e $INSTALL_DIR/include/boost ]; then
-	echo $SCRIPTNAME: $INSTALL_DIR/include/boost installed
+	log_verbose "$INSTALL_DIR/include/boost installed"
 fi
 
 if [ ! -e $INSTALL_DIR/lib/boost ]; then

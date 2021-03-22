@@ -60,11 +60,9 @@ fi
 
 log_verbose "run unshallow operation so update works"
 # https://github.com/Homebrew/brew/pull/9383
-for lib in homebrew-core homebrew-cask
-do
+for lib in homebrew-core homebrew-cask; do
 	repo="$HOMEBREW_PREFIX/Homebrew/Library/Taps/homebrew/$lib"
-	if [[ $(git -C "$repo" rev-parse --is-shallow-repository) =~ true ]]
-	then
+	if [[ $(git -C "$repo" rev-parse --is-shallow-repository) =~ true ]]; then
 		git -C "$repo" fetch --unshallow
 	fi
 done
@@ -82,7 +80,7 @@ done
 
 # homebrew changed so upgrade greedy does casks and packages
 # if ! brew upgrade --cask; then
-	# log_verbose brew cask failed with $?
+# log_verbose brew cask failed with $?
 # fi
 
 log_warning "you should now reboot"

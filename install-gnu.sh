@@ -68,6 +68,10 @@ package_install --with-gettext wdiff
 log_verbose update utilities on macOS
 package_install bash gdb guile gpatch m4 make nano
 
+# installing other utilities like rename
+log_verbose util-linux
+package_install util-linux
+
 log_verbose bash link
 if ! command -v bash | grep -q "/usr/local/bin"; then
 	brew link --overwrite bash
@@ -105,18 +109,21 @@ fi
 # Note this assume line_add_or_change appends at bottom so that GNU_PATH goes
 # first in the path masking the system utils like ls
 if ! config_mark; then
-	config_add <<<"export PATH=\"$NEW_PATH\""
+	config_add <<<"[[ \$PATH =~ $NEW_PATH ]] || export PATH=\"$NEW_PATH\""
 	log_verbose "add paths for utilities"
 	for name in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils; do
-		log_verbose $name paths in libexec/
-		# note we don't want $PATH expanded but we do want $name so that is why we
 		# single quote except where we have the $name entry
-		config_add <<<"export PATH=\"/usr/local/opt/$name/libexec/gnubin:\$PATH\""
+		config_add <<-EOF
+			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || export PATH=\"/usr/local/opt/$name/libexec/gnubin:\$PATH\""
+		EOF
 	done
-	log_verbose install insert paths of the for name/bin
+	log_verbose "install insert paths of the for name/bin"
 	for name in gnu-getopt gettext m4; do
-		config_add <<<"export PATH=\"/usr/local/opt/$name/bin:\$PATH\""
+		config_add <<-EOF
+			[[ \$PATH =~ opt/$name/bin ]] || export PATH=\"/usr/local/opt/$name/bin:\$PATH\""
+		EOF
 	done
+
 fi
 
 log_verbose make sure to run lib/lib-util.sh/source_profile to get the new paths

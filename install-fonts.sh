@@ -32,43 +32,40 @@ fira-code
 fira-code-nerd-font
 hack
 dejavusansmono-nerd-font"}"
-while getopts "hdv" opt
-do
-    case "$opt" in
-        h)
-            cat <<-EOF
-$SCRIPTNAME: Install fonts
-Usage: $SCRIPTNAME flags... fonts...
-flags: -d debug, -h help -v verbose"
-fonts (default: $FONTS)
-EOF
-            exit 0
-            ;;
-        d)
-            export DEBUGGING=true
-            ;;
-        v)
-            export VERBOSE=true
-            ;;
-        *)
-            echo "No flag -$opt"
-            ;;
-    esac
+while getopts "hdv" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			$SCRIPTNAME: Install fonts
+			Usage: $SCRIPTNAME flags... fonts...
+			flags: -d debug, -h help -v verbose"
+			fonts (default: $FONTS)
+		EOF
+		exit 0
+		;;
+	d)
+		export DEBUGGING=true
+		;;
+	v)
+		export VERBOSE=true
+		;;
+	*)
+		echo "No flag -$opt"
+		;;
+	esac
 done
 # shellcheck source=./include.sh
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-if ! in_os mac
-then
-    log_exit Mac only
+if ! in_os mac; then
+	log_exit Mac only
 fi
 
-if [[ $# -gt 0 ]]
-then
-    log_verbose "$# so replacing default $FONTS"
-    FONTS="$*"
+if [[ $# -gt 0 ]]; then
+	log_verbose "$# so replacing default $FONTS"
+	FONTS="$*"
 fi
 
 # required by ubuntu font
@@ -77,8 +74,7 @@ package_install svn
 log_verbose install cask-fonts
 tap_install homebrew/cask-fonts
 log_verbose "installing $FONTS"
-for FONT in $FONTS
-do
-    cask_install "font-$FONT"
-    log_verbose "font-$FONT installed"
+for FONT in $FONTS; do
+	cask_install "font-$FONT"
+	log_verbose "font-$FONT installed"
 done
