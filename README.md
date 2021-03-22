@@ -1,3 +1,27 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Infrastructure commands](#infrastructure-commands)
+  - [Dependencies and notes](#dependencies-and-notes)
+  - [Installation](#installation)
+  - [Global variables](#global-variables)
+  - [AWS Install.sh (deprecated)](#aws-installsh-deprecated)
+  - [Configuring your Mac](#configuring-your-mac)
+  - [Note on the programs](#note-on-the-programs)
+  - [Agent scripts vs dev scripts](#agent-scripts-vs-dev-scripts)
+  - [Helper role of ../etc and ../lib](#helper-role-of-etc-and-lib)
+  - [List of files and what they do](#list-of-files-and-what-they-do)
+  - [SSH key setup](#ssh-key-setup)
+  - [Continue the installation if this is a general surround machines](#continue-the-installation-if-this-is-a-general-surround-machines)
+  - [Configure a deployment machine or a testing machine](#configure-a-deployment-machine-or-a-testing-machine)
+    - [Installing agents](#installing-agents)
+    - [Function so each agent](#function-so-each-agent)
+  - [Creating a file server](#creating-a-file-server)
+  - [Using the Raspberry Pi as a dockerized camera system](#using-the-raspberry-pi-as-a-dockerized-camera-system)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Infrastructure commands
 
 These are (mainly by @richtong) convenience programs for use in installing and
