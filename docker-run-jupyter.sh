@@ -11,27 +11,31 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
 REPO="${REPO:-"jupyter"}"
 NOTEBOOK="${NOTEBOOK:-"tensorflow-notebook"}"
-while getopts "hdvr:" opt; do
+while getopts "hdvr:n:" opt; do
 	case "$opt" in
 	h)
-		echo $SCRIPTNAME: Install jupyter running on docker
+		echo "$SCRIPTNAME: Install jupyter running on docker"
 		echo "flags: -d debug, -v verbose, -h help"
 		echo "       -r repo (default: $REPO)"
 		echo "positional  notebook (default: $NOTEBOOK)"
 		exit 0
 		;;
 	d)
-		DEBUGGING=true
+		export DEBUGGING=true
 		;;
 	v)
-		VERBOSE=true
+		export VERBOSE=true
 		;;
 	n)
 		NOTEBOOK="$OPTARG"
 		;;
+	*)
+		echo "no -$opt"
+		;;
 	esac
 done
 
+# shellcheck disable=SC1090
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-docker.sh
 
@@ -48,7 +52,7 @@ if docker_find_container "$NOTEBOOK"; then
 	log_error 0 "$NOTEBOOK already exists"
 fi
 
-log_verbose running $REPO/$NOTEBOOK
+log_verbose "running $REPO/$NOTEBOOK"
 docker run -d --rm -p 8888:8888 --name "$NOTEBOOK" "$REPO/$NOTEBOOK"
 log_verbose show the logs as they main have token info wait a little
 sleep 5

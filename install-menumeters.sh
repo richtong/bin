@@ -13,19 +13,23 @@ OPTIND=1
 while getopts "hdv" opt; do
 	case "$opt" in
 	h)
-		echo $SCRIPTNAME: Install Menumeters taskbar monitoring of system
+		echo "$SCRIPTNAME: Install Menumeters taskbar monitoring of system"
 		echo "flags: -d debug, -v verbose, -h help"
 		exit 0
 		;;
 	d)
-		DEBUGGING=true
+		export DEBUGGING=true
 		;;
 	v)
-		VERBOSE=true
+		export VERBOSE=true
+		;;
+	*)
+		echo "no -$opt"
 		;;
 	esac
 done
 
+# shellcheck disable=SC1090
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-mac.sh
 
