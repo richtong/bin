@@ -13,14 +13,17 @@ SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 SECRET_USER="${SECRET_USER:-"$USER"}"
+SECRET_FILE="${SECRET_FILE:-"$SECRET_USER.vc"}"
 # switch to Google Drive because Dropbox charges for >3 machines
-#SECRET_VOLUME="${SECRET_VOLUME:-"$HOME/Dropbox/$SECRET_USER.vc"}"
-SECRET_VOLUME="${SECRET_VOLUME:-"$HOME/Google Drive/$SECRET_USER.vc"}"
+# SECRET_VOLUME="${SECRET_DRIVE:-"Dropbox"}"
+SECRET_DRIVE="${SECRET_DRIVE:-"Google Drive"}"
 if [[ $OSTYPE =~ darwin ]]; then
-	SECRET_MOUNTPOINT="${SECRET_MOUNTPOINT:-"/Volumes/$SECRET_USER.vc"}"
+	SECRET_MOUNT_ROOT="${SECRET_MOUNT_ROOT:-"/Volumes"}"
 else
-	SECRET_MOUNTPOINT="${SECRET_MOUNTPOINT:-"/media/$SECRET_USER.vc"}"
+	SECRET_MOUNT_ROOT="${SECRET_MOUNT_ROOT:-"/media"}"
 fi
+SECRET_VOLUME="${SECRET_VOLUME:-"$HOME/$SECRET_DRIVE/$SECRET_FILE"}"
+SECRET_MOUNTPOINT="${SECRET_MOUNTPOINT:-"$SECRET_MOUNT_ROOT/$SECRET_FILE"}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvu:" opt; do
@@ -108,19 +111,21 @@ log_verbose Mac install
 # which prevents the hdiutil from working, so we use unix mount instead
 
 if ! config_mark; then
-	log_verbose adding fstab entry to close permissions
+	log_verbose "adding fstab entry to close permissions"
 	# http://pclosmag.com/html/issues/200709/page07.html
 	config_add <<-EOF
-		if ! veracrypt -t -l "$SECRET_VOLUME" >/dev/null 2>&1
+		# finds the first match for of secret file on any matching $SECRET_DRIVE
+		veracrypt_secret="$(find "\$HOME" -maxdepth 3 -name "$SECRET_FILE" | grep -m1 "$SECRET_DRIVE")
+		if ! veracrypt -t -l "\$veracrypt_secret" >/dev/null 2>&1
 		then
 		    # need to mount as block device with filesystem=none
 		    echo enter the password for the hidden volume this will take at least a minute
-		    veracrypt -t --pim=0 -k "" --protect-hidden=no --filesystem=none "$SECRET_VOLUME"
+		    veracrypt -t --pim=0 -k "" --protect-hidden=no --filesystem=none "\$veracrypt_disk"
 		fi
 		# https://serverfault.com/questions/81746/bypass-ssh-key-file-permission-check/82282#82282
 		# for parameters needed for msdos fat partitions
 		# Need to look the second to last field because if the volume has a space cut will not work
-		veracrypt_disk="\$(veracrypt -t -l "$SECRET_VOLUME" | awk '{print \$(NF-1)}')"
+		veracrypt_disk="\$(veracrypt -t -l "\$veracrypt_secret" | awk '{print \$(NF-1)}')"
 		if ! mount | grep -q "\$veracrypt_disk"
 		then
 		    echo Enter your macOS password

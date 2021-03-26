@@ -87,8 +87,10 @@ if [[ ! -e $SSH/config ]]; then
 Host *
 	AddKeysToAgent yes
 	UseKeychain yes
-	IdentityFile \$HOME/.ssh/$SSH_KEY
+	IdentityFile ~/.ssh/$SSH_KEY
 EOF
+
+ssh-add -K "$HOME/.ssh/$SSH_KEY"
 
 # https://docs.github.com/en/github/authenticating-to-github/testing-your-ssh-connection
 if ! ssh -T git@github.com; then
