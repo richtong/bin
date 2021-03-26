@@ -74,6 +74,21 @@ PACKAGES=(
 	pydocstyle
 )
 
+# we need it to be python and pip for compatibility with Linux
+# https://docs.brew.sh/Homebrew-and-Python
+if ! config_mark; then
+	log_verbose "adding homebrew python $(config_profile)"
+	# note we want $PATH not quoted, but set the python version
+	config_add <<-EOF
+		[[ \$PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:\$PATH"
+	EOF
+	log_warning "source $(config_profile) to get the correct python"
+fi
+
+log_verbose "added to config now source"
+source_profile
+hash -r
+
 if $PIPENV; then
 	PACKAGES+=(pipenv)
 	log_verbose "use pipenv per directory pipenv install"
@@ -94,18 +109,6 @@ fi
 if $ANACONDA; then
 	log_verbose "use anaconda"
 	"$SCRIPT_DIR/install-anaconda.sh"
-fi
-
-# we need it to be python and pip for compatibility with Linux
-# no longer need this installation
-# https://docs.brew.sh/Homebrew-and-Python
-if ! config_mark; then
-	log_verbose "adding homebrew python $(config_profile)"
-	# note we want $PATH not quoted, but set the python version
-	config_add <<-EOF
-		[[ \$PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:\$PATH"
-	EOF
-	log_warning "source $(config_profile) to get the correct python"
 fi
 
 # argparse complete

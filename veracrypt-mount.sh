@@ -13,7 +13,9 @@ SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 SECRET_USER="${SECRET_USER:-"$USER"}"
-SECRET_VOLUME="${SECRET_VOLUME:-"$HOME/Dropbox/$SECRET_USER.vc"}"
+# switch to Google Drive because Dropbox charges for >3 machines
+#SECRET_VOLUME="${SECRET_VOLUME:-"$HOME/Dropbox/$SECRET_USER.vc"}"
+SECRET_VOLUME="${SECRET_VOLUME:-"$HOME/Google Drive/$SECRET_USER.vc"}"
 if [[ $OSTYPE =~ darwin ]]; then
 	SECRET_MOUNTPOINT="${SECRET_MOUNTPOINT:-"/Volumes/$SECRET_USER.vc"}"
 else
