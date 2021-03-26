@@ -56,8 +56,8 @@ PACKAGES=(
 	jupyterlab-lsp
 	'python-language-server[all]'
 	jupyterlab-system-monitor
-	'xeus-python>=0.8.6'
-	'notebook>=6'
+	'xeus-python==0.8*'
+	'notebook==6*'
 	ptvsd
 	nodejs
 	jupyterlab-git
