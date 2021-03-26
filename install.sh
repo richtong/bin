@@ -314,7 +314,7 @@ log_verbose "installing development and devops systems"
 "$SCRIPT_DIR/install-netlify.sh"
 "$SCRIPT_DIR/install-terraform.sh"
 "$SCRIPT_DIR/install-jupyter.sh"
-"$SCRIPT_DIR/install-ruby.sh}"
+"$SCRIPT_DIR/install-ruby.sh"
 
 log_verbose "skipping install-flutter but somehow"
 #"$SCRIPT_DIR/install-flutter.sh"
