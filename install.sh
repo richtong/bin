@@ -15,7 +15,7 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 export REPO_USER="${REPO_USER:-"$USER"}"
 export REPO_DOMAIN="${REPO_DOMAIN:-"restart.us"}"
-export GIT_REPO_NAME="${GIT_REPO_NAME:-"restartus"}"
+export GIT_REPO_NAME="${GIT_REPO_NAME:-"richtong"}"
 
 export DOCKER_USER="${DOCKER_USER:-"$REPO_USER"}"
 export GIT_USERNAME="${GIT_USERNAME:-"${REPO_USER^}"}"
@@ -27,6 +27,7 @@ NEW_HOSTNAME="${NEW_HOSTNAME:-"$HOSTNAME"}"
 DOTFILES_STOW="${DOTFILES_STOW:-false}"
 FORCE="${FORCE:-false}"
 MAC_SYSTEM_UPDATE="${MAC_SYSTEM_UPDATE:-false}"
+WS_DIR="${WS_DIR:-$HOME/ws}"
 
 INSTALL_SECRETS="${INSTALL_SECRETS:-false}"
 export SECRETS_DIR_ROOT="${SECRETS_DIR_ROOT:-"/Volumes"}"
