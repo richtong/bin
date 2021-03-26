@@ -342,8 +342,8 @@ if $VMWARE; then
 	popd >/dev/null || return
 fi
 
-# Install kubernetes not used it is now in docker desktop
-# "$SCRIPT_DIR/install-kubernetes.sh"
+# Install kubernetes as docker desktop is only a single node
+"$SCRIPT_DIR/install-kubernetes.sh"
 # Needed for docker for kubernetes minikube
 # "$SCRIPT_DIR/install-xhyve.sh"
 

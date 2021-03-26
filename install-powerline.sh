@@ -54,7 +54,7 @@ source_lib lib-install.sh lib-util.sh lib-config.sh
 log_verbose "install powerline-go and powerline-status packages"
 pip_install powerline-status powerline-gitstatus
 
-brew_install powerline-go
+brew_install powerline-go svn
 
 log_verbose "installing powerline fonts"
 cask_install font-fira-mono-for-powerline
@@ -133,3 +133,5 @@ fi
 log_verbose "change config at $PROFILE"
 log_verbose "run powerline-lint to check and then powerline-daemon --replace"
 log_verbose "on python version changes, need to delete the files and reset"
+log_verbose "Set iterm/Preferences/Profiles/Font to Fira Mono"
+log_verbose "Set iterm/Preferenes/Profiles/Colors to Solarized Dark"

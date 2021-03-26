@@ -60,9 +60,9 @@ KUBE_VERSION="${KUBE_RELEASE:-"$(curl -s https://storage.googleapis.com/kubernet
 KUBE_DEST="${KUBE_DEST:-"/usr/local/bin/kubectl"}"
 KUBE_URL="${KUBE_URL:-https://storage.googleapis.com/kubernetes-release/release/$KUBE_VERSION/bin/linux/amd64/kubectl}"
 
-if ! $FORCE && command -v kubectl; then
-	log_exit "already installed"
-fi
+#if ! $FORCE && command -v kubectl; then
+#log_exit "already installed"
+#fi
 
 if in_os mac; then
 	log_verbose "Installing on MacOS"
