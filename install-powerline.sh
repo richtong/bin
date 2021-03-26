@@ -34,7 +34,7 @@ while getopts "hdv" opt; do
 		export FLAGS+=" -v "
 		;;
 	*)
-		echo "not flag -$opt"
+		echo "not flag -$opt" >&2
 		;;
 	esac
 done
@@ -55,14 +55,14 @@ if [[ ! -e $powerline ]]; then
 fi
 
 if ! config_mark "$(config_profile_shell)"; then
-	config_add "$(config_profile_shell)" <<-EOF
-		if [[ -r $powerline ]]; then
-			powerline-daemon -q
-			export POWERLINE_BASH_CONTINUATION=1
-			export POWERLINE_BASH_SELECT=1
-			source "$powerline" || true
-		fi
-	EOF
+	config_add "$(config_profile_shell)" <<EOF
+if [[ -r $powerline ]]; then
+	powerline-daemon -q
+	export POWERLINE_BASH_CONTINUATION=1
+	export POWERLINE_BASH_SELECT=1
+	source "$powerline" || true
+fi
+EOF
 fi
 
 config="$location/config_files"
@@ -76,7 +76,7 @@ log_verbose "installing powerline fonts add to config.json"
 cask_install font-fira-mono-for-powerline
 
 VIM_PROFILE="${VIM_PROFILE:-"$HOME/.vimrc"}"
-if ! config_mark "$VIM_PROFILE" "'"; then
+if ! config_mark "$VIM_PROFILE" '"'; then
 	log_verbose "adding to $VIM_PROFILE"
 	config_add "$VIM_PROFILE" <<-EOF
 		set rtp+="$location/bindings/vim"

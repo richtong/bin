@@ -114,13 +114,13 @@ if ! config_mark; then
 	for name in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils; do
 		# single quote except where we have the $name entry
 		config_add <<-EOF
-			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || export PATH=\"/usr/local/opt/$name/libexec/gnubin:\$PATH\""
+			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || export PATH="/usr/local/opt/$name/libexec/gnubin:\$PATH"
 		EOF
 	done
 	log_verbose "install insert paths of the for name/bin"
 	for name in gnu-getopt gettext m4; do
 		config_add <<-EOF
-			[[ \$PATH =~ opt/$name/bin ]] || export PATH=\"/usr/local/opt/$name/bin:\$PATH\""
+			[[ \$PATH =~ opt/$name/bin ]] || export PATH="/usr/local/opt/$name/bin:\$PATH"
 		EOF
 	done
 
