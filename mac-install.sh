@@ -129,10 +129,13 @@ PACKAGES+=(lua)
 # PACKAGES+=" vlc "
 
 # To run commands in parallel across the cluster do not need anymore
-# PACKAGES+=" parallel "
+PACKAGES+=(parallel)
 # parallel is in moreutils so do not install both
 # And this is part of moreutils
-PACKAGES+=(moreutils)
+# PACKAGES+=(moreutils)
+
+# rename files quickly
+PACKAGES+=(rename)
 
 # http://blog.hypriot.com/post/introducing-hypriot-cluster-lab-docker-clustering-as-easy-as-it-gets/
 # For hypriot RPI cluster searching
