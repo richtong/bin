@@ -88,6 +88,7 @@ read -p "Connect to 1Password and press enter to continue"
 open -a "Backup and Sync"
 read -p "Connect to $SECRET_DRIVE where your $SECRET_FILE is stored press enter to continue"
 
+brew install veracrypt
 # finds the first match for of secret file on any matching $SECRET_DRIVE
 veracrypt_secret="$(find "\$HOME" -maxdepth 3 -name "$SECRET_FILE" | grep -m1 "$SECRET_DRIVE")
 if ! veracrypt -t -l "$veracrypt_secret" >/dev/null 2>&1

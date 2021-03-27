@@ -54,13 +54,12 @@ if [[ $OSTYPE =~ darwin ]]; then
 	fi
 
 	cask_install veracrypt
-	if [[ ! -e /usr/local/bin/veracrypt ]]; then
-		mkdir -p /usr/local/bin
-		ln -s "/Applications/VeraCrypt.app/Contents/MacOS/VeraCrypt" "/usr/local/bin/veracrypt"
+	if ! config_mark; then
+		config_add <<-EOF
+			[[ -e /Applications/VeraCrypt.app/Contents/MacOS ]] && PATH+=":/Applications/VeraCrypt.app/Contents/MacOS"
+	EOF
 	fi
-
-	log_assert "[[ -e /Applications/VeraCrypt.app ]]" "VeraCrypt installed"
-	exit
+	log_exit "Veracrypt installed"
 fi
 
 # https://www.linuxbabe.com/ubuntu/install-veracrypt-ubuntu-16-04-16-10
