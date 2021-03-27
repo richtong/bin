@@ -14,7 +14,7 @@ export SCRIPTNAME
 trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 export REPO_USER="${REPO_USER:-"$USER"}"
-export REPO_DOMAIN="${REPO_DOMAIN:-"restart.us"}"
+export REPO_DOMAIN="${REPO_DOMAIN:-"tongfamily.com"}"
 export GIT_REPO_NAME="${GIT_REPO_NAME:-"richtong"}"
 
 export DOCKER_USER="${DOCKER_USER:-"$REPO_USER"}"
@@ -245,8 +245,22 @@ if [[ $OSTYPE =~ linux ]]; then
 	run_if "$SOURCE_DIR/scripts/build/bootstrap-dev"
 fi
 
-"$BIN_DIR/install-anaconda.sh"
+mkdir -p "$WS_DIR"
+if $FORCE; then
+	FORCE_FLAG="-f"
+fi
 
+log_verbose install secrets will work with ssh now that we can use dropbox cli
+if $INSTALL_SECRETS; then
+	# no longer load dropbox where secrets are stored note this currently graphical
+	"$SCRIPT_DIR/install-google.sh"
+	# "$SCRIPT_DIR/install-dropbox.sh"
+
+	log_verbose install secrets from veracrypt and link to .ssh
+	"$SCRIPT_DIR/install-secrets.sh" -u "$REPO_USER" -r "$SECRETS_DIR_ROOT"
+fi
+
+"$BIN_DIR/install-anaconda.sh"
 PYTHON_PACKAGES=(
 )
 
@@ -319,20 +333,6 @@ log_verbose "installing development and devops systems"
 
 log_verbose "skipping install-flutter but somehow"
 #"$SCRIPT_DIR/install-flutter.sh"
-
-log_verbose install secrets will work with ssh now that we can use dropbox cli
-if $INSTALL_SECRETS; then
-	log_verbose load dropbox where secrets are stored note this currently graphical
-	log_verbose so requires console access
-	"$SCRIPT_DIR/install-dropbox.sh"
-	log_verbose install secrets from veracrypt and link to .ssh
-	"$SCRIPT_DIR/install-secrets.sh" -u "$REPO_USER" -r "$SECRETS_DIR_ROOT"
-fi
-
-mkdir -p "$WS_DIR"
-if $FORCE; then
-	FORCE_FLAG="-f"
-fi
 
 log_verbose install brew for linux and mac
 "$SCRIPT_DIR/install-brew.sh"
