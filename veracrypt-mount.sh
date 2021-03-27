@@ -116,7 +116,7 @@ if ! config_mark; then
 	config_add <<-EOF
 		# finds the first match for of secret file on any matching $SECRET_DRIVE
 		veracrypt_secret="$(find "\$HOME" -maxdepth 3 -name "$SECRET_FILE" | grep -m1 "$SECRET_DRIVE")
-		if ! veracrypt -t -l "\$veracrypt_secret" >/dev/null 2>&1
+		if [[ -n \$veracrypt_secret ]] && ! veracrypt -t -l "\$veracrypt_secret" >/dev/null 2>&1
 		then
 		    # need to mount as block device with filesystem=none
 		    echo enter the password for the hidden volume this will take at least a minute
@@ -126,7 +126,7 @@ if ! config_mark; then
 		# for parameters needed for msdos fat partitions
 		# Need to look the second to last field because if the volume has a space cut will not work
 		veracrypt_disk="\$(veracrypt -t -l "\$veracrypt_secret" | awk '{print \$(NF-1)}')"
-		if ! mount | grep -q "\$veracrypt_disk"
+		if [[ -n \$veracrypt_disk ]]! mount | grep -q "\$veracrypt_disk"
 		then
 		    echo Enter your macOS password
 		    sudo mkdir -p "$SECRET_MOUNTPOINT"
