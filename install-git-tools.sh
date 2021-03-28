@@ -136,7 +136,7 @@ PACKAGES+=(
 # PACKAGES+=" meld "
 
 # shellcheck disable=SC2086
-cask_install "${PACKAGES[@]}"
+package_install "${PACKAGES[@]}"
 
 gh config set git_protocol ssh
 # https://dev.to/softprops/digitally-unmastered-the-github-cli-edition-1cc4
