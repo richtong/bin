@@ -9,7 +9,7 @@
 ##@author Rich Tong
 ##
 #
-set -u && "SCRIPTNAME=$(basename "$0")"
+set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
@@ -139,9 +139,10 @@ if in_os mac; then
 		log_verbose install docker and uninstall docker-edge if needed
 		cask_swap docker docker-edge
 	fi
+	cask_install docker
 	log_warning docker now installed by homebrew open it up and fill it in before continuing
 	log_warning it is best to login from the Docker.app
-	open /Applications/Docker.app
+	open -a Docker.app
 	read -n1 -r -p "Press anything to continue.." key
 	# need to use key to make shellcheck happy
 	log_debug "got $key"
