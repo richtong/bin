@@ -267,7 +267,7 @@ PYTHON_PACKAGES=(
 # these python packages do not always install command line argument stuff
 
 # common packages
-# mmv - multiple file mov
+# mmv - multiple file move and rename
 # curl - not clear if needed but MacOS doesn't have the latest
 # bfg - remove passwords and big files you didn't mean to commit
 PACKAGES+=(
