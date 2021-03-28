@@ -270,11 +270,11 @@ PYTHON_PACKAGES=(
 # mmv - multiple file move and rename
 # curl - not clear if needed but MacOS doesn't have the latest
 # bfg - remove passwords and big files you didn't mean to commit
+# sudo - Linux only
 PACKAGES+=(
 	mmv
 	curl
 	bfg
-	sudo
 	git
 	pre-commit
 )
