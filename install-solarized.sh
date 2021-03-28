@@ -56,74 +56,73 @@ log_verbose on Mac requires coreutils dircolors to start
 shopt -s nullglob
 
 if [[ $OSTYPE =~ darwin ]]; then
-	# https://apple.stackexchange.com/questions/63062/where-are-the-terminal-settings-stored-on-os-x
-	# https://stackoverflow.com/questions/8350065/reload-com-apple-terminal-plist
-	log_verbose Make directory listings the right color and vi too
-	# Note we need the quotes in the search string
-	if ! defaults read com.apple.Terminal "Window Settings" | grep -q 'name = "Solarized Dark"'; then
-		git_install_or_update "$MAC_REPO" "$MAC_GIT"
-		log_warning will open Terminal windows to when adding solarized layouts
-		for terminal in "$WS_DIR/git/$MAC_REPO"/*.terminal; do
-			open "$terminal"
-		done
-	fi
-	# Mac does not have dircolors profile loaded, so add the equivalent code
-	# http://www.conrad.id.au/2013/07/making-mac-os-x-usable-part-1-terminal.html
-	# note in linux .bashrc called for interactive non-login shells
-	# And .bash_profile called for login shells (like when you ssh in or when you login
-	# for the first time on your Mac)
-	# But in MacOSX the Terminal.app calls .bash_profile each time and then
-	# .bashrc and with iterm2 it just calls bashrc so put it there
-	#
-	PROFILE="${PROFILE:-"$HOME/.bashrc"}"
-	if ! config_mark "$PROFILE"; then
-		log_verbose "Adding .dircolors to $PROFILE"
-		log_verbose note on Mac assumes gnu path is loaded first
-		config_add "$PROFILE" <<-'EOF'
-			        if command -v dircolors >/dev/null; then
-			            if [[ -r "$HOME/.dircolors" ]]; then eval "$(dircolors -b "$HOME/.dircolors")"
-			                                            else eval "$(dircolors -b)"; fi
-			            alias ls='ls --color=auto'
-			            alias grep='grep --color=auto'
-			            alias fgrep='fgrep --color=auto'
-			            alias egrep='egrep --color=auto'
-			        fi
-		EOF
-	fi
-	# do not exit as we will install dircolors for everyone at the ned
+# https://apple.stackexchange.com/questions/63062/where-are-the-terminal-settings-stored-on-os-x
+# https://stackoverflow.com/questions/8350065/reload-com-apple-terminal-plist
+log_verbose Make directory listings the right color and vi too
+# Note we need the quotes in the search string
+if ! defaults read com.apple.Terminal "Window Settings" | grep -q 'name = "Solarized Dark"'; then
+    git_install_or_update "$MAC_REPO" "$MAC_GIT"
+    log_warning will open Terminal windows to when adding solarized layouts
+    for terminal in "$WS_DIR/git/$MAC_REPO"/*.terminal; do
+        open "$terminal"
+    done
+fi
+# Mac does not have dircolors profile loaded, so add the equivalent code
+# http://www.conrad.id.au/2013/07/making-mac-os-x-usable-part-1-terminal.html
+# note in linux .bashrc called for interactive non-login shells
+# And .bash_profile called for login shells (like when you ssh in or when you login
+# for the first time on your Mac)
+# But in MacOSX the Terminal.app calls .bash_profile each time and then
+# .bashrc and with iterm2 it just calls bashrc so put it there
+#
+if ! config_mark "$(config_profile_shell)"; then
+    log_verbose "Adding .dircolors to $PROFILE"
+    log_verbose note on Mac assumes gnu path is loaded first
+    config_add "$(config_profile_shell)"<<'EOF'
+if command -v dircolors >/dev/null; then
+    if [[ -r "$HOME/.dircolors" ]]; then eval "$(dircolors -b "$HOME/.dircolors")"
+                                    else eval "$(dircolors -b)"; fi
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+EOF
+fi
+# do not exit as we will install dircolors for everyone at the ned
 fi
 if [[ $(desktop_environment) =~ xfce ]]; then
-	log_warning Note that in debian xfce implementation the
-	log_verbose Application/Terminal Emulator by default
-	log_verbose To use solarized start and go to Edit
-	log_verbose Edit/Profile Preferences/Test and Background Color/Built in Scheme
-	log_verbose select solarized light or solarized dark
-	log_verbose Color Palette/Built in Schemes/Solarized
-	log_verbose we also xetup xfce4-terminal
-	# So we install both xfce4-terminal and gnome terminal below
-	# confusing right?
-	# https://github.com/sgerrand/xfce4-terminal-colors-solarized
-	# https://askubuntu.com/questions/676428/change-color-scheme-for-xfce4-terminal-manually
-	# Note that unlike gnome terminal there is no easy way to switch
-	# themes as they are entries in the terminal.rc
-	# although you can fool with the system with a wrapper that dynamically
-	# changes terminal based on the command line.
-	git_install_or_update "$XFCE_REPO" "$XFCE_GIT"
-	# do not use install command because we do not want to overwrite
-	# use the cp -n so as not to overwrite
-	# https://stackoverflow.com/questions/9392735/linux-how-to-copy-but-not-overwrite
-	# note quoting so the asterisk wild cards correctly
-	# Each terminalrc needs to be in its own config
-	for color_terminalrc in "$WS_DIR/git/$XFCE_REPO/"*/terminalrc; do
-		color="$(basename "$(dirname "$color_terminalrc")")"
-		color_dir="$HOME/.config-$color"
-		log_verbose "$color_dir is the name of the directory $color terminal scheme"
-		color_dest="$color_dir/xfce4/terminal"
-		mkdir -p "$color_dest"
-		cp -rn "$color_terminalrc" "$color_dest"
-		log_verbose "to change to $color color scheme run"
-		log_verbose "XDG_CONFIG_HOME=$color_dir xfce4-terminal"
-	done
+log_warning Note that in debian xfce implementation the
+log_verbose Application/Terminal Emulator by default
+log_verbose To use solarized start and go to Edit
+log_verbose Edit/Profile Preferences/Test and Background Color/Built in Scheme
+log_verbose select solarized light or solarized dark
+log_verbose Color Palette/Built in Schemes/Solarized
+log_verbose we also xetup xfce4-terminal
+# So we install both xfce4-terminal and gnome terminal below
+# confusing right?
+# https://github.com/sgerrand/xfce4-terminal-colors-solarized
+# https://askubuntu.com/questions/676428/change-color-scheme-for-xfce4-terminal-manually
+# Note that unlike gnome terminal there is no easy way to switch
+# themes as they are entries in the terminal.rc
+# although you can fool with the system with a wrapper that dynamically
+# changes terminal based on the command line.
+git_install_or_update "$XFCE_REPO" "$XFCE_GIT"
+# do not use install command because we do not want to overwrite
+# use the cp -n so as not to overwrite
+# https://stackoverflow.com/questions/9392735/linux-how-to-copy-but-not-overwrite
+# note quoting so the asterisk wild cards correctly
+# Each terminalrc needs to be in its own config
+for color_terminalrc in "$WS_DIR/git/$XFCE_REPO/"*/terminalrc; do
+color="$(basename "$(dirname "$color_terminalrc")")"
+color_dir="$HOME/.config-$color"
+log_verbose "$color_dir is the name of the directory $color terminal scheme"
+color_dest="$color_dir/xfce4/terminal"
+mkdir -p "$color_dest"
+cp -rn "$color_terminalrc" "$color_dest"
+log_verbose "to change to $color color scheme run"
+log_verbose "XDG_CONFIG_HOME=$color_dir xfce4-terminal"
+done
 
 	dest="$HOME/.config/xfce4/terminal"
 	dark="$HOME/.config-dark/xfce4/terminal"

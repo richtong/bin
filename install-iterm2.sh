@@ -62,7 +62,10 @@ if ! in_os mac; then
 fi
 
 brew_install iterm2
-log_verbose "install dynamic profiles $ITERM2_PROFILE_SRC if $ITERM2_PROFILE_DST not there"
+
+log_verbose "making $ITERM2_PATH"
+mkdir -p "$HOME/$ITERM2_PATH"
+log_verbose "install dynamic profiles"
 if [[ -e $ITERM2_PROFILE_SRC ]] && [[ ! -e $ITERM2_PROFILE_DST ]]; then
 	log_verbose "symlink $ITERM2_PROFILE_SRC to $ITERM2_PROFILE_DST"
 	# generate a guid with uuidgen
@@ -74,7 +77,7 @@ curl -L https://iterm2.com/shell_integration/install_shell_integration.sh | bash
 
 if ! config_mark; then
 	# shellcheck disable=SC2016
-	config_add <<<-'EOF'
+	config_add <<-'EOF'
 	# shellcheck disable=SC2015,SC1090
 	[[ -e $HOME/.iterm2_shell_integration.bash ]] && source "$HOME/.iterm2_shell_integration.bash" || true
 	EOF

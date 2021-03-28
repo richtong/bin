@@ -169,6 +169,20 @@ source_lib lib-util.sh lib-version-compare.sh lib-git.sh \
 	lib-keychain.sh lib-config.sh
 shift $((OPTIND - 1))
 
+# do not use config_add because this added the comment line
+log_verbose "Add #! to profiles"
+for profile in "$(config_profile)" "$(config_profile_shell)"; do
+	if [[ ! -e $profile ]]; then
+		echo '#!/usr/bin/env bash' >> "$profile"
+	fi
+done
+
+# https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
+if ! config_mark; then
+	# shellcheck disable=SC2016
+	config_add <<<'if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi'
+fi
+
 if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose "mac-install.sh with ${MAC_FLAGS-no flags}"
 	"$SOURCE_DIR/bin/mac-install.sh" "${MAC_FLAGS-}"
