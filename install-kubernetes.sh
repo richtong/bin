@@ -79,12 +79,12 @@ if in_os mac; then
 	if ! config_mark; then
 		# https://github.com/corneliusweig/konfig
 		config_add <<-'EOF'
-			[[ $PATH =~ .krew/bin ]] && export PATH="$PATH:$HOME/.krew/bin"
+			[[ $PATH =~ .krew/bin ]] || export PATH="$PATH:$HOME/.krew/bin"
 			# shellcheck disable=SC1090
 			source <(kubectl completion bash)
 		EOF
 	fi
-
+	source_profile
 	hash -r
 	# https://github.com/corneliusweig/konfig
 	# used by microk8s to merge its config file
@@ -108,6 +108,13 @@ if in_os mac; then
 		microk8s install
 		# https://ubuntu.com/tutorials/install-microk8s-on-mac-os#4-wait-for-microk8s-to-start
 		log_verbose "microk8s installed waiting for it to start"
+		if ! microk8s --help >/dev/null; then
+			# https://github.com/canonical-web-and-design/microk8s.io/issues/239
+			log_verbose "microk8s failed delete vm and retry"
+			multipass delete microk8s-vm
+			multipass purge
+			microk8s install
+		fi
 		microk8s status --wait-ready
 		if $VERBOSE; then
 			microk8s kubectl get nodes
@@ -132,11 +139,21 @@ if in_os mac; then
 		# because microk8s does sudo for everything and kubeflow does not want
 		# that https://github.com/ubuntu/microk8s/issues/1763#issuecomment-731999949
 		# shellcheck disable=SC2016
-		multipass exec microk8s-vm -- eval 'sudo usermod -a -G microk8s $USER'
-		# shellcheck disable=SC2016
-		multipass exec microk8s-vm -- eval 'sudo chown -f -R $USER $HOME/.kubd'
+		log_verbose "running usermod"
+		if ! multipass exec microk8s-vm -- eval 'sudo usermod -a -G microk8s $USER'; then
+			log_error 2 "sudo usermod failed"
+		fi
 
-		microk8s enable kubeflow --ignore-min-mem --bundle=lite
+		# shellcheck disable=SC2016
+		log_verbose "running chown"
+		if ! multipass exec microk8s-vm -- eval 'sudo chown -f -R $USER $HOME/.kube'; then
+			log_error 3 "sudo chown failed"
+		fi
+
+		log_verbose "running kubeflow"
+		if ! multipass exec microk8s-vm -- microk8s enable kubeflow --ignore-min-mem --bundle lite; then
+			log_error 4 "enable kubeflow failed"
+		fi
 
 	fi
 else
