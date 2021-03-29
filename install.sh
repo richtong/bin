@@ -173,14 +173,16 @@ shift $((OPTIND - 1))
 log_verbose "Add #! to profiles"
 for profile in "$(config_profile)" "$(config_profile_shell)"; do
 	if [[ ! -e $profile ]]; then
-		echo '#!/usr/bin/env bash' >> "$profile"
+		echo '#!/usr/bin/env bash' >>"$profile"
 	fi
 done
 
 # https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
 if ! config_mark; then
-	# shellcheck disable=SC2016
-	config_add <<<'if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi'
+	config_add <<-'EOF'
+		# shellcheck disable=SC2016
+		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
+	EOF
 fi
 
 if [[ $OSTYPE =~ darwin ]]; then
@@ -344,6 +346,7 @@ log_verbose "installing development and devops systems"
 "$SCRIPT_DIR/install-terraform.sh"
 "$SCRIPT_DIR/install-jupyter.sh"
 "$SCRIPT_DIR/install-ruby.sh"
+"$SCRIPT_DIR/install-1password.sh"
 
 log_verbose "skipping install-flutter but somehow"
 #"$SCRIPT_DIR/install-flutter.sh"

@@ -50,6 +50,14 @@ use then in the ~/ws/src.
 Also if you have more than one ~/ws, be aware that the way search works, you
 ~/wsr/src/lib for instance is "shadowed" and will not be seen as a library.
 
+## Prebuild and bare metal installation
+
+To do a bare metal build, use create-prebuild.sh which will give you enough of
+this system to put onto a USB key and then bootstrap from there.
+
+Alternatively, if you have network access put it on a share drive and then you
+can install
+
 ## Installation
 
 This assumes that there is a next door directory `../lib` which has library

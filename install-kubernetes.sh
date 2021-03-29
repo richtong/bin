@@ -140,12 +140,14 @@ if in_os mac; then
 		# that https://github.com/ubuntu/microk8s/issues/1763#issuecomment-731999949
 		# shellcheck disable=SC2016
 		log_verbose "running usermod"
+		# shellcheck disable=SC2016
 		if ! multipass exec microk8s-vm -- eval 'sudo usermod -a -G microk8s $USER'; then
 			log_error 2 "sudo usermod failed"
 		fi
 
 		# shellcheck disable=SC2016
 		log_verbose "running chown"
+		# shellcheck disable=SC2016
 		if ! multipass exec microk8s-vm -- eval 'sudo chown -f -R $USER $HOME/.kube'; then
 			log_error 3 "sudo chown failed"
 		fi

@@ -24,7 +24,7 @@ while getopts "hdvp:" opt; do
 		cat <<EOF
 Installs iTerm2 and dynamic profiles
 which may be in JSON or XML property lists or Plists
-Make sure this is formatted properly with a guid and name for each 
+Make sure this is formatted properly with a guid and name for each
 
 	usage: $SCRIPTNAME [ flags ]
 	flags: -d debug, -v verbose, -h help"
@@ -56,7 +56,6 @@ source_lib lib-config.sh lib-mac.sh lib-install.sh lib-util.sh
 # since this uses WS_DIR need to have it run after include
 ITERM2_PROFILE_SRC="${ITERM2_PROFILE_SRC:-"$WS_DIR/git/src/user/$USER/dotfiles/macos/$ITERM2_PATH/$ITERM2_FILE"}"
 
-
 if ! in_os mac; then
 	log_exit "mac only"
 fi
@@ -78,7 +77,7 @@ curl -L https://iterm2.com/shell_integration/install_shell_integration.sh | bash
 if ! config_mark; then
 	# shellcheck disable=SC2016
 	config_add <<-'EOF'
-	# shellcheck disable=SC2015,SC1090
-	[[ -e $HOME/.iterm2_shell_integration.bash ]] && source "$HOME/.iterm2_shell_integration.bash" || true
+		# shellcheck disable=SC2015,SC1090
+		[[ -e $HOME/.iterm2_shell_integration.bash ]] && source "$HOME/.iterm2_shell_integration.bash" || true
 	EOF
 fi

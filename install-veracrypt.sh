@@ -57,7 +57,7 @@ if [[ $OSTYPE =~ darwin ]]; then
 	if ! config_mark; then
 		config_add <<-EOF
 			[[ -e /Applications/VeraCrypt.app/Contents/MacOS ]] && PATH+=":/Applications/VeraCrypt.app/Contents/MacOS"
-	EOF
+		EOF
 	fi
 	log_exit "Veracrypt installed"
 fi

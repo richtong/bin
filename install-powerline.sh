@@ -59,8 +59,8 @@ brew_install powerline-go svn
 log_verbose "installing powerline fonts"
 tap_install homebrew/cask-fonts
 cask_install font-fira-mono-for-powerline \
-			 font-sf-mono-for-powerline \
-			 font-menlo-for-powerline
+	font-sf-mono-for-powerline \
+	font-menlo-for-powerline
 
 if ! $INSTALL_POWERLINE; then
 	log_verbose "Installing Powerline-Go"

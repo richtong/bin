@@ -56,7 +56,7 @@ brew_install jenv
 if ! config_mark; then
 	# this will fail if not yet installed so add check
 	config_add <<-'EOF'
-		export [[ $PATH =~ $HOME/.jenv/bin ]] || export PATH="$HOME/.jenv/bin:$PATH"
+		[[ $PATH =~ $HOME/.jenv/bin ]] || export PATH="$HOME/.jenv/bin:$PATH"
 		eval "$(jenv init -)"
 	EOF
 fi

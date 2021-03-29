@@ -541,6 +541,6 @@ let g:go_fmt_autosave=1
 let g:go_fmt_command="goimports"
 
 EOF
-    fi
+fi
 
 log_verbose "To complete install start vim and run :PlugInstall"
