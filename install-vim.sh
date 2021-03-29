@@ -185,8 +185,8 @@ Plug 'lifepillar/vim-solarized8'
 " Using Powerline instead
 " https://www.tecmint.com/powerline-adds-powerful-statuslines-and-prompts-to-vim-and-bash/
 " better status line that is vim only
-"Plug 'vim-airline/vim-airline'
-"Plug 'vim-airline/vim-airline-themes'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 
 
 " fzf - fuzzy find with auto update of fzf
@@ -384,10 +384,6 @@ colorscheme solarized8
 " F5 will switch from dark to white
 call togglebg#map("<F5>")
 
-" https://www.tecmint.com/powerline-adds-powerful-statuslines-and-prompts-to-vim-and-bash/
-set rtp+=/usr/local/lib/python3.8/site-packages/powerline/bindings/vim
-set laststatus=2
-"set t_Co=256
 
 " https://stackoverflow.com/questions/34428944/how-to-enable-gx-in-vim-mine-doesnt-work-anymore
 " https://github.com/vim/vim/issues/4738
@@ -528,8 +524,9 @@ silent! helptags ALL
 set completefunc=emoji#complete
 
 " Added by install-powerline.sh on Sat Feb  6 21:44:02 PST 2021
-set rtp+="/usr/local/lib/python3.9/site-packages/powerline/bindings/vim"
-set laststatus=2
+"set rtp+="/usr/local/lib/python3.9/site-packages/powerline/bindings/vim"
+"set laststatus=2
+"set t_Co=256
 
 " use <C-x> instead of <M-p> which does not work on MacOS
 let g:AutoPairsCompatibleMaps = 0
