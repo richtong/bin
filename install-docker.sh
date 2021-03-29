@@ -16,14 +16,14 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
 DOCKER_CONTENT_TRUST="${DOCKER_CONTENT_TRUST:-false}"
 DOCKER_TRUST_PRIVATE="${DOCKER_TRUST_PRIVATE:-"$SCRIPT_DIR/ssh/docker"}"
-DOCKER_VERSION="${DOCKER_VERSION:-17.06.1}"
+DOCKER_VERSION="${DOCKER_VERSION:-20.10.12}"
 # Do not make too high as this will fail the minimum version needed test
 # Also this is not the Mac Docker App version, it is engine version
-DOCKER_EDGE_VERSION="${DOCKER_EDGE_VERSION:-19.03.12}"
+DOCKER_INSTALL_EDGE_VERSION="${DOCKER_INSTALL_EDGE_VERSION:-20.10.12}"
 DOCKER_MACHINE_VERSION="${DOCKER_MACHINE_VERSION:-0.16.1}"
 DOCKER_COMPOSE_VERSION="${DOCKER_COMPOSE_VERSION:-1.26.2}"
 FORCE="${FORCE:-false}"
-EDGE="${EDGE:-true}"
+INSTALL_EDGE="${INSTALL_EDGE:-false}"
 while getopts "hdvctr:m:o:fns:" opt; do
 	case "$opt" in
 	h)
@@ -38,8 +38,8 @@ flags: -d debug, -h help
        -m docker machine version (default: $DOCKER_MACHINE_VERSION)
        -o docker compose version (default: $DOCKER_COMPOSE_VERSION)
        -f force redownload of installation (default: $FORCE)
-       -n do not install edge install the Normal stable release for Mac (default: $EDGE)
-       -s docker edge version minimum (default: $DOCKER_EDGE_VERSION)
+	   -n install edge release deprecated can now switch in main (default: $INSTALL_EDGE)
+       -s docker edge version minimum (default: $DOCKER_INSTALL_EDGE_VERSION)
 EOF
 		exit 0
 		;;
@@ -68,10 +68,10 @@ EOF
 		FORCE=true
 		;;
 	n)
-		EDGE=false
+		INSTALL_EDGE=false
 		;;
 	s)
-		DOCKER_EDGE_VERSION="$OPTARG"
+		DOCKER_INSTALL_EDGE_VERSION="$OPTARG"
 		;;
 	*)
 		log_warning "no $opt flag"
@@ -92,8 +92,8 @@ fi
 
 set -u
 version_needed="$DOCKER_VERSION"
-if $EDGE; then
-	version_needed="$DOCKER_EDGE_VERSION"
+if $INSTALL_EDGE; then
+	version_needed="$DOCKER_INSTALL_EDGE_VERSION"
 fi
 log_verbose "check for docker looking for version $version_needed"
 
@@ -128,9 +128,10 @@ fi
 # http://blog.docker.com/2015/07/new-apt-and-yum-repos/#more-6860
 if in_os mac; then
 	log_verbose install with brew cask
-	if $EDGE; then
+	if $INSTALL_EDGE; then
 		# https://github.com/caskroom/homebrew-versions
 		# log_verbose installing alternative beta and edge versions for tap
+		log_warning "Edge now included in mainline docker"
 		tap_install homebrew/cask-versions
 		# So swap docker_edge for docker if installed
 		log_verbose install docker-edge

@@ -194,8 +194,8 @@ install-ssmtp.sh - Installs a simple mail transport send through ops@surround.io
 install-sublime.sh - Installs sublime, not debugged
 install-travis-env.sh - Installs the travis routines for 12.04, deprecated,
 install-travis.sh - Installs travis, not debugged
-install-vim.py - Vim lint checkers for sh, python, Javascript
-install-vim.sh - deprecated, and as first version of python script
+install-vim.py - deprecated Vim lint checkers for sh, python, Javascript
+install-vim.sh - installs vim
 install-vmware-tools.sh - Checks for latest vmware tools
 install-vpn.sh - Installs a vpn file
 make-bin.sh - Converts one of these files into a general use with src/bin
