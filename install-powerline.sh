@@ -57,7 +57,10 @@ pip_install powerline-status powerline-gitstatus
 brew_install powerline-go svn
 
 log_verbose "installing powerline fonts"
-cask_install font-fira-mono-for-powerline
+tap_install homebrew/cask-fonts
+cask_install font-fira-mono-for-powerline \
+			 font-sf-mono-for-powerline \
+			 font-menlo-for-powerline
 
 if ! $INSTALL_POWERLINE; then
 	log_verbose "Installing Powerline-Go"
@@ -68,9 +71,9 @@ if ! $INSTALL_POWERLINE; then
 		config_add "$(config_profile_shell)" <<'EOF'
 function _update_ps1() {
     # shellcheck disable=SC2046
-    PS1=$(powerline-go -hostname-only-if-ssh -max-width 30
-		  -colorize-hostname -shorten-gke-names -theme solarized-dark16
-		  -modules venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root,docker,docker-content,goenv,kube
+    PS1=$(powerline-go -hostname-only-if-ssh -max-width 30 \
+		  -colorize-hostname -shorten-gke-names -theme solarized-dark16 \
+		  -modules \ venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root,docker,goenv,kube \
 		  -error $? -jobs "$(jobs -p | wc -l)")
 }
 if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then

@@ -131,7 +131,7 @@ if in_os mac; then
 	if $EDGE; then
 		# https://github.com/caskroom/homebrew-versions
 		# log_verbose installing alternative beta and edge versions for tap
-		# tap_install caskroom/versions
+		tap_install homebrew/cask-versions
 		# So swap docker_edge for docker if installed
 		log_verbose install docker-edge
 		cask_swap docker-edge docker
