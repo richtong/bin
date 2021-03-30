@@ -11,7 +11,7 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 DOCKER="${DOCKER:-"false"}"
 MINIKUBE="${MINIKUBE:-"false"}"
 FORCE="${FORCE:-"false"}"
-MICROK8S="${MICROK8S:-"true"}"
+MICROK8S="${MICROK8S:-"false"}"
 OPTIND=1
 while getopts "hdvmuof" opt; do
 	case "$opt" in
@@ -21,7 +21,7 @@ while getopts "hdvmuof" opt; do
 			flags: -d debug, -v verbose, -h help
 				-f force installation (default: $FORCE)
 				-m minikube (default: $MINIKUBE)
-				-u Ubuntu MicroK8s (default: $MICROK8S)
+				-u MicroK8s current hangs on MacOS (default: $MICROK8S)
 				-o Docker has a single cluster version (default: $DOCKER)
 		EOF
 		exit 0
@@ -68,6 +68,11 @@ if in_os mac; then
 	log_verbose "Installing on MacOS"
 	# also need sponge in moreutils to prevent redirect problems
 	package_install kubernetes-cli krew helm
+
+	log_verbose "closing up secretes in .kube/config"
+	mkdir -p "$HOME/.kube"
+	chmod 700 "$HOME/.kube"
+	chmod 600 "$HOME/.kube/config"
 
 	log_verbose "configring helm"
 	# stable is deprecated use artifactory hub to find the right repos

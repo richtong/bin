@@ -79,6 +79,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 # must be after the include since WS_DIR defined there
 DOWNLOADS=${DOWNLOADS:-"$WS_DIR/cache"}
+
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 if [[ ! $OSTYPE =~ darwin ]]; then
 	log_exit Must be on OS X does nothing otherwise
@@ -348,11 +349,14 @@ fi
 # "$SCRIPT_DIR/install-xhyve.sh"
 
 # Install Mac App Store
+#	497799835
 MAS+=(
 	497799835
 )
 log_verbose "mas install ${MAS[*]}"
-mas_install "${MAS[@]}"
+mas install "${MAS[@]}"
+log_verbose "complete Xcode installation in GUI"
+open -a Xcode
 
 log_verbose bash completion used by kubernetes
 "$SCRIPT_DIR/install-bash-completion.sh"

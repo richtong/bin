@@ -42,7 +42,7 @@ while getopts "hdv" opt; do
 done
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-install.sh lib-mac.sh lib-version-compare.sh
+source_lib lib-install.sh lib-mac.sh lib-version-compare.sh lib-config.sh
 shift $((OPTIND - 1))
 
 if [[ $OSTYPE =~ darwin ]]; then
@@ -54,6 +54,15 @@ if [[ $OSTYPE =~ darwin ]]; then
 	fi
 
 	cask_install veracrypt
+
+	log_verbose "VeraCrypt is actually installed so symlink to the lower case version"
+	APP_DIR="/Applications/VeraCrypt.app/Contents/MacOS"
+	if [[ ! -e $APP_DIR/veracrypt ]]; then
+		pushd "$APP_DIR" >/dev/null || true
+		sudo ln -s VeraCrypt veracrypt
+		popd >/dev/null || true
+	fi
+
 	if ! config_mark; then
 		config_add <<-EOF
 			[[ -e /Applications/VeraCrypt.app/Contents/MacOS ]] && PATH+=":/Applications/VeraCrypt.app/Contents/MacOS"
