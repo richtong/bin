@@ -103,7 +103,7 @@ if in_os mac; then
 	if $MICROK8S; then
 		log_verbose "Install MicroK8s"
 		tap_install ubuntu/microk8s
-		package_install microk8s
+		package_install microk8s multipass
 		hash -r
 		microk8s install
 		# https://ubuntu.com/tutorials/install-microk8s-on-mac-os#4-wait-for-microk8s-to-start

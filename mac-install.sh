@@ -347,5 +347,12 @@ fi
 # Needed for docker for kubernetes minikube
 # "$SCRIPT_DIR/install-xhyve.sh"
 
+# Install Mac App Store
+MAS+=(
+	497799835
+)
+log_verbose "mas install ${MAS[*]}"
+mas_install "${MAS[@]}"
+
 log_verbose bash completion used by kubernetes
 "$SCRIPT_DIR/install-bash-completion.sh"

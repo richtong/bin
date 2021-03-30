@@ -151,7 +151,9 @@ set incsearch
 set showmatch
 " Tuned for python
 set shiftwidth=4 tabstop=4 expandtab
+" http://blog.ezyang.com/2010/03/vim-textwidth/
 set textwidth=79
+set formatoptions=cqt
 set number " numbers are ugly  but needed for Python
 " modelines are a security hole but worthwhile for css files that like 2 indents
 set modeline

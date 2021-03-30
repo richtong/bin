@@ -17,13 +17,9 @@ SECRET_FILE="${SECRET_FILE:-"$SECRET_USER.vc"}"
 # switch to Google Drive because Dropbox charges for >3 machines
 # SECRET_VOLUME="${SECRET_DRIVE:-"Dropbox"}"
 SECRET_DRIVE="${SECRET_DRIVE:-"Google Drive"}"
-if [[ $OSTYPE =~ darwin ]]; then
-	SECRET_MOUNT_ROOT="${SECRET_MOUNT_ROOT:-"/Volumes"}"
-else
-	SECRET_MOUNT_ROOT="${SECRET_MOUNT_ROOT:-"/media"}"
-fi
+SECRET_MOUNT_ROOT="${SECRET_MOUNT_ROOT:-"$HOME"}"
 SECRET_VOLUME="${SECRET_VOLUME:-"$HOME/$SECRET_DRIVE/$SECRET_FILE"}"
-SECRET_MOUNTPOINT="${SECRET_MOUNTPOINT:-"$SECRET_MOUNT_ROOT/$SECRET_FILE"}"
+SECRET_MOUNTPOINT="${SECRET_MOUNTPOINT:-"$SECRET_MOUNT_ROOT/.secret"}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvu:" opt; do
@@ -36,7 +32,6 @@ while getopts "hdvu:" opt; do
 
 			flags: -d debug, -v verbose, -h help
 			       -u secret user (default: $SECRET_USER)
-
 
 			positionals:
 			      VeraCrypt volume location (default: $SECRET_VOLUME)
@@ -115,7 +110,7 @@ if ! config_mark; then
 	# http://pclosmag.com/html/issues/200709/page07.html
 	config_add <<-EOF
 		# finds the first match for of secret file on any matching $SECRET_DRIVE
-		veracrypt_secret="$(find "\$HOME" -maxdepth 3 -name "$SECRET_FILE" | grep -m1 "$SECRET_DRIVE")
+		veracrypt_secret="\$(find "\$HOME" -maxdepth 3 -name "$SECRET_FILE" | grep -m1 "$SECRET_DRIVE")"
 		if [[ -n \$veracrypt_secret ]] && ! veracrypt -t -l "\$veracrypt_secret" >/dev/null 2>&1
 		then
 		    # need to mount as block device with filesystem=none
