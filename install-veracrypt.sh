@@ -55,14 +55,8 @@ if [[ $OSTYPE =~ darwin ]]; then
 
 	cask_install veracrypt
 
-	log_verbose "VeraCrypt is actually installed so symlink to the lower case version"
-	APP_DIR="/Applications/VeraCrypt.app/Contents/MacOS"
-	if [[ ! -e $APP_DIR/veracrypt ]]; then
-		pushd "$APP_DIR" >/dev/null || true
-		sudo ln -s VeraCrypt veracrypt
-		popd >/dev/null || true
-	fi
-
+	# note this works for case insensitive files systems since if stored as
+	# VeraCrypt but we call it as veracrypt
 	if ! config_mark; then
 		config_add <<-EOF
 			[[ -e /Applications/VeraCrypt.app/Contents/MacOS ]] && PATH+=":/Applications/VeraCrypt.app/Contents/MacOS"

@@ -108,27 +108,27 @@ log_verbose Mac install
 if ! config_mark; then
 	log_verbose "adding fstab entry to close permissions"
 	# http://pclosmag.com/html/issues/200709/page07.html
-	config_add <<-EOF
-		# finds the first match for of secret file on any matching $SECRET_DRIVE
-		veracrypt_secret="\$(find "\$HOME" -maxdepth 3 -name "$SECRET_FILE" | grep -m1 "$SECRET_DRIVE")"
-		if [[ -n \$veracrypt_secret ]] && ! veracrypt -t -l "\$veracrypt_secret" >/dev/null 2>&1
-		then
-		    # need to mount as block device with filesystem=none
-		    echo enter the password for the hidden volume this will take at least a minute
-		    veracrypt -t --pim=0 -k "" --protect-hidden=no --filesystem=none "\$veracrypt_disk"
-		fi
-		# https://serverfault.com/questions/81746/bypass-ssh-key-file-permission-check/82282#82282
-		# for parameters needed for msdos fat partitions
-		# Need to look the second to last field because if the volume has a space cut will not work
-		veracrypt_disk="\$(veracrypt -t -l "\$veracrypt_secret" | awk '{print \$(NF-1)}')"
-		if [[ -n \$veracrypt_disk ]]! mount | grep -q "\$veracrypt_disk"
-		then
-		    echo Enter your macOS password
-		    sudo mkdir -p "$SECRET_MOUNTPOINT"
-		    # mode must be 700 need 700 for directory access and no one else can see it
-		    sudo mount -t msdos -o -u=\$(id -u),-m=700 "\$veracrypt_disk" "$SECRET_MOUNTPOINT"
-		fi
-	EOF
+	config_add <<EOF
+# finds the first match for of secret file on any matching $SECRET_DRIVE
+veracrypt_secret="\$(find "\$HOME" -maxdepth 3 -name "$SECRET_FILE" 2>/dev/null | grep -m1 "$SECRET_DRIVE")"
+if [[ -n \$veracrypt_secret ]] && ! veracrypt -t -l "\$veracrypt_secret" >/dev/null 2>&1
+then
+	# need to mount as block device with filesystem=none
+	echo enter the password for the hidden volume this will take at least a minute
+	veracrypt -t --pim=0 -k "" --protect-hidden=no --filesystem=none "\$veracrypt_secret"
+fi
+# https://serverfault.com/questions/81746/bypass-ssh-key-file-permission-check/82282#82282
+# for parameters needed for msdos fat partitions
+# Need to look the second to last field because if the volume has a space cut will not work
+veracrypt_disk="\$(veracrypt -t -l "\$veracrypt_secret" | awk '/^Virtual Device/ {print \$(NF)}')"
+if [[ -n \$veracrypt_disk ]] && ! mount | grep -q "\$veracrypt_disk"
+then
+	echo Enter your macOS password
+	sudo mkdir -p "$SECRET_MOUNTPOINT"
+	# mode must be 700 need 700 for directory access and no one else can see it
+	sudo mount -t msdos -o -u="\$(id -u),-m=700" "\$veracrypt_disk" "$SECRET_MOUNTPOINT"
+fi
+EOF
 fi
 
 log_verbose now run the mount from the profile script
