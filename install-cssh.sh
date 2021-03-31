@@ -34,9 +34,9 @@ log_verbose check for installation
 if in_os mac; then
 	log_verbose in mac
 	package_install csshx
-	if ! config_mark; then
+	if ! config_mark "$(config_profile_shell)"; then
 		log_verbose adding cssh alias
-		config_add <<<"alias cssh=csshx"
+		config_add "$(config_profile_shell)" <<<"alias cssh=csshx"
 	fi
 	log_assert "command -v csshx" "csshx installed"
 
