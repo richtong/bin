@@ -11,13 +11,8 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
-if [[ $OSTYPE =~ darwin ]]; then
-	SECRETS_ROOT_DIR="${SECRETS_ROOT_DIR:-/Volumes}"
-else
-	SECRETS_ROOT_DIR="${SECRETS_ROOT_DIR:-/media}"
-fi
 SECRET_USER="${SECRET_USER:-"$USER"}"
-SECRETS_DIR="${SECRETS_DIR:-"$SECRETS_ROOT_DIR/$SECRET_USER.vc/secrets"}"
+SECRETS_DIR="${SECRETS_DIR:-"$HOME/.secret"}"
 
 while getopts "hdvr:u:" opt; do
 	case "$opt" in
@@ -66,8 +61,8 @@ log_verbose make sure veracrypt and stow are loaded
 package_install stow
 "$SCRIPT_DIR/install-veracrypt.sh"
 
-log_verbose "mounting veracrypt into $SECRETS_ROOT_DIR"
-"$SCRIPT_DIR/secrets-mount.sh" "$SECRETS_ROOT_DIR"
+log_verbose "mounting veracrypt"
+"$SCRIPT_DIR/veracrypt-mount.sh"
 #log_verbose "Seed .ssh keys from $SECRETS_ROOT_DIR"
 #"$SCRIPT_DIR/install-ssh-keys.sh" "$USER" "$(id -gn)" "$SECRETS_ROOT_DIR/ssh/$SECRET_USER" "$HOME/.ssh"
 # instead of our home brew install-ssh-keys use stow
@@ -126,12 +121,12 @@ if in_os mac; then
 	fi
 
 	log_verbose "look for all the keys in the $HOME/.ssh file and add to MacOS keychain"
-	SECRET="$(find "$HOME/.ssh" -name "*.id_ed25519" -o -name "*.id_rsa")"
-	log_verbose "found $SECRET"
-	# https://github.com/koalaman/shellcheck/wiki/SC2206
-	IFS=" " read -r -a SECRET <<<"$SECRET"
-	log_verbose turned secrets in an array with ${#SECRET[@]} elements
-	log_warning if you get this repeatedly you need to make sure the ssh comment
+	# https://superuser.com/questions/273187/how-to-place-the-output-of-find-in-to-an-array
+	# https://github.com/koalaman/shellcheck/wiki/SC2207
+	# works for multiple lines
+	mapfile -t SECRET < <(find "$HOME/.ssh" -name "*.id_ed25519" -o -name "*.id_rsa")
+	log_verbose "turned secrets in an array with ${#SECRET[*]} elements"
+	log_warning "if you get this repeatedly you need to make sure the ssh comment"
 	log_warning "is the same as name ${SECRET[*]} in MacOS and debian and not the file name in ubuntu"
 	log_warning "to do with ssh-keygen -c -f _key_ -C _key_"
 
@@ -140,11 +135,11 @@ if in_os mac; then
 		log_verbose before checking keys add all from the Mac Keychain
 		ssh-add -A
 	fi
-	installed=$(ssh-add -l | cut -d' ' -f 3)
-	log_verbose "checking for secrets in $installed"
+	# https://stackoverflow.com/questions/3685970/check-if-a-bash-array-contains-a-value
+	log_verbose "checking for secrets in ssh-add -l"
 	for secret in "${SECRET[@]}"; do
 		log_verbose "looking for $secret"
-		if [[ ! $installed =~ $secret ]]; then
+		if ! ssh-add -l | cut -d ' ' -f 3 | grep -q "^$secret$"; then
 			log_verbose "could not find $secret so adding to keychain"
 			log_verbose adding to the MacOS keychain and will be unlocked by user login
 			log_verbose access all keys by ssh-add -A in .bash_profile

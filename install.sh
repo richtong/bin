@@ -30,11 +30,7 @@ MAC_SYSTEM_UPDATE="${MAC_SYSTEM_UPDATE:-false}"
 WS_DIR="${WS_DIR:-$HOME/ws}"
 
 INSTALL_SECRETS="${INSTALL_SECRETS:-false}"
-export SECRETS_DIR_ROOT="${SECRETS_DIR_ROOT:-"/Volumes"}"
-# override if in linux
-if [[ ! $OSTYPE =~ darwin ]]; then
-	export SECRETS_DIR_ROOT="${SECRETS_DIR_ROOT:-"/media"}"
-fi
+export SECRETS_DIR_ROOT="${SECRETS_DIR_ROOT:-"$HOME/.secret"}"
 
 # deprecated for building machines remotely
 DEPLOY_MACHINE="${DEPLOY_MACHINE:-false}"

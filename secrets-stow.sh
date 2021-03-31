@@ -13,12 +13,7 @@ SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 TARGET="${TARGET:-"$HOME/.ssh"}"
-if [[ $OSTYPE =~ darwin ]]; then
-	SECRETS_DIR_ROOT="${SECRETS_DIR_ROOT:-"/Volumes"}"
-else
-	SECRETS_DIR_ROOT="${SECRETS_DIR_ROOT:-"/media"}"
-fi
-SECRETS_DIR="${SECRETS_DIR:-"$SECRETS_DIR_ROOT/$USER.vc/secrets"}"
+SECRETS_DIR="${SECRETS_DIR:-"$HOME/.secrets"}"
 SECRETS="${SECRETS:-"$HOME/.ssh $HOME/.aws $HOME/vpn"}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
@@ -64,3 +59,6 @@ if (($# > 0)); then
 	SECRETS=("$@")
 fi
 "$SCRIPT_DIR/stow-all.sh" -s "$SECRETS_DIR" "${SECRETS[@]}"
+
+log_verbose "close up the secrets permissions"
+chmod -R go-rwx "${SECRETS[@]}"

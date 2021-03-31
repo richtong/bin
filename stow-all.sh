@@ -13,30 +13,23 @@ set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
-TARGET="${TARGET:-"$HOME/.ssh"}"
-if [[ $OSTYPE =~ darwin ]]; then
-	SOURCE_DIR_ROOT="${SOURCE_DIR_ROOT:-"/Volumes"}"
-else
-	SOURCE_DIR_ROOT="${SOURCE_DIR_ROOT:-"/media"}"
-fi
-SOURCE_DIR="${SOURCE_DIR:-"$SOURCE_DIR_ROOT/$USER.vc/secrets"}"
+SOURCE_DIR="${SOURCE_DIR:-"$HOME/.secrets"}"
 TARGETS="${TARGETS:-($HOME $HOME/.ssh $HOME/vpn)}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvs:" opt; do
 	case "$opt" in
 	h)
-		cat <<-EOF
-			Symlink from a special source directory to a target
+		cat <<EOF
+Symlink from a special source directory to a target
+usage: $SCRIPTNAME [ flags ] [source directory ]
+flags: -d debug, -v verbose, -h help"
+	   -s location of source directory (default: $SOURCE_DIR)
+positionals:
+	   targets for linking assumes the file names are the same in both
+	   (default: $TARGETS)
+EOF
 
-			    usage: $SCRIPTNAME [ flags ] [source directory ]
-			    flags: -d debug, -v verbose, -h help"
-			           -s location of source directory (default: $SOURCE_DIR)
-			    positionals:
-			           targets for linking assumes the file names are the same in both
-			           (default: $TARGETS)
-
-		EOF
 		exit 0
 		;;
 	d)

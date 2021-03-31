@@ -33,7 +33,8 @@ while getopts "hdvl:u:m:" opt; do
 	h)
 		cat <<-EOF
 
-			Install the private directories where secrets live
+			Install the private directories where secrets live (deprecated)
+			Use veracrypt-mount.sh instead
 			usage: $SCRIPTNAME [ flags ] directory
 
 			flags: -d debug, -v verbose, -h help

@@ -25,18 +25,15 @@ export FLAGS="${FLAGS:-""}"
 while getopts "hdvu:" opt; do
 	case "$opt" in
 	h)
-		cat <<-EOF
-			    Mount a veracrypt volume to a mount point and sets automount
-
-			usage: $SCRIPTNAME [ flags ] [ volume [mountpoint]]
-
-			flags: -d debug, -v verbose, -h help
-			       -u secret user (default: $SECRET_USER)
-
-			positionals:
-			      VeraCrypt volume location (default: $SECRET_VOLUME)
-			      Mointpoint for volume (default: $SECRET_MOUNTPOINT)
-		EOF
+		cat <<EOF
+Mount a veracrypt volume to a mount point and sets automount
+	usage: $SCRIPTNAME [ flags ] [ volume [mountpoint]]
+	flags: -d debug, -v verbose, -h help
+		   -u secret user (default: $SECRET_USER)
+	positionals:
+		  VeraCrypt volume location (default: $SECRET_VOLUME)
+		  Mointpoint for volume (default: $SECRET_MOUNTPOINT)
+EOF
 
 		exit 0
 		;;
@@ -93,18 +90,16 @@ fi
 
 log_verbose Mac install
 # https://serverfault.com/questions/81746/bypass-ssh-key-file-permission-check/82282#82282
-# There is a MacOS bug where the permissions are default set to 777 because fat
-# has no permissions at all. Solution is to add an entry to /etc/fstab which
-# fixes this
 # https://forums.fedoraforum.org/showthread.php?t=149189
-# need --filesystem=none which does not mount the file system it just
-# becomes a block device you can then use that device if you get the hdiutil
-# bug so we do the Mac mount in two steps, first mount the block device
-# then mount the block device with correct msdos parameters
-#
-# We do the dual phase mount because there is a bug in veracrypt for the Mac
-# which prevents the hdiutil from working, so we use unix mount instead
-
+# unlike linux, we can not just mount with veracrypt because veracrypt
+# only supports FAT volumes and these have 777 permissions
+# which are too open for ssh.
+# instead first mount the veracryot volume as block device with the
+# --filesystem=no and then this gets mounted in /dev as a block device
+# We then use a normal MacOS mount which does do the permissions properly
+# note we are using the -v option so we can figure the block device
+mkdir -p "$SECRET_MOUNTPOINT"
+# https://kifarunix.com/how-to-use-veracrypt-on-command-line-to-encrypt-drives-on-ubuntu-18-04/
 if ! config_mark; then
 	log_verbose "adding fstab entry to close permissions"
 	# http://pclosmag.com/html/issues/200709/page07.html
@@ -117,19 +112,17 @@ then
 	echo enter the password for the hidden volume this will take at least a minute
 	veracrypt -t --pim=0 -k "" --protect-hidden=no --filesystem=none "\$veracrypt_secret"
 fi
-# https://serverfault.com/questions/81746/bypass-ssh-key-file-permission-check/82282#82282
-# for parameters needed for msdos fat partitions
-# Need to look the second to last field because if the volume has a space cut will not work
-veracrypt_disk="\$(veracrypt -t -l "\$veracrypt_secret" | awk '/^Virtual Device/ {print \$(NF)}')"
+echo Enter your macOS password
+mkdir -p "$SECRET_MOUNTPOINT"
+# mode must be 700 need 700 for directory access and no one else can see it
+veracrypt_disk="\$(veracrypt -t -v -l "\$veracrypt_secret" | awk '/^Virtual Device/ {print \$(NF)}')"
 if [[ -n \$veracrypt_disk ]] && ! mount | grep -q "\$veracrypt_disk"
 then
-	echo Enter your macOS password
-	sudo mkdir -p "$SECRET_MOUNTPOINT"
-	# mode must be 700 need 700 for directory access and no one else can see it
+	#  mount in user space so private to a user
 	sudo mount -t msdos -o -u="\$(id -u),-m=700" "\$veracrypt_disk" "$SECRET_MOUNTPOINT"
 fi
 EOF
 fi
-
-log_verbose now run the mount from the profile script
+log_warning "OSX Fuse must run and be allowed in Security and Privacy"
+log_verbose "now run the mount from the profile script"
 source_profile
