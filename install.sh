@@ -30,7 +30,7 @@ MAC_SYSTEM_UPDATE="${MAC_SYSTEM_UPDATE:-false}"
 WS_DIR="${WS_DIR:-$HOME/ws}"
 
 INSTALL_SECRETS="${INSTALL_SECRETS:-false}"
-export SECRETS_DIR_ROOT="${SECRETS_DIR_ROOT:-"$HOME/.secret"}"
+SECRETS_DIR_ROOT="${SECRETS_DIR_ROOT:-"$HOME/.secret"}"
 
 # deprecated for building machines remotely
 DEPLOY_MACHINE="${DEPLOY_MACHINE:-false}"
@@ -65,7 +65,7 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tz" opt; do
 			Check these as well:
 			       -e Email for user (default: $GIT_EMAIL)
 			       -u User name for github (default: $GIT_USERNAME)
-			       -a Use dotfiles stow to hive away your dotfiles in the repo (default:
+			       -a Use dotfiles
 			$DOTFILES_STOW)
 
 			You should not normally need these:
@@ -173,14 +173,6 @@ for profile in "$(config_profile)" "$(config_profile_shell)"; do
 	fi
 done
 
-# https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
-if ! config_mark; then
-	config_add <<-'EOF'
-		# shellcheck disable=SC2016
-		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
-	EOF
-fi
-
 if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose "mac-install.sh with ${MAC_FLAGS-no flags}"
 	"$SOURCE_DIR/bin/mac-install.sh" "${MAC_FLAGS-}"
@@ -270,6 +262,7 @@ if $INSTALL_SECRETS; then
 
 	log_verbose install secrets from veracrypt and link to .ssh
 	"$SCRIPT_DIR/install-secrets.sh" -u "$REPO_USER" -r "$SECRETS_DIR_ROOT"
+	"$SCRIPT_DIR/fix-ssh-permissions.sh"
 fi
 
 "$BIN_DIR/install-anaconda.sh"
@@ -364,12 +357,11 @@ fi
 # run dotfiles-stow as soon as possible use the personal repo above
 # Otherwise the installation scripts below will cause conflicts
 if $DOTFILES_STOW; then
-	log_verbose put into .bak all files that need to be stowed
+	log_verbose "put into .bak all files that need to be stowed"
 	"$SCRIPT_DIR/dotfiles-backup.sh"
-	log_verbose install dotfiles note that this needs the personal repo installed to work
+	log_verbose "install dotfiles note that this needs the personal repo installed to work"
 	"$SCRIPT_DIR/dotfiles-stow.sh"
-	"$SCRIPT_DIR/fix-ssh-permissions.sh"
-	log_verbose in the stow process if .ssh is touched the permissions will be too wide
+	log_verbose "in the stow process if .ssh is touched the permissions will be too wide"
 fi
 
 log_verbose Also allow ssh into this machine so you can switch to using consoler
@@ -434,6 +426,14 @@ source_profile
 log_verbose Chain to your personal installs
 # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
 run_if "$SOURCE_DIR/user/$REPO_USER/bin/install.sh" "$@"
+
+# https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
+if ! config_mark; then
+	config_add <<-'EOF'
+		# shellcheck disable=SC2016
+		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
+	EOF
+fi
 
 # log_verbose update all submodules only for special use cases
 # "$SOURCE_DIR/scripts/build/update-all-submodules.sh"

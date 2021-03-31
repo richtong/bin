@@ -80,37 +80,43 @@ while [[ -n "$config_name" ]]; do
 		# https://github.com/koalaman/shellcheck/wiki/SC2044
 		# instead and this requires bash 4.2
 		shopt -s globstar nullglob
+		# does not work with multiple levels, you get each directory level
+		#for dotfile in "$dotfiles_dir"/**/*; do
+		# does not handle spaces correctly in aths
 		# for dotfile in $(find "$dotfiles_dir" -type f -print)
-		for dotfile in "$dotfiles_dir"/**/*; do
-			# https://stackoverflow.com/questions/16623835/remove-a-fixed-prefix-suffix-from-a-string-in-bash#16623897
-			source_file="$SOURCE_ROOT${dotfile#$dotfiles_dir}"
-			log_verbose "for $dotfile looking for equivalent $source_file"
-			if [[ ! -e $source_file ]]; then
-				log_verbose "no $source_file nothing to backup"
-				continue
-			fi
-			if [[ -L $source_file ]]; then
-				log_verbose "$source_file is already symlinked skipping"
-				continue
-			fi
-			log_verbose "found $source_file finding a free backup location"
-			count=0
-			backup="$source_file.bak"
-			while true; do
-				log_verbose "looking for $backup"
-				if [[ ! -e $backup ]]; then
-					if $SIMULATE; then
-						log_verbose "would move $source_file to $backup"
+		# https://stackoverflow.com/questions/9612090/how-to-loop-through-file-names-returned-by-find
+		find "$dotfiles_dir" -type f -print0 |
+			while IFS= read -r -d '' dotfile; do
+				# https://stackoverflow.com/questions/16623835/remove-a-fixed-prefix-suffix-from-a-string-in-bash#16623897
+				source_file="$SOURCE_ROOT${dotfile#$dotfiles_dir}"
+				log_verbose "for $dotfile looking for equivalent $source_file"
+				if [[ ! -e $source_file ]]; then
+					log_verbose "no $source_file nothing to backup"
+					continue
+				fi
+				# move symlinks too as they could be hand done
+				# if [[ -L $source_file ]]; then
+				# 	log_verbose "$source_file is already symlinked skipping"
+				# 	continue
+				# fi
+				log_verbose "found $source_file finding a free backup location"
+				count=0
+				backup="$source_file.bak"
+				while true; do
+					log_verbose "looking for $backup"
+					if [[ ! -e $backup ]]; then
+						if $SIMULATE; then
+							log_verbose "would move $source_file to $backup"
+							break
+						fi
+						log_verbose "no $backup present so move $source_file there"
+						mv "$source_file" "$backup"
 						break
 					fi
-					log_verbose "no $backup present so move $source_file there"
-					mv "$source_file" "$backup"
-					break
-				fi
-				log_verbose "found $backup looking for an empty one"
-				backup="${backup%.bak*}.bak.$((++count))"
+					log_verbose "found $backup looking for an empty one"
+					backup="${backup%.bak*}.bak.$((++count))"
+				done
 			done
-		done
 	fi
 
 	# if there are no more periods we have processed the last one

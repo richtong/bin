@@ -19,7 +19,7 @@ while getopts "hdvw:" opt; do
 		echo "$SCRIPTNAME: Fix ssh keys"
 		echo "flags: -d debug, -h help"
 		echo "       -w workspace directory"
-		echo "positionals: ssh_directories..."
+		echo "for paths in \$PATHS"
 		exit 0
 		;;
 	d)
@@ -42,10 +42,12 @@ source_lib lib-config.sh lib-util.sh
 
 shift $((OPTIND - 1))
 
-paths=${*:-"$HOME/.ssh"}
+if [[ -z ${PATHS[*]} ]]; then
+	PATHS=("$HOME/.ssh" "$HOME/.secrets" "$HOME/.aws")
+fi
 
-log_verbose recurse down into all and make sure directories
-for path in $paths; do
+log_verbose "recurse down into all ${PATHS[*]}"
+for path in "${PATHS[@]}"; do
 	log_verbose "closing up $path"
 	# .ssh requires the parent not have write permissions
 	# If there are symlinks, then follow them and change the app there
