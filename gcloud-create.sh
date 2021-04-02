@@ -136,7 +136,7 @@ mkdir -p "$SECRET_DIR"
 secret="$SECRET_DIR/$account_email.json"
 log_verbose "looking for $secret"
 if [[ ! -e $secret ]]; then
-	log_verbose "getting the secrete for $account_email email"
+	log_verbose "getting the secret for $account_email email"
 	gcloud iam service-account keys create "$secret" \
 		--iam-account "$account_email"
 
