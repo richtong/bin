@@ -43,7 +43,7 @@ source_lib lib-config.sh lib-util.sh
 shift $((OPTIND - 1))
 
 if [[ -z ${PATHS[*]} ]]; then
-	PATHS=("$HOME/.ssh" "$HOME/.secrets" "$HOME/.aws")
+	PATHS=("$HOME/.ssh" "$HOME/.secret" "$HOME/.aws" "$HOME/vpn")
 fi
 
 log_verbose "recurse down into all ${PATHS[*]}"

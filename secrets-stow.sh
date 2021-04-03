@@ -13,7 +13,7 @@ SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 TARGET="${TARGET:-"$HOME/.ssh"}"
-SECRETS_DIR="${SECRETS_DIR:-"$HOME/.secrets"}"
+SECRETS_DIR="${SECRETS_DIR:-"$HOME/.secret"}"
 if [[ ! -v SECRETS ]]; then
 	SECRETS=("$HOME/.ssh" "$HOME/.aws" "$HOME/vpn")
 fi 
@@ -30,7 +30,7 @@ while getopts "hdvs:" opt; do
 			           -s location of secrets directory (default: $SECRETS_DIR)
 			    positionals:
 			           targets for secrets assumes the file names are the same
-			           (default: $SECRETS[*])
+			           (default: ${SECRETS[*]})
 
 		EOF
 		exit 0

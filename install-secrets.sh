@@ -83,16 +83,13 @@ if in_os mac; then
 	# Note we could also create a LaunchAgent, but using bashrc
 	# instead
 	# https://apple.stackexchange.com/questions/48502/how-can-i-permanently-add-my-ssh-private-key-to-keychain-so-it-is-automatically
-	log_verbose for MacOS Sierra and above need this to reload keys previously was automatic
-	log_verbose Create the keys with ssh-add -K and it will go into the keychain
-	log_verbose make sure ~/.ssh/config has UseKeychain and AddKeysToAgent set to Yes
+	log_verbose "for MacOS Sierra and above need this to reload keys previously was automatic"
+	log_verbose "Create the keys with ssh-add -K and it will go into the keychain"
+	log_verbose "make sure ~/.ssh/config has UseKeychain and AddKeysToAgent set to Yes"
 	log_verbose "then you no longer need to manually add keys or have ssh-add -A in mac"
 	log_verbose "but you do need this if you use ssh key forwarding so downstream"
-	log_verbose machines see all the keys you have
-
-	log_verbose profile
-
-	log_verbose Mac configs
+	log_verbose "machines see all the keys you have profile"
+	log_verbose "Mac configs"
 	if vergte "$OSTYPE" darwin16; then
 		log_warning "Make sure that in MacOS Sierra and above we have right ssh config options"
 		if ! grep "^AddKeysToAgent" "$HOME/.ssh/config"; then
@@ -106,12 +103,12 @@ if in_os mac; then
 			config_replace "$HOME/.ssh/config" "AddKeysToAgent" "AddKeysToAgent yes"
 			config_replace "$HOME/.ssh/config" "UseKeychain" "UseKeychain yes"
 		fi
-		log_warning MacOS Sierra can stop here if you never need SSH Key forwarding but we use it so continue
+		log_warning "MacOS Sierra can stop here if you never need SSH Key forwarding but we use it so continue"
 	fi
 
-	log_verbose for MacOS earlier than Sierra, need ssh-add -K and -A
+	log_verbose "for MacOS earlier than Sierra, need ssh-add -K and -A"
 
-	log_verbose "$(config_profile)" config
+	log_verbose "$(config_profile) config"
 	if ! config_mark; then
 		config_add <<-EOF
 			if [[ -z \$SSH_AUTH_SOCK ]]; then source "$WS_DIR/git/src/bin/set-ssh-agent.sh"; fi
@@ -132,7 +129,7 @@ if in_os mac; then
 
 	# Just get the commands assume these are the name of the files
 	if [[ $OSTYPE =~ darwin ]]; then
-		log_verbose before checking keys add all from the Mac Keychain
+		log_verbose "before checking keys add all from the Mac Keychain"
 		ssh-add -A
 	fi
 	# https://stackoverflow.com/questions/3685970/check-if-a-bash-array-contains-a-value

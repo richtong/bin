@@ -13,8 +13,10 @@ set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
-SECRETS_SOURCE_DIR="${SECRETS_SOURCE_DIR:-"$HOME/.secrets"}"
-TARGETS="${TARGETS:-($HOME $HOME/.ssh $HOME/vpn)}"
+SECRETS_SOURCE_DIR="${SECRETS_SOURCE_DIR:-"$HOME/.secret"}"
+if [[ -v TARGETS ]]; then
+	TARGETS=("$HOME" "$HOME/.ssh" "$HOME/vpn")
+fi
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvs:" opt; do
@@ -27,7 +29,7 @@ flags: -d debug, -v verbose, -h help"
 	   -s location of source directory (default: $SECRETS_SOURCE_DIR)
 positionals:
 	   targets for linking assumes the file names are the same in both
-	   (default: $TARGETS)
+	   (default: ${TARGETS[*]})
 EOF
 
 		exit 0
@@ -68,9 +70,9 @@ stow_if() {
 	local package="$1"
 	local stow_dir="${2:-"."}"
 	local target="${3:-".."}"
-	log_verbose "looking $stow_dir"
+	log_verbose "looking $stow_dir/$package"
 	if [[ ! -e $stow_dir/$package ]]; then
-		log_verbose "$package does not exist"
+		log_verbose "$stow_dir/$package does not exist"
 		return
 	fi
 	log_verbose "$stow_dir/$package exists stowing to $target with --defer"
@@ -121,6 +123,6 @@ for target in "${TARGETS[@]}"; do
 		config_name="${config_name%.*}"
 	done
 	log_verbose "do common last so deeper versions can override"
-	log_verbose "STOW_DIR is $STOW_DIR and stowing common deferring if they already exist"
+	log_verbose "STOW_DIR is $STOW_DIR and into $target"
 	stow_if common "$STOW_DIR" "$target"
 done
