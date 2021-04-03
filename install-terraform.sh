@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##
-## Install Terraform
+## Install Terraform and Packer
 ##
 ## Including AWS and GGloud providers
 ## https://learn.hashicorp.com/terraform/getting-started/install.html
@@ -48,7 +48,7 @@ if ! in_os mac; then
 	log_exit "only tested on the mac"
 fi
 
-package_install terraform
+package_install terraform packer
 
 if ! terraform -install-autocomplete; then
 	log_verbose autocomplete already installed

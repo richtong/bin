@@ -14,7 +14,9 @@ SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 trap 'exit $?' ERR
 TARGET="${TARGET:-"$HOME/.ssh"}"
 SECRETS_DIR="${SECRETS_DIR:-"$HOME/.secrets"}"
-SECRETS="${SECRETS:-"$HOME/.ssh $HOME/.aws $HOME/vpn"}"
+if [[ ! -v SECRETS ]]; then
+	SECRETS=("$HOME/.ssh" "$HOME/.aws" "$HOME/vpn")
+fi 
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvs:" opt; do
@@ -28,7 +30,7 @@ while getopts "hdvs:" opt; do
 			           -s location of secrets directory (default: $SECRETS_DIR)
 			    positionals:
 			           targets for secrets assumes the file names are the same
-			           (default: $SECRETS)
+			           (default: $SECRETS[*])
 
 		EOF
 		exit 0

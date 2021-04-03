@@ -13,7 +13,7 @@ set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
-SOURCE_DIR="${SOURCE_DIR:-"$HOME/.secrets"}"
+SECRETS_SOURCE_DIR="${SECRETS_SOURCE_DIR:-"$HOME/.secrets"}"
 TARGETS="${TARGETS:-($HOME $HOME/.ssh $HOME/vpn)}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
@@ -24,7 +24,7 @@ while getopts "hdvs:" opt; do
 Symlink from a special source directory to a target
 usage: $SCRIPTNAME [ flags ] [source directory ]
 flags: -d debug, -v verbose, -h help"
-	   -s location of source directory (default: $SOURCE_DIR)
+	   -s location of source directory (default: $SECRETS_SOURCE_DIR)
 positionals:
 	   targets for linking assumes the file names are the same in both
 	   (default: $TARGETS)
@@ -41,7 +41,7 @@ EOF
 		export FLAGS+=" -v "
 		;;
 	s)
-		SOURCE_DIR="$OPTARG"
+		SECRETS_SOURCE_DIR="$OPTARG"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -56,6 +56,7 @@ shift $((OPTIND - 1))
 if (($# > 0)); then
 	# https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
 	TARGETS=("$@")
+	
 fi
 
 package_install stow
@@ -82,12 +83,13 @@ stow_if() {
 # config_path returns the deepest existing path of os/major/minor release/...
 # Note we use dashes instead of true directories since stow
 # is recursive
-mkdir -p "$SOURCE_DIR"
-log_verbose "getting files from $SOURCE_DIR"
+mkdir -p "$SECRETS_SOURCE_DIR"
+log_verbose "getting files from $SECRETS_SOURCE_DIR"
 full_version_name="$(util_full_version)"
+log_verbose "for targets ${TARGETS[*]}"
 for target in "${TARGETS[@]}"; do
-	target="$(readlink -f "$target")"
 	log_verbose "processing $target"
+	target="$(readlink -f "$target")"
 	mkdir -p "$target"
 	if [[ $target == "$HOME" ]]; then
 		export source=.
@@ -96,7 +98,7 @@ for target in "${TARGETS[@]}"; do
 		source="$(basename "$target")"
 		export source
 	fi
-	STOW_DIR="$SOURCE_DIR/$source"
+	STOW_DIR="$SECRETS_SOURCE_DIR/$source"
 	log_verbose "stow $STOW_DIR into $target"
 	# do-while loop
 	# https://stackoverflow.com/questions/16489809/emulating-a-do-while-loop-in-bash
