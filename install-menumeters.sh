@@ -14,6 +14,7 @@ while getopts "hdv" opt; do
 	case "$opt" in
 	h)
 		echo "$SCRIPTNAME: Install Menumeters taskbar monitoring of system"
+		echo "deprecated for yujitach-menumeters"
 		echo "flags: -d debug, -v verbose, -h help"
 		exit 0
 		;;
@@ -37,6 +38,8 @@ set -u
 shift $((OPTIND - 1))
 
 if [[ $OSTYPE =~ darwin ]]; then
+	brew_install menumeters
+	log_exit
 	if ! [[ -e /Library/PreferencePanes/MenuMeters.prefPane || -e $HOME/Library/PreferencePanes/MenuMeters.prefPane ]]; then
 		curl_and_attach_or_open "http://member.ipmu.jp/yuji.tachikawa/MenuMetersElCapitan/zips/MenuMeters_1.9.5.zip"
 	fi
