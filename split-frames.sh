@@ -36,9 +36,10 @@ while getopts "hf:o:" opt; do
 done
 
 shift $((OPTIND - 1))
+mkdir -p ./frames_${FRAMES}_${OUTPUT_FORMAT}
 
 # Split each input video into frames
 for fname in "$@"; do
 	base="$(cut -d'.' -f1 <<<"$fname")"
-	ffmpeg -i "$fname" -vf "select=not(mod(n\, $FRAMES))" -vsync vfr "frames/${base}_%03d.${OUTPUT_FORMAT}"
+	ffmpeg -i "$fname" -vf "select=not(mod(n\, ${FRAMES}))" -vsync vfr "frames_${FRAMES}_${OUTPUT_FORMAT}/${base}_%03d.${OUTPUT_FORMAT}"
 done
