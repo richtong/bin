@@ -1,1 +1,1 @@
-../lib/include.sh
+source ../lib/include.sh
