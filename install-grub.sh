@@ -44,14 +44,19 @@ source_lib lib-config.sh lib-util.sh
 
 shift $((OPTIND - 1))
 
-if ! in_os linux; then
-	log_exit Linux only
+log_verbose "OS is $OSTYPE"
+if [[ $(util_os) != linux ]]; then
+	log_exit Real Linux only
 fi
 
 log_verbose when booting try to get to the terminal window by typing CTRL-ALT-F1
 log_verbose which will get you to tty1, as an aside tty6 is the graphical shell CTRL-ALT-F6
 log_verbose Look at the /var/log/syslog for Failed and see what is happening, most
 # https://askubuntu.com/questions/477821/how-can-i-permanently-remove-the-boot-option-quiet-splash.
+
+if [[ ! -e /etc/default/grub ]]; then
+	log_warning "no /etc/default/grub"
+fi
 
 log_verbose remove the word quiet from GRUB_CMDLINE_LINUX_DEFAULT
 modify_config_var GRUB_CMDLINE_LINUX_DEFAULT quiet "" /etc/default/grub

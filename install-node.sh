@@ -58,8 +58,6 @@ if $BREW; then
 	log_exit brew complete
 fi
 
-log_exit using package instal now
-
 if command -v node >/dev/null && vergte "$(node --version)" "v$VERSION"; then
 	log_verbose "have node $VERSION or higher no need to install over it"
 	exit

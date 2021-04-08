@@ -62,9 +62,9 @@ if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
 
-if ! in_os mac; then
-	log_exit "Mac only"
-fi
+#if ! in_os mac; then
+	#log_exit "Mac only"
+#fi
 
 PACKAGES=(
 	"python@$OLD_PYTHON"
@@ -138,3 +138,10 @@ if [[ -n ${PYTHON_PACKAGES[*]} ]]; then
 fi
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
+
+log_verbose "If no python alias this to python3"
+if ! command -v python &> /dev/null || command -v python3 &> /dev/null; then
+	if ! config_mark "$(config_profile_shell)"; then
+		config_add "$(config_profile_shell)" <<<"alias python=python3"
+	fi
+fi

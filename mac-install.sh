@@ -112,6 +112,9 @@ fi
 declare -a PACKAGES
 PACKAGES+=(bash)
 
+# bfg repo cleaner
+PACKAGES+=(bfg)
+
 # For lib-debug.sh gettext is in install-gnu.sh
 # PACKAGES+=" gettext "
 
@@ -145,9 +148,6 @@ PACKAGES+=(nmap)
 # docker users this for installation
 PACKAGES+=(wget)
 
-# installations for netdron.es for 3D work
-PACKAGES+=(epic-games)
-
 # use Brew for command line management of Mac App Store apps
 # https://lifehacker.com/mas-updates-and-installs-mac-app-store-apps-from-the-co-1791919584
 PACKAGES+=(mas)
@@ -162,8 +162,6 @@ if $SOFTWAREUPDATE && ! softwareupdate -l | grep "No new software available"; th
 	log_verbose update your Mac with all system changes
 	sudo softwareupdate -ia
 fi
-
-"$SCRIPT_DIR/install-python.sh"
 
 # aws need this
 # aws cli needs python and uses jq to parse output from it in bash scripts

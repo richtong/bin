@@ -54,8 +54,8 @@ if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh
 shift $((OPTIND - 1))
 
-if ! in_os linux; then
-	log_exit Linux only
+if [[ ! $(util_os) == linux ]]; then
+	log_exit "Real linux only"
 fi
 
 log_verbose configure grub for next reboot with dev flags

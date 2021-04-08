@@ -173,6 +173,11 @@ for profile in "$(config_profile)" "$(config_profile_shell)"; do
 	fi
 done
 
+log_verbose "install brew for linux and mac as common installer"
+"$SCRIPT_DIR/install-brew.sh"
+
+"$SCRIPT_DIR/install-python.sh"
+
 if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose "mac-install.sh with ${MAC_FLAGS-no flags}"
 	"$SOURCE_DIR/bin/mac-install.sh" "${MAC_FLAGS-}"
@@ -191,12 +196,12 @@ log_warning mac-install.sh must be run first before sourcing libraries
 # log_verbose assembling the full git key as $FULL_GIT_KEY and $FULL_LOCAL_KEY
 # the installation of packages
 
-if [[ $OSTYPE =~ linux ]]; then
+if in_os linux; then
 
-	log_verbose install check for sudo
+	log_verbose "install sudo and lua"
 	# lua used by lib-config
 	package_install sudo lua5.2
-	log_verbose check for sudo
+	"$SCRIPT_DIR/install-keychain.sh"
 
 	log_verbose Adding sudoers entry ignored if running under iam-key
 	SUDOERS_FILE="/etc/sudoers.d/10-$USER"
@@ -241,6 +246,7 @@ if [[ $OSTYPE =~ linux ]]; then
 	fi
 
 	sudo apt-get -y upgrade
+	log_verbose note that snap does not work on WSL2
 
 	# not this should no longer exist now that we are on docker
 	run_if "$SOURCE_DIR/scripts/build/install-dev-packages.sh"
@@ -274,12 +280,12 @@ PYTHON_PACKAGES=(
 # common packages
 # mmv - multiple file move and rename
 # curl - not clear if needed but MacOS doesn't have the latest
-# bfg - remove passwords and big files you didn't mean to commit
+# bfg - remove passwords and big files you didn't mean to commit this is snap only
+# gh
 # sudo - Linux only
 PACKAGES+=(
 	mmv
 	curl
-	bfg
 	git
 	pre-commit
 )
@@ -308,6 +314,12 @@ if ! in_os mac; then
 	log_verbose "no pip install docker install docker-py instead"
 	log_verbose if you mistakely install docker, you need to remove both docker and docker-py
 	log_verbose before installing docker-py again
+
+	if ! in_os linux-wsl; then
+		log_verbose install snap packages only in real linux not in wsl
+		# https://snapcraft.io/install/bfg-repo-cleaner/ubunt-
+		sudo snap install bfg-repo-clean --beta
+	fi
 
 fi
 
@@ -339,9 +351,6 @@ log_verbose "installing development and devops systems"
 
 log_verbose "skipping install-flutter but somehow"
 #"$SCRIPT_DIR/install-flutter.sh"
-
-log_verbose install brew for linux and mac
-"$SCRIPT_DIR/install-brew.sh"
 
 # the {-} means replace with null if FORCE_FLAG is not set
 "$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"

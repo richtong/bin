@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 ##
-## install Netlify CMS
-## https://docs.netlify.com/cli/get-started/
-
+## install WebODM tools
+##
 ##@author Rich Tong
 ##@returns 0 on success
 #
@@ -19,7 +18,8 @@ while getopts "hdv" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs Netlify CMS
+			Installs Photogrammetry tools to convert photos to 3D models
+			including  WebODM, qgix, cloudcompare, meshlab, epic-games unreal
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 		EOF
@@ -41,21 +41,19 @@ done
 shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-
-source_lib lib-install.sh
+source_lib lib-mac.sh lib-install.sh lib-util.sh
 
 if ! in_os mac; then
-	log_exit "Mac only"
-fi
-log_verbose "installing from npm netlify-cli"
-npm_install -g netlify-cli
-
-log_verbose "version checking"
-if $VERBOSE; then
-	netlify
+	log_exit "Mac Only"
 fi
 
-log_verbose "to login run netlify login"
-log_verbose "to connect a repo to netlify run netlify init in the directory"
-log_verbose "if you have already connected it then run netlify link"
-log_verbose "store $HOME/.netlify/config.json in secure storage"
+if [[ ! -v TOOLS ]]; then
+	TOOLS=(
+		qgis
+		cloudcompare
+		meshlab
+		epic-games
+	)
+fi
+
+package_install "${TOOLS[@]}"

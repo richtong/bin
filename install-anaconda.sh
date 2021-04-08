@@ -11,20 +11,24 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
-FULLCONDA="${FULLCONDA:-false}"
 NOFORGE="${NOFORGE:-false}"
-PYTHON="${PYTHON:-3.8}"
+PYTHON="${PYTHON:-3.9}"
+ANACONDA="${ANACONDA:-miniconda}"
+URL="${URL:-https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh}"
+VERSION="${VERSION:-2020.11}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvacf" opt; do
+while getopts "hdvacfp:r:u:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs Miniconda (you can install anaconda but more dependency issues)
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
-			           -a install miniconda and not full (default: $FULLCONDA)
-					   -c do not install conda-forge (defualt: NOFORGE)
+			           -a install full Anaconda (default: not $ANACONDA)
+					   -c do not install conda-forge (defualt: $NOFORGE)
 					   -p install python version (default: $PYTHON)
+					   -r install anaconda version (default: $VERSION)
+					   -u install miniconda version from (default: $URL)
 		EOF
 		exit 0
 		;;
@@ -40,7 +44,17 @@ while getopts "hdvacf" opt; do
 		NOFORGE=true
 		;;
 	f)
-		FULLCONDA=true
+		ANACONDA=anaconda
+		URL="https://repo.anaconda.com/archive/Anaconda3-$VERSION-Linux-x86_64.sh"
+		;;
+	p)
+		PYTHON="$OPTARG"
+		;;
+	r)
+		VERSION="$OPTARG"
+		;;
+	u)
+		URL="$OPTARG"
 		;;
 	*)
 		echo "no -$opt flag" >&2
@@ -52,15 +66,17 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
-if ! in_os mac; then
-	log_exit "mac only"
+if in_os mac; then
+	cask_install "$ANACONDA"
+elif ! command -v conda &> /dev/null; then
+	log_verbose "downloading $URL and running it"
+	# https://docs.continuum.io/anaconda/install/linux/
+	download_url "$URL"
+	log_verbose "run script"
+	bash "$WS_DIR/cache/$(basename "$URL")"
 fi
 
-if $FULLCONDA; then
-	cask_install anaconda
-else
-	cask_install miniconda
-fi
+source_profile
 
 if ! $NOFORGE; then
 	conda config --env --add channels conda-forge

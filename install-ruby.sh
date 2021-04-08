@@ -36,7 +36,7 @@ done
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 log_verbose "about to source"
-source_lib lib-version-compare.sh lib-util.sh lib-config.sh
+source_lib lib-version-compare.sh lib-util.sh lib-config.sh lib-install.sh
 
 VERSION=${VERSION:-2.1}
 
@@ -61,6 +61,12 @@ if in_os mac; then
 		EOF
 	fi
 	exit
+fi
+
+# https://www.thoughtco.com/instal-ruby-on-linux-2908370#:~:text=How%20to%20Install%20Ruby%20on%20Linux%201%20Open,exact%2C%20but%20if%20you%20are%20...%20See%20More.
+log_verbose "trying ruby-full"
+if package_install ruby-full; then
+	log_exit "ruby-full installs"
 fi
 
 # For travis using 12.04, need different install

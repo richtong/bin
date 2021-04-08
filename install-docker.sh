@@ -80,7 +80,7 @@ EOF
 done
 # shellcheck disable=SC1090
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-util.sh lib-docker.sh lib-install.sh lib-mac.sh lib-version-compare.sh
+source_lib lib-util.sh lib-docker.sh lib-install.sh lib-mac.sh lib-version-compare.sh lib-config.sh
 DEBUGGING=${DEBUGGING:=false}
 DOCKER_MACHINE=${DOCKER_MACHINE:="https://github.com/docker/machine/releases/download/v$DOCKER_MACHINE_VERSION/docker-machine-$(uname -s)-$(uname -m)"}
 DOCKER_COMPOSE=${DOCKER_COMPOSE:="https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)"}
@@ -162,12 +162,18 @@ if in_os mac; then
 	exit
 fi
 
-log_verbose docker-py needed for wscons in all versions of linux
-pip_install docker-py
-
+# log_verbose docker-py needed for wscons in all versions of linux
+# pip_install docker-py
+PACKAGES=(
+	apt-transport-https
+	ca-certificates
+	curl
+	gnupg
+	lsb-release
+)
 if in_linux debian; then
 	# https://docs.docker.com/engine/installation/linux/docker-ce/debian/#install-docker-ce
-	package_install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+	package_install "${PACKAGES[@]}"
 	curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add
 	# need |& because stderr warns not to pipe output
 	# need the asterisks because spaces vary in the string
@@ -179,7 +185,24 @@ if in_linux debian; then
 	package_install docker-ce
 
 elif in_linux ubuntu; then
-	package_install curl
+	# https://phoenixnap.com/kb/install-docker-on-ubuntu-20-04
+	# https://docs.docker.com/engine/install/ubuntu/
+	log_verbose "trying to install docker.io"
+	if ! package_install docker.io; then
+		log_verbose "docker.io package failed so install pieces"
+		package_install "${PACKAGES[@]}"
+		curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+			sudo gpg --deearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+		sudo add-apt-repository \
+			"deb [arch=amd64] signed-by /usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+		sudo apt-get update
+		sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+		if $VERBOSE; then
+			log_verbose "docker versions available"
+			apt-cache madison docker-ce
+		fi
+	fi
 
 	if ! command -v docker || ! docker -v | grep "$version_needed"; then
 		# We could have old docker components from ubuntu oritented installs
@@ -187,11 +210,13 @@ elif in_linux ubuntu; then
 		sudo apt-get purge -y lxc-docker* || true
 	fi
 
-	wget -qO- https://get.docker.com/ | sh
+	# the dangerous version do not install opaque scripts
+	# curl -fsSL  https://get.docker.com/ | sh
 	service_start docker
 
 fi
 
+"$SCRIPT_DIR/install-node.sh"
 NPM_PACKAGES=(dockerfilelint)
 #shellcheck disable=SC2086
 npm_install -g "${NPM_PACKAGES[@]}"

@@ -114,10 +114,6 @@ git config pull.ff only
 git config --global status.submodulesummary 2
 # use lfs for now, s3 for very large files
 
-if ! in_os mac; then
-	log_exit "Linux installed"
-fi
-
 # need for convenience with git and used in workflows so get used to it
 # https://github.com/github/hub
 # https://github.blog/2021-03-04-4-things-you-didnt-know-you-could-do-with-github-actions/

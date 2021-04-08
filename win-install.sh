@@ -53,10 +53,10 @@ if ! in_os windows; then
 	log_exit "Windows only"
 fi
 
-if ! command -v scoop > /dev/null; then
+if ! command -v scoop >/dev/null; then
 	"$SCRIPT_DIR/install-scoop.ps1"
 fi
-if ! command -v choco > /dev/null; then
+if ! command -v choco >/dev/null; then
 	"$SCRIPT_DIR/install-choco.ps1"
 fi
 
@@ -74,7 +74,6 @@ if [[ ! -v SCOOP ]]; then
 		lessmsi
 		make
 		msys2
-		openssh
 		potplayer
 		python
 		sharpkeys
@@ -92,16 +91,29 @@ fi
 log_verbose "install ${SCOOP[*]}"
 package_install "${SCOOP[@]}"
 
-
 if [[ ! -v CHOCO ]]; then
 	CHOCO=(
 		divvy
 		epicgameslauncher
 		kodi
 		nordvpn
-		openssh
-		)
+	)
 fi
 
 log_verbose "choco installation of packagers not in scoop ${CHOCO[*]}"
 choco install "${CHOCO[@]}"
+
+# https://365adviser.com/powershell/install-use-openssh-windows-powershell-core-remoting-via-ssh/#:~:text=Installing%20the%20OpenSSH%20package%20Option%203%29%20using%20Chocolatey,command%3A%20choco%20install%20openssh%20-params%20%E2%80%98%E2%80%9D%2FSSHServerFeature%20%2FKeyBasedAuthenticationFeature%E2%80%9D%E2%80%98%20%E2%80%93y
+log_verbose "openssh v8 is needed for git-lfs needs special installation"
+choco install openssh -params ""/SSHServerFeature /KeyBasedAuthenticationFeature"" -y
+# https://stackoverflow.com/questions/52113738/starting-ssh-agent-on-windows-10-fails-unable-to-start-ssh-agent-service-erro
+log_verbose "by default sshd is not started so set to automatic then start"
+powershell Get-Service -Name ssh-agent | Start-Service -StartupType Automatic
+powershell Start-Service ssh-agent
+log_verbose "make sure GIT_SSH points to this and not default Windows OpenSSH"
+# https://stackoverflow.com/questions/10574267/cannot-spawn-ssh-when-connecting-to-github-but-ssh-t-gitgithub-com-works
+# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.1#:~:text=Environment%20variables%2C%20unlike%20other%20types%20of%20variables%20in,are%20needed%20in%20both%20parent%20and%20child%20processes.
+# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.1
+powershell $env:GIT_SSH="c:\Program Files\OpenSSH-Win64\ssh.exe"
+
+powershell [Environment]::SetEnvironmentVariable("GIT_SSH", "c:\Program Files\OpenSSH\ssh.exe", 'Machine')
