@@ -16,7 +16,7 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
 DOCKER_CONTENT_TRUST="${DOCKER_CONTENT_TRUST:-false}"
 DOCKER_TRUST_PRIVATE="${DOCKER_TRUST_PRIVATE:-"$SCRIPT_DIR/ssh/docker"}"
-DOCKER_VERSION="${DOCKER_VERSION:-20.10.12}"
+DOCKER_VERSION="${DOCKER_VERSION:-20.03.8}"
 # Do not make too high as this will fail the minimum version needed test
 # Also this is not the Mac Docker App version, it is engine version
 DOCKER_INSTALL_EDGE_VERSION="${DOCKER_INSTALL_EDGE_VERSION:-20.10.12}"
@@ -97,7 +97,7 @@ if $INSTALL_EDGE; then
 fi
 log_verbose "check for docker looking for version $version_needed"
 
-if ! $FORCE && command -v docker; then
+if ! $FORCE && command -v docker &> /dev/null; then
 	INSTALLED_DOCKER="$(version_extract "$(docker -v)")"
 	if vergte "$INSTALLED_DOCKER" "$version_needed"; then
 		log_exit "docker installed $INSTALLED_DOCKER greater or equal to desired $version_needed"
@@ -171,7 +171,11 @@ PACKAGES=(
 	gnupg
 	lsb-release
 )
+if in_wsl; then
+	log_exit "WSL does not need docker install in Windows"
+fi
 if in_linux debian; then
+	log_verbose "installnig for debian"
 	# https://docs.docker.com/engine/installation/linux/docker-ce/debian/#install-docker-ce
 	package_install "${PACKAGES[@]}"
 	curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add
@@ -183,12 +187,13 @@ if in_linux debian; then
 	fi
 	repository_install "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
 	package_install docker-ce
-
 elif in_linux ubuntu; then
 	# https://phoenixnap.com/kb/install-docker-on-ubuntu-20-04
 	# https://docs.docker.com/engine/install/ubuntu/
-	log_verbose "trying to install docker.io"
-	if ! package_install docker.io; then
+	log_verbose "trying to install docker for ubuntu"
+	if package_install docker; then
+		log_exit "linux docker installed"
+	else
 		log_verbose "docker.io package failed so install pieces"
 		package_install "${PACKAGES[@]}"
 		curl -fsSL https://download.docker.com/linux/ubuntu/gpg \

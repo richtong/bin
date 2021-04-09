@@ -315,7 +315,7 @@ if ! in_os mac; then
 	log_verbose if you mistakely install docker, you need to remove both docker and docker-py
 	log_verbose before installing docker-py again
 
-	if ! in_os linux-wsl; then
+	if ! is_wsl; then
 		log_verbose install snap packages only in real linux not in wsl
 		# https://snapcraft.io/install/bfg-repo-cleaner/ubunt-
 		sudo snap install bfg-repo-clean --beta
