@@ -70,30 +70,49 @@ done
 
 # https://github.com/peterklijn/hammerspoon-shiftit#spooninstall
 if ! config_mark "$INIT" "--"; then
-	config_add "$INIT" <<-EOF
-		hs.loadSpoon("SpoonInstall")
-		spoon.SpoonInstall:andUse("WindowHalfsAndThirds")
-		spoon.WindowHalfsAndThirds:bindHotkeys(
-			 {
-				left_half   = { {"ctrl", "alt", "cmd"}, "Left" },
-				right_half  = { {"ctrl", "alt", "cmd"}, "Right" },
-				top_half    = { {"ctrl", "alt", "cmd"}, "Up" },
-				bottom_half = { {"ctrl", "alt", "cmd"}, "Down" },
-				third_left  = { {"ctrl", "alt", "cmd"}, "5" },
-				third_right = { {"ctrl", "alt", "cmd"}, "6" },
-				third_up    = { {"ctrl", "alt", "cmd"}, "7" },
-				third_down  = { {"ctrl", "alt", "cmd"}, "8" },
-				top_left    = { {"ctrl", "alt", "cmd"}, "1" },
-				top_right   = { {"ctrl", "alt", "cmd"}, "2" },
-				bottom_left = { {"ctrl", "alt", "cmd"}, "3" },
-				bottom_right= { {"ctrl", "alt", "cmd"}, "4" },
-				max_toggle  = { {"ctrl", "alt", "cmd"}, "f" },
-				max         = { {"ctrl", "alt", "cmd"}, "Up" },
-				undo        = { {"ctrl", "alt", "cmd"}, "z" },
-				center      = { {"ctrl", "alt", "cmd"}, "c" },
-				larger      = { {        "alt", "cmd", "shift"}, "Right" },
-				smaller     = { {        "alt", "cmd", "shift"}, "Left" },
-			 }
-		)
-	EOF
+	config_add "$INIT" <<EOF
+-- https://www.hammerspoon.org/Spoons/SpoonInstall.html
+-- mash it!
+hyper = {"cmd", "alt", "ctrl"}
+
+-- hotkeys for windows, repeated half rotates between -- 50%, 40% and 60% of screen
+-- repeated thirds moves to different locations except for middle_third which
+hs.loadSpoon("SpoonInstall")
+spoon.SpoonInstall:andUse("WindowHalfsAndThirds", {
+		hotkeys = {
+			left_half   = { hyper, "Left" },
+			right_half  = { hyper, "Right" },
+			top_half    = { hyper, "Up" },
+			bottom_half = { hyper, "Down" },
+			third_left  = { hyper, "5" },
+			middle_third_h = { hyper, "6" },
+			third_right = { hyper, "7" },
+			third_up    = { hyper, "8" },
+			middle_third_v  = { hyper, "9" },
+			third_down  = { hyper, "0" },
+			top_left    = { hyper, "1" },
+			top_right   = { hyper, "2" },
+			bottom_left = { hyper, "3" },
+			bottom_right= { hyper, "4" },
+			max_toggle  = { hyper, "f" },
+			max         = { hyper, "m" },
+			undo        = { hyper, "z" },
+			center      = { hyper, "c" },
+		}
+	}
+)
+
+-- Grid layout, hyper-g,
+-- single letter moves but does not resize, double letter moves and resizes
+spoon.SpoonInstall:andUse("WindowGrid", { start = true })
+
+-- throw windows to diferrent screens with hyper left, right
+-- use hyper a, s as in wasd instead
+spoon.SpoonInstall:andUse("WindowScreenLeftAndRight", {
+		hotkeys = {
+			screen_left = { hyper,  "a"},
+			screen_right = { hyper,  "s" },
+		}
+})
+EOF
 fi
