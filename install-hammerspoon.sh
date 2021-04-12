@@ -107,11 +107,11 @@ spoon.SpoonInstall:andUse("WindowHalfsAndThirds", {
 spoon.SpoonInstall:andUse("WindowGrid", { start = true })
 
 -- throw windows to diferrent screens with hyper left, right
--- use hyper a, s as in wasd instead
+-- use hyper j,k like vi mode to move windows
 spoon.SpoonInstall:andUse("WindowScreenLeftAndRight", {
 		hotkeys = {
-			screen_left = { hyper,  "a"},
-			screen_right = { hyper,  "s" },
+			screen_left = { hyper,  "j"},
+			screen_right = { hyper,  "k" },
 		}
 })
 EOF
