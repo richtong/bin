@@ -16,17 +16,21 @@ trap 'exit $?' ERR
 INSTALL_POWERLINE=${INSTALL_POWERLINE:-false}
 VIM_PROFILE="${VIM_PROFILE:-"$HOME/.vimrc"}"
 WINDOWS_ADMIN="${WINDOWS_ADMIN:-"service-account"}"
+FORCE="${FORCE:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvpw:" opt; do
+while getopts "hdvlw:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs Powerline
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help
-					   -f install powerline not powerline-go and vim-airline (default: $INSTALL_POWERLINE)
-					   -w Windows administrator account if in WSL (default:$WINDOWS_ADMIN)
+					   -l install powerline not powerline-go and vim-airline (default: $INSTALL_POWERLINE)
+					   -w Windows administrator account if in WSL not used (default:$WINDOWS_ADMIN)
+					   -f Install Powerline font for Windows (default: $FORCE)
+					      Set to false because you get a zillion confirms
+						  otherwise so only do -f once
 		EOF
 		exit 0
 		;;
@@ -38,7 +42,7 @@ while getopts "hdvpw:" opt; do
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
 		;;
-	p)
+	l)
 		INSTALL_POWERLINE=true
 		;;
 	w)
@@ -79,7 +83,13 @@ else
 			#log_warning "so create a service-account instead with local password"
 			#runas.exe /savecred /user:"$WINDOWS_ADMIN" "./install.ps1"
 			# https://www.raymondcamden.com/2017/09/25/calling-a-powershell-script-from-wsl
-			powershell.exe -File ".\install.ps1"
+			log_verbose "will install fonts"
+			if $VERBOSE; then
+				powershell.exe -File ".\\install.ps1" -WhatIf
+			fi
+			if $FORCE; then
+				powershell.exe -File ".\\install.ps1"
+			fi
 			log_warning "change the Terminal font to use a Powerline one and"
 			log_warning "restart the terminal session"
 		else

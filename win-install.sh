@@ -60,6 +60,8 @@ if ! command -v choco.exe >/dev/null; then
 	"$SCRIPT_DIR/install-choco.ps1"
 fi
 
+# https://github.com/lukesampson/psutils
+# psutils adds ln, sudo and touch to Windows
 if [[ ! -v SCOOP ]]; then
 	SCOOP=(
 		1password-cli
@@ -85,6 +87,7 @@ if [[ ! -v SCOOP ]]; then
 		vscode
 		windows-terminal
 		zoom
+		psutils
 	)
 fi
 
