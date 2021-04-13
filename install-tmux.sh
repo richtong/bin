@@ -42,7 +42,8 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
-brew install tmux tmuxinator
+# package install tries brew first then apt-get on linux
+package_install tmux tmuxinator tumuxinator-completion
 log_verbose tmuxinator requires latest ruby
 "$SCRIPT_DIR/install-ruby.sh"
 
