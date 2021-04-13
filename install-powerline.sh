@@ -15,17 +15,18 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
 INSTALL_POWERLINE=${INSTALL_POWERLINE:-false}
 VIM_PROFILE="${VIM_PROFILE:-"$HOME/.vimrc"}"
+WINDOWS_ADMIN="${WINDOWS_ADMIN:-"service-account"}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvp" opt; do
+while getopts "hdvpw:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs Powerline
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
-					   -f install powerline not powerline-go and vim-airline
-					   (default: $INSTALL_POWERLINE)
+			    flags: -d debug, -v verbose, -h help
+					   -f install powerline not powerline-go and vim-airline (default: $INSTALL_POWERLINE)
+					   -w Windows administrator account if in WSL (default:$WINDOWS_ADMIN)
 		EOF
 		exit 0
 		;;
@@ -39,6 +40,9 @@ while getopts "hdvp" opt; do
 		;;
 	p)
 		INSTALL_POWERLINE=true
+		;;
+	w)
+		WINDOWS_ADMIN="$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt" >&2
@@ -56,11 +60,39 @@ pip_install powerline-status powerline-gitstatus
 
 brew_install powerline-go svn
 
-log_verbose "installing powerline fonts"
-tap_install homebrew/cask-fonts
-cask_install font-fira-mono-for-powerline \
-	font-sf-mono-for-powerline \
-	font-menlo-for-powerline
+if in_os mac; then
+	log_verbose "installing powerline fonts"
+	tap_install homebrew/cask-fonts
+	cask_install font-fira-mono-for-powerline \
+		font-sf-mono-for-powerline \
+		font-menlo-for-powerline
+else
+	log_verbose "In linux have to install fonts from repo"
+	if [[ ! -e $SOURCE_DIR/extern/fonts ]]; then
+		log_warning "no powerline-fonts repo cloned $SOURCE_DIR/extern/fonts"
+	else
+		pushd "$SOURCE_DIR/extern/fonts" &> /dev/null || true
+		if in_wsl; then
+			# https://stackoverflow.com/questions/16107381/how-to-complete-the-runas-command-in-one-line
+			# https://answers.microsoft.com/en-us/windows/forum/windows_10-security/windows-10-run-as-administrator-using-microsoft/f2b75044-ef0d-4acd-86d9-c6c7998664ab
+			#log_warning "It does not work To use a Microsoft Account as admin switch to local"
+			#log_warning "so create a service-account instead with local password"
+			#runas.exe /savecred /user:"$WINDOWS_ADMIN" "./install.ps1"
+			# https://www.raymondcamden.com/2017/09/25/calling-a-powershell-script-from-wsl
+			powershell.exe -File ".\install.ps1"
+			log_warning "change the Terminal font to use a Powerline one and"
+			log_warning "restart the terminal session"
+		else
+			sudo apt-get install fontconfig
+			./install.sh
+			log_verbose "Installed fonts are:"
+			if $VERBOSE; then
+				fc-list
+			fi
+			popd &> /dev/null || true
+		fi
+	fi
+fi
 
 if ! $INSTALL_POWERLINE; then
 	log_verbose "Installing Powerline-Go"
@@ -73,7 +105,8 @@ function _update_ps1() {
     # shellcheck disable=SC2046
     PS1=$(powerline-go -hostname-only-if-ssh -max-width 30 \
 		  -colorize-hostname -shorten-gke-names -theme solarized-dark16 \
-		  -modules \ venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root,docker,goenv,kube \
+		  -modules \ 
+			 venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root,docker,goenv,kube \
 		  -error $? -jobs "$(jobs -p | wc -l)")
 }
 if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then
@@ -138,3 +171,4 @@ log_verbose "run powerline-lint to check and then powerline-daemon --replace"
 log_verbose "on python version changes, need to delete the files and reset"
 log_verbose "Set iterm/Preferences/Profiles/Font to Fira Mono"
 log_verbose "Set iterm/Preferenes/Profiles/Colors to Solarized Dark"
+log_verbose "source $(config_profile_shell) or re-login to use"

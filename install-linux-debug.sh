@@ -58,6 +58,10 @@ if [[ ! $(util_os) == linux ]]; then
 	log_exit "Real linux only"
 fi
 
+if in_wsl; then 
+	log_exit "Not for WSL"
+fi
+
 log_verbose configure grub for next reboot with dev flags
 "$SCRIPT_DIR/install-grub.sh"
 log_verbose check for sudo
