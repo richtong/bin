@@ -49,6 +49,7 @@ fi
 # This does not work with bash 4.4 as of August 2017 the parser
 # does not handle a bash sequence inside a conditional variable
 # and does not correctly pass bash sequences through parameter substitution
+# not used use brace expansion instead
 name_generate() {
 	local name="${1:-car}"
 	# Note that if you add quote to the iterator this breaks
@@ -80,7 +81,9 @@ fi
 log_verbose checking for config
 outsides=6
 # the bash eval cannot have any spaces between the commas
-outside="$(eval echo "outside{1..$outsides}" | tr " " ",")"
+# https://www.gnu.org/software/bash/manual/html_node/Brace-Expansion.html
+# heavy use of brace expansion
+#outside="$(eval echo "outside{1..$outsides}" | tr " " ",")"
 cars=4
 if ! config_mark "$config"; then
 
@@ -91,13 +94,14 @@ if ! config_mark "$config"; then
 	# need the eval echo to allow bash variables in the iterator
 	for car in $(eval echo "car{0..$((cars - 1))}"); do
 		log_verbose "adding $car"
-		log_verbose evaluates to "$(eval echo "$car $car{front,back,driver,$outside}.local")"
+		log_verbose evaluates to "$(eval echo "$car $car{front,back,driver,outside{1..$outsides}}.local")"
 		# note how the local applies to the suffixes and a null item means add
 		# no string need parens around the items
 		# would need an eval if a bash variable was part of an iterator
 		# also we need ${car} to make sure the next iterator is parsed correctly
 		#eval echo "${car}{" = ",{front,back,driver,outside{1..$outsides}}.local}" | config_add "$config"
-		eval echo "$car $car{front,back,driver,$outside}.local" | config_add "$config"
+		# nested brace expansion
+		eval echo "$car $car{front,back,driver,outside{1..$outsides}}.local" | config_add "$config"
 	done
 
 	log_verbose adding ai? and ai?r for remote
