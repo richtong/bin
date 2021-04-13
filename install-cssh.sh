@@ -32,17 +32,15 @@ source_lib lib-install.sh lib-config.sh lib-util.sh
 
 log_verbose check for installation
 if in_os mac; then
-	log_verbose in mac
+	log_verbose "in mac install csshX"
 	package_install csshx
 	if ! config_mark "$(config_profile_shell)"; then
 		log_verbose adding cssh alias
-		config_add "$(config_profile_shell)" <<<"alias cssh=csshx"
+		config_add "$(config_profile_shell)" <<<"alias cssh=csshX"
 	fi
-	log_assert "command -v csshx" "csshx installed"
-
 else
+	log_verbose "package install clusterssh"
 	package_install clusterssh
-	log_assert "command -v cssh" "cssh installed"
 fi
 
 # generate car sensors to stdout
@@ -81,34 +79,38 @@ if in_os mac; then
 fi
 log_verbose checking for config
 outsides=6
+# the bash eval cannot have any spaces between the commas
+outside="$(eval echo "outside{1..$outsides}" | tr " " ",")"
 cars=4
 if ! config_mark "$config"; then
 
-	eval echo "clusters = car{0..$((cars - 1))} ai{,r,.local}" | config_add "$config"
+	eval echo "all car{0..$((cars - 1))} ai{,r,.local}" | config_add "$config"
 	# name_generate car '"{0..3}"' '"{front,back}"'
 	# name_generate | config_add "$HOME/.clusterssh/config"
 
 	# need the eval echo to allow bash variables in the iterator
 	for car in $(eval echo "car{0..$((cars - 1))}"); do
 		log_verbose "adding $car"
-		log_verbose evaluates to "$(eval echo "${car}{,{front,back,driver,outside{1..5}}.local}")"
+		log_verbose evaluates to "$(eval echo "$car $car{front,back,driver,$outside}.local")"
 		# note how the local applies to the suffixes and a null item means add
 		# no string need parens around the items
 		# would need an eval if a bash variable was part of an iterator
 		# also we need ${car} to make sure the next iterator is parsed correctly
-		eval echo "${car}{" = ",{front,back,driver,outside{1..$outsides}}.local}" | config_add "$config"
+		#eval echo "${car}{" = ",{front,back,driver,outside{1..$outsides}}.local}" | config_add "$config"
+		eval echo "$car $car{front,back,driver,$outside}.local" | config_add "$config"
 	done
 
 	log_verbose adding ai? and ai?r for remote
 	for site in "" r .local; do
 		# do not need eval
-		eval echo ai$site = ai{0..4}$site | config_add "$config"
+		eval echo "ai$site ai{0..4}$site" | config_add "$config"
 	done
 	# the above use of bash expansion replaced these lines
 	#config_add "$HOME/.clusterssh/config" <<-EOF
+	#all  cars0 car1 car2 car3
 	#car0 car0front.local car0back.local car0driver.local car0outside1.local car0outside2.local car0outside3.local car0outside4.local car0outside5.local
 	#car1 car1front.local car1back.local car1driver.local car1outside1.local car1outside2.local car1outside3.local car1outside4.local car1outside5.local
-	#car2 car2front.local car2back.local car2driver.local car2outside2.local car2outside2.local car2outside3.local car2outside4.local car2outside5.local
-	#car3 car3front.local car3back.local car3driver.local car3outside3.local car3outside3.local car3outside3.local car3outside4.local car3outside5.local
+	#car2  car2front.local car2back.local car2driver.local car2outside2.local car2outside2.local car2outside3.local car2outside4.local car2outside5.local
+	#car3  car3front.local car3back.local car3driver.local car3outside3.local car3outside3.local car3outside3.local car3outside4.local car3outside5.local
 	#EOF
 fi
