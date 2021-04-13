@@ -9,13 +9,15 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 # get command line options
 OPTIND=1
+DOWNLOAD="${DOWNLOAD:-false}"
 APT_INSTALL=${APT_INSTALL:-false}
-while getopts "hdvb" opt; do
+while getopts "hdvbf" opt; do
 	case "$opt" in
 	h)
 		echo "$SCRIPTNAME: install aws"
 		echo "flags: -d : debug, -v : verbose, -h :help"
-		echo "       -b use apt-get installer (default: $APT_INSTALL)"
+		echo "       -b use deprecated apt-get installer (default: $APT_INSTALL)"
+		echo "  	 -f download directly from AWS (default: $DOWNLOAD)"
 		exit 0
 		;;
 	d)
@@ -26,6 +28,9 @@ while getopts "hdvb" opt; do
 		;;
 	b)
 		APT_INSTALL=true
+		;;
+	f)
+		DOWNLOAD=true
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -41,15 +46,10 @@ source_lib lib-install.sh lib-util.sh
 #log_exit "installed already $(aws --version)"
 #fi
 
-NODE_PACKAGE=(
-	aws-cdk
-)
-log_verbose "Install ${NODE_PACKAGE[*]}"
-npm_install -g "${NODE_PACKAGE[@]}"
+package_install awscli aws-cdk
 
 if in_os mac; then
-	log_verbose "installing awscli"
-	package_install awscli
+	log_verbose "installing awscli if brew install failed"
 	if ! command -v aws && [[ $(command -v python) =~ /opt/local ]]; then
 		log_warning running with Macport python and this does not seem to work but try anyway
 		# https://trac.macports.org/ticket/50063
@@ -59,8 +59,13 @@ if in_os mac; then
 			sudo port select awscli py27-awscli
 		fi
 	fi
-	log_exit "aws install complete"
 fi
+
+NODE_PACKAGE=(
+	aws-cdk
+)
+log_verbose "Install ${NODE_PACKAGE[*]}"
+npm_install -g "${NODE_PACKAGE[@]}"
 
 log_verbose "Linux installation started"
 if $APT_INSTALL; then
@@ -69,34 +74,37 @@ if $APT_INSTALL; then
 	package_install awscli
 	# pip_install --user --upgrade awscli
 	log_exit "install awscli"
-fi
 
-if ! in_os docker; then
-	# Debian does not have ntpdate by default
-	if ! command -v ntpdate; then
-		log_verbose ntp install
-		package_install ntpdate
+	if ! in_os docker; then
+		# Debian does not have ntpdate by default
+		if ! command -v ntpdate; then
+			log_verbose ntp install
+			package_install ntpdate
+		fi
+		# VMware can get out of date so force a time update
+		log_verbose Need to time synchronize because aws will not allow out of date clients
+		# -u so it works on Mac too
+		# http://osxdaily.com/2012/07/04/set-system-time-mac-os-x-command-line/
+		sudo ntpdate -u pool.ntp.org
 	fi
-	# VMware can get out of date so force a time update
-	log_verbose Need to time synchronize because aws will not allow out of date clients
-	# -u so it works on Mac too
-	# http://osxdaily.com/2012/07/04/set-system-time-mac-os-x-command-line/
-	sudo ntpdate -u pool.ntp.org
+
 fi
 
-# the only way in August 2020 to get AWS CLI v2
-log_verbose bundled install as the last try
-download_url "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-	"$WS_DIR/cache/awscliv2.zip"
-pushd >/dev/null "$WS_DIR/cache"
-log_verbose unpackaing awscli source
-package_install unzip
-unzip -oq awscliv2.zip
-log_verbose building aws cli from source
-sudo ./aws/install
-pushd >/dev/null
-log_exit bundle installed
-
+if $DOWNLOAD; then
+# the only way in August 2020 to get AWS CLI v2 official way:w
+	log_verbose bundled install as the last try
+	download_url "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+		"$WS_DIR/cache/awscliv2.zip"
+	pushd >/dev/null "$WS_DIR/cache"
+	log_verbose unpackaging awscli source
+	package_install unzip
+	unzip -oq awscliv2.zip
+	log_verbose building aws cli from source
+	if ! sudo ./aws/install; then
+		log_warning "Installation failed do ypu and to upgrade instead"
+	fi
+	pushd >/dev/null
+	log_exit bundle installed
 # as of August 2020 no more pip install
 # package_install python-pip
 # http://docs.aws.amazon.com/cli/latest/userguide/installing.html
@@ -104,3 +112,5 @@ log_exit bundle installed
 # --user means install for current user only not for all users
 # pip_install --upgrade --user awscli
 # log_exit "pip install succeeded"
+
+fi
