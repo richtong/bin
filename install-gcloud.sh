@@ -13,6 +13,7 @@
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 PACKAGES="${PACKAGES:-" beta "}"
+INSTALL_DIR="${INSTALL_DIR:-"$HOME/.local/bin"}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
@@ -46,24 +47,42 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh lib-config.sh
 
-if ! in_os mac; then
-	log_exit "Not tested beyond MacOS"
-fi
-log_verbose install google cloud sdk
-cask_install google-cloud-sdk
+if in_os mac; then
+	log_verbose install google cloud sdk
+	cask_install google-cloud-sdk
 
-log_verbose "checking for gcloud in $(config_profile)"
-if ! config_mark; then
-	log_verbose "installing into $(config_profile)"
-	config_add <<-EOF
-		source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"
-		source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc"
-	EOF
-	log_verbose "now source the changes to $(config_profile)"
-	source_profile
-	hash -r
-fi
+	log_verbose "checking for gcloud in $(config_profile)"
+	if ! config_mark; then
+		log_verbose "installing into $(config_profile)"
+		config_add <<-EOF
+			source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"
+			source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc"
+		EOF
+		log_verbose "now source the changes to $(config_profile)"
+	fi
 
+elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then
+	# https://cloud.google.com/sdk/docs/downloads-interactive#linux-mac
+	log_verbose "enter the installation directory ~/.local/bin is a good choice"
+	download_url "https://sdk.cloud.google.com" "$WS_DIR/cache/install-google-cloud-sdk.sh"
+	bash "$WS_DIR/cache/install-google-cloud-sdk.sh" --disable-prompts --install-dir="$INSTALL_DIR"
+	if ! config_mark "$(config_shell_profile)"; then
+		config_add "$(config_shell_profile)" <<-EOF
+		# The next line updates PATH for the Google Cloud SDK.
+		if [ -f '$INSTALL_DIR/google-cloud-sdk/path.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/path.bash.inc'; fi
+
+		# The next line enables shell command completion for gcloud.
+		if [ -f 'INSTALL_DIR/google-cloud-sdk/completion.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/completion.bash.inc'; fi
+		EOF
+	fi
+
+elif in_os linux; then
+	# https://tecadmin.net/how-to-install-google-cloud-sdk-on-ubuntu-20-04/#:~:text=How%20To%20Install%20Google%20Cloud%20SDK%20on%20Ubuntu,comamnd%20line%20reference%20to%20start%20working%20with%20it.
+	snap_install google-cloud-sdk
+fi 
+
+source_profile
+hash -r
 log_verbose install additional packages "$PACKAGES" "$@"
 
 # all packages cannot contain spaces

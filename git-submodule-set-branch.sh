@@ -114,8 +114,9 @@ fi
 # we need the true because set-branch will return false if the
 # change has already been made
 log_verbose add the test commands
+declare -a CMDS
 if $VERBOSE; then
-	CMDS=(
+	CMDS+=(
 		# test variables in foreach
 		"git submodule foreach \"echo origin=$ORIGIN_REMOTE\"' sm_path=\$sm_path
 		name=\$name displaypath=\$displaypath sha1=\$sha1 toplevel=\$toplevel'"
@@ -141,16 +142,20 @@ if $VERBOSE; then
 		# now set to the right master
 	)
 fi
-log_verbose adding the real working command
+log_verbose "add working commands"
+# note that submodule uses /bin/sh and not bash
 CMDS+=(
 	"git submodule foreach
-		\$'default=\$(git remote set-head $ORIGIN_REMOTE -a |
-			awk \'{print \$NF}\') && echo \$default &&
-		[[ -n \$default ]] &&
-		cd \$toplevel && git submodule set-branch -b \$default -- \$sm_path'"
+		\$'default=\$(git remote set-head $ORIGIN_REMOTE -a | awk \'{print \$NF}\') &&
+		echo \$default &&
+		[ -n \$default ] && 
+		git switch \$default &&
+		cd \$toplevel &&
+		git submodule set-branch -b \$default -- \$sm_path'"
 	'git submodule update --init --recursive --remote'
 )
 
+log_verbose "Is this a dry run arg is $DRY_RUN_ARG"
 # shellcheck disable=SC2086
 util_cmd $DRY_RUN_ARG "${CMDS[@]}"
 

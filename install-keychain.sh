@@ -57,8 +57,9 @@ else
 	log_verbose "found ${KEYS[*]}"
 fi
 
-if ! config_mark; then
-	config_add <<-EOF
+# needs to run on each subshell for windows terminal
+if ! config_mark "$(config_shell_profile)"; then
+	config_add "$(config-shell_profile)" <<-EOF
 		keychain "${KEYS[@]}"
 		source "$HOME/.keychain/$(uname -n)-sh"
 	EOF
