@@ -14,6 +14,7 @@ set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 PACKAGES="${PACKAGES:-" beta "}"
 INSTALL_DIR="${INSTALL_DIR:-"$HOME/.local/bin"}"
+PROJECT="${PROJECT:-netdrones}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
@@ -93,4 +94,9 @@ gcloud components install --quiet $PACKAGES "$@"
 if [[ $(gcloud config configurations list | wc -l) -lt 2 ]]; then
 	log_verbose no configuration exists so init
 	gcloud init
+fi
+
+if gcloud auth list |& grep "No credentialed accounts"; then
+	gcloud auth login
+	gcloud config set project "$PROJECT"
 fi
