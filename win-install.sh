@@ -13,6 +13,7 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
+ADMIN="${ADMIN:-service-account}"
 VERSION="${VERSION:-7}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvr:" opt; do
@@ -45,7 +46,7 @@ done
 shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
+source_lib lib-install.sh lib-util.sh lib-win.sh
 
 log_verbose "In $SCRIPT_DIR"
 
@@ -101,15 +102,30 @@ if [[ ! -v CHOCO ]]; then
 		kodi
 		nordvpn
 		docker-desktop
+		visualstudio2019community
 	)
 fi
 
 log_verbose "choco installation of packagers not in scoop ${CHOCO[*]}"
 log_verbose "you must run in administrative mode"
-runas.exe /savecred /user:administrator choco.exe install "${CHOCO[@]}"
+# https://superuser.com/questions/108207/how-to-run-a-powershell-script-as-administrator
+#runas.exe /savecred /user:"$ADMIN" "choco.exe install ${CHOCO[*]}"
+win_sudo "choco install ${CHOCO[*]}"
 
-# https://365adviser.com/powershell/install-use-openssh-windows-powershell-core-remoting-via-ssh/#:~:text=Installing%20the%20OpenSSH%20package%20Option%203%29%20using%20Chocolatey,command%3A%20choco%20install%20openssh%20-params%20%E2%80%98%E2%80%9D%2FSSHServerFeature%20%2FKeyBasedAuthenticationFeature%E2%80%9D%E2%80%98%20%E2%80%93y
+# https://365adviser.com/powershell/install-use-openssh-windows-powershell-core-remoting-via-ssh/
 log_verbose "openssh v8 is needed for git-lfs needs special installation"
-runas.exe /savecredd /user:administrator choco install openssh -params ""/SSHServerFeature /KeyBasedAuthenticationFeature"" -y
+# do not add SCRIPT_DIR we use cwd as Linux paths are not windows paths
+log_verbose "install-ssh.ps1 Powershell script not correctly called quote issue"
+win_sudo '-f install-ssh.ps1'
 
-"$SCRIPT_DIR/insstall-ssh.ps1"
+# https://www.partitionwizard.com/partitionmagic/enable-remote-desktop-windows-10.html
+log_verbose "Now enable Remote Desktop Server with cmd.exe"
+#cmd.exe reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" \
+	#/v fDenyTSConnectionsd /t REG_DWORD /d 0 /f
+#cmd.exe netsh advfirewall firewall set rul group="remote desktop" new enable=yes
+
+log_verbose "Enable Remote Desktop with powershell"
+win_sudo 'Set-ItemProperty
+	-Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" 
+	-Name "fDenyTSConnection" -Value 0'
+win_sudo 'Enable-NetFirewallRule -DisplayGroup "Remote Desktop"'
