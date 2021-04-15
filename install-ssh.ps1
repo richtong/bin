@@ -15,9 +15,6 @@ Start-Service ssh-agent
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.1
 $env:GIT_SSH="c:\Program Files\OpenSSH-Win64\ssh.exe"
 
-# There are two levels the Machine is lowest but across all users
-# https://stackoverflow.com/questions/4477660/what-is-the-difference-between-user-variables-and-system-variables
+# Need to set the User too so it is not overridden
 [Environment]::SetEnvironmentVariable("GIT_SSH", "c:\Program Files\OpenSSH-Win64\ssh.exe", 'Machine')
-# Now set for the current user
-# https://community.idera.com/database-tools/powershell/powertips/b/tips/posts/setting-permanent-environment-variables#:~:text=Setting%20Permanent%20Environment%20Variables.%20When%20you%20set%20or,the%20value%20%22Hello%20World%22%2C%20for%20the%20current%20user%3A
 [Environment]::SetEnvironmentVariable("GIT_SSH", "c:\Program Files\OpenSSH-Win64\ssh.exe", 'User')
