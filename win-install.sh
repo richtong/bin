@@ -116,7 +116,10 @@ win_sudo "choco install ${CHOCO[*]}"
 log_verbose "openssh v8 is needed for git-lfs needs special installation"
 # do not add SCRIPT_DIR we use cwd as Linux paths are not windows paths
 log_verbose "install-ssh.ps1 Powershell script not correctly called quote issue"
-win_sudo '-f install-ssh.ps1'
+#win_sudo '-f install-ssh.ps1'
+# note you need a path here not just a file name and the path needs to be a
+# windows one not a WSL2 one, but ./ for current directory works
+win_sudo ./install-ssh.ps1
 
 # https://www.partitionwizard.com/partitionmagic/enable-remote-desktop-windows-10.html
 log_verbose "Now enable Remote Desktop Server with cmd.exe"
@@ -124,8 +127,7 @@ log_verbose "Now enable Remote Desktop Server with cmd.exe"
 	#/v fDenyTSConnectionsd /t REG_DWORD /d 0 /f
 #cmd.exe netsh advfirewall firewall set rul group="remote desktop" new enable=yes
 
-log_verbose "Enable Remote Desktop with powershell"
-win_sudo 'Set-ItemProperty
-	-Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" 
-	-Name "fDenyTSConnection" -Value 0'
-win_sudo 'Enable-NetFirewallRule -DisplayGroup "Remote Desktop"'
+log_warning "Enable Remote Desktop with powershell does not work use Settings > System > Remote Desktop"
+log_warning "Will not work in Windows Home"
+win_sudo Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnection" -Value 0
+# win_sudo 'Enable-NetFirewallRule -DisplayGroup "Remote Desktop"'
