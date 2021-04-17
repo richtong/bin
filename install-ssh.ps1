@@ -18,3 +18,19 @@ $env:GIT_SSH="c:\Program Files\OpenSSH-Win64\ssh.exe"
 # Need to set the User too so it is not overridden
 [Environment]::SetEnvironmentVariable("GIT_SSH", "c:\Program Files\OpenSSH-Win64\ssh.exe", 'Machine')
 [Environment]::SetEnvironmentVariable("GIT_SSH", "c:\Program Files\OpenSSH-Win64\ssh.exe", 'User')
+
+# Enable sshd server
+# https://zamarax.com/2020/02/14/installing-sftp-ssh-ftp-server-on-windows-with-openssh/
+Get-Service -Name sshd | Set-Service -StartupType Automatic
+Start-Service sshd
+
+# https://www.technig.com/manage-windows-firewall-using-powershell/#:~:text=1.%20Try%20to%20run%20PowerShell%20as%20administrator%20and,networking%20and%20security%20cmdlets%20with%20Firewall%20PowerShell%20commands.
+# allow port 22 traffic this should already be done
+#New-NetFirewallRule -Protocol TCP -LocalPort 22 -Direction Inbound -Action Allow -DisplayName SSH
+# assume we are using the private network rules so display them
+Get-NetFirewallProfile -Profile Private
+Get-NetFirewallRule -Enable True | Select-String -Pattern ssh
+Get-NetFirewallRule -Enable True | Select-String -Pattern RemoteDesktop
+
+# you need to reboot
+# Restart-Computer

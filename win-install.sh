@@ -107,7 +107,6 @@ if [[ ! -v CHOCO ]]; then
 fi
 
 log_verbose "choco installation of packagers not in scoop ${CHOCO[*]}"
-log_verbose "you must run in administrative mode"
 # https://superuser.com/questions/108207/how-to-run-a-powershell-script-as-administrator
 # runas does not work
 #runas.exe /savecred /user:"$ADMIN" "choco.exe install ${CHOCO[*]}"
@@ -121,14 +120,16 @@ log_verbose "install-ssh.ps1 Powershell script not correctly called quote issue"
 # note you need a path here not just a file name and the path needs to be a
 # windows one not a WSL2 one, but ./ for current directory works
 win_sudo ./install-ssh.ps1
+log_warning "sshd starting requires reboot"
 
 # https://www.partitionwizard.com/partitionmagic/enable-remote-desktop-windows-10.html
 log_verbose "Now enable Remote Desktop Server with cmd.exe"
+# firewall is already set properly and these are not correct anyway
 #cmd.exe reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" \
 	#/v fDenyTSConnectionsd /t REG_DWORD /d 0 /f
+# win_sudo 'Enable-NetFirewallRule -DisplayGroup "Remote Desktop"'
 #cmd.exe netsh advfirewall firewall set rul group="remote desktop" new enable=yes
 
 log_warning "Enable Remote Desktop with powershell does not work use Settings > System > Remote Desktop"
 log_warning "Will not work in Windows Home"
 win_sudo Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnection" -Value 0
-# win_sudo 'Enable-NetFirewallRule -DisplayGroup "Remote Desktop"'
