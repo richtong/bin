@@ -10,6 +10,13 @@ choco.exe install openssh -params '"/SSHServerFeature /KeyBasedAuthenticationFea
 # needs to run as an admin
 Get-Service -Name ssh-agent | Set-Service -StartupType Automatic
 Start-Service ssh-agent
+
+# start the ssh server
+# https://www.pugetsystems.com/labs/hpc/How-To-Use-SSH-Client-and-Server-on-Windows-10-1470/
+Get-Service -Name sshd | Set-Service -StartupType Automatic
+# make sure port 22 is open
+Get-NetFirewallRule -Name *ssh*
+
 # https://stackoverflow.com/questions/10574267/cannot-spawn-ssh-when-connecting-to-github-but-ssh-t-gitgithub-com-works
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.1#:~:text=Environment%20variables%2C%20unlike%20other%20types%20of%20variables%20in,are%20needed%20in%20both%20parent%20and%20child%20processes.
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables?view=powershell-7.1
