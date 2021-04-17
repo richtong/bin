@@ -109,6 +109,7 @@ fi
 log_verbose "choco installation of packagers not in scoop ${CHOCO[*]}"
 log_verbose "you must run in administrative mode"
 # https://superuser.com/questions/108207/how-to-run-a-powershell-script-as-administrator
+# runas does not work
 #runas.exe /savecred /user:"$ADMIN" "choco.exe install ${CHOCO[*]}"
 win_sudo "choco install ${CHOCO[*]}"
 
