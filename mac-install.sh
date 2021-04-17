@@ -240,9 +240,12 @@ log_verbose install complete Mac apps via brew
 # VLC - video viewer
 # google-backup-and-sync - super set of gdrive and also does photo uploads used
 # for veracrypt
+# microsoft-remote-desktop - to remote into graphical windows desktops
 #
-CASKS+=(vlc
+CASKS+=(
+	vlc
 	google-backup-and-sync
+	microsoft-remote-desktop
 )
 
 log_verbose "cask install ${CASKS[*]}"
