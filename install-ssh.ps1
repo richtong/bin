@@ -4,7 +4,13 @@
 # "choco install openssh -params /SSHServerFeature /KeyBasedAuthenticationFeature" 
 # https://mangolassi.it/topic/9954/installing-openssh-on-windows-via-chocolatey
 #-ArgumentList ('-noexit choco.exe install openssh')
-choco.exe install openssh -params '"/SSHServerFeature /KeyBasedAuthenticationFeature"'
+# make sure Windows OpenSSH is not installed as it is very old
+Remove-WindowsCapability -Onlin -Name OpenSSH.Client
+Remove-WindowsCapabiltiy -Online -Name OpenSSH.Server
+# Has version 8.2
+ choco.exe install openssh -params '"/SSHServerFeature /KeyBasedAuthenticationFeature"'
+# Has the latest OpenSSH 8.5
+#scoop install git-with-openssh
 
 # https://dmtavt.com/post/2020-08-03-ssh-agent-powershell/
 # needs to run as an admin
