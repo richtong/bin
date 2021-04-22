@@ -355,7 +355,7 @@ log_verbose "skipping install-flutter but somehow"
 # the {-} means replace with null if FORCE_FLAG is not set
 "$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"
 log_verbose must be installed is git lfs is used before installing repos
-"$BIN_DIR/install-lfs.sh"
+"$BIN_DIR/install-git-lfs.sh"
 
 log_verbose install repos only if not in docker
 if ! in_os docker &&

@@ -20,7 +20,7 @@ while getopts "hdvr:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs 1Password
+			Installs Install native Windows applications
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 			           -r version number (default: $VERSION)
@@ -61,17 +61,31 @@ if ! command -v choco.exe >/dev/null; then
 	"$SCRIPT_DIR/install-choco.ps1"
 fi
 
+log_verbose "Install with Winget but cannot figure out path yet"
+if [[ ! -v WINGET ]]; then
+	WINGET=(
+		git
+		1password
+		7zip
+		authy
+		)
+fi
+
+for package in "${WINGET[@]}"; do
+	pwsh.exe winget install "$package"
+done
+
 # https://github.com/lukesampson/psutils
+# powershell v7.x is pwsh
 # psutils adds ln, sudo and touch to Windows
 if [[ ! -v SCOOP ]]; then
 	SCOOP=(
 		1password-cli
-		7zip
 		authy
 		dark
 		firefox
 		gcloud
-		git
+		git-with-openssh
 		googlechrome
 		jq
 		lessmsi
@@ -89,12 +103,17 @@ if [[ ! -v SCOOP ]]; then
 		windows-terminal
 		zoom
 		psutils
+		pwsh
 	)
 fi
 
 log_verbose "install ${SCOOP[*]}"
 scoop install "${SCOOP[@]}"
+# https://github.com/lukesampson/scoop/issues/3954
+scoop update "*"
 
+# we install both pwsh and choco powershell-core because for scripts
+# choco is administratively installed and easier to put in the shebang
 if [[ ! -v CHOCO ]]; then
 	CHOCO=(
 		divvy
@@ -103,6 +122,8 @@ if [[ ! -v CHOCO ]]; then
 		nordvpn
 		docker-desktop
 		visualstudio2019community
+		powershell-core
+		icloud
 	)
 fi
 
@@ -119,7 +140,7 @@ log_verbose "install-ssh.ps1 Powershell script not correctly called quote issue"
 #win_sudo '-f install-ssh.ps1'
 # note you need a path here not just a file name and the path needs to be a
 # windows one not a WSL2 one, but ./ for current directory works
-win_sudo ./install-ssh.ps1
+./install-ssh.ps1
 log_warning "sshd starting requires reboot"
 
 # https://www.partitionwizard.com/partitionmagic/enable-remote-desktop-windows-10.html

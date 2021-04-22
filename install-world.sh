@@ -14,23 +14,24 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
-APP_NAME="${APP_NAME:-COLMAP}"
+COLMAP_NAME="${COLMAP_NAME:-COLMAP}"
 RELEASE="${RELEASE:-3.6}"
-APP_URL="${APP_URL:-"https://github.com/colmap/colmap/releases/download/$RELEASE/$APP_NAME-$RELEASE-mac-no-cuda.zip"}"
-APP_BIN="${APP_BIN:-"/Applications/$APP_NAME.app/Contents/MacOS"}"
+COLMAP_URL="${COLMAP_URL:-"https://github.com/colmap/colmap/releases/download/$RELEASE/$COLMAP_NAME-$RELEASE-mac-no-cuda.zip"}"
+COLMAP_BIN="${COLMAP_BIN:-"/Applications/$COLMAP_NAME.app/Contents/MacOS"}"
+RC_URL="${RC_URL:-"https://www.capturingreality.com/download"}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvfa:r:u:b:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs Mapping Software
+			Installs Mapping Software Colmap, Reality Capture, Unreal Engine
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 					   -f force install (default: $FORCE)
-					   -a application name (default: $APP_NAME)
+					   -a application name (default: $COLMAP_NAME)
 			           -r version number (default: $RELEASE)
-					   -u download url (defualt: $APP_URL)
-					   -b binary path (default: $APP_BIN)
+					   -u download url (defualt: $COLMAP_URL)
+					   -b binary path (default: $COLMAP_BIN)
 		EOF
 		exit 0
 		;;
@@ -46,16 +47,16 @@ while getopts "hdvfa:r:u:b:" opt; do
 		FORCE=true
 		;;
 	a)
-		APP_NAME="$OPTARG"
+		COLMAP_NAME="$OPTARG"
 		;;
 	r)
 		RELEASE="$OPTARG"
 		;;
 	u)
-		APP_URL="$OPTARG"
+		COLMAP_URL="$OPTARG"
 		;;
 	b)
-		APP_BIN="$OPTARG"
+		COLMAP_BIN="$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt"
@@ -68,23 +69,26 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-util.sh lib-install.sh lib-config.sh
 
-if in_os mac; then
-	log_verbose "Downloading $APP_NAME"
-	download_url_open "$APP_URL"
-	log_verbose "Move $APP_NAME.app to /Applications"
-	APP_DIR="/Applications/$APP_NAME.app"
-	if [[ -e $APP_DIR ]] && $FORCE; then
-		rm -rf "$APP_DIR"
-	fi
-	mv "$WS_DIR/cache/$APP_NAME.app" "$(dirname "$APP_DIR")"
-	log_verbose "Making CLI available"
-	if ! config_mark; then
-		config_add <<-EOF
-			[[ \$PATH =~ $APP_BIN ]] || PATH+=":$APP_BIN"
-		EOF
-	fi
-	log_verbose "Download sample images from https://colmap.github.io/datasets.html#datasets"
-	log_verbose "Choose Reconstruction/Automatic Reconstruction"
-	log_verbose "And pick workspace and image folders"
-	log_exit "See https://colmap.github.io/tutorial.html#quick-start"
+if in_wsl; then
+	log_verbose "Downloading Reality Capture"
+	download_url_open "$RC_URL"
 fi
+
+log_verbose "Downloading $COLMAP_NAME"
+download_url_open "$COLMAP_URL"
+log_verbose "Move $COLMAP_NAME.app to /Applications"
+COLMAP_DIR="/Applications/$COLMAP_NAME.app"
+if [[ -e $COLMAP_DIR ]] && $FORCE; then
+	rm -rf "$COLMAP_DIR"
+fi
+mv "$WS_DIR/cache/$COLMAP_NAME.app" "$(dirname "$COLMAP_DIR")"
+log_verbose "Making CLI available"
+if ! config_mark; then
+	config_add <<-EOF
+		[[ \$PATH =~ $COLMAP_BIN ]] || PATH+=":$COLMAP_BIN"
+	EOF
+fi
+log_verbose "Download sample images from https://colmap.github.io/datasets.html#datasets"
+log_verbose "Choose Reconstruction/Automatic Reconstruction"
+log_verbose "And pick workspace and image folders"
+log_exit "See https://colmap.github.io/tutorial.html#quick-start"
