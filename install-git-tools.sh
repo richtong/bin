@@ -111,7 +111,8 @@ log_verbose "in the newest version of git specify fast forward only so you do no
 git config pull.ff only
 # https://git-scm.com/docs/git-config show summary of submodules
 # the number of commits to show -1 means all of them
-git config --global status.submodulesummary 2
+# this is very slow so remove for now particularly for WSL to Windows
+#git config --global status.submodulesummary 2
 # use lfs for now, s3 for very large files
 
 # need for convenience with git and used in workflows so get used to it
