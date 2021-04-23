@@ -104,20 +104,26 @@ else
 	fi
 fi
 
+MODULES="venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root,docker,goenv,kube"
+if in_wsl; then
+	log_verbose "In WSL git is very expensive in Windows file systems so do not use"
+	MODULES="venv,user,host,ssh,cwd,perms,hg,jobs,exit,root,docker,goenv,kube"
+fi
+
 if ! $INSTALL_POWERLINE; then
 	log_verbose "Installing Powerline-Go"
 	# https://github.com/vim-airline/vim-airline
 	# recommend .profile but .bashrc works better
 	# for pipenv shell etc
 	if ! config_mark "$(config_profile_shell)"; then
-		config_add "$(config_profile_shell)" <<'EOF'
+		config_add "$(config_profile_shell)" <<EOF
 function _update_ps1() {
     # shellcheck disable=SC2046
     PS1=$(powerline-go -hostname-only-if-ssh -max-width 30 \
 		  -colorize-hostname -shorten-gke-names -theme solarized-dark16 \
-		  -modules \ 
-			 venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root,docker,goenv,kube \
-		  -error $? -jobs "$(jobs -p | wc -l)")
+		  -modules \
+			  $MODULES \
+		  -error \$? -jobs "\$(jobs -p | wc -l)")
 }
 if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then
     PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
