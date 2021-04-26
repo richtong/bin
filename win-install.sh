@@ -121,19 +121,20 @@ if [[ ! -v SCOOP ]]; then
 		vscode
 		zoom
 		psutils
-		pwsh
 		googlechrome
 		vlc
 	)
 fi
 
 log_verbose "Prefer with upgrades and shims install ${SCOOP[*]}"
-scoop "scoop install ${SCOOP[*]}"
+scoop install "${SCOOP[*]}"
 # https://github.com/lukesampson/scoop/issues/3954
 scoop update "*"
 
-# we install both pwsh and choco powershell-core because for scripts
-# choco is administratively installed and easier to put in the shebang
+# use choco powershell-core because for scripts choco is installed for all
+# users and so easy to add in shebang
+# whereas scoop is relative for the user
+if [[ ! -v CHOCO ]]; then
 	CHOCO=(
 		1password
 		divvy
@@ -145,7 +146,7 @@ scoop update "*"
 		powershell-core
 		icloud
 	)
-
+fi
 log_verbose "choco install packages not in scoop"
 log_verbose "${CHOCO[*]}"
 # https://superuser.com/questions/108207/how-to-run-a-powershell-script-as-administrator
@@ -154,12 +155,12 @@ log_verbose "${CHOCO[*]}"
 win_sudo "choco install ${CHOCO[*]}"
 
 # https://365adviser.com/powershell/install-use-openssh-windows-powershell-core-remoting-via-ssh/
-log_verbose "openssh v8 is needed for git-lfs needs special installation"
 # do not add SCRIPT_DIR we use cwd as Linux paths are not windows paths
-log_verbose "install-ssh.ps1 Powershell script not correctly called quote issue"
 #win_sudo '-f install-ssh.ps1'
 # note you need a path here not just a file name and the path needs to be a
 # windows one not a WSL2 one, but ./ for current directory works
+log_verbose "openssh v8 is needed for git-lfs needs special installation"
+log_verbose "do not install choco openssh use scoop instead it is 8.5 and seems to work "
 win_sudo ./install-ssh.ps1
 log_warning "sshd starting requires reboot"
 
@@ -173,4 +174,6 @@ log_verbose "Now enable Remote Desktop Server with cmd.exe"
 
 log_warning "Enable Remote Desktop with powershell does not work use Settings > System > Remote Desktop"
 log_warning "Will not work in Windows Home"
-win_sudo Set-ItemProperty -Path "'HKLM:\System\CurrentControlSet\Control\Terminal Server'" -Name "fDenyTSConnection" -Value 0
+log_verbose "Assumes remote desktop installs Terminal Server correctly"
+# do not need this line
+#win_sudo Set-ItemProperty -Path "'HKLM:\System\CurrentControlSet\Control\Terminal Server'" -Name "fDenyTSConnection" -Value 0

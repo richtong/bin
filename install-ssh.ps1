@@ -18,6 +18,11 @@ scoop install git-with-openssh
 Write-Host "Removing ssh and ssh-agents"
 # https://mangolassi.it/topic/9954/installing-openssh-on-windows-via-chocolatey
 # make sure Windows OpenSSH is not installed as it is very old
+# https://devblogs.microsoft.com/scripting/powertip-find-windows-capabilities-with-powershell/
+# cannot figure out how to get this and see if it is NotPresent
+Get-WindowsCapability -Online -Name OpenSSH.Client
+Get-WindowsCapability -Online -Name OpenSSH.Server
+
 Remove-WindowsCapability -Online -Name OpenSSH.Client
 Remove-WindowsCapability -Online -Name OpenSSH.Server
 if ( Get-Service sshd ) {
