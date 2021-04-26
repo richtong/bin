@@ -6,11 +6,11 @@
 # This is for the older Powershell 5.x
 #!/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe
 # https://stackoverflow.com/questions/52113738/starting-ssh-agent-on-windows-10-fails-unable-to-start-ssh-agent-service-erro
-
+Write-Host "Most command need sudo"
 
 # Has version 8.2 not working well but does have working SSH Client
 # Has the latest OpenSSH 8.5 which we can use sort of but ssh-agent does not work
-Write-host "scoop install git-with-openssh"
+Write-Host "scoop install git-with-openssh"
 scoop install git-with-openssh
 
 # Remove the Windows sshd and ssh-agent
@@ -18,14 +18,14 @@ scoop install git-with-openssh
 Write-Host "Removing ssh and ssh-agents"
 # https://mangolassi.it/topic/9954/installing-openssh-on-windows-via-chocolatey
 # make sure Windows OpenSSH is not installed as it is very old
-sudo Remove-WindowsCapability -Online -Name OpenSSH.Client
-sudo Remove-WindowsCapability -Online -Name OpenSSH.Server
+Remove-WindowsCapability -Online -Name OpenSSH.Client
+Remove-WindowsCapability -Online -Name OpenSSH.Server
 if ( Get-Service sshd ) {
-    sudo Remove-Service -Name sshd
+    Remove-Service -Name sshd
 }
 
 if ( Get-Service ssh-agent  ) {
-    sudo Remove-Service -Name ssh-agent
+    Remove-Service -Name ssh-agent
 }
 
 
@@ -35,22 +35,22 @@ if ( Get-Service ssh-agent  ) {
 
 # -pre gives us version 8.1 vs 8.0
 Write-Host "Install opensh with choco"
-sudo choco install openssh -pre -params "/SSHServerFeature /KeyBasedAuthenticationFeature" 
+choco install openssh -pre -params "/SSHServerFeature /KeyBasedAuthenticationFeature" 
 
 # https://dmtavt.com/post/2020-08-03-ssh-agent-powershell/
 # needs to run as an admin and this is for the older OpenSSH not the choco one
 if ((Get-Service -Name ssh-agent).Service -ne "Running") {
-    sudo Get-Service -Name ssh-agent | Set-Service -StartupType Automatic
-    sudo Get-Service -Name ssh-agent | Start-Service
+    Get-Service -Name ssh-agent | Set-Service -StartupType Automatic
+    Get-Service -Name ssh-agent | Start-Service
 }
 
 # start the ssh server
 # https://www.pugetsystems.com/labs/hpc/How-To-Use-SSH-Client-and-Server-on-Windows-10-1470/
 # https://zamarax.com/2020/02/14/installing-sftp-ssh-ftp-server-on-windows-with-openssh/
 if ((Get-Service -Name sshd).Service -ne "Running") {
-    sudo Get-Service -Name sshd | Set-Service -StartupType Automatic
-    sudo Get-Service -Name sshd | Start-Service
-    sudo Get-NetFirewallRule -Name *ssh*
+    Get-Service -Name sshd | Set-Service -StartupType Automatic
+    Get-Service -Name sshd | Start-Service
+    Get-NetFirewallRule -Name *ssh*
 }
 
 # https://stackoverflow.com/questions/10574267/cannot-spawn-ssh-when-connecting-to-github-but-ssh-t-gitgithub-com-works

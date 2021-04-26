@@ -58,28 +58,35 @@ if ! command -v scoop >/dev/null; then
 	"$SCRIPT_DIR/install-scoop.ps1"
 fi
 if ! command -v choco.exe >/dev/null; then
-	"$SCRIPT_DIR/install-choco.ps1"
+	win_sudo "$SCRIPT_DIR/install-choco.ps1"
 fi
 
-log_verbose "Install with Winget but cannot figure out path yet"
+log_verbose "Minimal install with winget since there is no update yet"
 # vim actually install gvim
 if [[ ! -v WINGET ]]; then
+	log_verbose "Only Winget does git and git-lfs properly"
 	WINGET=(
 		git
 		github.gitlfs
-		1password
-		7zip
-		authy
 		)
 fi
 
-log_verbose "gvim does not add vim to path"
+if [[ ! -v WINGET_FORCE ]]; then
+	WINGET_FORCE=(
+		)
+fi
+log_verbose "skip winget vim installation since no update yet"
+#./install-vim.ps1
+
 
 for package in "${WINGET[@]}"; do
-	pwsh.exe winget install "$package"
+	pwsh.exe -Command winget install "$package"
 done
 
-./install-vim.ps1
+if (( ${#WINGET_FORCE[@]} > 1 )); then
+	echo "${WINGET_FORCE[@]}" | xargs -n 1 pwsh.exe -Command winget install --force
+fi
+
 
 # https://stackoverflow.com/questions/10049316/how-do-you-run-vim-in-windows
 # by inspection, it live in c:\Program Files\Vim\vim82\vim.exe or whatever the
@@ -90,14 +97,18 @@ done
 # https://github.com/lukesampson/psutils
 # powershell v7.x is pwsh
 # psutils adds ln, sudo and touch to Windows
+# moved to winget
 if [[ ! -v SCOOP ]]; then
 	SCOOP=(
-		1password-cli
-		authy
-		dark
-		firefox
 		gcloud
-		googlechrome
+		authy
+		7zip
+		authy
+		vim
+		firefox
+		transmission
+		1password-cli
+		dark
 		jq
 		lessmsi
 		make
@@ -107,26 +118,24 @@ if [[ ! -v SCOOP ]]; then
 		sharpkeys
 		signal
 		slack
-		transmission
-		vim
-		vlc
 		vscode
-		windows-terminal
 		zoom
 		psutils
 		pwsh
+		googlechrome
+		vlc
 	)
 fi
 
-log_verbose "install ${SCOOP[*]}"
-scoop install "${SCOOP[@]}"
+log_verbose "Prefer with upgrades and shims install ${SCOOP[*]}"
+scoop "scoop install ${SCOOP[*]}"
 # https://github.com/lukesampson/scoop/issues/3954
 scoop update "*"
 
 # we install both pwsh and choco powershell-core because for scripts
 # choco is administratively installed and easier to put in the shebang
-if [[ ! -v CHOCO ]]; then
 	CHOCO=(
+		1password
 		divvy
 		epicgameslauncher
 		kodi
@@ -136,9 +145,9 @@ if [[ ! -v CHOCO ]]; then
 		powershell-core
 		icloud
 	)
-fi
 
-log_verbose "choco installation of packagers not in scoop ${CHOCO[*]}"
+log_verbose "choco install packages not in scoop"
+log_verbose "${CHOCO[*]}"
 # https://superuser.com/questions/108207/how-to-run-a-powershell-script-as-administrator
 # runas does not work
 #runas.exe /savecred /user:"$ADMIN" "choco.exe install ${CHOCO[*]}"
@@ -151,7 +160,7 @@ log_verbose "install-ssh.ps1 Powershell script not correctly called quote issue"
 #win_sudo '-f install-ssh.ps1'
 # note you need a path here not just a file name and the path needs to be a
 # windows one not a WSL2 one, but ./ for current directory works
-./install-ssh.ps1
+win_sudo ./install-ssh.ps1
 log_warning "sshd starting requires reboot"
 
 # https://www.partitionwizard.com/partitionmagic/enable-remote-desktop-windows-10.html
@@ -164,4 +173,4 @@ log_verbose "Now enable Remote Desktop Server with cmd.exe"
 
 log_warning "Enable Remote Desktop with powershell does not work use Settings > System > Remote Desktop"
 log_warning "Will not work in Windows Home"
-win_sudo Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnection" -Value 0
+win_sudo Set-ItemProperty -Path "'HKLM:\System\CurrentControlSet\Control\Terminal Server'" -Name "fDenyTSConnection" -Value 0
