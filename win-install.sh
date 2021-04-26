@@ -14,16 +14,16 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
 OPTIND=1
 ADMIN="${ADMIN:-service-account}"
-VERSION="${VERSION:-7}"
+SKIP="${SKIP:-false}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvr:" opt; do
+while getopts "hdvs" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs Install native Windows applications
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
-			           -r version number (default: $VERSION)
+					   -s skip the winget installation as there is no upgrade (default: $SKIP)
 		EOF
 		exit 0
 		;;
@@ -35,8 +35,8 @@ while getopts "hdvr:" opt; do
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
 		;;
-	r)
-		VERSION="$OPTARG"
+	s)
+		SKIP=true
 		;;
 	*)
 		echo "not flag -$opt"
@@ -68,6 +68,7 @@ if [[ ! -v WINGET ]]; then
 	WINGET=(
 		git
 		github.gitlfs
+		pwsh
 		)
 fi
 
@@ -79,14 +80,14 @@ log_verbose "skip winget vim installation since no update yet"
 #./install-vim.ps1
 
 
-for package in "${WINGET[@]}"; do
-	pwsh.exe -Command winget install "$package"
-done
-
-if (( ${#WINGET_FORCE[@]} > 1 )); then
-	echo "${WINGET_FORCE[@]}" | xargs -n 1 pwsh.exe -Command winget install --force
+if ! $SKIP; then
+	for package in "${WINGET[@]}"; do
+		pwsh.exe -Command winget install "$package"
+	done
+	if (( ${#WINGET_FORCE[@]} > 1 )); then
+		echo "${WINGET_FORCE[@]}" | xargs -n 1 pwsh.exe -Command winget install --force
+	fi
 fi
-
 
 # https://stackoverflow.com/questions/10049316/how-do-you-run-vim-in-windows
 # by inspection, it live in c:\Program Files\Vim\vim82\vim.exe or whatever the
@@ -114,6 +115,7 @@ if [[ ! -v SCOOP ]]; then
 		make
 		msys2
 		potplayer
+		pwsh
 		python
 		sharpkeys
 		signal
@@ -133,6 +135,7 @@ scoop update "*"
 
 # use choco powershell-core because for scripts choco is installed for all
 # users and so easy to add in shebang
+		#powershell-core
 # whereas scoop is relative for the user
 if [[ ! -v CHOCO ]]; then
 	CHOCO=(
@@ -143,7 +146,6 @@ if [[ ! -v CHOCO ]]; then
 		nordvpn
 		docker-desktop
 		visualstudio2019community
-		powershell-core
 		icloud
 	)
 fi
@@ -156,11 +158,9 @@ win_sudo "choco install ${CHOCO[*]}"
 
 # https://365adviser.com/powershell/install-use-openssh-windows-powershell-core-remoting-via-ssh/
 # do not add SCRIPT_DIR we use cwd as Linux paths are not windows paths
-#win_sudo '-f install-ssh.ps1'
 # note you need a path here not just a file name and the path needs to be a
 # windows one not a WSL2 one, but ./ for current directory works
 log_verbose "openssh v8 is needed for git-lfs needs special installation"
-log_verbose "do not install choco openssh use scoop instead it is 8.5 and seems to work "
 win_sudo ./install-ssh.ps1
 log_warning "sshd starting requires reboot"
 

@@ -1,4 +1,4 @@
-#!/mnt/c/Users/rich/scoop/shims/pwsh.exe
+#!/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe
 #
 # Has version 8.2 not working well but does have working SSH Client
 # Has the latest OpenSSH 8.5 which we can use sort of but ssh-agent does not work

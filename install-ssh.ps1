@@ -1,10 +1,22 @@
-#!/mnt/c/Users/rich/scoop/shims/pwsh.exe
+#!/mnt/c/Users/rich/scoop/shims/pwsh.exe 
 # there is no way to escape a space in shebang so need a symlink formed
-# https://lists.gnu.org/archive/html/bug-bash/2008-05/msg00052.html
-# So need a symlink
-#!/mnt/c/Program Files/PowerShell/7/pwsh.exe
+# this needs the later Powershell 7 but shebang requires no escale
+#
+# Microsoft App Store Powershell installs into
+#
+# choco install powershell-core installed into so it will not work
+# C:\Program Files\PowerShell\7\pwsh.exe
+#
+# scoop install pwsh installed into C:\Users\rich\scoop\shims\pwsh.exe so this 
+# works but is User specific
+#
+# winget install pwsh installs into which has no spaces but is user specific
+# C:\Users\rich\AppData\Local\Microsoft\WindowsApps\Microsoft.PowerShell_8wekyb3d8bbwe\pwsh.exe
+#
 # This is for the older Powershell 5.x
 #!/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe
+#
+# https://lists.gnu.org/archive/html/bug-bash/2008-05/msg00052.html
 # https://stackoverflow.com/questions/52113738/starting-ssh-agent-on-windows-10-fails-unable-to-start-ssh-agent-service-erro
 Write-Host "Most command need sudo"
 
@@ -38,12 +50,18 @@ if ( Get-Service ssh-agent  ) {
 #runas.exe /savecred /user:"$ADMIN" \
 #-ArgumentList ('-noexit choco.exe install openssh')
 
-# -pre gives us version 8.1 vs 8.0
 Write-Host "Install opensh with choco"
-choco install openssh -pre -params "/SSHServerFeature /KeyBasedAuthenticationFeature" 
+# keybased authentication assumed and neeed to explictly install the ssh-agent
+# this does not work
+#choco install wincrypt-sshagent
+# -pre gives us version 8.1 vs 8.0
+choco install openssh -pre -params "/SSHServerFeature /SSHAgentFeature" 
+# https://community.chocolatey.org/packages/wincrypt-sshagent
+# Uses the Windows encryption system
 
 # https://dmtavt.com/post/2020-08-03-ssh-agent-powershell/
 # needs to run as an admin and this is for the older OpenSSH not the choco one
+# this should be done automatically by the installer above but check anyway
 if ((Get-Service -Name ssh-agent).Service -ne "Running") {
     Get-Service -Name ssh-agent | Set-Service -StartupType Automatic
     Get-Service -Name ssh-agent | Start-Service
