@@ -62,18 +62,30 @@ if ! command -v choco.exe >/dev/null; then
 fi
 
 log_verbose "Install with Winget but cannot figure out path yet"
+# vim actually install gvim
 if [[ ! -v WINGET ]]; then
 	WINGET=(
 		git
+		github.gitlfs
 		1password
 		7zip
 		authy
 		)
 fi
 
+log_verbose "gvim does not add vim to path"
+
 for package in "${WINGET[@]}"; do
 	pwsh.exe winget install "$package"
 done
+
+./install-vim.ps1
+
+# https://stackoverflow.com/questions/10049316/how-do-you-run-vim-in-windows
+# by inspection, it live in c:\Program Files\Vim\vim82\vim.exe or whatever the
+# version number is
+# https://www.ntweekly.com/2020/10/01/add-windows-permanent-path-using-powershell/
+
 
 # https://github.com/lukesampson/psutils
 # powershell v7.x is pwsh
@@ -85,7 +97,6 @@ if [[ ! -v SCOOP ]]; then
 		dark
 		firefox
 		gcloud
-		git-with-openssh
 		googlechrome
 		jq
 		lessmsi
