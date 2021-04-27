@@ -22,8 +22,10 @@ Write-Host "Most command need sudo"
 
 # Has version 8.2 not working well but does have working SSH Client
 # Has the latest OpenSSH 8.5 which we can use sort of but ssh-agent does not work
-Write-Host "scoop install git-with-openssh"
-scoop install git-with-openssh
+# Try working using OpenSSH v.8 in regular choco installation
+# Cannot figure out how scoop ssh-agent works does not start a windows service
+#Write-Host "scoop install git-with-openssh"
+#scoop install git-with-openssh
 
 # Remove the Windows sshd and ssh-agent
 # https://stackoverflow.com/questions/10832000/best-way-to-write-to-the-console-in-powershell
@@ -54,7 +56,7 @@ Write-Host "Install opensh with choco"
 # keybased authentication assumed and neeed to explictly install the ssh-agent
 # this does not work
 #choco install wincrypt-sshagent
-# -pre gives us version 8.1 vs 8.0
+# -pre gives us version 8.1 vs 8.0 trying 8.0 now then if this does not work then 8.1
 choco install openssh -pre -params "/SSHServerFeature /SSHAgentFeature" 
 # https://community.chocolatey.org/packages/wincrypt-sshagent
 # Uses the Windows encryption system
