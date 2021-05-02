@@ -9,7 +9,7 @@ set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 trap 'exit $?' ERR
 OPTIND=1
-KEY_TYPE="${KEY_TYPE:="rsa"}"
+KEY_TYPE="${KEY_TYPE:="ed25519"}"
 # only used for rsa
 BIT_LENGTH="${BIT_LENGTH:-4096}"
 SECRET_USER="${SECRET_USER:-"$USER"}"

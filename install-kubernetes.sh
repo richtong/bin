@@ -11,7 +11,7 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 DOCKER="${DOCKER:-"false"}"
 MINIKUBE="${MINIKUBE:-"false"}"
 FORCE="${FORCE:-"false"}"
-MICROK8S="${MICROK8S:-"false"}"
+MICROK8S="${MICROK8S:-"true"}"
 OPTIND=1
 while getopts "hdvmuof" opt; do
 	case "$opt" in
@@ -118,7 +118,9 @@ if in_os mac; then
 			log_verbose "microk8s failed delete vm and retry"
 			multipass delete microk8s-vm
 			multipass purge
-			microk8s install
+			if ! microk8s install; then
+				log_error 2 "microk8s installation failed maybe internet issues, remove vpns and retry"
+			fi
 		fi
 		microk8s status --wait-ready
 		if $VERBOSE; then
