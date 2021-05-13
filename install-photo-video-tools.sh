@@ -43,10 +43,14 @@ log_verbose handbrake needs libdvdcss from el capitan on
 PACKAGES=(libdvdcss handbrake)
 
 # log_verbose really want gimp 2.9, but load 2.8 for now
-PACKAGEs+=(gimp exiftool)
+PACKAGES+=(gimp exiftool)
 
 # shellcheck disable=SC2086
 package_install "${PACKAGES[@]}"
+
+# handbrake is a cli and a cask too
+CASKS+=(handbrake)
+cask_install "${CASKS[@]}"
 
 log_verbose "install DXO from $DXO_URL"
 download_url_open "$DXO_URL"
