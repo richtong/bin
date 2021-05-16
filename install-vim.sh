@@ -77,6 +77,9 @@ package_install "${package_flags[@]}" vim
 log_verbose make sure node is installed for the linters
 "$SCRIPT_DIR/install-lint.sh"
 
+# needed for vim-markdown
+package_install markdown
+
 # https://github.com/scrooloose/syntastic for multiple syntax checkers
 mkdir -p "$HOME/.vim/bundle"
 log_verbose install pathogen for legacy installs

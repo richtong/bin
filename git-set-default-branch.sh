@@ -19,6 +19,7 @@ LEAVE="${LEAVE:-false}"
 DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
 DRY_RUN="${DRY_RUN:-"echo"}"
 REMOTE="${REMOTE:-origin}"
+NEW_DEFAULT="${NEW_DEFAULT:-main}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvlf:t:r:n" opt; do
 	case "$opt" in
@@ -28,7 +29,7 @@ while getopts "hdvlf:t:r:n" opt; do
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 			           -l leave the master branch do not delete (default: $LEAVE)
-			           -f the current default branch (default: $OLD_DEFAULT)
+			           -f the current default branch
 			           -t the new default branch name (default: $NEW_DEFAULT)
 			           -r the remote location (default: $REMOTE)
 			           -n dry run (default: $DRY_RUN_FLAG)
@@ -66,6 +67,7 @@ done
 shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
+source_lib lib-git.sh lib-util.sh
 
 if ! $DRY_RUN_FLAG; then
 	log_verbose not a dry run
@@ -91,7 +93,7 @@ log_warning "settings/branches and change the branch which will create the new o
 
 # https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch
 log_verbose "Determine the default branch on github"
-OLD_DEFAULT=$(git_default_branch)
+OLD_DEFAULT="$(git_default_branch)"
 log_verbose "current default branch is $OLD_DEFAULT"
 
 if [[ $OLD_DEFAULT == "$NEW_DEFAULT" ]]; then
