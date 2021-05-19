@@ -49,7 +49,10 @@ PACKAGES+=(gimp exiftool)
 package_install "${PACKAGES[@]}"
 
 # handbrake is a cli and a cask too
-CASKS+=(handbrake)
+CASKS+=(
+	handbrake
+	geotag
+)
 cask_install "${CASKS[@]}"
 
 log_verbose "install DXO from $DXO_URL"
