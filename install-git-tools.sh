@@ -122,10 +122,12 @@ git config pull.ff only
 # act : run github actions locally
 # gh : official github cli
 #	hub : deprecated and break git completions
+# nbdime: jupyter notebook diff and merge with git integration to git diff
 log_verbose "do not installed hub the completions interfer with git and it is deprecated"
 PACKAGES+=(
 	gh
 	act
+	nbdime
 )
 
 # meld is ugly compared with the default
@@ -170,5 +172,9 @@ git config --global diff.tool vimdiff
 git config --global merge.tool vimdiff
 # no prompting for next file
 git config --global difftool.prompt false
+
 log_verbose "main is now the default branch for all new repos"
 git config --global init.defaultBranch main
+
+# https://nbdime.readthedocs.io/en/latest/vcs.html
+nbdime config-git --enable --system
