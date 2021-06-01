@@ -157,6 +157,7 @@ fi
 
 config="$location/config_files"
 PROFILE="${PROFILE:-"$HOME/.config/powerline"}"
+mkdir -p "$PROFILE"
 if [[ ! -e $PROFILE/config.json ]]; then
 	log_verbose "copying from $config to $PROFILE"
 	cp -r "$config/"* "$PROFILE"
