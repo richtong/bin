@@ -44,15 +44,14 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh lib-config.sh
 
-if ! in_wsl ; then
+if ! in_wsl; then
 	log_exit "WSL2 only"
 fi
 
 log_exit "the sudo nsenter does not run under wsl2"
 
-
 # https://github.com/microsoft/WSL/issues/5126
-# this needs to apt-get installed since brew installs do not 
+# this needs to apt-get installed since brew installs do not
 # work with sudo
 sudo apt-get install -y daemonize dbus-user-session fontconfig
 
@@ -66,7 +65,7 @@ for i in {1..10}; do
 	if [[ -n $SYSTEMD_PID ]] && (( SYSTEMD_PID != 1 )); then
 		break
 	fi
-	if ! $SYSTEMD_START; then 
+	if ! $SYSTEMD_START; then
 		# shellcheck disable=SC2086
 		sudo daemonize /usr/bin/unshare $SYSTEMD_ARGS
 		SYSTEMD_START=true

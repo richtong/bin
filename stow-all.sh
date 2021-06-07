@@ -58,7 +58,7 @@ shift $((OPTIND - 1))
 if (($# > 0)); then
 	# https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
 	TARGETS=("$@")
-	
+
 fi
 
 package_install stow

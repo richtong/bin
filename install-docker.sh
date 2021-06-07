@@ -97,7 +97,7 @@ if $INSTALL_EDGE; then
 fi
 log_verbose "check for docker looking for version $version_needed"
 
-if ! $FORCE && command -v docker &> /dev/null; then
+if ! $FORCE && command -v docker &>/dev/null; then
 	INSTALLED_DOCKER="$(version_extract "$(docker -v)")"
 	if vergte "$INSTALLED_DOCKER" "$version_needed"; then
 		log_exit "docker installed $INSTALLED_DOCKER greater or equal to desired $version_needed"

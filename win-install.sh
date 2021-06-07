@@ -69,22 +69,21 @@ if [[ ! -v WINGET ]]; then
 		git
 		github.gitlfs
 		pwsh
-		)
+	)
 fi
 
 if [[ ! -v WINGET_FORCE ]]; then
 	WINGET_FORCE=(
-		)
+	)
 fi
 log_verbose "skip winget vim installation since no update yet"
 #./install-vim.ps1
-
 
 if ! $SKIP; then
 	for package in "${WINGET[@]}"; do
 		pwsh.exe -Command winget install "$package"
 	done
-	if (( ${#WINGET_FORCE[@]} > 1 )); then
+	if ((${#WINGET_FORCE[@]} > 1)); then
 		echo "${WINGET_FORCE[@]}" | xargs -n 1 pwsh.exe -Command winget install --force
 	fi
 fi
@@ -93,7 +92,6 @@ fi
 # by inspection, it live in c:\Program Files\Vim\vim82\vim.exe or whatever the
 # version number is
 # https://www.ntweekly.com/2020/10/01/add-windows-permanent-path-using-powershell/
-
 
 # https://github.com/lukesampson/psutils
 # powershell v7.x is pwsh
@@ -135,7 +133,7 @@ scoop update "*"
 
 # use choco powershell-core because for scripts choco is installed for all
 # users and so easy to add in shebang
-		#powershell-core
+#powershell-core
 # whereas scoop is relative for the user
 if [[ ! -v CHOCO ]]; then
 	CHOCO=(
@@ -168,7 +166,7 @@ log_warning "sshd starting requires reboot"
 log_verbose "Now enable Remote Desktop Server with cmd.exe"
 # firewall is already set properly and these are not correct anyway
 #cmd.exe reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" \
-	#/v fDenyTSConnectionsd /t REG_DWORD /d 0 /f
+#/v fDenyTSConnectionsd /t REG_DWORD /d 0 /f
 # win_sudo 'Enable-NetFirewallRule -DisplayGroup "Remote Desktop"'
 #cmd.exe netsh advfirewall firewall set rul group="remote desktop" new enable=yes
 

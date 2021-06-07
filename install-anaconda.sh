@@ -68,7 +68,7 @@ source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 if in_os mac; then
 	cask_install "$ANACONDA"
-elif ! command -v conda &> /dev/null; then
+elif ! command -v conda &>/dev/null; then
 	log_verbose "downloading $URL and running it"
 	# https://docs.continuum.io/anaconda/install/linux/
 	download_url "$URL"

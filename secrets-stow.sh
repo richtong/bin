@@ -16,7 +16,7 @@ TARGET="${TARGET:-"$HOME/.ssh"}"
 SECRETS_DIR="${SECRETS_DIR:-"$HOME/.secret"}"
 if [[ ! -v SECRETS ]]; then
 	SECRETS=("$HOME/.ssh" "$HOME/.aws" "$HOME/vpn")
-fi 
+fi
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvs:" opt; do

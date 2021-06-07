@@ -148,7 +148,7 @@ CMDS+=(
 	"git submodule foreach
 		\$'default=\$(git remote set-head $ORIGIN_REMOTE -a | awk \'{print \$NF}\') &&
 		echo \$default &&
-		[ -n \$default ] && 
+		[ -n \$default ] &&
 		git switch \$default &&
 		cd \$toplevel &&
 		git submodule set-branch -b \$default -- \$sm_path'"

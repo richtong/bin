@@ -62,7 +62,6 @@ fi
 log_verbose "start gazebo loading worlds"
 gazebo worlds/pioneers2dx.world
 
-if ! sysctl kern.hv_support | grep "1$";
-then
+if ! sysctl kern.hv_support | grep "1$"; then
 	log_error 1 "Cannot install open drone map need hardware virtualization"
 fi

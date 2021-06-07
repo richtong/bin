@@ -59,7 +59,6 @@ NODE_PACKAGES+=(
 	jslint
 	jsonlint
 	js-yaml
-	markdown-cli
 	markdownlint
 )
 
@@ -71,7 +70,6 @@ PYTHON_PACKAGES+=(
 	vim-vint
 	beautysh
 )
-
 log_verbose "install ${PYTHON_PACKAGES[*]}"
 pip_install "${PYTHON_PACKAGES[@]}"
 
@@ -81,14 +79,17 @@ RUBY_PACKAGES+=(
 log_verbose "install ${RUBY_PACKAGES[*]}"
 gem_install "${RUBY_PACKAGES[@]}"
 
-BREW_PACKAGES+=(
+# note we install both the ruby mdl and the node markdown-cli
+# but prefer markdown-cli
+PACKAGES+=(
 	yapf
 	shellcheck
 	shfmt
 	yamllint
+	markdownlint-cli
 )
-
-brew_install "${BREW_PACKAGES[@]}"
+log_verbose "install ${PACKAGES[*]}"
+package_install "${PACKAGES[@]}"
 
 # Not compatible with PostCSS use stylelint below although this also seems to
 # have issues and not report bugs to vi.

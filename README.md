@@ -1,3 +1,5 @@
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable MD041 -->
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
@@ -21,6 +23,7 @@
   - [Using the Raspberry Pi as a dockerized camera system](#using-the-raspberry-pi-as-a-dockerized-camera-system)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+<!-- markdownlint-restore -->
 
 # Infrastructure commands
 

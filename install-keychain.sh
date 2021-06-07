@@ -13,9 +13,9 @@ while getopts "hdvk:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-		$SCRIPTNAME: Install correct keychain and list of keys
-		flags: -d debug, -v verbose, -h help
-			   directory with keys to be added (default: all keys in $SSH_DIR)
+			$SCRIPTNAME: Install correct keychain and list of keys
+			flags: -d debug, -v verbose, -h help
+				   directory with keys to be added (default: all keys in $SSH_DIR)
 		EOF
 		exit 0
 		;;

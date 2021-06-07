@@ -33,11 +33,10 @@ DOWNLOAD_DIR=${DOWNLOAD_DIR:-"$HOME/Downloads/git-lfs-$VERSION"}
 DOWNLOAD_URL=${DOWNLOAD_URL:-"https://github.com/github/git-lfs/releases/download/v$VERSION/git-lfs-darwin-amd64-$VERSION.tar.gz"}
 source_lib lib-install.sh lib-mac.sh lib-util.sh
 
-
 log_verbose "try to install git lfs"
 package_install git-lfs
 
-if ! command -v git-lfs &> /dev/null; then
+if ! command -v git-lfs &>/dev/null; then
 	if in_os mac; then
 		log_verbose "package install failed try to download"
 		if [[ ! -e "$DOWNLOAD_DIR" ]]; then
@@ -55,7 +54,7 @@ if ! command -v git-lfs &> /dev/null; then
 	fi
 fi
 
-if command -v git-lfs &> /dev/null; then
+if command -v git-lfs &>/dev/null; then
 	log_verbose "git lfs install running"
 	git lfs install
 fi

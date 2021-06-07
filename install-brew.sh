@@ -48,21 +48,21 @@ fi
 # https://www.thoughtco.com/instal-ruby-on-linux-2908370#:~:text=How%20to%20Install%20Ruby%20on%20Linux%201%20Open,exact%2C%20but%20if%20you%20are%20...%20See%20More.
 homebrew_completion() {
 	config_add <<-EOF
-	if type brew &>/dev/null; then
-		HOMEBREW_PREFIX="$(brew --prefix)"
-		if [[ -r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]]; then
-			source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
-		else
-			for COMPLETION in "$HOMEBREW_PREFIX/etc/bash_ocmpletion.d}"; do
-			[[ -r "$COMPLETION" ]] && source "$COMPLETION"
-			done
+		if type brew &>/dev/null; then
+			HOMEBREW_PREFIX="$(brew --prefix)"
+			if [[ -r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]]; then
+				source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
+			else
+				for COMPLETION in "$HOMEBREW_PREFIX/etc/bash_ocmpletion.d}"; do
+				[[ -r "$COMPLETION" ]] && source "$COMPLETION"
+				done
+			fi
 		fi
-	fi
 	EOF
 }
 
 # https://apple.stackexchange.com/questions/175069/how-to-accept-xcode-license
-if in_os linux || in_os wsl-linux ; then
+if in_os linux || in_os wsl-linux; then
 	log_verbose installing linuxbrew
 	package_install build-essential curl file git
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
@@ -88,12 +88,12 @@ fi
 SBIN="${SBIN:-"/usr/local/sbin"}"
 log_verbose "creating $SBIN if needed"
 if [[ ! -e $SBIN ]]; then
-# only use sudo if necessary
-$(config_sudo "$SBIN") mkdir -p "$SBIN"
+	# only use sudo if necessary
+	$(config_sudo "$SBIN") mkdir -p "$SBIN"
 fi
 log_verbose "adding $SBIN to the profile if needed"
 if ! config_mark; then
-# this no longer seems to work in Bash 5.0
+	# this no longer seems to work in Bash 5.0
 	config_add <<<"export PATH+=:/usr/local/sbin"
 	homebrew_completion
 fi
@@ -120,20 +120,20 @@ HOMEBREW_DIRS="${HOMEBREW_DIRS:-"
 /usr/local/sbin
 "}"
 for HOMEBREW in $HOMEBREW_DIRS; do
-log_verbose "checking $HOMEBREW"
-if [[ ! -e $HOMEBREW ]]; then
-	log_verbose "$HOMEBREW does not exist skipping"
-	mkdir -p "$HOMEBREW"
-fi
-# https://apple.stackexchange.com/questions/130685/understanding-the-staff-user-group
-members="$(dscacheutil -q group -a name "$(util_group "$HOMEBREW")" | grep ^users: | awk '{$1= ""; print $0}')"
-log_verbose "$members can access $HOMEBREW"
-if [[ $members =~ $USER ]]; then
-	sudo chmod -R g+w "$HOMEBREW"
-	log_verbose "cannot write to $HOMEBREW as user but made group writeable"
-fi
-log_verbose "need to change these to your $HOMEBREW_USER"
-sudo find "$HOMEBREW" \! -user "$HOMEBREW_USER" -a \! -type l -exec chown "$HOMEBREW_USER" {} \;
+	log_verbose "checking $HOMEBREW"
+	if [[ ! -e $HOMEBREW ]]; then
+		log_verbose "$HOMEBREW does not exist skipping"
+		mkdir -p "$HOMEBREW"
+	fi
+	# https://apple.stackexchange.com/questions/130685/understanding-the-staff-user-group
+	members="$(dscacheutil -q group -a name "$(util_group "$HOMEBREW")" | grep ^users: | awk '{$1= ""; print $0}')"
+	log_verbose "$members can access $HOMEBREW"
+	if [[ $members =~ $USER ]]; then
+		sudo chmod -R g+w "$HOMEBREW"
+		log_verbose "cannot write to $HOMEBREW as user but made group writeable"
+	fi
+	log_verbose "need to change these to your $HOMEBREW_USER"
+	sudo find "$HOMEBREW" \! -user "$HOMEBREW_USER" -a \! -type l -exec chown "$HOMEBREW_USER" {} \;
 done
 
 log_assert "command -v brew > /dev/null" "brew installed"

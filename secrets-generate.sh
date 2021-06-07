@@ -2,7 +2,7 @@
 ##
 ## Create all the files need for a new developers ssh keys
 ## for github and other sites. These are custom for each provider
-## This wraps the keys in the new bcrypt format using openssh version 6.5 
+## This wraps the keys in the new bcrypt format using openssh version 6.5
 set -u && SCRIPTNAME="$(basename "$0")"
 trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
@@ -19,10 +19,10 @@ if [[ ! -v TYPES ]]; then TYPES=(ed25519 rsa ed25519); fi
 #/users/$USER?section=security_credentials"
 if [[ ! -v URLS ]]; then
 	URLS=("https://github.com/settings/keys"
-		  "https://console.aws.amazon.com/iam/home?region=us-west-2"
-		  "https://cloud.google.com")
+		"https://console.aws.amazon.com/iam/home?region=us-west-2"
+		"https://cloud.google.com")
 fi
-if [[ ! -v DATES  ]]; then DATES=("$(date +%Y-%m)"); fi
+if [[ ! -v DATES ]]; then DATES=("$(date +%Y-%m)"); fi
 SECRETS_DIR="${SECRETS_DIR:-"$HOME/.ssh"}"
 CONFIG="${CONFIG:-false}"
 FORCE="${FORCE:-false}"

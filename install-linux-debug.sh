@@ -58,7 +58,7 @@ if [[ ! $(util_os) == linux ]]; then
 	log_exit "Real linux only"
 fi
 
-if in_wsl; then 
+if in_wsl; then
 	log_exit "Not for WSL"
 fi
 

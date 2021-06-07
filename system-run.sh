@@ -72,7 +72,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-system.sh lib-git.sh lib-keychain.sh
 
 # Get the path changes need this when using ssh and we get no profiles
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 if [[ -e "$HOME/.bash_profile" ]]; then source "$HOME/.bash_profile"; fi
 
 shift $((OPTIND - 1))

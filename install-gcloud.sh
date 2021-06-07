@@ -69,18 +69,18 @@ elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then
 	bash "$WS_DIR/cache/install-google-cloud-sdk.sh" --disable-prompts --install-dir="$INSTALL_DIR"
 	if ! config_mark "$(config_shell_profile)"; then
 		config_add "$(config_shell_profile)" <<-EOF
-		# The next line updates PATH for the Google Cloud SDK.
-		if [ -f '$INSTALL_DIR/google-cloud-sdk/path.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/path.bash.inc'; fi
+			# The next line updates PATH for the Google Cloud SDK.
+			if [ -f '$INSTALL_DIR/google-cloud-sdk/path.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/path.bash.inc'; fi
 
-		# The next line enables shell command completion for gcloud.
-		if [ -f 'INSTALL_DIR/google-cloud-sdk/completion.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/completion.bash.inc'; fi
+			# The next line enables shell command completion for gcloud.
+			if [ -f 'INSTALL_DIR/google-cloud-sdk/completion.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/completion.bash.inc'; fi
 		EOF
 	fi
 
 elif in_os linux; then
 	# https://tecadmin.net/how-to-install-google-cloud-sdk-on-ubuntu-20-04/#:~:text=How%20To%20Install%20Google%20Cloud%20SDK%20on%20Ubuntu,comamnd%20line%20reference%20to%20start%20working%20with%20it.
 	snap_install google-cloud-sdk
-fi 
+fi
 
 source_profile
 hash -r

@@ -2,6 +2,7 @@
 ##
 ## Markdown utilities
 ## https://github.com/thlorenz/doctoc
+## There are two markdownlinters mdl is ruby and markdown-cli is from node
 ##
 ##@author Rich Tong
 ##@returns 0 on success
@@ -50,3 +51,6 @@ NPM=" doctoc "
 # We want to allow splitting by white space for packages
 #shellcheck disable=SC2086
 npm_install -g $NPM
+
+# https://github.com/igorshubovych/markdownlint-cli
+package_install markdownlint-cli

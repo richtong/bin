@@ -75,7 +75,7 @@ else
 	if [[ ! -e $SOURCE_DIR/extern/fonts ]]; then
 		log_warning "no powerline-fonts repo cloned $SOURCE_DIR/extern/fonts"
 	else
-		pushd "$SOURCE_DIR/extern/fonts" &> /dev/null || true
+		pushd "$SOURCE_DIR/extern/fonts" &>/dev/null || true
 		if in_wsl; then
 			# https://stackoverflow.com/questions/16107381/how-to-complete-the-runas-command-in-one-line
 			# https://answers.microsoft.com/en-us/windows/forum/windows_10-security/windows-10-run-as-administrator-using-microsoft/f2b75044-ef0d-4acd-86d9-c6c7998664ab
@@ -99,7 +99,7 @@ else
 			if $VERBOSE; then
 				fc-list
 			fi
-			popd &> /dev/null || true
+			popd &>/dev/null || true
 		fi
 	fi
 fi
@@ -120,10 +120,10 @@ if ! $INSTALL_POWERLINE; then
 function _update_ps1() {
     # shellcheck disable=SC2046
     PS1=$(powerline-go -hostname-only-if-ssh -max-width 30 \
-		  -colorize-hostname -shorten-gke-names -theme solarized-dark16 \
-		  -modules \
-			  $MODULES \
-		  -error \$? -jobs "\$(jobs -p | wc -l)")
+			-colorize-hostname -shorten-gke-names -theme solarized-dark16 \
+			-modules \
+			$MODULES \
+			-error \$? -jobs "\$(jobs -p | wc -l)")
 }
 if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then
     PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"

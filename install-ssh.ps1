@@ -1,4 +1,4 @@
-#!/mnt/c/Users/rich/scoop/shims/pwsh.exe 
+#!/mnt/c/Users/rich/scoop/shims/pwsh.exe
 # there is no way to escape a space in shebang so need a symlink formed
 # this needs the later Powershell 7 but shebang requires no escale
 #
@@ -7,7 +7,7 @@
 # choco install powershell-core installed into so it will not work
 # C:\Program Files\PowerShell\7\pwsh.exe
 #
-# scoop install pwsh installed into C:\Users\rich\scoop\shims\pwsh.exe so this 
+# scoop install pwsh installed into C:\Users\rich\scoop\shims\pwsh.exe so this
 # works but is User specific
 #
 # winget install pwsh installs into which has no spaces but is user specific
@@ -57,7 +57,7 @@ Write-Host "Install opensh with choco"
 # this does not work
 #choco install wincrypt-sshagent
 # -pre gives us version 8.1 vs 8.0 trying 8.0 now then if this does not work then 8.1
-choco install openssh -pre -params "/SSHServerFeature /SSHAgentFeature" 
+choco install openssh -pre -params "/SSHServerFeature /SSHAgentFeature"
 # https://community.chocolatey.org/packages/wincrypt-sshagent
 # Uses the Windows encryption system
 

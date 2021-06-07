@@ -59,7 +59,7 @@ while getopts "hdvg:u:f" opt; do
 		GROUP="$OPTARG"
 		;;
 	u)
-		UIDFILE="$UIDFILE"
+		UIDFILE="$OPTARG"
 		;;
 	f)
 		FORCE=true

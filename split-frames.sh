@@ -36,7 +36,7 @@ while getopts "hf:o:" opt; do
 done
 
 shift $((OPTIND - 1))
-mkdir -p ./frames_${FRAMES}_${OUTPUT_FORMAT}
+mkdir -p "./frames_${FRAMES}_${OUTPUT_FORMAT}"
 
 # Split each input video into frames
 for fname in "$@"; do
