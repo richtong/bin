@@ -43,6 +43,7 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh
+log_verbose "You can also install as a docker container from tongfamily/jupyterlab"
 
 if ! in_os mac; then
 	log_exit "Mac only"
@@ -53,17 +54,25 @@ log_verbose "Installing into the bare environment use pipenv, conda or venv norm
 hash -r
 
 PACKAGES=(
-	jupyterlab-lsp
-	'python-language-server[all]'
-	jupyterlab-system-monitor
-	'xeus-python==0.8*'
-	'notebook==6*'
-	ptvsd
+	'notebook>=6'
+	'jupyterlab>=3'
+	'jupyterhab>=1.4'
+	'xeus-python>=0.8.6'
 	nodejs
 	jupyterlab-git
-	nbdime
+	jupyterlab-github
+	nb-mermaid
 	aquirdturtle_collapsible_headings
+	jupyterlab-system-monitor
+	nbdime
 	jupyterlab_vim
+	jupyterlab-lsp
+	'python-language-server[all]'
+	black
+	yapf
+	isort
+	jupyterlab_hdf
+	hdf5plugin
 )
 log_verbose "Installing python extensions ${PACKAGES[*]}"
 pip_install "${PACKAGES[@]}"
@@ -71,11 +80,20 @@ pip_install "${PACKAGES[@]}"
 # this is for node applications but you need to know the node package names
 # Latex not up to date
 #@jupyterlab/latex
+# included by default
+#@jupyterlab/debugger
 NODE_EXTENSIONS=(
-	@jupyterlab/debugger
 	@jupyterlab/toc
 )
 if ((${#NODE_EXTENSIONS[@]} > 0)); then
 	log_verbose "Installing Node Extensions ${NODE_EXTENSIONS[*]}"
 	jupyter labextension install "${NODE_EXTENSIONS[@]}"
 fi
+
+# https://github.com/jupyter/nbconvert
+# for nbconvert
+# http://tug.org/mactex/
+package_install mactex
+
+log_verbose "Add to the path"
+eval "$(/usr/libexec/path_helper)"
