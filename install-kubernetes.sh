@@ -184,7 +184,7 @@ if in_os mac; then
 	fi
 
 	# https://www.techrepublic.com/article/how-to-quickly-spin-up-microk8s-with-multipass/
-	if $MICROK8S_ONLY; then
+	if $MICROK8S; then
 		log_verbose "do not use microk8s but install directly into multipass"
 		package_install multipass
 

@@ -103,7 +103,7 @@ defaults write com.apple.finder ShowPathbar -bool true
 # https://stackoverflow.com/questions/15371925/how-to-check-if-command-line-tools-is-installed
 # note that the -p path may exist but not be up to date so check for the
 # package
-if ! xcode-select -p || ! pkgutil --pkg-info=com.apple.pkg.CLTools_Executables; then
+if ! xcode-select -p && ! pkgutil --pkg-info=com.apple.pkg.CLTools_Executables; then
 	log_verbose "installing Apple command line tools will throw up a gui"
 	xcode-select --install
 fi
