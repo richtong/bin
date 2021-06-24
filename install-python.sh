@@ -14,7 +14,8 @@ ANACONDA="${ANACONDA:-true}"
 PIPENV="${PIPENV:-true}"
 PYTHON_VERSION="${PYTHON_VERSION:-3.9}"
 STABLE_PYTHON="${STABLE_PYTHON:-3.8}"
-OLD_PYTHON="${OLD_PYTHON:-3.7}"
+# we normally don't need the oldest version
+#OLD_PYTHON="${OLD_PYTHON:-3.7}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
@@ -65,11 +66,19 @@ shift $((OPTIND - 1))
 #if ! in_os mac; then
 #log_exit "Mac only"
 #fi
+if [[ -v OLD_PYTHON ]]; then
+	PACKAGES+=("python@$OLD_PYTHON")
+fi
+
+if [[ -v STABLE_PYTHON ]]; then
+	PACKAGES+=("python@$STABLE_PYTHON")
+fi
+
+if [[ -v PYTHON_VERSION ]]; then
+	PACKAGES+=("python@$PYTHON_VERSION")
+fi
 
 PACKAGES=(
-	"python@$OLD_PYTHON"
-	"python@$STABLE_PYTHON"
-	"python@$PYTHON_VERSION"
 	black
 	pydocstyle
 )

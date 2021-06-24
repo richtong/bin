@@ -93,7 +93,8 @@ fi
 # https://github.com/jupyter/nbconvert
 # for nbconvert
 # http://tug.org/mactex/
-package_install mactex
+# this library is huge takes 5GB so do not install typically
+#package_install mactex
 
 log_verbose "Add to the path"
 eval "$(/usr/libexec/path_helper)"
