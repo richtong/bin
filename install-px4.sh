@@ -43,7 +43,7 @@ shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
-source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
+source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 if ! in_os mac; then
 	log_exit "MacOS only"
@@ -63,20 +63,43 @@ PACKAGE+=(
 	px4-sim-gazebo
 	adoptopenjdk15
 	px4-sim-jmavsim
+	qgroundcontrol
 )
 
-URL+=(
-	https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg
-)
+if ! config_mark; then
+	log_verbose "set file ulimit higher"
+	# this no longer seems to work in Bash 5.0
+	config_add <<<"ulimit -S -n 2048"
+	source_profile
+fi
+
 
 log_verbose "tapping ${TAP[*]}"
 tap_install "${TAP[@]}"
 
+log_warning "check for bash_completion conflicts between v1 and v2"
+if brew_conflict bash-completion@2 bash-completion "${PACKAGE[@]}"; then
+	log_verbose "conflict with bash-completion, unlinkj bash-completion@2"
+	brew unlink bash-completion@2
+fi
+
 log_verbose "install ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
 
-for url in "${URL[@]}"
-do
-	log_verbose "opening ${URL[*]}"
-	download_url_open "$url"
-done
+if brew_conflict bash-completion@2 bash-completion "${PACKAGE[@]}"; then
+	log_verbose "installation complete relinking bash-completion2"
+	brew unlink bash-completion
+	brew link bash-completion@2
+fi
+
+log_verbose "install QGroundControl if needed"
+URL+=(
+	https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg
+)
+if ! osascript -e 'id of application "QGroundControl"' >/dev/null >&1; then
+	for url in "${URL[@]}"
+	do
+		log_verbose "opening ${URL[*]} for versions later than in homebrew"
+		download_url_open "$url"
+	done
+fi
