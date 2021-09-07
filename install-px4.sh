@@ -57,11 +57,12 @@ TAP+=(
 	px4/px4
 	adoptopenjdk/openjdk
 )
+# Note as of September 2021, jdk16 is required
 PACKAGE+=(
 	px4-dev
 	xquartz
 	px4-sim-gazebo
-	adoptopenjdk15
+	adoptopenjdk16
 	px4-sim-jmavsim
 	qgroundcontrol
 )
@@ -72,7 +73,6 @@ if ! config_mark; then
 	config_add <<<"ulimit -S -n 2048"
 	source_profile
 fi
-
 
 log_verbose "tapping ${TAP[*]}"
 tap_install "${TAP[@]}"
@@ -91,14 +91,17 @@ if brew_conflict bash-completion@2 bash-completion "${PACKAGE[@]}"; then
 	brew unlink bash-completion
 	brew link bash-completion@2
 fi
+log_verbose "As of September 2021 use tbb@2020 as tbb@2021 is incompatible"
+brew unlink tbb
+brew_install tbb@2020
+brew link tbb@2020
 
 log_verbose "install QGroundControl if needed"
 URL+=(
 	https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg
 )
 if ! osascript -e 'id of application "QGroundControl"' >/dev/null >&1; then
-	for url in "${URL[@]}"
-	do
+	for url in "${URL[@]}"; do
 		log_verbose "opening ${URL[*]} for versions later than in homebrew"
 		download_url_open "$url"
 	done
