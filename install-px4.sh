@@ -58,6 +58,7 @@ TAP+=(
 	adoptopenjdk/openjdk
 )
 # Note as of September 2021, jdk16 is required
+# parallels used for ubuntu installation on MacOS
 PACKAGE+=(
 	px4-dev
 	xquartz
@@ -65,6 +66,8 @@ PACKAGE+=(
 	adoptopenjdk16
 	px4-sim-jmavsim
 	qgroundcontrol
+	visual-studio-code
+	parallels
 )
 
 if ! config_mark; then
