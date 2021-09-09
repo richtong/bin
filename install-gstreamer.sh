@@ -32,6 +32,12 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh
 set -u
 shift $((OPTIND - 1))
+PACKAGES+=(
+	gstreamer
+	gst-plugins-base
+	gst-plugins-good
+	gst-plugins-bad
+	gst-plugins-ugly
+)
 
-package_install gstreamer \
-	gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly
+package_install "${PACKAGES[@]}"
