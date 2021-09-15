@@ -12,13 +12,13 @@ OPTIND=1
 KEY_TYPE="${KEY_TYPE:="ed25519"}"
 # only used for rsa
 BIT_LENGTH="${BIT_LENGTH:-4096}"
-SECRET_USER="${SECRET_USER:-"$USER"}"
-TARGET="${TARGET:="tongfamily.com"}"
+SECRET_USER="${SECRET_USER:-"$USER@tongfamily.com"}"
+TARGET="${TARGET:="github.com"}"
 SECRETS_DIR="${SECRETS_DIR:-"$HOME/.ssh"}"
 SECRET_DATE="${SECRET_DATE:-"$(date +%Y-%m)"}"
 ROUNDS="${ROUNDS:-256}"
 FORCE="${FORCE:-false}"
-while getopts "hdvu:t:k:b:a:s:y:i:f" opt; do
+while getopts "hdvu:t:k:b:a:s:y:i:fu:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -36,6 +36,11 @@ while getopts "hdvu:t:k:b:a:s:y:i:f" opt; do
 			       -y date stampe for the key (default: $SECRET_DATE)
 			       -i override key file name by (default: $SECRET_USER@$TARGET.$SECRET_DATE.id_$KEY_TYPE)
 			       -f if a key exists already overwrite it (default: $FORCE)
+
+			defaults would create a key file:
+				$SECRET_USER-$TARGET.$SECRET_DATE.id_$KEY_TYPE
+				$SECRET_USER-$TARGET.$SECRET_DATE.id_$KEY_TYPE.fingerprint
+				$SECRET_USER-$TARGET.$SECRET_DATE.id_$KEY_TYPE.pub
 		EOF
 
 		exit 0
@@ -90,7 +95,7 @@ if ! pushd "$SECRETS_DIR" >/dev/null; then
 fi
 log_verbose "using $SECRETS_DIR"
 
-KEY_FILE=${KEY_FILE:-"$SECRET_USER@$TARGET.$SECRET_DATE.id_$KEY_TYPE"}
+KEY_FILE=${KEY_FILE:-"$SECRET_USER-$TARGET.$SECRET_DATE.id_$KEY_TYPE"}
 log_verbose key "$KEY_FILE"
 
 if [[ -e $KEY_FILE ]] && ! $FORCE; then

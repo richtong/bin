@@ -6,13 +6,17 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-# To enable compatibility with bashdb instead of set -e
-# https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
-# use the trap on ERR
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+# To enable compatibility with bashdb instead of set -e
+# https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
+# https://unix.stackexchange.com/questions/15998/what-does-the-e-do-in-a-bash-shebang
+# https://coderwall.com/p/fkfaqq/safer-bash-scripts-with-set-euxo-pipefail
+# the -e flag says exist if any part of the pipeline fails it should
+set -eo pipefail
 # this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+# but as of september 2021 this causes bashdb to fail
+#trap 'exit $?' ERR
 OPTIND=1
 VERSION="${VERSION:-7}"
 export FLAGS="${FLAGS:-""}"

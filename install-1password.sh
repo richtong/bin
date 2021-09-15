@@ -8,13 +8,11 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-# To enable compatibility with bashdb instead of set -e
-# https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
-# use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+# do not need To enable compatibility with bashdb instead of set -e
+# https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
+# trap 'exit $?' ERR
 OPTIND=1
 VERSION="${VERSION:-7}"
 export FLAGS="${FLAGS:-""}"
@@ -24,12 +22,13 @@ while getopts "hdvr:" opt; do
 		cat <<-EOF
 			Installs 1Password
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
+				flags: -d debug (not functional use bashdb), -v verbose, -h help"
 			           -r version number (default: $VERSION)
 		EOF
 		exit 0
 		;;
 	d)
+
 		export DEBUGGING=true
 		;;
 	v)

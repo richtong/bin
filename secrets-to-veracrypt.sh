@@ -8,19 +8,20 @@
 ##
 ## This wraps the keys in the new bcrypt format using openssh version 6.5
 ##
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+# no long works use -e again
+#trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-trap 'exit $?' ERR
 
 OPTIND=1
 FORCE="${FORCE:-false}"
 FLAGS="${FLAGS:-""}"
 if [[ $OSTYPE =~ darwin ]]; then
-	TARGET_DIR="${TARGET_DIR:-"/Volumes"}"
+	TARGET_DIR="${TARGET_DIR:-"$HOME"}"
 else
 	TARGET_DIR="${TARGET_DIR:-"/media"}"
 fi
-TARGET="${TARGET:-"$TARGET_DIR/$USER.vc/secrets/.ssh/common"}"
+TARGET="${TARGET:-"$TARGET_DIR/.secret/.ssh/common"}"
 SECRETS="${SECRETS:-"$HOME/.ssh"}"
 
 while getopts "hdvft:" opt; do
@@ -80,15 +81,23 @@ mkdir -p "$TARGET"
 
 log_verbose "look for real id_rsa and id_ed25519 files in ${SECRETS[*]}"
 # shellcheck disable=SC2044
-for key in $(find "${SECRETS[@]}" -type f -name "*.id_rsa" -o -name "*.id_ed25519"); do
+for key in $(find "${SECRETS[@]}" -type f -name "*.id_rsa*" -o -name "*.id_ed25519*"); do
 	log_verbose "found $key"
 	# note the $FORCE override the interactive -i
 	# shellcheck disable=SC2086
-	cp -i $FLAGS "$key" "$TARGET"
-	log_verbose "copied $key to $TARGET"
-	if $FORCE; then
-		# shellcheck disable=SC2086
-		rm $FLAGS "$key"
-		log_verbose "removed $key"
+	if [[ -e "$TARGET/$key" ]]; then
+		log_verbose "$TARGET/$key already exists"
+		if $FORCE; then
+			log_verbose "force remove $key"
+			# shellcheck disable=SC2086
+			rm $FLAGS "$key"
+		fi
+	fi
+	log_verbose "copy $key to $TARGET"
+	# shellcheck disable=SC2086
+	if cp -i $FLAGS "$key" "$TARGET"; then
+		log_verbose "copied"
+	else
+		log_warning "copy $key to $TARGET failed"
 	fi
 done
