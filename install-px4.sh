@@ -113,3 +113,16 @@ if ! osascript -e 'id of application "QGroundControl"' >/dev/null >&1; then
 		download_url_open "$url"
 	done
 fi
+
+PYTHON+=(
+	pyserial
+	empy
+	toml
+	numpy
+	pandas
+	jinja2
+	pyyaml
+	pyros-genmsg
+)
+log_verbose "Install PIP packages"
+pip_install "${PYTHON[@]}"

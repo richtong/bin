@@ -15,7 +15,7 @@ PIPENV="${PIPENV:-true}"
 PYTHON_VERSION="${PYTHON_VERSION:-3.9}"
 STABLE_PYTHON="${STABLE_PYTHON:-3.8}"
 # we normally don't need the oldest version
-#OLD_PYTHON="${OLD_PYTHON:-3.7}"
+OLD_PYTHON="${OLD_PYTHON:-3.7}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
@@ -66,13 +66,6 @@ shift $((OPTIND - 1))
 #if ! in_os mac; then
 #log_exit "Mac only"
 #fi
-if [[ -v OLD_PYTHON ]]; then
-	PACKAGES+=("python@$OLD_PYTHON")
-fi
-
-if [[ -v STABLE_PYTHON ]]; then
-	PACKAGES+=("python@$STABLE_PYTHON")
-fi
 
 if [[ -v PYTHON_VERSION ]]; then
 	PACKAGES+=("python@$PYTHON_VERSION")
@@ -86,9 +79,9 @@ PACKAGES=(
 # we need it to be python and pip for compatibility with Linux
 # https://docs.brew.sh/Homebrew-and-Python
 if ! config_mark; then
-	log_verbose "adding homebrew python $(config_profile)"
 	# note we want $PATH not quoted, but set the python version
 	config_add <<-EOF
+		# Naked pip and python are here
 		[[ \$PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:\$PATH"
 	EOF
 	log_warning "source $(config_profile) to get the correct python"
@@ -148,9 +141,7 @@ fi
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
 
-log_verbose "If no python alias this to python3"
-if ! command -v python &>/dev/null || command -v python3 &>/dev/null; then
-	if ! config_mark "$(config_profile_shell)"; then
-		config_add "$(config_profile_shell)" <<<"alias python=python3"
-	fi
-fi
+for version in "$OLD_PYTHON" "$STABLE_PYTHON"; do
+	log_verbose "Install Old python $version"
+	package_install "python@$version"
+done
