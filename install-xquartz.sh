@@ -46,14 +46,14 @@ EOF
 done
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-mac.sh lib-install.sh lib-config.sh
+source_lib lib-mac.sh lib-install.sh lib-config.sh lib-util.sh
 shift $((OPTIND - 1))
 
-if [[ ! $OSTYPE =~ darwin ]]; then
+if ! in_os mac; then
 	log_exit Only for Mac
 fi
 
-log_verbose install using brew
+log_verbose "install using brew"
 # https://apple.stackexchange.com/questions/224373/install-xquartz-using-homebrew-on-mac-os-x-el-capitan
 if ! command -v brew >/dev/null; then
 	"$SCRIPT_DIR/install-brew.sh"
@@ -82,3 +82,49 @@ config_add_once "$CONFIG" XAuthLocation /opt/X11/bin/xauth
 log_verbose make sure the client allows X11 forwarding
 config_add_once "$HOME/.ssh/config" "XAuthLocation /opt/X11/bin/xauth"
 config_add_once "$HOME/.ssh/config" "ForwardX11Timeout 596h"
+
+# make sure we have all the bash settings not needed rn but for safety
+source_profile
+
+# Enable OpenGL in XQuartz
+# https://services.dartmouth.edu/TDClient/1806/Portal/KB/ArticleDet?ID=89669
+log_verbose "Enableing iglx for OpenGL support"
+defaults write org.xquartz.X11 enable_iglx -bool true
+
+# https://stackoverflow.com/questions/28392949/running-chromium-inside-docker-gtk-cannot-open-display-0/34586732#comment63471630_28395350
+log_warning "Start XQuartz and in Preference > Network > Security > Allow"
+log_warning "connections from network client"
+log_warning "use xhost to connect to allow local docker access"
+# shellcheck disable=SC2016
+log_warning 'Enable it with host "+$HOSTNAME" +localhost'
+
+if $VERBOSE; then
+	log_verbose "Starting XQuartz"
+	open -a XQuartz
+	log_verbose "adding host names"
+	xhost +localhost "+$HOSTNAME"
+
+	# https://unix.stackexchange.com/questions/118811/why-cant-i-run-gui-apps-from-root-no-protocol-specified
+	log_verbose "checking X authentication active and allowed network addresses"
+	xauth info
+	xauth list
+	log_verbose "Query if glxinfo works"
+	# https://dri.freedesktop.org/wiki/glxinfo/
+	glxinfo | grep render
+	log_verbose "Should say direct rendering: Yes and OpenGL Renderer string points to hardware"
+	for test in xeyes glxgears; do
+		log_verbose "run $test for 10 seconds to verify then quit"
+		"$test" &
+		sleep 10
+		pkill "$test"
+	done
+	log_verbose "Test Docker access"
+	open -a Docker
+	sleep 10
+	docker run -d --rm --name firefox -e DISPLAY=host.docker.internal:0 jess/firefox
+	sleep 10
+	docker stop firefox
+
+	# https://osxdaily.com/2014/09/05/gracefully-quit-application-command-line/
+	osascript -e 'quit app "XQuartz"'
+fi

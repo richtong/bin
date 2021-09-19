@@ -78,7 +78,7 @@ if ! command -v brew >/dev/null; then
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 brew update
-brew install bash google-backup-and-sync 1password
+brew install bash google-drive 1password
 
 # fail the next command if no 1Password.app
 shopt -s failglob

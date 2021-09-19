@@ -90,8 +90,7 @@ if [[ $SECRET_DIR =~ Dropbox ]]; then
 		log_error 1 "no Dropbox folders found did you install and sync?"
 	fi
 elif [[ $SECRET_DIR =~ "Google Drive" ]]; then
-	#"$SCRIPT_DIR/install-google-backup-and-sync.sh"
-	brew_install google-drive
+	"$SCRIPT_DIR/install-google-drive.sh"
 	found="$(util_find "Google Drive")"
 	if [[ -z $found ]]; then
 		log_error 1 "no Google Drive found did you install and sync"

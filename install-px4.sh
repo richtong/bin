@@ -57,6 +57,16 @@ if ! in_os mac; then
 	# git_install_or_update 1pass georgebrock
 fi
 
+if ! config_mark; then
+	log_verbose "set file ulimit higher"
+	# this no longer seems to work in Bash 5.0
+	config_add <<<"ulimit -S -n 2048"
+	source_profile
+fi
+
+log_verbose "Install XQuartz for simulator output"
+"$SCRIPT_DIR/install-xquartz.sh"
+
 TAP+=(
 	px4/px4
 	adoptopenjdk/openjdk
@@ -65,7 +75,6 @@ TAP+=(
 # parallels used for ubuntu installation on MacOS
 PACKAGE+=(
 	px4-dev
-	xquartz
 	px4-sim-gazebo
 	adoptopenjdk16
 	px4-sim-jmavsim
@@ -73,13 +82,6 @@ PACKAGE+=(
 	visual-studio-code
 	parallels
 )
-
-if ! config_mark; then
-	log_verbose "set file ulimit higher"
-	# this no longer seems to work in Bash 5.0
-	config_add <<<"ulimit -S -n 2048"
-	source_profile
-fi
 
 log_verbose "tapping ${TAP[*]}"
 tap_install "${TAP[@]}"

@@ -14,7 +14,7 @@ FORCE="${FORCE:-false}"
 VMWARE="${VMWARE:-false}"
 UBUNTU="${UBUNTU:-"20.04"}"
 # https://www.debian.org/releases/ as of August 2020
-DEBIAN="${DEBIAN:-"10.5"}"
+DEBIAN="${DEBIAN:-"11"}"
 SOFTWAREUPDATE="${SOFTWAREUPDATE:-false}"
 MACPORTS_INSTALL="${MACPORTS_INSTALL:-false}"
 # The other choice is zsh but this is not working yet
@@ -238,13 +238,13 @@ hash -r
 log_verbose install complete Mac apps via brew
 #
 # VLC - video viewer
-# google-backup-and-sync - super set of gdrive and also does photo uploads used
+# google-drive - super set of gdrive and also does photo uploads used
 # for veracrypt
 # microsoft-remote-desktop - to remote into graphical windows desktops
 #
 CASKS+=(
 	vlc
-	google-backup-and-sync
+	google-drive
 	microsoft-remote-desktop
 )
 
@@ -340,7 +340,7 @@ if $VMWARE; then
 		fi
 	fi
 	log_verbose get Ubuntu
-	download_url "http://releases.ubuntu.com/$UBUNTU/ubuntu-$UBUNTU-desktop-amd64.iso"
+	download_url "https://releases.ubuntu.com/$UBUNTU/ubuntu-$UBUNTU-desktop-amd64.iso"
 	log_verbose get Debian
 	download_url "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-$DEBIAN-amd64-netinst.iso"
 	log_message "ISOs available to Fusion in $DOWNLOADS"
