@@ -105,12 +105,27 @@ brew unlink tbb
 brew_install tbb@2020
 brew link tbb@2020
 
+PYTHON+=(
+	pyserial
+	empy
+	toml
+	numpy
+	pandas
+	jinja2
+	pyyaml
+	pyros-genmsg
+)
+log_verbose "Install PIP packages"
+pip_install "${PYTHON[@]}"
+
 # https://askubuntu.com/questions/1092742/where-should-i-put-appimages-files
-log_verbose "Download linux QGroundcontrol into cache"
-download_url "https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.AppImage"
+APPIMAGE="${APPIMAGE:-"https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.AppImage"}"
+log_verbose "Download linux daily build from $APPIMAGE"
+download_url "$APPIMAGE"
 
 if osascript -e 'id of application "QGroundControl"' >/dev/null >&1; then
-	log_warning "qgroundcontrol already installed this downloads daily build"
+	log_warning "qgroundcontrol is already installed as homebrew stable"
 fi
-log_verbose "opening ${URL[*]} for versions later than in homebrew"
-download_url_open "https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg"
+DMG="${DMG:-"https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg"}"
+log_verbose "Download daily build from $DMG"
+download_url_open "$DMG"
