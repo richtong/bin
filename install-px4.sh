@@ -105,7 +105,11 @@ brew unlink tbb
 brew_install tbb@2020
 brew link tbb@2020
 
-log_verbose "install QGroundControl if needed"
+# https://askubuntu.com/questions/1092742/where-should-i-put-appimages-files
+log_verbose "Download linux QGroundcontrol into cache"
+download_url "https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.AppImage"
+
+log_verbose "install QGroundControl if needed on Mac"
 URL+=(
 	https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg
 )
