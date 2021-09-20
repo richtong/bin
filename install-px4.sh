@@ -109,26 +109,8 @@ brew link tbb@2020
 log_verbose "Download linux QGroundcontrol into cache"
 download_url "https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.AppImage"
 
-log_verbose "install QGroundControl if needed on Mac"
-URL+=(
-	https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg
-)
-if ! osascript -e 'id of application "QGroundControl"' >/dev/null >&1; then
-	for url in "${URL[@]}"; do
-		log_verbose "opening ${URL[*]} for versions later than in homebrew"
-		download_url_open "$url"
-	done
+if osascript -e 'id of application "QGroundControl"' >/dev/null >&1; then
+	log_warning "qgroundcontrol already installed this downloads daily build"
 fi
-
-PYTHON+=(
-	pyserial
-	empy
-	toml
-	numpy
-	pandas
-	jinja2
-	pyyaml
-	pyros-genmsg
-)
-log_verbose "Install PIP packages"
-pip_install "${PYTHON[@]}"
+log_verbose "opening ${URL[*]} for versions later than in homebrew"
+download_url_open "https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg"
