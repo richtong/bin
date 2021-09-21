@@ -129,3 +129,12 @@ fi
 DMG="${DMG:-"https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg"}"
 log_verbose "Download daily build from $DMG"
 download_url_open "$DMG"
+VOLUME="${VOLUME:-QGroundControl}"
+log_verbose "Looking for the first /Volume/$VOLUME"
+FOUND=$(find /Volume -name "$VOLUME*" -quit)
+if [[ -n $FOUND && -e $FOUND/QGroundControl.app ]]; then
+	log_verbose "Found daily build at $FOUND/QGroundControl.app moving to $HOME/Applications"
+	mv "$FOUND/QGroundControl.app" "$HOME/Applications"
+else
+	log_warning "No daily build found"
+fi
