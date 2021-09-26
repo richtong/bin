@@ -140,7 +140,3 @@ if [[ -n $FOUND && -e $FOUND/QGroundControl.app ]]; then
 else
 	log_warning "No daily build found"
 fi
-
-DMG="${DMG:="https://s3-us-west-2.amazonaws.com/qgroundcontrol/builds/master/QGroundControl.dmg"}"
-log_verbose "Downloading $DMG for versions later than in homebrew"
-download_url_open "$DMG"
