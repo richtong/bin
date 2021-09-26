@@ -105,6 +105,7 @@ brew unlink tbb
 brew_install tbb@2020
 brew link tbb@2020
 
+# python-json2yaml is to convert yaml into QGC .plan files
 PYTHON+=(
 	pyserial
 	empy
@@ -114,6 +115,7 @@ PYTHON+=(
 	jinja2
 	pyyaml
 	pyros-genmsg
+	python-json2yaml
 )
 log_verbose "Install PIP packages"
 pip_install "${PYTHON[@]}"
