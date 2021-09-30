@@ -63,6 +63,7 @@ package_install gpg gawk
 ASDF+=(
 	nodejs
 	direnv
+	python
 )
 
 # http://asdf-vm.com/guide/getting-started.html#_3-install-asdf
@@ -100,14 +101,16 @@ if ! config_mark "$DIRENVRC"; then
 	log_verbose "adding to $DIRENVRC"
 	config_add "$DIRENVRC" <<-'EOF'
 		source "$(asdf direnv hook asdf)"
+		# make direnv silent by default
+		export DIRENV_LOG_FORMAT=""
 	EOF
 fi
 
 ENVRC="${ENVRC:-"$HOME/.envrc"}"
 if ! config_mark "$ENVRC"; then
 	log_verbose "Adding $ENVRC"
+	direnv allow "$ENVRC"
 	config_add "$ENVRC" <<-'EOF'
 		use asdf
 	EOF
 fi
-direnv allow "$ENVRC"
