@@ -76,17 +76,6 @@ PACKAGES=(
 	pydocstyle
 )
 
-# we need it to be python and pip for compatibility with Linux
-# https://docs.brew.sh/Homebrew-and-Python
-if ! config_mark; then
-	# note we want $PATH not quoted, but set the python version
-	config_add <<-EOF
-		# Naked pip and python are here
-		[[ \$PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:\$PATH"
-	EOF
-	log_warning "source $(config_profile) to get the correct python"
-fi
-
 log_verbose "added to config now source"
 source_profile
 hash -r
@@ -145,3 +134,17 @@ for version in "$OLD_PYTHON" "$STABLE_PYTHON"; do
 	log_verbose "Install Old python $version"
 	package_install "python@$version"
 done
+
+# we need it to be python and pip for compatibility with Linux
+# https://docs.brew.sh/Homebrew-and-Python
+if ! config_mark; then
+	# note we want $PATH not quoted, but set the python version
+	config_add <<-EOF
+		# Naked pip and python are here
+		[[ \$PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:\$PATH"
+		if $PIPENV; then
+			'eval "$(pipenv --completion)"'
+		fi
+	EOF
+	log_warning "source $(config_profile) to get the correct python"
+fi
