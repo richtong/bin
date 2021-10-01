@@ -91,11 +91,18 @@ if in_os mac; then
 		config_add <<-'EOF'
 			[[ $PATH =~ .krew/bin ]] || export PATH="$PATH:$HOME/.krew/bin"
 			# shellcheck disable=SC1090
+		EOF
+	fi
+
+	source_profile
+	hash -r
+
+	if ! config_mark "$(config_profile_shell)"; then
+		log_verbose "adding completions to $(config_profile_shell)"
+		config_add "$(config_profile_shell)" <<-'EOF'
 			source <(kubectl completion bash)
 		EOF
 	fi
-	source_profile
-	hash -r
 	# https://github.com/corneliusweig/konfig
 	# used by microk8s to merge its config file
 	kubectl krew install konfig

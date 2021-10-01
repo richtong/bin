@@ -52,14 +52,14 @@ fi
 log_verbose "install in the non-login shell profile so it completion always runs"
 
 # completions can go into .bash_profile and be run once
-if ! config_mark; then
+if ! config_mark "$(config_profile_shell)"; then
 	log_verbose "adding bash_completion to $(config_profile_shell)"
 	# We need to quote this since it is going into the profile
 	# shellcheck disable=SC2016
 	# config_add "$(config_profile_shell)" <<<'source "$(brew --prefix)/etc/bash_completion"'
 	# latest for brew completions
 	# https://docs.brew.sh/Shell-Completion
-	config_add <<'EOF'
+	config_add "$(config_profile_shell)" <<'EOF'
 if type brew &>/dev/null; then
 	HOMEBREW_PREFIX="$(brew --prefix)"
 	if [[ -r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]]; then

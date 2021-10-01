@@ -104,25 +104,46 @@ else
 	fi
 fi
 
-MODULES="venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root,docker,goenv,kube"
+# gcp - unusable do not use 10 seconds at least
+# kube - very slow 1-2 seconds
+# docker - uses ~/.docker to detect if running in a container not needed much
+# venv-name-size-limit does not work
+MODULES="${MODULES:-"venv,node,goenv,user,host,ssh,cwd,perms,git,jobs,exit,root"}"
+# priorities if the prompt exceeds % max-width of screen
+# deprioritieze user we know who we are usually
+PRIORITIES="${PRIORITIES:-"root,cwd,venv,host,ssh,perms,git-branch,git-status,hg,user,jobs,exit,cwd-path"}"
+
 if in_wsl; then
 	log_verbose "In WSL git is very expensive in Windows file systems so do not use"
 	MODULES="venv,user,host,ssh,cwd,perms,hg,jobs,exit,root,docker,goenv,kube"
 fi
 
+# status line meanings
+# ✎ -- a file has been modified, but not staged for commit
+# ✔ -- a file is staged for commit
+# ✼ -- a file has conflicts
+# + -- untracked files are present
+# ⚑ -- stash is present
 if ! $INSTALL_POWERLINE; then
 	log_verbose "Installing Powerline-Go"
 	# https://github.com/vim-airline/vim-airline
 	# recommend .profile but .bashrc works better
 	# for pipenv shell etc
+	# note max-width seems buggy will sometimes just truncate
+	#-max-width 30 \
 	if ! config_mark "$(config_profile_shell)"; then
 		config_add "$(config_profile_shell)" <<EOF
 function _update_ps1() {
     # shellcheck disable=SC2046
-    PS1=$(powerline-go -hostname-only-if-ssh -max-width 30 \
-			-colorize-hostname -shorten-gke-names -theme solarized-dark16 \
+    PS1=\$(powerline-go \
+			-max-width 50 -cwd-max-dir-size 4 -cwd-max-depth 4 -condensed \
+			-theme solarized-dark16 \
+			-colorize-hostname -hostname-only-if-ssh \
+			-shorten-gke-names -shorten-eks-names \\
 			-modules \
-			$MODULES \
+				"$MODULES" \
+			-priority \
+				"$PRIORITIES" \
 			-error \$? -jobs "\$(jobs -p | wc -l)")
 }
 if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then

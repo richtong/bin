@@ -52,8 +52,9 @@ log_verbose "installing yq"
 package_install yq
 hash -r
 
-if ! config_mark; then
-	log_verbose "installing command completion into $(config_profile)"
+# goes into the shell so subshells pick up completion
+if ! config_mark "$(config_profile_shell)"; then
+	log_verbose "installing command completion into $(config_profile_shell)"
 	config_add <<-EOF
 		# shellcheck disable=SC1090
 		source <(yq shell-completion bash)

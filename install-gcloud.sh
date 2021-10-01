@@ -52,14 +52,14 @@ if in_os mac; then
 	log_verbose install google cloud sdk
 	cask_install google-cloud-sdk
 
-	log_verbose "checking for gcloud in $(config_profile)"
+	log_verbose "checking for gcloud in $(config_profile_shell)"
 	if ! config_mark; then
-		log_verbose "installing into $(config_profile)"
+		log_verbose "installing into $(config_profile_shell)"
 		config_add <<-EOF
 			source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"
 			source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc"
 		EOF
-		log_verbose "now source the changes to $(config_profile)"
+		log_warning "now source the changes to $(config_profile_shell)"
 	fi
 
 elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then

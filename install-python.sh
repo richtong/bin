@@ -138,13 +138,17 @@ done
 # we need it to be python and pip for compatibility with Linux
 # https://docs.brew.sh/Homebrew-and-Python
 if ! config_mark; then
-	# note we want $PATH not quoted, but set the python version
-	config_add <<-EOF
-		# Naked pip and python are here
-		[[ \$PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:\$PATH"
-		if $PIPENV; then
-			'eval "$(pipenv --completion)"'
-		fi
+	# Use the brew location for python
+	config_add <<-'EOF'
+		# shellcheck disable=SC2155
+		[[ $PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH"
 	EOF
 	log_warning "source $(config_profile) to get the correct python"
+fi
+
+# now put the completions in bashrc so subshells can find them like pipenv uses
+if $PIPENV && ! config_mark "$(config_profile_shell)"; then
+	config_add "$(config_profile_shell)" <<-'EOF'
+		eval "$(pipenv --completion)"
+	EOF
 fi
