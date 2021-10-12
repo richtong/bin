@@ -12,10 +12,10 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 ANACONDA="${ANACONDA:-true}"
 PIPENV="${PIPENV:-true}"
-PYTHON_VERSION="${PYTHON_VERSION:-3.9}"
-STABLE_PYTHON="${STABLE_PYTHON:-3.8}"
+PYTHON_VERSION="${PYTHON_VERSION:-3.10j}"
+STABLE_PYTHON="${STABLE_PYTHON:-3.9}"
 # we normally don't need the oldest version
-OLD_PYTHON="${OLD_PYTHON:-3.7}"
+OLD_PYTHON="${OLD_PYTHON:-3.8}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
