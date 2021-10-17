@@ -57,8 +57,8 @@ if [[ $OSTYPE =~ darwin ]]; then
 
 	# note this works for case insensitive files systems since if stored as
 	# VeraCrypt but we call it as veracrypt
-	if ! config_mark; then
-		config_add <<-EOF
+	if ! config_mark "$(config_profile)"; then
+		config_add "$(config_profile)" <<-EOF
 			[[ -e /Applications/VeraCrypt.app/Contents/MacOS ]] && PATH+=":/Applications/VeraCrypt.app/Contents/MacOS"
 		EOF
 	fi

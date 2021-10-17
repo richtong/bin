@@ -105,6 +105,7 @@ if ! config_mark; then
 	# http://pclosmag.com/html/issues/200709/page07.html
 	config_add <<EOF
 # finds the first match for of secret file on any matching $SECRET_DRIVE
+if ! pgrep -q "Google Drive"; then echo "Google Drive.app must be running"; fi
 veracrypt_secret="\$(find -L "\$HOME" -maxdepth 3 -name "$SECRET_FILE" 2>/dev/null | grep -m 1 "$SECRET_DRIVE")"
 if [[ -n \$veracrypt_secret ]] && ! veracrypt -t -l "\$veracrypt_secret" >/dev/null 2>&1
 then
