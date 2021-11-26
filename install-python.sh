@@ -147,9 +147,13 @@ for version in "$OLD_PYTHON" "$STABLE_PYTHON"; do
 done
 
 # now put the completions in bashrc so subshells can find them like pipenv uses
+# the --completion is removed as of Nov 2021 so there is a new way
+		#eval "$(pipenv --completion)"
+# https://github.com/pypa/pipenv/issues/4860
+
 if $PIPENV && ! config_mark "$(config_profile_shell)"; then
 	config_add "$(config_profile_shell)" <<-'EOF'
-		eval "$(pipenv --completion)"
+		eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
 	EOF
 fi
 source_profile

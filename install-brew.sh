@@ -85,7 +85,7 @@ fi
 # not user accessible but used by utilities like unbound a dns
 # resolver that opencv uses
 # https://github.com/Homebrew/homebrew-php/issues/4527
-SBIN="${SBIN:-"/usr/local/sbin"}"
+SBIN="${SBIN:-"$(brew --prefix)/sbin"}"
 log_verbose "creating $SBIN if needed"
 if [[ ! -e $SBIN ]]; then
 	# only use sudo if necessary
@@ -94,8 +94,14 @@ fi
 log_verbose "adding $SBIN to the profile if needed"
 if ! config_mark; then
 	# this no longer seems to work in Bash 5.0
-	config_add <<<"export PATH+=:/usr/local/sbin"
+	# config_add <<<"export PATH+=:/usr/local/sbin"
 	homebrew_completion
+fi
+
+if ! config_mark $(config_profile); then
+	config_add $(config_profiel) <<-'EOF'
+		eval "\$($(brew --prefix)/bin/brew shellenv)"
+EOF
 fi
 
 # make sure we can write the brew files you can have access problems
@@ -111,29 +117,31 @@ fi
 # the recommendation is to create a dedicated 'brew' user and use sudo -u brew
 # We take the easier way out and just chown to the current user
 HOMEBREW_DIRS="${HOMEBREW_DIRS:-"
-/usr/local/Cellar
-/usr/local/Homebrew
-/usr/local/Frameworks
-/usr/local/share
-/usr/local/lib
-/usr/local/etc
-/usr/local/sbin
+Cellar
+Homebrew
+Frameworks
+share
+lib
+etc
+sbin
 "}"
-for HOMEBREW in $HOMEBREW_DIRS; do
+for f in $HOMEBREW_DIRS; do
 	log_verbose "checking $HOMEBREW"
-	if [[ ! -e $HOMEBREW ]]; then
-		log_verbose "$HOMEBREW does not exist skipping"
-		mkdir -p "$HOMEBREW"
+	file="$(brew --prefix)/$f"
+	
+	if [[ ! -e $file ]]; then
+		log_verbose "$file does not exist skipping"
+		mkdir -p "$file"
 	fi
 	# https://apple.stackexchange.com/questions/130685/understanding-the-staff-user-group
-	members="$(dscacheutil -q group -a name "$(util_group "$HOMEBREW")" | grep ^users: | awk '{$1= ""; print $0}')"
-	log_verbose "$members can access $HOMEBREW"
+	members="$(dscacheutil -q group -a name "$(util_group "$file")" | grep ^users: | awk '{$1= ""; print $0}')"
+	log_verbose "$members can access $file"
 	if [[ $members =~ $USER ]]; then
-		sudo chmod -R g+w "$HOMEBREW"
-		log_verbose "cannot write to $HOMEBREW as user but made group writeable"
+		sudo chmod -R g+w "$file"
+		log_verbose "cannot write to $file as user but made group writeable"
 	fi
 	log_verbose "need to change these to your $HOMEBREW_USER"
-	sudo find "$HOMEBREW" \! -user "$HOMEBREW_USER" -a \! -type l -exec chown "$HOMEBREW_USER" {} \;
+	sudo find "$file" \! -user "$HOMEBREW_USER" -a \! -type l -exec chown "$HOMEBREW_USER" {} \;
 done
 
 log_assert "command -v brew > /dev/null" "brew installed"

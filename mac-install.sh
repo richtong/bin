@@ -207,12 +207,14 @@ log_verbose The path for getting to gnu utilities needed so source the new profi
 source_profile
 hash -r
 
-log_verbose checking to see if should update .bash_profile
-if ! config_mark; then
+# this is now done at the istall-brew level
+#log_verbose checking to see if should update .bash_profile
+# this is now done at the istall-brew level
+#if ! config_mark; then
 	# put a guard in so we don't keep adding path variables
 	# shellcheck disable=SC2016
-	config_add <<<'[[ $PATH =~ /usr/local/bin ]] || export PATH="/usr/local/bin:$PATH"'
-fi
+	#config_add <<<'[[ $PATH =~ /usr/local/bin ]] || export PATH="/usr/local/bin:$PATH"'
+#fi
 
 # or just do a full source
 log_verbose pick up path changes from gnu

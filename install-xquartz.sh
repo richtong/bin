@@ -11,7 +11,8 @@ set -u && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
-VERSION=${VERSION:-2.7.9}
+VERSION="${VERSION:-2.8.1}"
+DISPLAY="${DISPLAY:-:0}"
 CONFIG="${CONFIG:-/etc/ssh/sshd_config}"
 DOWNLOAD_URL="${DOWNLOAD_URL:-"https://dl.bintray.com/xquartz/downloads/XQuartz-$VERSION.dmg"}"
 OPTIND=1
@@ -59,7 +60,7 @@ if ! command -v brew >/dev/null; then
 	"$SCRIPT_DIR/install-brew.sh"
 fi
 
-cask_install xquartz
+package_install xquartz
 if [[ ! -e /Applications/Utilities/XQuartz.app ]]; then
 	log_verbose falling back to dmg installation
 	download_url_open "$DOWNLOAD_URL"
@@ -101,7 +102,8 @@ log_warning 'Enable it with host "+$HOSTNAME" +localhost'
 if $VERBOSE; then
 	log_verbose "Starting XQuartz"
 	open -a XQuartz
-	log_verbose "adding host names"
+	log_verbose "adding host names for $DISPLAY"
+	export DISPLAY=:0
 	xhost +localhost "+$HOSTNAME"
 
 	# https://unix.stackexchange.com/questions/118811/why-cant-i-run-gui-apps-from-root-no-protocol-specified
@@ -118,12 +120,15 @@ if $VERBOSE; then
 		sleep 10
 		pkill "$test"
 	done
-	log_verbose "Test Docker access"
-	open -a Docker
-	sleep 10
-	docker run -d --rm --name firefox -e DISPLAY=host.docker.internal:0 jess/firefox
-	sleep 10
-	docker stop firefox
+
+	if command -v docker >/dev/null; then
+		log_verbose "Test Docker access"
+		open -a Docker
+		sleep 10
+		docker run -d --rm --name firefox -e DISPLAY=host.docker.internal:0 jess/firefox
+		sleep 10
+		docker stop firefox
+	fi
 
 	# https://osxdaily.com/2014/09/05/gracefully-quit-application-command-line/
 	osascript -e 'quit app "XQuartz"'

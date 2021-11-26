@@ -53,4 +53,5 @@ package_install terraform packer
 if ! terraform -install-autocomplete; then
 	log_verbose autocomplete already installed
 fi
-log_verbose source ~/.bashrc to install autocomplete
+
+log_verbose "source ~/.bashrc to install autocomplete"

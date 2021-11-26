@@ -67,7 +67,9 @@ log_verbose need to fix gnu-sed first because it is required by the lib-config.s
 package_install --with-gettext wdiff
 
 log_verbose update utilities on macOS
-package_install bash gdb guile gpatch m4 make nano
+package_install bash guile gpatch m4 make nano
+log_verbose install MacOS Intel only 
+package_install gdb
 
 # installing other utilities like rename
 log_verbose util-linux
