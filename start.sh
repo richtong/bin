@@ -70,9 +70,9 @@ if [[ $(uname) =~ Linux ]] && ! command -v brew; then
 fi
 
 brew update
-brew install bash git
+brew install bash git gh
 # using google drive now for rich.vc
-brew install 1password google-drive
+brew install 1password google-drive 
 
 # fail the next command if no 1Password.app
 if [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
@@ -111,6 +111,7 @@ if ! mkdir -p "$WS_DIR/git"; then
 fi
 
 if [[ ! -e "$WS_DIR/git/src" ]]; then
+    gh auth login
 	git clone --recurse-submodules "https://github.com/$ORG_DOMAIN/src" "$WS_DIR/git"
 fi
 echo "Restart the terminal or source .profile and .bash_profile and start a new bash"
