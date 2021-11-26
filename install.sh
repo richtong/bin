@@ -24,7 +24,7 @@ export GIT_USERNAME="${GIT_USERNAME:-"${REPO_USER^}"}"
 export GIT_EMAIL="${GIT_EMAIL:-"$REPO_USER@$REPO_DOMAIN"}"
 NO_SUDO_PASSWORD="${NO_SUDO_PASSWORD:=false}"
 NEW_HOSTNAME="${NEW_HOSTNAME:-"$HOSTNAME"}"
-DOTFILES_STOW="${DOTFILES_STOW:-false}"
+DOTFILES_STOW="${DOTFILES_STOW:-true}"
 FORCE="${FORCE:-false}"
 MAC_SYSTEM_UPDATE="${MAC_SYSTEM_UPDATE:-false}"
 WS_DIR="${WS_DIR:-$HOME/ws}"
@@ -165,6 +165,27 @@ source_lib lib-util.sh lib-version-compare.sh lib-git.sh \
 	lib-keychain.sh lib-config.sh
 shift $((OPTIND - 1))
 
+
+log_verbose install repos only if not in docker
+if ! in_os docker &&
+	"$SCRIPT_DIR/install-repos.sh" ${FORCE_FLAG-}; then
+	log_warning "install-repos.sh returned $?"
+fi
+
+log_verbose "need readlink on bootstrap from coreutils"
+package_install coreutils
+[[ $PATH =~ opt/coreutils/libexec/gnubin ]] || export PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
+
+# run dotfiles-stow as soon as possible use the personal repo above
+# Otherwise the installation scripts below will cause conflicts
+if $DOTFILES_STOW; then
+	log_verbose "put into .bak all files that need to be stowed"
+	"$SCRIPT_DIR/dotfiles-backup.sh"
+	log_verbose "install dotfiles note that this needs the personal repo installed to work"
+	"$SCRIPT_DIR/dotfiles-stow.sh"
+	log_verbose "in the stow process if .ssh is touched the permissions will be too wide"
+fi
+
 # do not use config_add because this added the comment line
 log_verbose "Add #! to profiles"
 for profile in "$(config_profile)" "$(config_profile_shell)"; do
@@ -269,21 +290,6 @@ if $FORCE; then
 	FORCE_FLAG="-f"
 fi
 
-log_verbose install secrets will work with ssh now that we can use dropbox cli
-if $INSTALL_SECRETS; then
-	# no longer load dropbox where secrets are stored note this currently graphical
-	"$SCRIPT_DIR/install-google.sh"
-	# "$SCRIPT_DIR/install-dropbox.sh"
-
-	log_verbose install secrets from veracrypt and link to .ssh
-	"$SCRIPT_DIR/install-secrets.sh" -u "$REPO_USER" -r "$SECRETS_DIR_ROOT"
-	"$SCRIPT_DIR/fix-ssh-permissions.sh"
-fi
-
-"$BIN_DIR/install-anaconda.sh"
-PYTHON_PACKAGES=(
-)
-
 # these python packages do not always install command line argument stuff
 
 # common packages
@@ -365,22 +371,6 @@ log_verbose "skipping install-flutter but somehow"
 "$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"
 log_verbose must be installed is git lfs is used before installing repos
 "$BIN_DIR/install-git-lfs.sh"
-
-log_verbose install repos only if not in docker
-if ! in_os docker &&
-	"$SCRIPT_DIR/install-repos.sh" ${FORCE_FLAG-}; then
-	log_warning "install-repos.sh returned $?"
-fi
-
-# run dotfiles-stow as soon as possible use the personal repo above
-# Otherwise the installation scripts below will cause conflicts
-if $DOTFILES_STOW; then
-	log_verbose "put into .bak all files that need to be stowed"
-	"$SCRIPT_DIR/dotfiles-backup.sh"
-	log_verbose "install dotfiles note that this needs the personal repo installed to work"
-	"$SCRIPT_DIR/dotfiles-stow.sh"
-	log_verbose "in the stow process if .ssh is touched the permissions will be too wide"
-fi
 
 log_verbose Also allow ssh into this machine so you can switch to using consoler
 if [[ $OSTYPE =~ darwin ]]; then

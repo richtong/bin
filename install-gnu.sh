@@ -13,7 +13,8 @@ set -u && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 trap 'exit $?' ERR
 # This is for Brew
 # https://apple.stackexchange.com/questions/69223/how-to-replace-mac-os-x-utilities-with-gnu-core-utilities
-BREW_GNU="${BREW_GNU:-"/usr/local/opt/coreutils/libexec/gnubin"}"
+# for m1 macs it is /opt/homebrew and for intel macs it is /usr/local use brew --prefix to make portable
+BREW_GNU="${BREW_GNU:-"$(brew --prefix)/opt/coreutils/libexec/gnubin"}"
 # https://superuser.com/questions/440288/where-does-macports-install-gnu-sed-when-i-install-coreutils-port
 PORT_GNU="${PORT_GNU:-"/opt/local/bin"}"
 OPTIND=1
@@ -73,7 +74,7 @@ log_verbose util-linux
 package_install util-linux
 
 log_verbose bash link
-if ! command -v bash | grep -q "/usr/local/bin"; then
+if ! command -v bash | grep -q "$(brew --prefix)/bin"; then
 	brew link --overwrite bash
 fi
 
@@ -113,14 +114,14 @@ if ! config_mark; then
 	log_verbose "add paths for utilities"
 	for name in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils; do
 		# single quote except where we have the $name entry
-		config_add <<-EOF
-			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || export PATH="/usr/local/opt/$name/libexec/gnubin:\$PATH"
+		config_add <<-'EOF'
+			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || export PATH="$(brew --prefix)/opt/$name/libexec/gnubin:\$PATH"
 		EOF
 	done
 	log_verbose "install insert paths of the for name/bin"
 	for name in gnu-getopt gettext m4; do
 		config_add <<-EOF
-			[[ \$PATH =~ opt/$name/bin ]] || export PATH="/usr/local/opt/$name/bin:\$PATH"
+			[[ \$PATH =~ opt/$name/bin ]] || export PATH="$(brew --prefix)/opt/$name/bin:\$PATH"
 		EOF
 	done
 

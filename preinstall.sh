@@ -54,19 +54,26 @@ if ! command -v brew >/dev/null; then
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-# make sure on reboot we can see it
+echo  "make sure on reboot we can see it" >&2
 for file in .profile .bash_profile .bashrc; do
     if [[ ! -e $HOME/$file ]]; then
         echo "#!/usr/bin/env bash" > "$HOME/$file"
     fi
 done
 
+echo ".bash_profile existence shadows .profile so link to it" >&2
+if ! grep .profile "$HOME/.bash_profile"; then
+	cat >> "$HOME/.bash_profile" <<-'EOF'
+source "$HOME/.profile"
+EOF
+fi
+
 if ! grep shellenv "$HOME/.profile"; then
     echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.profile"
 fi
 
-# make sure we can see brew
-eval "$(/opt/homebrew/bin/brew shellenv)"
+echo "make sure we can see brew source the profiles" >&2
+source "$HOME/.bash_profile"
 
 if [[ $(uname) =~ Linux ]] && ! command -v brew; then
 	# shellcheck disable=SC2016
@@ -77,9 +84,19 @@ if [[ $(uname) =~ Linux ]] && ! command -v brew; then
 fi
 
 brew update
-brew install bash git gh
+# coreutils gets us readlink
+brew install bash coreutils git gh
+
+echo change login shell to homebrew bash
+if ! grep "$(brew --prefix)" /etc/shells; then
+    sudo tee -a /etc/shells >/dev/null <<<"$(brew --prefix)/bin/bash"
+fi
+chsh -s "$(brew --prefix)/bin/bash"
 # using google drive now for rich.vc
 brew install 1password google-drive 
+
+echo make sure we can see brew and coreutils on reboot
+
 
 # fail the next command if no 1Password.app
 if [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
@@ -121,4 +138,4 @@ if [[ ! -e "$WS_DIR/git/src" ]]; then
     gh auth login
 	git clone --recurse-submodules "https://github.com/$ORG_DOMAIN/src" "$WS_DIR/git"
 fi
-echo "Restart the terminal or source .profile and .bash_profile and start a new bash"
+echo "Restart the terminal to get new bash and profile"
