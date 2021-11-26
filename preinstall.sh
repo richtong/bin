@@ -87,7 +87,8 @@ brew update
 # coreutils gets us readlink
 brew install bash coreutils git gh
 
-echo change login shell to homebrew bash
+# https://github.com/thoughtbot/laptop/issues/447
+echo "change login shell to homebrew bash" >&2
 if ! grep "$(brew --prefix)" /etc/shells; then
     sudo tee -a /etc/shells >/dev/null <<<"$(brew --prefix)/bin/bash"
 fi

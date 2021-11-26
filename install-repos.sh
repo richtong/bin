@@ -65,7 +65,6 @@ fi
 
 # Make sure git is there
 package_install git
-exit
 mkdir -p "$WS_DIR"/git
 pushd "$WS_DIR/git" >/dev/null || true
 if $FORCE; then
