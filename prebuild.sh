@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# vi: sw=4 ts=4 et :
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## bootstrap to install.sh copy this down and you will have enough to get the
@@ -11,22 +12,28 @@ set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 ORG_NAME="${ORG_NAME:-tongfamily}"
-ORG_DOMAIN="${ORG_NAME:-$ORG_NAME.com}"
+ORG_DOMAIN="${ORG_DOMAIN:-$ORG_NAME.com}"
 export DOCKER_USER=${DOCKER_USER:-"$ORG_NAME$USER"}
-export MAIN_EMAIL=${MAIN_EMAIL:-"$USER@ORG_DOMAIN"}
+export MAIN_EMAIL=${MAIN_EMAIL:-"$USER@$ORG_DOMAIN"}
 export GIT_USER=${GIT_USER:-"$ORG_NAME-$USER"}
 export GIT_EMAIL=${GIT_EMAIL:-"$USER@$ORG_DOMAIN"}
 SSH_KEY="${SSH_KEY:-"$MAIN_EMAIL-github.com.id_ed25519"}"
 SECRET_FILE="${SECRET_FILE:-"$USER.vc"}"
-SECRET_DRIVE="${SECRET_DRIVE:-"Google Drive"}"
-SECRET_MOUNTPOINT="${SECRET_MOUNTPOINT:-"/Volume/$SECRET_FILE"}"
+SECRET_USER="${SECRET_USER:-"richtong@gmail.com"}"
+SECRET_DRIVE="${SECRET_DRIVE:-"$HOME/My Drive ($SECRET_USER"}"
+SECRET_MOUNTPOINT="${SECRET_MOUNTPOINT:-"$HOME/.secret"}"
 SSH_DIR="${SSH_DIR:-"$HOME/.ssh"}"
+WS_DIR="${WS_DIR:-"$HOME/ws/git"}"
 OPTIND=1
-while getopts "hdvu:e:r:m:w:s:" opt; do
+while getopts "hdvu:e:r:m:w:s:f:c:l:o:x:" opt; do
 	case "$opt" in
 	h)
-		cat <<EOF
-$SCRIPTNAME: Prebuild before install.sh can run
+	cat <<EOF
+$SCRIPTNAME: Prebuild before install.sh can run requires no other files
+	It installs assuming Bash 3.x and add 1Password and a shared Drive
+	This looks for the veracrypt volume with the the keys
+	Then links to the key one and copies in a temporary ssh config
+
 flags: -d debug, -h help
        -r dockeR user name (default: $DOCKER_USER)"
        -m mail for local or docker use (default: $MAIN_EMAIL)"
@@ -34,7 +41,13 @@ flags: -d debug, -h help
        -e email for git (default: $GIT_EMAIL)"
        -w workspace directory"
        -s ssh key for github (default: $SSH_KEY)
+       -f secret file with ssh keys (default: $SECRET_FILE)
+       -c email of secret user (default: $SECRET_USER)
+       -l secret drive location (default: $SECRET_DRIVE)
+       -o secret mount point (default: $SECRET_MOUNTPOINT)
+       -x ssh directory (default:$SSH_DIR)
 EOF
+
 		exit 0
 		;;
 	d)
@@ -61,16 +74,26 @@ EOF
 	s)
 		SSH_KEY="$OPTARG"
 		;;
+    f)
+        SECRET_FILE="$OPTARG"
+        ;;
+    c)
+        SECRET_USER="$OPTARG"
+        ;;
+    l)
+        SECRET_DRIVE="$OPTARG"
+        ;;
+    o)
+        SECRET_MOUNTPOINT="$OPTARG"
+        ;;
 	*)
 		echo "no -$opt" >&2
 		;;
 	esac
 done
 
-# no include.sh run standalone
 # shellcheck source=./include.sh
 # if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-# source_lib lib-git.sh
 
 set -u
 
@@ -92,7 +115,8 @@ fi
 
 brew update
 brew install bash
-brew install --cask google-drive 1password
+# using google drive now for rich.vc
+brew install 1password google-drive
 
 # fail the next command if no 1Password.app
 if [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
@@ -105,7 +129,7 @@ else
 		open -a "/Applications/1Password"*.app
 		shopt -u failglob
 		read -rp "Connect to 1Password and press enter to continue"
-		open -a "Backup and Sync"
+		open -a "Google Drive"
 		read -rp "Connect to $SECRET_DRIVE where your $SECRET_FILE is stored press enter to continue"
 	else
 		echo "On Ubuntu go to Settings > Online Accounts > Google and sign on"
@@ -124,7 +148,8 @@ else
 
 	brew install veracrypt
 	# finds the first match for of secret file on any matching $SECRET_DRIVE
-	veracrypt_secret=$(find "$HOME" -maxdepth 3 -name "$SECRET_FILE" | grep -m1 "$SECRET_DRIVE")
+	veracrypt_secret="$("$(find -L "$SECRET_DIR_ROOT" -maxdepth 3 -name "$SECRET_FILE" 2>/dev/null | grep -m 1 "$SECRET_DRIVE")"
+	echo "found $veracrypt_secret"
 	if ! veracrypt -t -l "$veracrypt_secret" >/dev/null 2>&1; then
 		# need to mount as block device with filesystem=none
 		echo enter the password for the hidden volume this will take at least a minute
@@ -175,10 +200,6 @@ if ! mkdir -p "$WS_DIR/git"; then
 	exit 2
 fi
 
-git clone --recurse-submodules "https://github.com/$ORG_DOMAIN/src"
-
-if [[ ! $OSTYPE =~ darwin ]] && ! command -v git; then
-	apt-get install -y git
-fi
+git clone --recurse-submodules "https://github.com/$ORG_DOMAIN/src" "$WS_DIR/git/src"
 
 "$SOURCE_DIR/bin/install.sh" -u "$GIT_USER" -e "GIT_EMAIL" -r "$DOCKER_USER" -m "$MAIN_EMAIL"

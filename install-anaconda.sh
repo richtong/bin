@@ -96,3 +96,8 @@ conda update conda --all -y
 conda install "python=$PYTHON"
 
 log_warning "you should not install into base create your own environment"
+conda deactivate
+log_debug "do not conda on by default"
+if ! config_mark; then
+	config_add <<<"conda deactivatK"
+fi

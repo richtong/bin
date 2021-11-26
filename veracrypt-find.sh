@@ -58,4 +58,4 @@ shift $((OPTIND - 1))
 # note that since we are returning on stdin we need to not write anything out
 # https://www.geeksforgeeks.org/mindepth-maxdepth-linux-find-command-limiting-search-specific-directory/
 # https://unix.stackexchange.com/questions/62880/how-to-stop-the-find-command-after-first-match
-find "$SECRET_DIR_ROOT" -maxdepth 3 -name "$SECRET_FILE" -print -quit 2>/dev/null
+find -L "$SECRET_DIR_ROOT" -maxdepth 3 -name "$SECRET_FILE" 2>/dev/null | grep -m 1 "$SECRET_DRIVE"
