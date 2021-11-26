@@ -55,9 +55,16 @@ if ! command -v brew >/dev/null; then
 fi
 
 # make sure on reboot we can see it
+for file in .profile .bash_profile .bashrc; do
+    if [[ ! -e $HOME/$file ]]; then
+        echo "#!/usr/bin/env bash" > "$HOME/$file"
+    fi
+done
+
 if ! grep shellenv "$HOME/.profile"; then
-	echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.profile"
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.profile"
 fi
+
 # make sure we can see brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
 

@@ -173,6 +173,15 @@ for profile in "$(config_profile)" "$(config_profile_shell)"; do
 	fi
 done
 
+# https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
+if ! config_mark; then
+	config_add <<-'EOF'
+		# shellcheck disable=SC2016
+		if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
+		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
+	EOF
+fi
+
 log_verbose "install brew for linux and mac as common installer"
 "$SCRIPT_DIR/install-brew.sh"
 
@@ -435,14 +444,6 @@ source_profile
 log_verbose Chain to your personal installs
 # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
 run_if "$SOURCE_DIR/user/$REPO_USER/bin/install.sh" "$@"
-
-# https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
-if ! config_mark; then
-	config_add <<-'EOF'
-		# shellcheck disable=SC2016
-		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
-	EOF
-fi
 
 # log_verbose update all submodules only for special use cases
 # "$SOURCE_DIR/scripts/build/update-all-submodules.sh"

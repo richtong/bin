@@ -10,7 +10,7 @@ set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 # need to use trap and not -e so bashdb works
 trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-ANACONDA="${ANACONDA:-true}"
+ANACONDA="${ANACONDA:-false}"
 PIPENV="${PIPENV:-true}"
 PYTHON_VERSION="${PYTHON_VERSION:-3.10j}"
 STABLE_PYTHON="${STABLE_PYTHON:-3.9}"
@@ -76,6 +76,17 @@ PACKAGES=(
 	pydocstyle
 )
 
+# we need it to be python and pip to work and not python3 and pip3 only
+# https://docs.brew.sh/Homebrew-and-Python
+if ! config_mark; then
+	# Use the brew location for python
+	config_add <<-'EOF'
+		# shellcheck disable=SC2155
+		[[ $PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH"
+	EOF
+	log_warning "source $(config_profile) to get the correct python"
+fi
+
 log_verbose "added to config now source"
 source_profile
 hash -r
@@ -135,20 +146,10 @@ for version in "$OLD_PYTHON" "$STABLE_PYTHON"; do
 	package_install "python@$version"
 done
 
-# we need it to be python and pip for compatibility with Linux
-# https://docs.brew.sh/Homebrew-and-Python
-if ! config_mark; then
-	# Use the brew location for python
-	config_add <<-'EOF'
-		# shellcheck disable=SC2155
-		[[ $PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH"
-	EOF
-	log_warning "source $(config_profile) to get the correct python"
-fi
-
 # now put the completions in bashrc so subshells can find them like pipenv uses
 if $PIPENV && ! config_mark "$(config_profile_shell)"; then
 	config_add "$(config_profile_shell)" <<-'EOF'
 		eval "$(pipenv --completion)"
 	EOF
 fi
+source_profile
