@@ -12,7 +12,6 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 VERSION="${VERSION:-2.8.1}"
-DISPLAY="${DISPLAY:-:0}"
 CONFIG="${CONFIG:-/etc/ssh/sshd_config}"
 DOWNLOAD_URL="${DOWNLOAD_URL:-"https://dl.bintray.com/xquartz/downloads/XQuartz-$VERSION.dmg"}"
 OPTIND=1
@@ -102,8 +101,8 @@ log_warning 'Enable it with host "+$HOSTNAME" +localhost'
 if $VERBOSE; then
 	log_verbose "Starting XQuartz"
 	open -a XQuartz
-	log_verbose "adding host names for $DISPLAY"
-	export DISPLAY=:0
+	log_verbose "Waiting for XQuartz to open"
+	sleep 5
 	xhost +localhost "+$HOSTNAME"
 
 	# https://unix.stackexchange.com/questions/118811/why-cant-i-run-gui-apps-from-root-no-protocol-specified

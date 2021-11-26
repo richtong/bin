@@ -77,6 +77,7 @@ if in_os mac; then
 	log_verbose "closing up secretes in .kube/config"
 	mkdir -p "$HOME/.kube"
 	chmod 700 "$HOME/.kube"
+	touch "$HOME/.kube/config"
 	chmod 600 "$HOME/.kube/config"
 
 	log_verbose "configring helm"
