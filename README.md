@@ -53,13 +53,33 @@ use then in the ~/ws/src.
 Also if you have more than one ~/ws, be aware that the way search works, you
 ~/wsr/src/lib for instance is "shadowed" and will not be seen as a library.
 
-## Prebuild and bare metal installation
+## Preinstall on naked or bare metal installation
 
-To do a bare metal build, use create-prebuild.sh which will give you enough of
+For a non-networked machine, To do a bare metal build, create-preinstall.sh which
+will give you enough of
 this system to put onto a USB key and then bootstrap from there.
 
-Alternatively, if you have network access put it on a share drive and then you
-can install
+Normally you should just clone an entire src repo which will have a bin and lib
+submodules. The preinstall will take a Mac convert it with enough git and bash
+to run.
+
+To have everything ready, it assumes you have a Veracrypt installation with
+your passwords on it in <your username>.vc which lives on your Google Drive.
+It will link your keys from there into ~/.ssh which is nice
+
+It also assumes you have a src/user/<your name>/dotfiles directory and will
+link your profile and other configurations there.
+
+If you have a network, then you should do:
+
+```sh
+# install brew with the one line ruby code that is on their site
+git clone --recurse https://github.com/richtong/src
+cd src/bin
+./preinstall.sh -v
+./install.sh -v
+
+```
 
 ## Installation
 
