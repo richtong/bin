@@ -69,7 +69,9 @@ package_install --with-gettext wdiff
 log_verbose update utilities on macOS
 package_install bash guile gpatch m4 make nano
 log_verbose install MacOS Intel only 
-package_install gdb
+if ! mac_is_arm; then
+	package_install gdb
+fi
 
 # installing other utilities like rename
 log_verbose util-linux

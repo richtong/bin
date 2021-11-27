@@ -56,12 +56,10 @@ hash -r
 PACKAGES=(
 	'notebook>=6'
 	'jupyterlab>=3'
-	'jupyterhab>=1.4'
-	'xeus-python>=0.8.6'
+	'jupyterhub>=1.4'
 	nodejs
 	jupyterlab-git
 	jupyterlab-github
-	nb-mermaid
 	aquirdturtle_collapsible_headings
 	jupyterlab-system-monitor
 	nbdime
@@ -71,11 +69,21 @@ PACKAGES=(
 	black
 	yapf
 	isort
-	jupyterlab_hdf
-	hdf5plugin
 )
 log_verbose "Installing python extensions ${PACKAGES[*]}"
 pip_install "${PACKAGES[@]}"
+
+INTEL=(
+	'xeus-python>=0.8.6'
+	nb-mermaid
+	jupyterlab_hdf
+	hdf5plugin
+)
+
+if mac_is_arm; then
+	log_verbose "Mac Intel only versions installed"
+	pip_install "${INTEL[@]}"
+fi
 
 # this is for node applications but you need to know the node package names
 # Latex not up to date

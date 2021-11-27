@@ -9,9 +9,9 @@ DXO_VERSION="${DXO_VERSION:-4}"
 DXO_URL="${DXO_URL:-"https://download-center.dxo.com/PhotoLab/v$DXO_VERSION/Mac/DxO_PhotoLab$DXO_VERSION.dmg"}"
 # insert your GUID here but do not check in
 PTGUI_GUID="${PTGUI_GUID="Do_not_check_in_this_guid"}"
-PTGUI_URL="${PTGUI_URL:-"https://www.ptgui.com/downloads/120000/reg/mac105/standard/112205/$PTGUI_GUID/PTGui_12.0.dmg"}"
+PTGUI_URL="${PTGUI_URL:-"https://www.ptgui.com/downloads/120000/reg/mac105/standard/112205/$PTGUI_GUID/PTGui_12.8.dmg"}"
 CAPTUREONE_GUID="${CAPTUREONE_GUID:-"Do_check_in_this_guid"}"
-CAPTUREONE_URL="${CAPTUREONE_URL:-"https://downloads.phaseone.com/$CAPTUREONE_GUID/International/CaptureOne21.Mac.14.1.0.dmg"}"
+CAPTUREONE_URL="${CAPTUREONE_URL:-"https://downloads.phaseone.com/$CAPTUREONE_GUID/International/CaptureOne21.Mac.14.4.1.dmg"}"
 OPTIND=1
 while getopts "hdv" opt; do
 	case "$opt" in
