@@ -114,12 +114,15 @@ fi
 # Note this assume line_add_or_change appends at bottom so that GNU_PATH goes
 # first in the path masking the system utils like ls
 if ! config_mark; then
-	config_add <<<"[[ \$PATH =~ $NEW_PATH ]] || export PATH=\"$NEW_PATH\""
+	config_add <<-EOF
+export PATH
+[[ \$PATH =~ $NEW_PATH ]] || PATH=\"$NEW_PATH\"
+EOF
 	log_verbose "add paths for utilities"
 	for name in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils; do
 		# single quote except where we have the $name entry
 		config_add <<-'EOF'
-			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || export PATH="$(brew --prefix)/opt/$name/libexec/gnubin:\$PATH"
+			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || PATH="$(brew --prefix)/opt/$name/libexec/gnubin:\$PATH"
 		EOF
 	done
 	log_verbose "install insert paths of the for name/bin"

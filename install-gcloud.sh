@@ -56,7 +56,9 @@ if in_os mac; then
 	if ! config_mark "$(config_profile_shell)"; then
 		log_verbose "installing into $(config_profile_shell)"
 		config_add "$(config_profile_shell)" <<-'EOF'
+			# shellcheck disable=SC1091
 			source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"
+			# shellcheck disable=SC1091
 			source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc"
 		EOF
 		log_warning "now source the changes to $(config_profile_shell)"
