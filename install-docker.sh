@@ -144,7 +144,7 @@ if in_os mac; then
 	log_warning docker now installed by homebrew open it up and fill it in before continuing
 	log_warning it is best to login from the Docker.app
 	open -a Docker.app
-	read -n1 -r -p "Press anything to continue.." key
+	util_press_key
 	# need to use key to make shellcheck happy
 	log_debug "got $key"
 

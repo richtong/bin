@@ -12,10 +12,11 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 VERSION="${VERSION:-2.8.1}"
+TEST="${TEST:-false}"
 CONFIG="${CONFIG:-/etc/ssh/sshd_config}"
 DOWNLOAD_URL="${DOWNLOAD_URL:-"https://dl.bintray.com/xquartz/downloads/XQuartz-$VERSION.dmg"}"
 OPTIND=1
-while getopts "hdvr:c:" opt; do
+while getopts "hdvr:c:t" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
@@ -24,6 +25,7 @@ usage: $SCRIPTNAME [ flags ]
 flags: -d debug, -v verbose, -h help
        -r release to download (default: $VERSION)
        -c location of sshd_config and ssh_config (default: $CONFIG)
+	   -t run tests (default: $TEST)
 EOF
 		exit 0
 		;;
@@ -38,6 +40,9 @@ EOF
 		;;
 	c)
 		CONFIG="$OPTARG"
+		;;
+	t)
+		TEST=true
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -98,11 +103,11 @@ log_warning "use xhost to connect to allow local docker access"
 # shellcheck disable=SC2016
 log_warning 'Enable it with host "+$HOSTNAME" +localhost'
 
-if $VERBOSE; then
+if $TEST; then
 	log_verbose "Starting XQuartz"
 	open -a XQuartz
-	log_verbose "Waiting for XQuartz to open"
-	sleep 5
+	log_verbose "Waiting for XQuartz to open and you should start an X-Windows application"
+	util_press_key
 	xhost +localhost "+$HOSTNAME"
 
 	# https://unix.stackexchange.com/questions/118811/why-cant-i-run-gui-apps-from-root-no-protocol-specified

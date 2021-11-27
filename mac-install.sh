@@ -360,6 +360,8 @@ log_verbose "mas install ${MAS[*]}"
 mas install "${MAS[@]}"
 log_verbose "complete Xcode installation in GUI"
 open -a Xcode
+xcode_license_accept
+read -n1 -s -r -p $'Press space to continue after install Xcode...\n' key
 
 log_verbose bash completion used by kubernetes
 "$SCRIPT_DIR/install-bash-completion.sh"
