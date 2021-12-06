@@ -120,7 +120,7 @@ veracrypt_disk="\$(veracrypt -t -v -l "\$veracrypt_secret" | awk '/^Virtual Devi
 if [[ -n \$veracrypt_disk ]] && ! mount | grep -q "\$veracrypt_disk"
 then
 	#  mount in user space so private to a user
-	sudo mount -t msdos -o -u="\$(id -u),-m=700" "\$veracrypt_disk" "$SECRET_MOUNTPOINT"
+	sudo mount -t msdos -o -u="\$UID,-m=700" "\$veracrypt_disk" "$SECRET_MOUNTPOINT"
 fi
 EOF
 fi

@@ -67,6 +67,9 @@ if [[ $OSTYPE =~ darwin ]]; then
 		sudo rm -rf "/Applications/Slack.app"
 		sudo mv "$DOWNLOAD_DIR/Slack.app" /Applications
 	fi
+
+	log_verbose "slack channel export installed need a slackchannel2pdf --tokern $TOKEN"
+	pip install slackchannel2pdf
 	exit
 fi
 
