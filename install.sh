@@ -168,13 +168,17 @@ shift $((OPTIND - 1))
 
 log_verbose install repos only if not in docker
 if ! in_os docker &&
-	"$SCRIPT_DIR/install-repos.sh" ${FORCE_FLAG-}; then
+	"$SCRIPT_DIR/install-repos.sh" "${FORCE_FLAG-}"; then
 	log_warning "install-repos.sh returned $?"
 fi
 
 log_verbose "need readlink on bootstrap from coreutils"
 package_install coreutils
-[[ $PATH =~ opt/coreutils/libexec/gnubin ]] || export PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
+export PATH
+[[ $PATH =~ opt/coreutils/libexec/gnubin ]] || PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
+
+log_verbose "Install Zsh opions"
+"$SOURCE_DIR/install-zsh.sh"
 
 # run dotfiles-stow as soon as possible use the personal repo above
 # Otherwise the installation scripts below will cause conflicts

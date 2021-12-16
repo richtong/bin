@@ -300,24 +300,7 @@ fi
 # https://johndjameson.com/blog/updating-your-shell-with-homebrew/
 # This works for both macports bash and homebrew bash, they install into the same place
 # The BASH_PATH check no longer works, so always chsh
-DESIRED_SHELL_PATH="$(command -v "$DESIRED_SHELL")"
-if [[ -e $DESIRED_SHELL_PATH ]]; then
-	if ! grep "$DESIRED_SHELL_PATH" /etc/shells; then
-		sudo tee -a /etc/shells <<<"$DESIRED_SHELL_PATH" >/dev/null
-	fi
-    CURRENT_SHELL_PATH="$(dscl . -read "$HOME" UserShell)"
-    log_verbose "Current default shell is $CURRENT_SHELL_PATH"
-    # https://stackoverflow.com/questions/16375519/how-to-get-the-default-shell
-    if [[ "$CURRENT_SHELL_PATH" != "$DESIRED_SHELL_PATH" ]]; then
-        log_verbose "Default user shell is not $DESIRED_SHELL_PATH"
-		log_warning you only get one login opportunity to change the shell so type carefully.
-		log_warning "if you make a mistake just rerun $SCRIPTNAME"
-		chsh -s "$DESIRED_SHELL_PATH"
-	fi
-fi
-
-# log_verbose install oh-my-zsh
-# "$SOURCE_DIR/install-zsh.sh"
+config_add_shell "$(command -v "$DESIRED_SHELL")"
 
 log_verbose Enable ssh so you can get into this machine
 if ! sudo launchctl list | grep -q sshd; then
