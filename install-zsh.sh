@@ -78,18 +78,18 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 # copydir - copydir will copy the last path onto clipboard
 # copyfile - copy the file to your clipboard
 # thefuck - ESC twice to correct command (conflicts with sudo plugin)
-# vi-mode - vv to edit line with vi command, ESC or Ctrl-[ to enter normal mode
+# vi-mode - ESC to enter vi edit mode. Another ESC puts in you in normal mode
 # one of these is useful probably z
 # dirhistory - ALT-Left goes to previous directory, ALT-right so like dirs (does not work with AnnePro2)
 # wd - warp directory do a wd add to add to a list of directories
-# z - z tracks recent directories and jumps
+# z - z <string> guess which directory you want to go to 
 # colorize - uses pygmenter to ccat files in color
 log_verbose "Adding OMZ plugins"
 brew install thefuck pygments
 PLUGIN+=(
 			git macos web-search copydir copyfile dirhistory gh gcloud git-lfs
 			gnu-utils asdf colorize
-			helm kubectl pip pipenv ripgrep thefuck vi-mode z
+			helm kubectl pip pipenv ripgrep thefuck vi-mode z wd
 		) 
 config_replace "$ZSH_PROFILE" plugins "plugins = ${PLUGIN[*]}"
 
