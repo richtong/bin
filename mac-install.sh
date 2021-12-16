@@ -305,8 +305,11 @@ if [[ -e $DESIRED_SHELL_PATH ]]; then
 	if ! grep "$DESIRED_SHELL_PATH" /etc/shells; then
 		sudo tee -a /etc/shells <<<"$DESIRED_SHELL_PATH" >/dev/null
 	fi
-	log_warning "checking $SHELL is same a $DESIRED_SHELL_PATH chsh if not"
-	if [[ $SHELL != "$DESIRED_SHELL_PATH" ]]; then
+    CURRENT_SHELL_PATH="$(dscl . -read "$HOME" UserShell)"
+    log_verbose "Current default shell is $CURRENT_SHELL_PATH"
+    # https://stackoverflow.com/questions/16375519/how-to-get-the-default-shell
+    if [[ "$CURRENT_SHELL_PATH" != "$DESIRED_SHELL_PATH" ]]; then
+        log_verbose "Default user shell is not $DESIRED_SHELL_PATH"
 		log_warning you only get one login opportunity to change the shell so type carefully.
 		log_warning "if you make a mistake just rerun $SCRIPTNAME"
 		chsh -s "$DESIRED_SHELL_PATH"
@@ -361,6 +364,7 @@ mas install "${MAS[@]}"
 log_verbose "complete Xcode installation in GUI"
 open -a Xcode
 xcode_license_accept
+# shellcheck disable=SC2034
 read -n1 -s -r -p $'Press space to continue after install Xcode...\n' key
 
 log_verbose bash completion used by kubernetes
