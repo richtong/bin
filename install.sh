@@ -166,6 +166,7 @@ source_lib lib-util.sh lib-version-compare.sh lib-git.sh \
 shift $((OPTIND - 1))
 
 
+
 log_verbose install repos only if not in docker
 if ! in_os docker &&
 	"$SCRIPT_DIR/install-repos.sh" "${FORCE_FLAG-}"; then
@@ -201,9 +202,10 @@ done
 # https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
 if ! config_mark; then
 	config_add <<-'EOF'
+		shopt -s cdspell
 		# shellcheck disable=SC2016
-		if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
-		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
+		#if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
+		#if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
 	EOF
 fi
 
