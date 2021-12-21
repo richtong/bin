@@ -12,18 +12,20 @@ DOCKER="${DOCKER:-"false"}"
 MINIKUBE="${MINIKUBE:-"false"}"
 FORCE="${FORCE:-"false"}"
 MICROK8S="${MICROK8S:-"false"}"
+KIND="${KIND:-"true"}"
 MULTIPASS_ONLY="${MULTIPASS_ONLY:-true}"
 OPTIND=1
-while getopts "hdvmuiof" opt; do
+while getopts "hdvmuiofk" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			$SCRIPTNAME: Install Kubernetes command line and then a k8s implementation
 			flags: -d debug, -v verbose, -h help
 				-f force installation (default: $FORCE)
-				-m minikube (default: $MINIKUBE)
-				-i MicroK8s using Multipass does not work with kubeflow (default: $MICROK8S)
-				-u Multipass with Microk8s available only inside VM (default: $MULTIPASS_ONLY)
+				-m Install minikube (default: $MINIKUBE)
+				-i MInstall icroK8s using Multipass does not work with kubeflow (default: $MICROK8S)
+				-u Do not install ultipass with Microk8s available only inside VM (default: $MULTIPASS_ONLY)
+				-k Do not install Kind a lightweight minikubd (default $KIND)
 				-o Docker has a single cluster version (default: $DOCKER)
 		EOF
 		exit 0
@@ -45,6 +47,9 @@ while getopts "hdvmuiof" opt; do
 		;;
 	u)
 		MULTIPASS_ONLY=false
+		;;
+	k)
+		KIND=false
 		;;
 	o)
 		DOCKER=true
@@ -69,6 +74,11 @@ KUBE_URL="${KUBE_URL:-https://storage.googleapis.com/kubernetes-release/release/
 #log_exit "already installed"
 #fi
 
+if $KIND; then
+	log_verbose "Install KinD"
+	brew install kind
+fi
+
 if in_os mac; then
 	log_verbose "Installing on MacOS"
 	# also need sponge in moreutils to prevent redirect problems
@@ -82,6 +92,7 @@ if in_os mac; then
 
 	log_verbose "configring helm"
 	# stable is deprecated use artifactory hub to find the right repos
+
 	#helm repo add stable https://charts.helm.sh/stable
 	helm repo add bitnami https://charts.bitnami.com/bitnami
 	log_verbose "to use helm install rich-wp bitnami/wordpress"

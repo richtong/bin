@@ -69,7 +69,7 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 # pip - command completion
 # pipenv - completions, psh pipenv shell, pi - pipenv install
 # rg - completions
-# asdf - completions
+# asdf - completions (not working)
 # macos - ofd - open in finder, pfd - print finder path, cdf - change to finder
 #       - tab open current directory in a new term tab, music - start Muisc,
 #       - pushdf - push finder dir, showfiles - sho hidden in Finder
@@ -84,13 +84,60 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 # wd - warp directory do a wd add to add to a list of directories
 # z - z <string> guess which directory you want to go to 
 # colorize - uses pygmenter to ccat files in color
+# fzf - completions
+# brew - new command bubo brew update & brew outdated bubc brew update && brew
+# cleanup
+# command-not-found - suggest missing package
+# command aliases - l ls -lFh h history ff find . -type f -name hgrep 
+# docker completions
+# emoji-clock - emoji not characters for clock
+# gcloud - completions
+# git-lfs - completions
 log_verbose "Adding OMZ plugins"
 brew install thefuck pygments
 PLUGIN+=(
-			git macos web-search copydir copyfile dirhistory gh gcloud git-lfs
-			gnu-utils asdf colorize
-			helm kubectl pip pipenv ripgrep thefuck vi-mode z wd
-		) 
+
+	aws
+	brew
+	colorize
+	command-not-found
+	common-aliases
+	copydir
+	copyfile
+	dirhistory
+	docker
+	dotenv
+	emoji-clock
+	fzf
+	gcloud
+	gh
+	git
+	git-lfs
+	gnu-utils
+	helm
+	history
+	ipfs
+	kubectl
+	macos
+	microk8s
+	npm
+	npx
+	pip
+	pipenv
+	rand-quote
+	ripgrep
+	terraform
+	thefuck
+	themes
+	transfer
+	vi-mode
+	wd
+	web-search
+	z
+	zsh-interactive-cd
+
+)
+
 config_replace "$ZSH_PROFILE" plugins "plugins = ${PLUGIN[*]}"
 
 log_verbose "adding zinit plugins"
