@@ -78,3 +78,16 @@ if ! config_mark "$HOME/.zshrc"; then
 		podman completion -f"${fpath[1]}/_podman" zsh
 	EOF
 fi
+
+log_verbose "Adding QEMU into container to run cross-platform images"
+# https://edofic.com/posts/2021-09-12-podman-m1-amd64/
+podman machine ssh <<-EOF
+	sudo -i
+	rpm-ostree install qemu-user-static
+	systemctl reboot
+EOF
+
+if $VERBOSE; then
+	log_verbose "Try running Hello World"
+	podman run --rm -it hello-world
+fi
