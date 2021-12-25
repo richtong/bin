@@ -112,7 +112,10 @@ if in_os mac; then
 	if ! config_mark "$(config_profile_shell)"; then
 		log_verbose "adding completions to $(config_profile_shell)"
 		config_add "$(config_profile_shell)" <<-'EOF'
-			source <(kubectl completion bash)
+			# shellcheck disable=SC1090
+			if ! command -v helm >/dev/null; then source <(helm completion bash); fi
+			# shellcheck disable=SC1090
+			if ! command -v kubectl > /dev/null; then source <(kubectl completion bash); fi
 		EOF
 	fi
 	# https://github.com/corneliusweig/konfig

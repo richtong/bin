@@ -165,6 +165,23 @@ source_lib lib-util.sh lib-version-compare.sh lib-git.sh \
 	lib-keychain.sh lib-config.sh
 shift $((OPTIND - 1))
 
+# do not use config_add because this added the comment line
+log_verbose "Add #! to profiles"
+for profile in "$(config_profile)" "$(config_profile_shell)"; do
+	if [[ ! -e $profile ]]; then
+		echo '#!/usr/bin/env bash' >>"$profile"
+	fi
+done
+# source .profile as early as possible to get the paths right
+# .bash_profile will source profile and bashrc for the first shell
+if ! config_mark; then
+	config_add <<-'EOF'
+		# shellcheck disable=SC2016
+		if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
+		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
+	EOF
+fi
+
 
 
 log_verbose install repos only if not in docker
@@ -191,24 +208,35 @@ if $DOTFILES_STOW; then
 	log_verbose "in the stow process if .ssh is touched the permissions will be too wide"
 fi
 
-# do not use config_add because this added the comment line
-log_verbose "Add #! to profiles"
-for profile in "$(config_profile)" "$(config_profile_shell)"; do
-	if [[ ! -e $profile ]]; then
-		echo '#!/usr/bin/env bash' >>"$profile"
-	fi
-done
-
 # https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
-if ! config_mark; then
+# https://stackoverflow.com/questions/9953005/should-the-bashrc-in-the-home-directory-load-automatically
+# macOS defaults: interactive login shell: /etc/profile ->
+#	 									   first[~/.bash_profsle, ~/.bash_login ~/.profile] -> 
+#	 									   ~/.bashrc
+#			      interactive non-login shell: ~/.bashrc -> /etc/ashrc
+#			      logout shell: ~/.bash_logout
+#
+# https://www.stefaanlippens.net/bashrc_and_others/
+# login shell means you login directly like an ssh session
+# non-login shell is a new terminal windows from iterm2
+#
+# So what do I put in which file:
+# .profile:  for non-Bash related environment variables.
+# .bash_profile: for the first login and it sets things that are inherited to non-interactive shells
+# .bashrc - for interactive things like alias that do not get inherited
+
+# https://www.computerhope.com/unix/bash/shopt.htm
+# globstart ls **/.profile matches all directoris in the path
+# nullglob: is * doesn't match it is turned into an empty string
+log_verbose "Add to .bashrc parameters not inherited from login shell"
+if ! config_mark "$(config_profile_shell)"; then
 	config_add <<-'EOF'
-		shopt -s cdspell
-		# shellcheck disable=SC2016
-		#if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
-		#if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
+		set -o vi
+		shopt -s autocd cdspell cdable_vars checkhash checkjobs \
+				checkwinsize cmdhist direxpand dirspell dotglob \
+				extglob globstar nullglob 
 	EOF
 fi
-
 log_verbose "install brew for linux and mac as common installer"
 "$SCRIPT_DIR/install-brew.sh"
 
