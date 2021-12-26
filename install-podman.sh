@@ -13,24 +13,29 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # trap 'exit $?' ERR
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt; do
+QEMU="${QEMU:-false}"
+while getopts "hdvq" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs 1Password
+			Installs Podman
 			    usage: $SCRIPTNAME [ flags ]
 				flags: -d debug (not functional use bashdb), -v verbose, -h help"
+					   -q run QEMU emulation for multiple architecture
+					   (default: $QEMU)
 		EOF
 		exit 0
 		;;
 	d)
-
 		export DEBUGGING=true
 		;;
 	v)
 		export VERBOSE=true
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
+		;;
+	q)
+		QEMU=true
 		;;
 	*)
 		echo "not flag -$opt"
@@ -44,7 +49,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh
 
 brew install podman
-podman machine init
+podman machine init --cpu=4 --disk-size=100 --memory=4096
 podman machine start
 
 if $VERBOSE; then
@@ -79,15 +84,22 @@ if ! config_mark "$HOME/.zshrc"; then
 	EOF
 fi
 
-log_verbose "Adding QEMU into container to run cross-platform images"
-# https://edofic.com/posts/2021-09-12-podman-m1-amd64/
-podman machine ssh <<-EOF
-	sudo -i
-	rpm-ostree install qemu-user-static
-	systemctl reboot
-EOF
+if $QEMU; then
+	log_verbose "Adding QEMU into container to run cross-platform images"
+	# https://edofic.com/posts/2021-09-12-podman-m1-amd64/
+	podman machine ssh <<-EOF
+		sudo rpm-ostree install qemu-user-static
+		sudo systemctl reboot
+	EOF
+fi
 
 if $VERBOSE; then
 	log_verbose "Try running Hello World"
 	podman run --rm -it hello-world
 fi
+
+# https://davegallant.ca/blog/2021/10/11/replacing-docker-with-podman-on-macos-and-linux/
+# use docker compose with a podman pipe instead
+# this podman compose does not suppor --env-file
+#log_verbose "Install podman-compose"
+#pip_install podman-compose
