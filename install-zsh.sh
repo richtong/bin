@@ -78,7 +78,10 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 # copydir - copydir will copy the last path onto clipboard
 # copyfile - copy the file to your clipboard
 # thefuck - ESC twice to correct command (conflicts with sudo plugin)
+# https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/vi-mode
 # vi-mode - ESC to enter vi edit mode. Another ESC puts in you in normal mode
+#           While in command mode, typing vv quickly will bring you to the full
+#           vi with the command in a window.
 # one of these is useful probably z
 # dirhistory - ALT-Left goes to previous directory, ALT-right so like dirs (does not work with AnnePro2)
 # wd - warp directory do a wd add to add to a list of directories
@@ -94,7 +97,9 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 # gcloud - completions
 # git-lfs - completions
 log_verbose "Adding OMZ plugins"
-brew install thefuck pygments
+brew install pygments
+log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
+
 PLUGIN+=(
 
 	aws
@@ -108,6 +113,7 @@ PLUGIN+=(
 	docker
 	dotenv
 	emoji-clock
+	vi-mode
 	fzf
 	gcloud
 	gh
@@ -130,7 +136,6 @@ PLUGIN+=(
 	thefuck
 	themes
 	transfer
-	vi-mode
 	wd
 	web-search
 	z
@@ -152,5 +157,7 @@ if ! config_mark "$ZSH_PROFILE"; then
 		zinit ice wait
 		zinit light zsh-users/zsh-autosuggestions
 		zinit light romkatv/powerlevel10k
+		zinit light joel-porquet/zsh-dircolors-solarized.git
+		setupsolarized
 	EOF
 fi
