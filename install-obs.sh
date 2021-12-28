@@ -61,7 +61,7 @@ package_install obs obs-ndi
 
 log_verbose "Install plugins"
 VERSION="${VERSION:-v0.3.0-beta}"
-URL+=( "https://github.com/royshil/obs-backgroundremoval/releases/download/$VERSION/obs-backgroundremoval-macosx.zip" )
+URL+=("https://github.com/royshil/obs-backgroundremoval/releases/download/$VERSION/obs-backgroundremoval-macosx.zip")
 APP="${APP:-/Applications/OBS.app/Contents}"
 
 for url in "${URL[@]}"; do

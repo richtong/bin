@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##
-## install Zsh 
+## install Zsh
 ## https://phuctm97.com/blog/zsh-antigen-ohmyzsh
 ## https://www.viget.com/articles/zsh-config-productivity-plugins-for-mac-oss-default-shell/
 ##
@@ -52,7 +52,6 @@ log_verbose "Add homebrew zsh to /etc/shells"
 ZSH_PATH="$(brew --prefix)/bin/zsh"
 config_add_shell "$ZSH_PATH"
 
-
 log_verbose "Adding Oh My Zsh"
 # https://osxdaily.com/2021/11/15/how-install-oh-my-zsh-mac/
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -85,13 +84,13 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 # one of these is useful probably z
 # dirhistory - ALT-Left goes to previous directory, ALT-right so like dirs (does not work with AnnePro2)
 # wd - warp directory do a wd add to add to a list of directories
-# z - z <string> guess which directory you want to go to 
+# z - z <string> guess which directory you want to go to
 # colorize - uses pygmenter to ccat files in color
 # fzf - completions
 # brew - new command bubo brew update & brew outdated bubc brew update && brew
 # cleanup
 # command-not-found - suggest missing package
-# command aliases - l ls -lFh h history ff find . -type f -name hgrep 
+# command aliases - l ls -lFh h history ff find . -type f -name hgrep
 # docker completions
 # emoji-clock - emoji not characters for clock
 # gcloud - completions

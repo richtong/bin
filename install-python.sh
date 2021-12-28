@@ -148,7 +148,7 @@ done
 
 # now put the completions in bashrc so subshells can find them like pipenv uses
 # the --completion is removed as of Nov 2021 so there is a new way
-		#eval "$(pipenv --completion)"
+#eval "$(pipenv --completion)"
 # https://github.com/pypa/pipenv/issues/4860
 
 if $PIPENV && ! config_mark "$(config_profile_shell)"; then

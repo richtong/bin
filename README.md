@@ -64,10 +64,10 @@ submodules. The preinstall will take a Mac convert it with enough git and bash
 to run.
 
 To have everything ready, it assumes you have a Veracrypt installation with
-your passwords on it in <your username>.vc which lives on your Google Drive.
+your passwords on it in _your username_.vc which lives on your Google Drive.
 It will link your keys from there into ~/.ssh which is nice
 
-It also assumes you have a src/user/<your name>/dotfiles directory and will
+It also assumes you have a src/user/_your name_/dotfiles directory and will
 link your profile and other configurations there.
 
 If you have a network, then you should do:

@@ -9,7 +9,7 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     # only language independent hooks
-    rev: v4.0.1
+    rev: v4.1.0
     hooks:
       - id: check-added-large-files
       - id: check-merge-conflict
@@ -67,7 +67,7 @@ repos:
   # https://github.com/igorshubovych/markdownlint-cli
   # node version of markdownlint with better disabling of checks
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.28.1
+    rev: v0.30.0
     hooks:
     - id: markdownlint
   - repo: https://github.com/kynan/nbstripout

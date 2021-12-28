@@ -68,7 +68,7 @@ package_install --with-gettext wdiff
 
 log_verbose update utilities on macOS
 package_install bash guile gpatch m4 make nano
-log_verbose install MacOS Intel only 
+log_verbose install MacOS Intel only
 if ! mac_is_arm; then
 	package_install gdb
 fi
@@ -115,9 +115,9 @@ fi
 # first in the path masking the system utils like ls
 if ! config_mark; then
 	config_add <<-EOF
-export PATH
-[[ \$PATH =~ $NEW_PATH ]] || PATH=\"$NEW_PATH\"
-EOF
+		export PATH
+		[[ \$PATH =~ $NEW_PATH ]] || PATH=\"$NEW_PATH\"
+	EOF
 	log_verbose "add paths for utilities"
 	for name in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils; do
 		# single quote except where we have the $name entry

@@ -182,8 +182,6 @@ if ! config_mark; then
 	EOF
 fi
 
-
-
 log_verbose install repos only if not in docker
 if ! in_os docker &&
 	"$SCRIPT_DIR/install-repos.sh" "${FORCE_FLAG-}"; then
@@ -211,7 +209,7 @@ fi
 # https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
 # https://stackoverflow.com/questions/9953005/should-the-bashrc-in-the-home-directory-load-automatically
 # macOS defaults: interactive login shell: /etc/profile ->
-#	 									   first[~/.bash_profsle, ~/.bash_login ~/.profile] -> 
+#	 									   first[~/.bash_profsle, ~/.bash_login ~/.profile] ->
 #	 									   ~/.bashrc
 #			      interactive non-login shell: ~/.bashrc -> /etc/ashrc
 #			      logout shell: ~/.bash_logout
@@ -234,7 +232,7 @@ if ! config_mark "$(config_profile_shell)"; then
 		set -o vi
 		shopt -s autocd cdspell cdable_vars checkhash checkjobs \
 				checkwinsize cmdhist direxpand dirspell dotglob \
-				extglob globstar nullglob 
+				extglob globstar nullglob
 	EOF
 fi
 log_verbose "install brew for linux and mac as common installer"

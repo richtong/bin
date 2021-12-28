@@ -98,10 +98,10 @@ if ! config_mark; then
 	homebrew_completion
 fi
 
-if ! config_mark $(config_profile); then
-	config_add $(config_profiel) <<-'EOF'
+if ! config_mark "$(config_profile)"; then
+	config_add "$(config_profile)" <<-'EOF'
 		eval "\$($(brew --prefix)/bin/brew shellenv)"
-EOF
+	EOF
 fi
 
 # make sure we can write the brew files you can have access problems
@@ -128,7 +128,7 @@ sbin
 for f in $HOMEBREW_DIRS; do
 	log_verbose "checking $HOMEBREW"
 	file="$(brew --prefix)/$f"
-	
+
 	if [[ ! -e $file ]]; then
 		log_verbose "$file does not exist skipping"
 		mkdir -p "$file"

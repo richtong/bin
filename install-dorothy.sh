@@ -51,4 +51,3 @@ elif in_os mac; then
 fi
 
 bash -ilc "$(curl -fsSL https://raw.githubusercontent.com/bevry/dorothy/master/commands/setup-dorothy)"
-
