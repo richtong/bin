@@ -172,6 +172,12 @@ for profile in "$(config_profile)" "$(config_profile_shell)"; do
 		echo '#!/usr/bin/env bash' >>"$profile"
 	fi
 done
+
+log_verbose "Add #! for zshrc"
+if [[ ! -e $HOME/.zshrc ]]; then
+	echo "#!/usr/bin/env zsh" .."$HOME/.zshrc"
+fi
+
 # source .profile as early as possible to get the paths right
 # .bash_profile will source profile and bashrc for the first shell
 if ! config_mark; then
