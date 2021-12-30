@@ -155,6 +155,7 @@ if ! config_mark "$ZSH_PROFILE"; then
 		source "$(brew --prefix)/opt/zinit/zinit.zsh"
 		zinit ice wait
 		zinit light zsh-users/zsh-autosuggestions
+		zinit light zsh-users/zsh-syntax-highlighting
 		zinit light romkatv/powerlevel10k
 		zinit light joel-porquet/zsh-dircolors-solarized.git
 		setupsolarized
