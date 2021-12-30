@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 ##
-## Install Podman
+## Install Podman and Lima instead of Docker
 ## https://podman.io/getting-started/installation
+## https://blog.mornati.net/lima-vm-docker-desktop-alternative-for-macosx
+## https://github.com/lima-vm/lima
 ##
 ##@author Rich Tong
 ##@returns 0 on success
@@ -18,7 +20,11 @@ while getopts "hdvq" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs Podman
+			Installs Podman and Lima
+				Podman is Redhat's CLI replacement for docker
+				Lima is an open source replacement for a linux VM with full
+				sharing to Linux, like Linux Subsystem for Mac (ala WSL)
+
 			    usage: $SCRIPTNAME [ flags ]
 				flags: -d debug (not functional use bashdb), -v verbose, -h help"
 					   -q run QEMU emulation for multiple architecture
@@ -48,9 +54,12 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh
 
-brew install podman
+brew install podman lima
 podman machine init --cpu=4 --disk-size=100 --memory=4096
 podman machine start
+
+log_verbose "On M1 Mac this fails with sshfs not loaded"
+limactl start
 
 if $VERBOSE; then
 	podman info
@@ -72,15 +81,18 @@ fi
 
 # https://docs.podman.io/en/latest/markdown/podman-completion.1.html
 
+# brew should already install bash completions for lima
 if ! config_mark; then
 	config_add <<-'EOF'
-		podman completion -f "/etc/bash_compoletion.d/podmash" bash
+		podman completion -f "/etc/bash_completion.d/podmank:w " bash
 	EOF
 fi
-if ! config_mark "$HOME/.zshrc"; then
+
+if ! config_mark "$(config_profile_zsh)"; then
 	log_verbose "Manually add completion no OMZ available"
 	config_add <<-'EOF'
 		podman completion -f"${fpath[1]}/_podman" zsh
+		limactl completion zsh
 	EOF
 fi
 
