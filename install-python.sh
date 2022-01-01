@@ -71,9 +71,12 @@ if [[ -v PYTHON_VERSION ]]; then
 	PACKAGES+=("python@$PYTHON_VERSION")
 fi
 
+# Kite is Python code completer
+# https://github.com/kiteco/jupyterlab-kite
 PACKAGES=(
 	black
 	pydocstyle
+	kite
 )
 
 # we need it to be python and pip to work and not python3 and pip3 only

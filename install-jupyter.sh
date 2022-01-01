@@ -18,7 +18,8 @@ while getopts "hdv" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs Jupyter and other good parts
+			Installs Jupyter and other good parts in a bare metal installation
+			You should really run this in pipenv or a container
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 			           -r version number (default: $VERSION)
@@ -53,6 +54,7 @@ brew_install jupyterlab
 log_verbose "Installing into the bare environment use pipenv, conda or venv normally"
 hash -r
 
+# nbdime - Notebook diff and merge cli and jupyterlab command line interface
 PACKAGES=(
 	'notebook>=6'
 	'jupyterlab>=3'
@@ -64,11 +66,29 @@ PACKAGES=(
 	jupyterlab-system-monitor
 	nbdime
 	jupyterlab_vim
-	jupyterlab-lsp
 	'python-language-server[all]'
 	black
 	yapf
 	isort
+	jupyterlab-hide-code
+	jupyterlab-spellchecker
+	"python-lsp-server[all]"
+	'ipywidgets>=7.5'
+	jupyterlab_widgets
+	jupyter_bokeh
+	jupyter-dash
+	pillow
+	graphviz
+	blockdiagmagic
+	"ipydrawio[all]"
+	ipydrawio-export
+	nb-js-diagrammers
+	pivottablejs
+	jupyterlab_code_formatter
+	black
+	isort
+	yapf
+
 )
 log_verbose "Installing python extensions ${PACKAGES[*]}"
 pip_install "${PACKAGES[@]}"
@@ -90,13 +110,20 @@ fi
 #@jupyterlab/latex
 # included by default
 #@jupyterlab/debugger
-NODE_EXTENSIONS=(
-	@jupyterlab/toc
-)
-if ((${#NODE_EXTENSIONS[@]} > 0)); then
-	log_verbose "Installing Node Extensions ${NODE_EXTENSIONS[*]}"
-	jupyter labextension install "${NODE_EXTENSIONS[@]}"
-fi
+# toc now included in Jupterlab 3.0
+#NODE_EXTENSIONS=(
+#    @jupyterlab/toc
+#)
+#if ((${#NODE_EXTENSIONS[@]} > 0)); then
+#    log_verbose "Installing Node Extensions ${NODE_EXTENSIONS[*]}"
+#    jupyter labextension install "${NODE_EXTENSIONS[@]}"
+#fi
+
+# https://nbdime.readthedocs.io/en/latest/extensions.html
+log_verbose "Enable git to use nbdime to diff notebooks"
+nbdime config-git --enable --global
+# nbdime extenstions enabled at install
+#nddime extensions --enable
 
 # https://github.com/jupyter/nbconvert
 # for nbconvert
@@ -106,3 +133,18 @@ fi
 
 log_verbose "Add to the path"
 eval "$(/usr/libexec/path_helper)"
+
+if [[ ! -e $HOME/.jupyter/nbconfig.json ]]; then
+	# https://stackoverflow.com/questions/36419342/how-to-wrap-code-text-in-jupyter-notebooks
+	log_verbose "Adding word wrap to cells"
+	cat >"$HOME/.jupyter/nbconfig.json" <<-"EOF"
+		{
+		  "Cell": {
+			"cm_config": {
+			  "lineNumbers": false,
+			  "lineWrapping": true
+			}
+		  }
+		}
+	EOF
+fi
