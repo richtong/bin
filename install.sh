@@ -200,7 +200,7 @@ export PATH
 [[ $PATH =~ opt/coreutils/libexec/gnubin ]] || PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
 
 log_verbose "Install Zsh opions"
-"$SOURCE_DIR/install-zsh.sh"
+"$SCRIPT_DIR/install-zsh.sh"
 
 # run dotfiles-stow as soon as possible use the personal repo above
 # Otherwise the installation scripts below will cause conflicts
