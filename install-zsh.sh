@@ -13,14 +13,16 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # trap 'exit $?' ERR
 OPTIND=1
+CHSH="${CHSH:-false}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt; do
+while getopts "hdvc" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs 1Password
 			    usage: $SCRIPTNAME [ flags ]
 				flags: -d debug (not functional use bashdb), -v verbose, -h help"
+				-c change default shell (default: $CHSH)
 		EOF
 		exit 0
 		;;
@@ -32,6 +34,9 @@ while getopts "hdv" opt; do
 		export VERBOSE=true
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
+		;;
+	c)
+		CHSH=true
 		;;
 	*)
 		echo "not flag -$opt"
@@ -51,6 +56,11 @@ brew install zsh
 log_verbose "Add homebrew zsh to /etc/shells"
 ZSH_PATH="$(brew --prefix)/bin/zsh"
 config_add_shell "$ZSH_PATH"
+
+if $CHSH; then
+	log_verbose "Change default shell to zsh"
+	config_change_default_shell "$ZSH_PATH"
+fi
 
 log_verbose "Adding Oh My Zsh"
 # https://osxdaily.com/2021/11/15/how-install-oh-my-zsh-mac/

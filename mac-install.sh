@@ -19,8 +19,9 @@ SOFTWAREUPDATE="${SOFTWAREUPDATE:-false}"
 MACPORTS_INSTALL="${MACPORTS_INSTALL:-false}"
 # The other choice is zsh but this is not working yet
 DESIRED_SHELL="${DESIRED_SHELL:-bash}"
+CHSH="${CHSH:-false}"
 OPTIND=1
-while getopts "hdvw:fu:b:mpa:" opt; do
+while getopts "hdvw:fu:b:mpa:s:n" opt; do
 	case "$opt" in
 	h)
 
@@ -37,6 +38,7 @@ while getopts "hdvw:fu:b:mpa:" opt; do
 			       -m MacOS Software Update beware takes a long time "(default: $SOFTWAREUPDATE)"
 			       -p Install Macports as well as Homebrew "(default: $MACPORTS_INSTALL)"
 			       -s Install a new default shell either bash or zsh "(default: $DESIRED_SHELL)"
+                   -n Do not change to new shell (default: $NO_CHSH)
 		EOF
 
 		exit 0
@@ -68,6 +70,12 @@ while getopts "hdvw:fu:b:mpa:" opt; do
 	a)
 		VMWARE=true
 		;;
+    s)
+        DESIRED_SHELL="$OPTARG"
+        ;;
+    n)
+        NO_CHSH=true
+        ;;
 	*)
 		echo "-$opt flag invalid" >&2
 		;;
@@ -301,6 +309,10 @@ fi
 # This works for both macports bash and homebrew bash, they install into the same place
 # The BASH_PATH check no longer works, so always chsh
 config_add_shell "$(command -v "$DESIRED_SHELL")"
+if ! $NO_CHSH; then
+  log_verbose "Change default shell to $DESIRED_SHELL"
+  config_change_default_shell "$(command -v "$DESIRED_SHELL")"
+fi
 
 log_verbose Enable ssh so you can get into this machine
 if ! sudo launchctl list | grep -q sshd; then
