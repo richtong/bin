@@ -19,7 +19,7 @@ SOFTWAREUPDATE="${SOFTWAREUPDATE:-false}"
 MACPORTS_INSTALL="${MACPORTS_INSTALL:-false}"
 # The other choice is zsh but this is not working yet
 DESIRED_SHELL="${DESIRED_SHELL:-bash}"
-CHSH="${CHSH:-false}"
+NO_CHSH="${NO_CHSH:-false}"
 OPTIND=1
 while getopts "hdvw:fu:b:mpa:s:n" opt; do
 	case "$opt" in
