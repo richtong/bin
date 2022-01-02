@@ -14,6 +14,7 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # trap 'exit $?' ERR
 OPTIND=1
 CHSH="${CHSH:-false}"
+ZSH_PROFILE="${ZSH_PROFILE:-"$HOME/.zshrc"}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvc" opt; do
 	case "$opt" in
@@ -64,7 +65,11 @@ fi
 
 log_verbose "Adding Oh My Zsh"
 # https://osxdaily.com/2021/11/15/how-install-oh-my-zsh-mac/
-sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+if [[ ! -e $HOME/.oh-my-zsh ]]; then
+	log_verbose "Install On My Zsh"
+	sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
 # https://travis.media/top-10-oh-my-zsh-plugins-for-productive-developers/
 # from @atong suggestions and https://travis.media/top-10-oh-my-zsh-plugins-for-productive-developers/
 # git -  ga git add, gca git commit -av, gd - git diff, gfa - git fetch --all --prune
@@ -159,7 +164,6 @@ log_verbose "adding zinit plugins"
 brew install zinit
 # powerlevel10k - status bar
 # zsh-autosuggestions - long suggestions
-ZSH_PROFILE="${ZSH_PROFILE:-"$HOME/.zshrc"}"
 if ! config_mark "$ZSH_PROFILE"; then
 	config_add "$ZSH_PROFILE" <<-EOF
 		source "$(brew --prefix)/opt/zinit/zinit.zsh"
