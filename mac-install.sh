@@ -240,7 +240,8 @@ hash -r
 # install-divvy uses cask_install underneath but fails over to dmg download
 # use divvy instead of shiftit for the big screens
 # "$SCRIPT_DIR/install-shiftit.sh"
-"$SCRIPT_DIR/install-divvy.sh"
+# now this is a user thing 
+#"$SCRIPT_DIR/install-divvy.sh"
 
 log_verbose install complete Mac apps via brew
 #
