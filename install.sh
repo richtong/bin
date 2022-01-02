@@ -441,7 +441,7 @@ log_verbose install linters
 
 # need to make sure we quoting correctly as bash version contains parentheses
 # Bump now using bash version 5
-log_assert "bash --version | awk 'NR==1 {print \$4}' | grep -q ^[45]" "bash version 4 detected"
+log_assert "bash --version | awk 'NR==1 {print \$4}' | grep -q '^[45]'" "bash version 4 detected"
 # This script can run in Bash 3, but you need to make sure that all the
 if [[ $BASH_VERSION != 4* || $BASH_VERSION != 5* ]]; then
 	log_warning "$SCRIPTNAME running $BASH_VERSION but subscripts running in $(bash --version | head -1)"

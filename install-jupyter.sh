@@ -56,9 +56,9 @@ hash -r
 
 # nbdime - Notebook diff and merge cli and jupyterlab command line interface
 PACKAGES=(
-	'notebook>=6'
-	'jupyterlab>=3'
-	'jupyterhub>=1.4'
+	notebook
+	jupyterlab
+	jupyterhub
 	nodejs
 	jupyterlab-git
 	jupyterlab-github
@@ -73,7 +73,7 @@ PACKAGES=(
 	jupyterlab-hide-code
 	jupyterlab-spellchecker
 	"python-lsp-server[all]"
-	'ipywidgets>=7.5'
+	ipywidgets
 	jupyterlab_widgets
 	jupyter_bokeh
 	jupyter-dash
