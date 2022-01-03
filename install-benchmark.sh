@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 ##
-## Run phoronix tests
+## Run phoronix tests, geekbench, cinebench and other benchmarks
 ## http://dustymabe.com/2012/12/30/running-benchmarks-with-the-phoronix-test-suite/
+## https://www.fossmint.com/benchmark-apps-to-measure-mac-performance/
 ## See https://openbenchmarking.org/ for list of popular tests
 ##
 ##@author Rich Tong
@@ -43,12 +44,14 @@ shift $((OPTIND - 1))
 
 set -u
 
-if ! in_os linux; then
-	log_error 1 "only runs on linux"
+if in_os mac; then
+	log_verbose "installing MacOS benchmarking"
+	package_install geekbench cinebench phoronix-test-suite
+	log_exit "Run Geekbench and Cinebench"
+	exit
 fi
 
-log_verbose installing phoronix
-
+log_verbose "installing Linux benchmarks Phoronix"
 if in_linux ubuntu; then
 	package_install phoronix-test-suite
 else
