@@ -15,7 +15,8 @@ OPTIND=1
 VERBOSE_FLAG=${VERBOSE_FLAG:-" -v "}
 # we do not use readlink because it is linux specific note that this assumes the
 # directory exists
-DOTFILES_ROOT=${DOTFILES_ROOT:-"$(cd "$SCRIPT_DIR/../user/$USER/dotfiles" 2>/dev/null && pwd -P || echo "")"}
+#DOTFILES_ROOT="${DOTFILES_ROOT:-"$(cd "$SCRIPT_DIR/../user/$USER/dotfiles" 2>/dev/null && pwd -P || echo "")"}"
+DOTFILES_ROOT="${DOTFILES_ROOT:-"$SCRIPT_DIR/../user/$USER/dotfiles"}"
 TARGET="${TARGET:-"$HOME"}"
 while getopts "hdvt:" opt; do
 	case "$opt" in
@@ -64,6 +65,8 @@ if [[ -z $DOTFILES_ROOT ]]; then
 	log_exit no dotfiles found skipping stow
 fi
 
+log_verbose "Making $TARGET"
 mkdir -p "$TARGET"
 
+log_verbose "Stowing from $DOTFILES_ROOT to $TARGET"
 "$SCRIPT_DIR/stow-all.sh" -s "$DOTFILES_ROOT" "$TARGET"

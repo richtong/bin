@@ -13,7 +13,7 @@ set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
-SECRETS_SOURCE_DIR="${SECRETS_SOURCE_DIR:-"$HOME/.secret"}"
+STOW_SOURCE_DIR="${STOW_SOURCE_DIR:-"$HOME/.secret"}"
 if [[ -v TARGETS ]]; then
 	TARGETS=("$HOME" "$HOME/.ssh" "$HOME/vpn")
 fi
@@ -26,7 +26,7 @@ while getopts "hdvs:" opt; do
 Symlink from a special source directory to a target
 usage: $SCRIPTNAME [ flags ] [source directory ]
 flags: -d debug, -v verbose, -h help"
-	   -s location of source directory (default: $SECRETS_SOURCE_DIR)
+	   -s location of source directory (default: $STOW_SOURCE_DIR)
 positionals:
 	   targets for linking assumes the file names are the same in both
 	   (default: ${TARGETS[*]})
@@ -43,7 +43,7 @@ EOF
 		export FLAGS+=" -v "
 		;;
 	s)
-		SECRETS_SOURCE_DIR="$OPTARG"
+		STOW_SOURCE_DIR="$OPTARG"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -85,8 +85,8 @@ stow_if() {
 # config_path returns the deepest existing path of os/major/minor release/...
 # Note we use dashes instead of true directories since stow
 # is recursive
-mkdir -p "$SECRETS_SOURCE_DIR"
-log_verbose "getting files from $SECRETS_SOURCE_DIR"
+mkdir -p "$STOW_SOURCE_DIR"
+log_verbose "getting files from $STOW_SOURCE_DIR"
 full_version_name="$(util_full_version)"
 log_verbose "for targets ${TARGETS[*]}"
 for target in "${TARGETS[@]}"; do
@@ -100,10 +100,12 @@ for target in "${TARGETS[@]}"; do
 		source="$(basename "$target")"
 		export source
 	fi
-	STOW_DIR="$SECRETS_SOURCE_DIR/$source"
+	STOW_DIR="$STOW_SOURCE_DIR/$source"
 	log_verbose "stow $STOW_DIR into $target"
 	# do-while loop
 	# https://stackoverflow.com/questions/16489809/emulating-a-do-while-loop-in-bash
+	# full version name is a dot delimited string with machine architecture
+	# as an example macos.arm64.12.1 would b
 	config_name="$full_version_name"
 	# This non zero check guards against null full_version_names
 	while [[ -n "$config_name" ]]; do

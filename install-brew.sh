@@ -78,7 +78,7 @@ fi
 
 xcode_license_accept
 if ! command -v brew >/dev/null; then
-	/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
 # since High Sierra /usr/local/sbin for system bin that is files

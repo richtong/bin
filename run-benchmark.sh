@@ -69,25 +69,30 @@ fi
 phoronix-test-suite make-download-cache
 # https://wiki.mikejung.biz/Phoronix_Test_Suite#How_to_install_Phoronix_test_suite_on_Ubuntu_14.10
 if [[ ! -e $HOME/.phoronix-test-suite/user-config.xml ]]; then
+	log_verbose "Creating user configuration"
 	phoronix-test-suite batch-setup
-	phoronix-test-suite openbenchmarking-login
 fi
 
+log_verbose "login to site"
+phoronix-test-suite openbenchmarking-login
+
 log_verbose "starting tests ${TEST[*]}"
-lob_verbose "For tests to run must in the correct directory"
+log_verbose "For tests to run must in the correct directory"
 
 # https://github.com/phoronix-test-suite/phoronix-test-suite/blob/master/documentation/phoronix-test-suite.md
 if $VERBOSE; then
 	phoronix-test-suite system-info
 	phoronix-test-suite list-recommended-tests
 fi
-#https://www.smartystreets.com/blog/2015/10/performance-testing-with-phoronix
-log_verbose "running ${TEST[*]}"
 
 CONFIG="${CONFIG:-"$HOME/.phronix-test-suite/user-config.xml"}"
 if [[ ! -e $CONFIG ]] || ! grep -q BatchMode "$CONFIG"; then
+	log_verbose "No user config found creating it"
 	phoronix-test-suite batch-setup
 fi
+
+#https://www.smartystreets.com/blog/2015/10/performance-testing-with-phoronix
+log_verbose "running ${TEST[*]}"
 phoronix-test-suite batch-benchmark "${TEST[@]}"
 phoronix-test-suite upload-result
 
