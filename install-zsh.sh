@@ -166,6 +166,7 @@ brew install zinit
 # zsh-autosuggestions - long suggestions
 if ! config_mark "$ZSH_PROFILE"; then
 	config_add "$ZSH_PROFILE" <<-EOF
+		compaudit | xargs chmod g-w,o-w
 		source "$(brew --prefix)/opt/zinit/zinit.zsh"
 		zinit ice wait
 		zinit light zsh-users/zsh-autosuggestions
@@ -173,5 +174,6 @@ if ! config_mark "$ZSH_PROFILE"; then
 		zinit light romkatv/powerlevel10k
 		zinit light joel-porquet/zsh-dircolors-solarized.git
 		setupsolarized
+		# close off shared directories
 	EOF
 fi

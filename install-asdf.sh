@@ -55,15 +55,14 @@ fi
 
 log_verbose "Install asdf core"
 package_install asdf
-
-log_verbose "Install node and python"
-
 package_install gpg gawk
 
-ASDF+=(
-	nodejs
-	direnv
-	python
+# https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
+# 3.10 does not install properly as of Jan 2022 on Big Sur 11.6.2
+declare -A ASDF+=(
+	[direnv]=latest
+	[nodejs]=latest
+	[python]=latest
 )
 
 # http://asdf-vm.com/guide/getting-started.html#_3-install-asdf
@@ -73,7 +72,9 @@ if ! config_mark; then
 		# shellcheck disable=SC1091
 		source "$(brew --prefix asdf)/libexec/asdf.sh"
 	EOF
-	if [[ ${ASDF[*]} =~ direnv ]]; then
+	# https://linuxhint.com/associative_array_bash/
+	if [[ -n ${ASDF[direnv]} ]]; then
+		log_verbose "Found direnv installing config info"
 		config_add <<-'EOF'
 			eval "$(asdf exec direnv hook bash)"
 			direnv() { asdf exec direnv "$@"; }
@@ -82,17 +83,23 @@ if ! config_mark; then
 fi
 
 # https://github.com/asdf-vm/asdf-nodejs/issues/253
-# must source otherwise reshim will fail
+log_verbose "must source otherwise reshim will fail"
 source_profile
 
-INSTALLED="$(asdf list)"
-for p in "${ASDF[@]}"; do
+for p in "${!ASDF[@]}"; do
 	log_verbose "install asdf plugin $p"
-	if [[ ! $INSTALLED =~ $p ]]; then
+	if ! asdf list "$p" >/dev/null; then
+		log_verbose "Install asdf plugin $p"
 		asdf plugin add "$p"
 	fi
-	asdf install "$p" latest
-	asdf global "$p" latest
+	log_verbose "Is version installed for $p"
+	version="$(asdf list "$p" 2>&1)"
+	if [[ $version =~ "No versions" || ! $version =~ ${ASDF[$p]} ]]; then
+		log_verbose asdf install "$p" "${ASDF[$p]}"
+		asdf install "$p" "${ASDF[$p]}"
+	fi
+	log_verbose "Set global for $p with ${ASDF[$p]}"
+	asdf global "$p" "${ASDF[$p]}"
 done
 
 # https://github.com/asdf-community/asdf-direnv

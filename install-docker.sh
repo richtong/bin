@@ -16,7 +16,7 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
 DOCKER_CONTENT_TRUST="${DOCKER_CONTENT_TRUST:-false}"
 DOCKER_TRUST_PRIVATE="${DOCKER_TRUST_PRIVATE:-"$SCRIPT_DIR/ssh/docker"}"
-DOCKER_VERSION="${DOCKER_VERSION:-20.03.8}"
+DOCKER_VERSION="${DOCKER_VERSION:-20.10.11}"
 # Do not make too high as this will fail the minimum version needed test
 # Also this is not the Mac Docker App version, it is engine version
 DOCKER_INSTALL_EDGE_VERSION="${DOCKER_INSTALL_EDGE_VERSION:-20.10.12}"

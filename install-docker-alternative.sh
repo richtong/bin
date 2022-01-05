@@ -148,12 +148,12 @@ if ! config_mark "$(config_profile_zsh)"; then
 	if ! $NOT_LIMA; then
 		log_verbose "lima code completion not working in zsh as of Dec 2021"
 		config_add "$(config_profile_zsh)" <<-'EOF'
-			limactl completion zsh > "$(brew --prefix)/share/zsh/site-function/_limactl"
+			command -v limactl >/dev/null && limactl completion zsh > "${fpath[1]}/_limactl"
 		EOF
 	fi
 	if ! $NOT_COLIMA; then
 		config_add "$(config_profile_zsh)" <<-'EOF'
-			colima completion zsh > "${fpath[1]}/_colima"
+			command -v colima >/dev/null && colima completion zsh > "${fpath[1]}/_colima"
 		EOF
 	fi
 fi
@@ -189,7 +189,7 @@ if $PODMAN; then
 	if ! config_mark "$(config_profile_zsh)"; then
 		log_verbose "Adding zsh completions"
 		config_add "$(config_profile_zsh)" <<-'EOF'
-			podman completion -f"${fpath[1]}/_podman" zsh
+			command -v podman >/dev/null && podman completion -f"${fpath[1]}/_podman" zsh
 		EOF
 	fi
 
