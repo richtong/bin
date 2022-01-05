@@ -164,9 +164,12 @@ log_verbose "adding zinit plugins"
 brew install zinit
 # powerlevel10k - status bar
 # zsh-autosuggestions - long suggestions
+# test if compaudit returns any bad permissions and if it does seal it up.
+# https://stackoverflow.com/questions/12137431/test-if-a-command-outputs-an-empty-string
+# note that compaudit does not always exist so check for it and then its output
 if ! config_mark "$ZSH_PROFILE"; then
 	config_add "$ZSH_PROFILE" <<-EOF
-		compaudit | xargs chmod g-w,o-w
+		command -v compaudit >/dev/null && [[ $(compaudit) ]] && compaudit | xargs chmod g-w,o-w
 		source "$(brew --prefix)/opt/zinit/zinit.zsh"
 		zinit ice wait
 		zinit light zsh-users/zsh-autosuggestions
