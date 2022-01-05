@@ -115,7 +115,7 @@ brew install pygments
 log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 
 PLUGIN+=(
-
+	asdf
 	aws
 	brew
 	colorize
