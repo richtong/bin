@@ -93,7 +93,8 @@ if in_ssh; then
 		config_add <<-EOF
 			dropbox.py status 2>&1 | grep -vq \"isn.t running\" && (exec \"$dest/.dropbox-dist/dropboxd\" >/dev/null &)
 		EOF
-		source_profile
+		log_verbose "make sure dropbox is running"
+		dropbox.py status 2>&1 | grep -vq \"isn.t running\" && (exec \"$dest/.dropbox-dist/dropboxd\" >/dev/null &)
 	fi
 
 	log_verbose run daemon and fill in the authentication using the provided url

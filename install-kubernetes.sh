@@ -101,12 +101,12 @@ if in_os mac; then
 	if ! config_mark; then
 		# https://github.com/corneliusweig/konfig
 		config_add <<-'EOF'
-			[[ $PATH =~ .krew/bin ]] || export PATH="$PATH:$HOME/.krew/bin"
 			# shellcheck disable=SC1090
+			[[ $PATH =~ .krew/bin ]] || export PATH="$PATH:$HOME/.krew/bin"
 		EOF
 	fi
+	[[ $PATH =~ .krew/bin ]] || export PATH="$PATH:$HOME/.krew/bin"
 
-	source_profile
 	hash -r
 
 	if ! config_mark "$(config_profile_shell)"; then

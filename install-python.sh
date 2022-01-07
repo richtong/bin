@@ -90,8 +90,12 @@ if ! config_mark; then
 	log_warning "source $(config_profile) to get the correct python"
 fi
 
-log_verbose "added to config now source"
-source_profile
+# add the correct python if not already there
+# you cannot just source it again because this will 
+# cause the default paths to be put in before this path
+#source_profile
+export PATH
+[[ $PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH"
 hash -r
 
 if $PIPENV; then
@@ -153,10 +157,8 @@ done
 # the --completion is removed as of Nov 2021 so there is a new way
 #eval "$(pipenv --completion)"
 # https://github.com/pypa/pipenv/issues/4860
-
 if $PIPENV && ! config_mark "$(config_profile_shell)"; then
 	config_add "$(config_profile_shell)" <<-'EOF'
 		eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
 	EOF
 fi
-source_profile

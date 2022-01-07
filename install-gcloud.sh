@@ -77,6 +77,11 @@ elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then
 			# The next line enables shell command completion for gcloud.
 			if [ -f 'INSTALL_DIR/google-cloud-sdk/completion.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/completion.bash.inc'; fi
 		EOF
+		log_verbose "Make sure we can see the new commands"
+		if [ -f "$INSTALL_DIR/google-cloud-sdk/path.bash.inc" ]; then
+			#shellcheck disable=SC1091
+			. "$INSTALL_DIR/google-cloud-sdk/path.bash.inc"
+		fi
 	fi
 
 elif in_os linux; then
@@ -84,7 +89,6 @@ elif in_os linux; then
 	snap_install google-cloud-sdk
 fi
 
-source_profile
 hash -r
 log_verbose install additional packages "$PACKAGES" "$@"
 

@@ -61,7 +61,7 @@ if ! config_mark; then
 	log_verbose "set file ulimit higher"
 	# this no longer seems to work in Bash 5.0
 	config_add <<<"ulimit -S -n 2048"
-	source_profile
+	ulimit -S -n 2048
 fi
 
 log_verbose "Install XQuartz for simulator output"

@@ -84,7 +84,14 @@ if [[ $OSTYPE =~ linux ]]; then
 		EOF
 	fi
 
-	source_profile
+	log_verbose "Now mount it"
+	if ! veracrypt -t -l "$SECRET_MOUNTPOINT" >/dev/null 2>&1
+	then
+		echo now enter the password for the hidden volume this will at least a minute
+		# https://forums.macrumors.com/threads/can-not-mount-truecrypt-container-hdiutil-attach-failed-no-mountable-file.1689590/
+		veracrypt -t --pim=0 -k "" --protect-hidden=no "$SECRET_VOLUME" "$SECRET_MOUNTPOINT"
+	fi
+
 	log_exit "Linux mounted"
 fi
 

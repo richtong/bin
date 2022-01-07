@@ -89,7 +89,7 @@ config_add_once "$HOME/.ssh/config" "XAuthLocation /opt/X11/bin/xauth"
 config_add_once "$HOME/.ssh/config" "ForwardX11Timeout 596h"
 
 # make sure we have all the bash settings not needed rn but for safety
-source_profile
+#source_profile
 
 # Enable OpenGL in XQuartz
 # https://services.dartmouth.edu/TDClient/1806/Portal/KB/ArticleDet?ID=89669

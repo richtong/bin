@@ -134,5 +134,5 @@ if ! config_mark; then
 
 fi
 
-log_verbose make sure to run lib/lib-util.sh/source_profile to get the new paths
+log_verbose "make sure to run lib/lib-util.sh/source_profile to get the new paths"
 # echo $NEW_PATH

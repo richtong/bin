@@ -184,8 +184,6 @@ PACKAGES+=(unix2dos)
 if $MACPORTS_INSTALL && ! command -v port >/dev/null; then
 	log_verbose also install mac ports for compatibility
 	"$SCRIPT_DIR/install-macports.sh"
-	log_verbose Pick up the new port instructions
-	source_profile
 	log_verbose "Prefer brew so first uninstall all Macports of ${PACKAGES[*]}"
 	if ! sudo port uninstalled "${PACKAGES[@]}"; then
 		log_verbose "no Macports ${PACKAGES[*]}found"
@@ -222,8 +220,8 @@ hash -r
 #fi
 
 # or just do a full source
-log_verbose pick up path changes from gnu
-source_profile
+#log_verbose pick up path changes from gnu
+#source_profile
 
 # https://superuser.com/questions/630911/vi-command-doesnt-open-newly-installed-vim-7-4-on-os-x
 # need these options so vi gets used and the override requires python3

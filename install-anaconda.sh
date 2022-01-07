@@ -76,6 +76,7 @@ elif ! command -v conda &>/dev/null; then
 	bash "$WS_DIR/cache/$(basename "$URL")"
 fi
 
+log_verbose "run .profile to make sure conda setup runs"
 source_profile
 
 if ! $NOFORGE; then
