@@ -169,7 +169,11 @@ brew install zinit
 # note that compaudit does not always exist so check for it and then its output
 if ! config_mark "$ZSH_PROFILE"; then
 	config_add "$ZSH_PROFILE" <<-EOF
+		# close off shared directories
 		command -v compaudit >/dev/null && [[ $(compaudit) ]] && compaudit | xargs chmod g-w,o-w
+		# deactivate conda if installed
+		command -v conda >/dev/null && conda deactivate
+
 		source "$(brew --prefix)/opt/zinit/zinit.zsh"
 		zinit ice wait
 		zinit light zsh-users/zsh-autosuggestions
@@ -177,6 +181,6 @@ if ! config_mark "$ZSH_PROFILE"; then
 		zinit light romkatv/powerlevel10k
 		zinit light joel-porquet/zsh-dircolors-solarized.git
 		setupsolarized
-		# close off shared directories
+
 	EOF
 fi
