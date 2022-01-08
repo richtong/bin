@@ -112,8 +112,9 @@ if in_os mac; then
 	if ! config_mark; then
 		config_add <<-EOF
 			if [[ -z \$SSH_AUTH_SOCK ]]; then source "$WS_DIR/git/src/bin/set-ssh-agent.sh"; fi
-			# ssh-add is slow so only run if no keys in the agent
-			if (( \$(ssh-add -l | wc -l) <= 1 )); then ssh-add -A; fi
+			# ssh-add is slow so only run if no keys in the asgent
+			# https://keith.github.io/xcode-man-pages/ssh-add.1.html
+			if (( \$(ssh-add -l | wc -l) <= 1 )); then APPLE_SSH_ADD_BEHAVIOR=1 ssh-add -A; fi
 		EOF
 	fi
 
