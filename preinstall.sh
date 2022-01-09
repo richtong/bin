@@ -70,7 +70,7 @@ fi
 
 if ! grep shellenv "$HOME/.profile"; then
 	# shellcheck disable=SC2016
-	echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >>"$HOME/.profile"
+	echo '[[ -v HOMEBREW_PROFILE ]] || eval "$(/opt/homebrew/bin/brew shellenv)"' >>"$HOME/.profile"
 fi
 
 echo "make sure we can see brew source the profiles" >&2

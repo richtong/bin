@@ -243,8 +243,6 @@ if ! config_mark "$(config_profile_shell)"; then
 	EOF
 fi
 log_verbose "install brew for linux and mac as common installer"
-echo $PATH
-exit
 "$SCRIPT_DIR/install-brew.sh"
 "$SCRIPT_DIR/install-python.sh"
 
@@ -252,12 +250,10 @@ if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose "mac-install.sh with ${MAC_FLAGS-no flags}"
 	"$SOURCE_DIR/bin/mac-install.sh" "${MAC_FLAGS-}"
 	# to get the latest mac ports, need to source the new .profile
-	# you cannot source this as it will mask PATH
-	#source_profile
+	# note make sure that things like :ll
+	source_profile
 	log_verbose "using bash at $(command -v bash)"
 fi
-echo "$PATH"
-exit
 
 log_warning mac-install.sh must be run first before sourcing libraries
 # These are set later as they depend on variables that can be

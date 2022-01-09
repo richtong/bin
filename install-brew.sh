@@ -70,7 +70,10 @@ if in_os linux || in_os wsl-linux; then
 	test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 	test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
 	if ! config_mark; then
-		config_add <<<"eval \$($(brew --prefix)/bin/brew shellenv)"
+		config_add <<-'EOF'
+		    # test for variable in case other apps override homebrew
+			[[ -v $BREW_PREFIX ]] || eval $($(brew --prefix)/bin/brew shellenv)
+		EOF
 		homebrew_completion
 	fi
 	log_exit "Linux brew installed"
@@ -100,7 +103,8 @@ fi
 
 if ! config_mark "$(config_profile)"; then
 	config_add "$(config_profile)" <<-'EOF'
-		eval "\$($(brew --prefix)/bin/brew shellenv)"
+		# add the check because asdf and pipenv override homebrew
+		[[ -v HOMEBREW_PREFIX ]] || eval "\$($(brew --prefix)/bin/brew shellenv)"
 	EOF
 fi
 
