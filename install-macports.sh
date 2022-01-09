@@ -184,14 +184,6 @@ fi
 
 log_assert "command -v port" "Port installed"
 
-# MacPorts installs into /opt/local/bin, but it is not on the path by default
-log_verbose source .profile from .bash_profile
-if ! config_mark; then
-	# shellcheck disable=SC2016
-	config_add <<<'export PATH=$PATH:/opt/local/bin/'
-	log_verbose to use Mac Ports source .bash_profile
-fi
-
 if ! command -v port >/dev/null; then
 	log_verbose could not find the port command try sourcing
 	source_profile

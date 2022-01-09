@@ -199,9 +199,6 @@ package_install coreutils
 export PATH
 [[ $PATH =~ opt/coreutils/libexec/gnubin ]] || PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
 
-log_verbose "Install Zsh opions"
-"$SCRIPT_DIR/install-zsh.sh"
-
 # run dotfiles-stow as soon as possible use the personal repo above
 # Otherwise the installation scripts below will cause conflicts
 if $DOTFILES_STOW; then
@@ -211,6 +208,10 @@ if $DOTFILES_STOW; then
 	"$SCRIPT_DIR/dotfiles-stow.sh"
 	log_verbose "in the stow process if .ssh is touched the permissions will be too wide"
 fi
+
+# install this after you stow
+log_verbose "Install Zsh opions"
+"$SCRIPT_DIR/install-zsh.sh"
 
 # https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
 # https://stackoverflow.com/questions/9953005/should-the-bashrc-in-the-home-directory-load-automatically
@@ -242,17 +243,21 @@ if ! config_mark "$(config_profile_shell)"; then
 	EOF
 fi
 log_verbose "install brew for linux and mac as common installer"
+echo $PATH
+exit
 "$SCRIPT_DIR/install-brew.sh"
-
 "$SCRIPT_DIR/install-python.sh"
 
 if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose "mac-install.sh with ${MAC_FLAGS-no flags}"
 	"$SOURCE_DIR/bin/mac-install.sh" "${MAC_FLAGS-}"
 	# to get the latest mac ports, need to source the new .profile
-	source_profile
+	# you cannot source this as it will mask PATH
+	#source_profile
 	log_verbose "using bash at $(command -v bash)"
 fi
+echo "$PATH"
+exit
 
 log_warning mac-install.sh must be run first before sourcing libraries
 # These are set later as they depend on variables that can be

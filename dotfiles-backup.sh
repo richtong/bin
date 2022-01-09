@@ -88,7 +88,7 @@ while [[ -n "$config_name" ]]; do
 		find "$dotfiles_dir" -type f -print0 |
 			while IFS= read -r -d '' dotfile; do
 				# https://stackoverflow.com/questions/16623835/remove-a-fixed-prefix-suffix-from-a-string-in-bash#16623897
-				source_file="$SOURCE_ROOT${dotfile#$dotfiles_dir}"
+				source_file="$SOURCE_ROOT${dotfile#"$dotfiles_dir"}"
 				log_verbose "for $dotfile looking for equivalent $source_file"
 				if [[ ! -e $source_file ]]; then
 					log_verbose "no $source_file nothing to backup"
@@ -104,16 +104,29 @@ while [[ -n "$config_name" ]]; do
 				backup="$source_file.bak"
 				while true; do
 					log_verbose "looking for $backup"
+
 					if [[ ! -e $backup ]]; then
-						if $SIMULATE; then
-							log_verbose "would move $source_file to $backup"
-							break
+						log_verbose "no $backup found"
+						log_verbose "move $source_file to $backup"
+						if ! $SIMULATE; then
+							#read -p "press enter to continue" </dev/tty
+							mv "$source_file" "$backup"
+							log_verbose "no $backup present so moved $source_file there"
 						fi
-						log_verbose "no $backup present so move $source_file there"
-						mv "$source_file" "$backup"
 						break
 					fi
-					log_verbose "found $backup looking for an empty one"
+
+					log_verbose "existing $backup found"
+					if cmp -s "$source_file" "$backup"; then
+						log_verbose "$source_file already in $backup; rm it"
+						if ! $SIMULATE; then
+							rm "$source_file"
+							log_verbose "rm $source_file already backed up as $backup"
+						fi
+						break
+					fi
+
+					log_verbose "found different $backup looking for an empty one"
 					backup="${backup%.bak*}.bak.$((++count))"
 				done
 			done
