@@ -170,7 +170,7 @@ brew install zinit
 if ! config_mark "$ZSH_PROFILE"; then
 	config_add "$ZSH_PROFILE" <<-EOF
 		# close off shared directories
-		command -v compaudit >/dev/null && [[ $(compaudit) ]] && compaudit | xargs chmod g-w,o-w
+		command -v compaudit >/dev/null && [[ \$(compaudit) ]] && compaudit | xargs chmod g-w,o-w
 		# deactivate conda if installed
 		command -v conda >/dev/null && conda deactivate
 
