@@ -73,10 +73,10 @@ fi
 
 # Kite is Python code completer
 # https://github.com/kiteco/jupyterlab-kite
+#kite
 PACKAGES=(
 	black
 	pydocstyle
-	kite
 )
 
 # we need it to be python and pip to work and not python3 and pip3 only
@@ -91,7 +91,7 @@ if ! config_mark; then
 fi
 
 # add the correct python if not already there
-# you cannot just source it again because this will 
+# you cannot just source it again because this will
 # cause the default paths to be put in before this path
 #source_profile
 export PATH
