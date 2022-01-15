@@ -176,5 +176,6 @@ git config --global difftool.prompt false
 log_verbose "main is now the default branch for all new repos"
 git config --global init.defaultBranch main
 
+# https://nbdime.readthedocs.io/en/latest/
 # https://nbdime.readthedocs.io/en/latest/vcs.html
 nbdime config-git --enable --system

@@ -88,7 +88,7 @@ PACKAGES=(
 	black
 	isort
 	yapf
-
+	jupytext
 )
 log_verbose "Installing python extensions ${PACKAGES[*]}"
 pip_install "${PACKAGES[@]}"
@@ -148,3 +148,17 @@ if [[ ! -e $HOME/.jupyter/nbconfig.json ]]; then
 		}
 	EOF
 fi
+
+# https://nbdime.readthedocs.io/en/latest/vcs.html#git-integration
+log_verbose "enable for Jupyter Notebooks in github $HOME/.gitconfig"
+nbdime config-git --enable --global
+
+# https://github.com/mwouts/jupytext
+log_verbose "use percent format for mainly code with # %% delimiters"
+log_verbose "   jupytertext --to py:percent notebook.ipynb"
+log_verbose "use markdown for rendering on GitHub as a README.md without outputs"
+log_verbose "   jupytext --to markdown notebook.ipynb"
+log_verbose "use MyST for rendering to Sphinx or Jupyter Book"
+log_verbose "   jupytext --to md:myst, notebook.ipynb"
+log_verbose "sync from the last modified .ipynb or .md to the other"
+log_verbose "   jupytext -s notebook.ipynb"
