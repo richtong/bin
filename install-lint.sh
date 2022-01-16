@@ -73,11 +73,12 @@ PYTHON_PACKAGES+=(
 log_verbose "install ${PYTHON_PACKAGES[*]}"
 pip_install "${PYTHON_PACKAGES[@]}"
 
-RUBY_PACKAGES+=(
-	mdl
-)
-log_verbose "install ${RUBY_PACKAGES[*]}"
-gem_install "${RUBY_PACKAGES[@]}"
+log_verbose "Use markdown-cli and not mdl"
+#RUBY_PACKAGES+=(
+#    mdl
+#)
+#log_verbose "install ${RUBY_PACKAGES[*]}"
+#gem_install "${RUBY_PACKAGES[@]}"
 
 # note we install both the ruby mdl and the node markdown-cli
 # but prefer markdown-cli

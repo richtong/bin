@@ -439,7 +439,9 @@ let g:syntastic_python_mypy_args="--namespace-packages"
 " This will slow vim alot as it reads the entire file set
 " https://github.com/vim-syntastic/syntastic/blob/master/doc/syntastic-checkers.txt
 let g:syntastic_rst_checkers = [ 'sphinx', 'rst2pseudoxml' ]
-let g:syntastic_markdown_mdl_exec = "mdl"
+" switch to markdownlint which has disable rules"
+"let g:syntastic_markdown_mdl_exec = "mdl"
+let g:syntastic_markdown_mdl_exec = "markdownlint"
 let g:syntastic_markdown_mdl_args = ""
 
 

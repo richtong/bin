@@ -55,7 +55,7 @@ log_verbose "Installing into the bare environment use pipenv, conda or venv norm
 hash -r
 
 # nbdime - Notebook diff and merge cli and jupyterlab command line interface
-PACKAGES=(
+PIP_PACKAGE=(
 	notebook
 	jupyterlab
 	jupyterhub
@@ -90,10 +90,10 @@ PACKAGES=(
 	yapf
 	jupytext
 )
-log_verbose "Installing python extensions ${PACKAGES[*]}"
-pip_install "${PACKAGES[@]}"
+log_verbose "Installing python extensions ${PIP_PACKAGE[*]}"
+pip_install "${PIP_PACKAGE[@]}"
 
-INTEL=(
+INTEL_PACKAGE=(
 	'xeus-python>=0.8.6'
 	nb-mermaid
 	jupyterlab_hdf
@@ -102,8 +102,22 @@ INTEL=(
 
 if mac_is_arm; then
 	log_verbose "Mac Intel only versions installed"
-	pip_install "${INTEL[@]}"
+	pip_install "${INTEL_PACKAGE[@]}"
 fi
+
+# https://github.com/jupyter/nbconvert
+# for nbconvert
+# http://tug.org/mactex/
+# this library is huge takes 5GB so do not install typically
+log_verbose "Run mermaid to generate JPGs from .mermaid files"
+log_verbose "Wanring mactex is huge at 5GB so only install if needed for pdfs"
+PACKAGE=(
+	mermaid-cli
+	pandoc
+	mactex
+)
+
+package_install "${PACKAGE[@]}"
 
 # this is for node applications but you need to know the node package names
 # Latex not up to date
@@ -124,12 +138,6 @@ log_verbose "Enable git to use nbdime to diff notebooks"
 nbdime config-git --enable --global
 # nbdime extenstions enabled at install
 #nddime extensions --enable
-
-# https://github.com/jupyter/nbconvert
-# for nbconvert
-# http://tug.org/mactex/
-# this library is huge takes 5GB so do not install typically
-#package_install mactex
 
 log_verbose "Add to the path"
 eval "$(/usr/libexec/path_helper)"
