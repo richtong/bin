@@ -182,9 +182,11 @@ fi
 # .bash_profile will source profile and bashrc for the first shell
 if ! config_mark; then
 	config_add <<-'EOF'
-		# shellcheck disable=SC2016
+		# shellcheck disable=SC1091
 		if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
+		# shellcheck disable=SC1091
 		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
+		PATH+="$HOME/.local/bin:$PATH"
 	EOF
 fi
 
