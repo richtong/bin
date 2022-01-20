@@ -157,7 +157,8 @@ PLUGIN+=(
 
 )
 
-config_replace "$ZSH_PROFILE" plugins "plugins = ${PLUGIN[*]}"
+# use -x so we don't replace if it is already there
+config_replace -x "$ZSH_PROFILE" plugins "plugins = (${PLUGIN[*]})"
 
 log_verbose "adding zinit plugins"
 # https://gist.github.com/laggardkernel/4a4c4986ccdcaf47b91e8227f9868ded

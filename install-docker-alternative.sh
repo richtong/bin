@@ -21,7 +21,8 @@ MULTIPASS="${MULTIPASS:-false}"
 NOT_LIMA="${NOT_LIMA:-false}"
 NOT_COLIMA="${NOT_COLIMA:-false}"
 COLIMA_STABLE="${COLIMA_STABLE:-false}"
-while getopts "hdvqpmcls" opt; do
+KUBERNETES="${KUBERNETES:-false}"
+while getopts "hdvqpmclsk" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -69,6 +70,9 @@ while getopts "hdvqpmcls" opt; do
 	s)
 		COLIMA_STABLE=true
 		;;
+	k)
+		KUBERNETES=true
+		;;
 	*)
 		echo "not flag -$opt"
 		;;
@@ -111,18 +115,30 @@ fi
 # https://github.com/abiosoft/colima
 #https://github.com/abiosoft/colima/issues/75
 if ! $NOT_COLIMA; then
-	package_install docker kubectl
+	# it is also the command line which we do
+	package_install kubectl
+	# note that docker has a collision it is a cask which we do not want
+	# if you want Docker for mac then you need cask_install
+	log_verbose "Installing command line docker"
+	brew_install docker
+	log_verbose "linking command line docker could overwrite Docker for Mac"
+	brew link --overwrite docker
 	log_verbose "docker or colima nerdctl to run containers"
 
 	if ! $COLIMA_STABLE; then
 		PACKAGE_FLAGS="--head"
 	fi
-	package_install $PACKAGE_FLAGS colima
+	package_install $PACKAGE_FLAGS colima lima
 
 	# the default
 	log_verbose "colima works with docker ps"
 	# --runtime docker is the default
-	colima start --cpu 2 --memory 4 --disk 100
+	COLIMA_FLAGS=(--cpu 2 --memory 4 --disk 100)
+	if $KUBERNETES; then
+		COLIMA_FLAGS+=(--with-kubernetes)
+	fi
+	log_verbose "Starting colima with ${COLIMA_FLAGS[*]}"
+	colima start "${COLIMA_FLAGS[@]}"
 
 	if $VERBOSE; then
 		log_verbose "colima works kubectl using containerd"
