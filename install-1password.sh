@@ -4,8 +4,7 @@
 ## https://news.ycombinator.com/item?id=9091691 for linux gui
 ## https://news.ycombinator.com/item?id=8441388 for cli
 ## https://www.npmjs.com/package/onepass-cli for npm package
-##
-##@author Rich Tong
+## ##@author Rich Tong
 ##@returns 0 on success
 #
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
@@ -15,26 +14,33 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # trap 'exit $?' ERR
 OPTIND=1
 VERSION="${VERSION:-7}"
+VERSION="${VERSION:-7}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvr:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs 1Password
-			    usage: $SCRIPTNAME [ flags ]
-				flags: -d debug (not functional use bashdb), -v verbose, -h help"
-			           -r version number (default: $VERSION)
+
+			usage: $SCRIPTNAME [ flags ]
+			flags:
+				   -h help
+				   -d $($DEBUGGING || echo "no ")debuggging
+				   -v $($VERBOSE || echo ""not "")verbose
+				   -r version number (default: $VERSION)
 		EOF
 		exit 0
 		;;
 	d)
-
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		${DEBUGGING:=false} && DEBUGGING=false || DEBUGGING=true
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		${VERBOSE:=false} && VERBOSE=false || VERBOSE=true
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	r)
 		VERSION="$OPTARG"
@@ -48,6 +54,7 @@ shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
+# just source if we are running in a mountable drive
 if [[ $SCRIPT_DIR =~ /Volumes ]]; then
 	# shellcheck disable=SC1091
 	source lib-git.sh lib-mac.sh lib-install.sh lib-util.sh

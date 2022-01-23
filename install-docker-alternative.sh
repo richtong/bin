@@ -15,66 +15,78 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # trap 'exit $?' ERR
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-QEMU="${QEMU:-false}"
+QEMU="${QEMU:-true}"
 PODMAN="${PODMAN:-false}"
 MULTIPASS="${MULTIPASS:-false}"
-NOT_LIMA="${NOT_LIMA:-false}"
-NOT_COLIMA="${NOT_COLIMA:-false}"
+LIMA="${LIMA:-false}"
+COLIMA="${COLIMA:-true}"
 COLIMA_STABLE="${COLIMA_STABLE:-false}"
 KUBERNETES="${KUBERNETES:-false}"
-while getopts "hdvqpmclsk" opt; do
+RANCHER="${RANCHER:-false}"
+while getopts "hdvqpmclsrk" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs Docker alternatives and running Linux on Mac
 				- Podman is Redhat's CLI replacement for docker
 				- Lima is an open source replacement for a linux VM with full
-				sharing to Linux, like Linux Subsystem for Mac (ala WSL)
+				  sharing to Linux, like Linux Subsystem for Mac (ala WSL)
 				- Colima uses Lima to emulate docker exactly
 				- Multipass is Ubuntu virtual machines for bare metal
+				- Rancher Desktop is a graphical replacement for Docker Desktop
 
-			    usage: $SCRIPTNAME [ flags ]
-				flags: -d debug (not functional use bashdb), -v verbose, -h help"
-					   -q run QEMU emulation for multiple architecture (default: $QEMU)
-					   -p install Podman (default: $PODMAN)
-					   -m install Multipass (default: $MULTIPASS)
-					   -l do not install Lima (default: $NOT_LIMA)
-					   -c do not install Colima (default: $NOT_COLIMA)
-					   -s install stable Colima release (default: $COLIMA_STABLE)
+				usage: $SCRIPTNAME [ flags ]
+				flags:
+					   -h help
+					   -d $($DEBUGGING || echo "no ")debuggging
+					   -v $($VERBOSE || echo ""not "")verbose
+					   -q QEMU $($QEMU && echo "not ")installed
+					   -p Podman $($PODMAN && echo "not ")installed
+					   -m Multipass $($MULTIPASS && echo "not ")installed
+					   -l Lima $($LIMA && echo "not ")installed
+					   -c Colima $($COLIMA && echo "not ")installed
+					   -s Colima $($COLIMA_STABLE && echo dev || echo stable) release installed
+					   -k Kubernetes $($KUBERNETES && echo not) installed
+					   -r Rancher Desktop $($RANCHER && echo "not ")installed
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		${DEBUGGING:=false} && DEBUGGING=false || DEBUGGING=true
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		${VERBOSE:=false} && VERBOSE=false || VERBOSE=true
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	q)
-		QEMU=true
+		${QEMU:=true} && QEMU=false || QEMU=true
 		;;
 	m)
-		MULTIPASS=true
+		${MULTIPASS:=false} && MULTIPASS=false || MULTIPASS=true
 		;;
 	p)
-		PODMAN=true
+		${PODMAN:=false} && PODMAN=false || PODMAN=true
 		;;
 	l)
-		NOT_LIMA=true
+		${LIMA:=true} && LIMA=false || LIMA=true
 		;;
 	c)
-		NOT_COLIMA=true
+		${COLIMA:=true} && COLIMA=false || COLIMA=true
 		;;
 	s)
-		COLIMA_STABLE=true
+		${COLIMA_STABLE:=false} && COLIMA_STABLE=false || COLIMA_STABLE=true
+		;;
+	r)
+		${RANCHER:=false} && RANCHER=false || RANCHER=true
 		;;
 	k)
-		KUBERNETES=true
+		${KUBERNETES:=false} && KUBERNETES=false || KUBERNETES=true
 		;;
 	*)
-		echo "not flag -$opt"
+		echo "no flag -$opt"
 		;;
 	esac
 done
@@ -84,7 +96,9 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh lib-config.sh
 
-if ! $NOT_LIMA; then
+log_verbose "LIMA=$LIMA"
+
+if $LIMA; then
 	log_verbose "Installing Lima"
 	log_warning "On M1 Mac this fails and may need a reboot"
 	limactl start
@@ -114,7 +128,7 @@ fi
 
 # https://github.com/abiosoft/colima
 #https://github.com/abiosoft/colima/issues/75
-if ! $NOT_COLIMA; then
+if $COLIMA; then
 	# it is also the command line which we do
 	package_install kubectl
 	# note that docker has a collision it is a cask which we do not want
@@ -161,13 +175,13 @@ if ! $NOT_COLIMA; then
 fi
 
 if ! config_mark "$(config_profile_zsh)"; then
-	if ! $NOT_LIMA; then
+	if ! $LIMA; then
 		log_verbose "lima code completion not working in zsh as of Dec 2021"
 		config_add "$(config_profile_zsh)" <<-'EOF'
 			command -v limactl >/dev/null && limactl completion zsh > "${fpath[1]}/_limactl"
 		EOF
 	fi
-	if ! $NOT_COLIMA; then
+	if ! $COLIMA; then
 		config_add "$(config_profile_zsh)" <<-'EOF'
 			command -v colima >/dev/null && colima completion zsh > "${fpath[1]}/_colima"
 		EOF
