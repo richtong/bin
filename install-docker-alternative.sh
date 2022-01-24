@@ -23,6 +23,8 @@ COLIMA="${COLIMA:-true}"
 COLIMA_STABLE="${COLIMA_STABLE:-false}"
 KUBERNETES="${KUBERNETES:-false}"
 RANCHER="${RANCHER:-false}"
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 while getopts "hdvqpmclsrk" opt; do
 	case "$opt" in
 	h)
@@ -52,38 +54,36 @@ while getopts "hdvqpmclsrk" opt; do
 		exit 0
 		;;
 	d)
-		${DEBUGGING:=false} && DEBUGGING=false || DEBUGGING=true
-		export DEBUGGING
+		export DEBUGGING="$DEBUGGING && echo false || echo true"
 		;;
 	v)
-		${VERBOSE:=false} && VERBOSE=false || VERBOSE=true
-		export VERBOSE
+		export VERBOSE="$VERBOSE && echo false || echo true"
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	q)
-		${QEMU:=true} && QEMU=false || QEMU=true
+		QEMU="$QEMU && echo false || echo true"
 		;;
 	m)
-		${MULTIPASS:=false} && MULTIPASS=false || MULTIPASS=true
+		MULTIPASS="$MULTIPASS && echo false || echo true"
 		;;
 	p)
-		${PODMAN:=false} && PODMAN=false || PODMAN=true
+		PODMAN="$PODMAN && echo false || echo true"
 		;;
 	l)
-		${LIMA:=true} && LIMA=false || LIMA=true
+		LIMA="$LIMA && echo false || echo true"
 		;;
 	c)
-		${COLIMA:=true} && COLIMA=false || COLIMA=true
+		COLIMA="$COLIMA && echo false || echo true"
 		;;
 	s)
-		${COLIMA_STABLE:=false} && COLIMA_STABLE=false || COLIMA_STABLE=true
+		COLIMA_STABLE="$COLIMA_STABLE && echo false || echo true"
 		;;
 	r)
-		${RANCHER:=false} && RANCHER=false || RANCHER=true
+		RANCHER="$RANCHER && echo false || echo true"
 		;;
 	k)
-		${KUBERNETES:=false} && KUBERNETES=false || KUBERNETES=true
+		KUBERNETES="$KUBERNETES && echo false || echo true"
 		;;
 	*)
 		echo "no flag -$opt"

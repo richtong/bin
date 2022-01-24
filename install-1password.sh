@@ -14,7 +14,8 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # trap 'exit $?' ERR
 OPTIND=1
 VERSION="${VERSION:-7}"
-VERSION="${VERSION:-7}"
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvr:" opt; do
 	case "$opt" in
@@ -25,7 +26,7 @@ while getopts "hdvr:" opt; do
 			usage: $SCRIPTNAME [ flags ]
 			flags:
 				   -h help
-				   -d $($DEBUGGING || echo "no ")debuggging
+				   -d $($DEBUGGING || echo "no ")debugging
 				   -v $($VERBOSE || echo ""not "")verbose
 				   -r version number (default: $VERSION)
 		EOF
@@ -33,12 +34,10 @@ while getopts "hdvr:" opt; do
 		;;
 	d)
 		# invert the variable when flag is set
-		${DEBUGGING:=false} && DEBUGGING=false || DEBUGGING=true
-		export DEBUGGING
+		export DEBUGGING="$DEBUGGING && echo false || echo true"
 		;;
 	v)
-		${VERBOSE:=false} && VERBOSE=false || VERBOSE=true
-		export VERBOSE
+		export VERBOSE="$VERBOSE && echo false || echo true"
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
@@ -46,7 +45,7 @@ while getopts "hdvr:" opt; do
 		VERSION="$OPTARG"
 		;;
 	*)
-		echo "not flag -$opt"
+		echo "no flag -$opt"
 		;;
 	esac
 done
