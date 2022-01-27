@@ -16,8 +16,10 @@ OPTIND=1
 VERSION="${VERSION:-7}"
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
+EMAIL="${EMAIL:-rich@tongfamily.com}"
+SIGNIN="${SIGNIN:-my}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvr:" opt; do
+while getopts "hdvr:e:s:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -29,6 +31,8 @@ while getopts "hdvr:" opt; do
 				   -d $($DEBUGGING || echo "no ")debugging
 				   -v $($VERBOSE || echo "not ")verbose
 				   -r version number (default: $VERSION)
+				   -e email for login (default: $EMAIL)
+			                   -s signin subdomain add to .1password.com (default: $SIGNIN)
 		EOF
 		exit 0
 		;;
@@ -45,6 +49,9 @@ while getopts "hdvr:" opt; do
 		;;
 	r)
 		VERSION="$OPTARG"
+		;;
+	e)
+		EMAIL="$OPTARG"
 		;;
 	*)
 		echo "no flag -$opt"
@@ -64,26 +71,35 @@ else
 fi
 
 if ! in_os mac; then
-	log_verbose git install
 	# obsoleted by official 1passworld cli
 	# https://app-updates.agilebits.com/product_history/CLI
 	## https://www.npmjs.com/package/onepass-cli for npm package
 	# git_install_or_update 1pass georgebrock
-	log_verbose insteall 1Password X for Chrome to use it
+	log_verbose "install 1Password X for Chrome to use it"
 	log_exit "Only manual installation supported see https://support.1password.com/command-line-getting-started/"
 fi
 
 if [[ -n $(find /Applications -maxdepth 1 -name "1Password*" -print -quit) ]]; then
-	log_verbose 1Password for Mac already installed
+	log_verbose "1Password for Mac already installed"
 	exit
 fi
 
 log_verbose using brew to install on Mac 1Password and the CLI
-if cask_install 1password 1password-cli; then
-	log_exit 1password already installed
+if package_install 1password 1password-cli; then
+	for PROFILE in "" "$(config_zsh_profile)"; do
+		# shellcheck disable=SC2086
+		if ! config_mark $PROFILE; then
+			# shellcheck disable=SC2086
+			config_add $PROFILE <<-EOF
+				if command -v op >/dev/null && [[ ! -v OP_SESSION_$SIGNIN ]]; then
+				    eval "\$(op $SIGNIN.1password.com $EMAIL)"; fi
+			EOF
+		fi
+	done
+	exit
 fi
 
-log_verbose brew cask install failed trying to cure the package
+log_verbose "brew  install failed trying to cure the package"
 # download_url_open "https://d13itkw33a7sus.cloudfront.net/dist/1P/mac4/1Password-6.0.2.zip"
 # more general location
 # usage: download_url url [dest_file [dest_dir [md5 [sha256]]]]
