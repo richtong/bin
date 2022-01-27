@@ -183,10 +183,10 @@ fi
 if ! config_mark; then
 	config_add <<-'EOF'
 		# shellcheck disable=SC1091
+		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
 		if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
 		# shellcheck disable=SC1091
 		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
-		PATH+="$HOME/.local/bin:$PATH"
 	EOF
 fi
 

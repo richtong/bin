@@ -45,7 +45,8 @@ source_lib lib-install.sh lib-util.sh lib-config.sh
 
 brew_install neovim
 
-log_verbose get neovim python packages in system python
+log_verbose "get neovim python packages in system python"
+log_warning "All pipenv installation need this in the python world"
 pip_install neovim
 
 log_verbose install IDE tools
@@ -76,19 +77,14 @@ if ! config_mark "$NVIM_INIT" '"'; then
 	config_add "$NVIM_INIT" <<-EOF
 		" check for vim-plug install if needed
 		" https://github.com/junegunn/vim-plug/issues/739
-		let plug_install=0
-		let autoload_plug_path = stdpath('data') . '/site/autoload/plug.vim'
-		if ! filereadable(autoload_plug_path)
-		    silent execute '!curl --create-dirs -fLo '
-		        \ . autoload_plug_path .
-		        \ 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-		    execute 'source ' . fnameescape(autoload_plug_path)
-		    let plug_install = 1
+		let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+		if empty(glob(data_dir . '/autoload/plug.vim'))
+		  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+		  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 		endif
-		unlet autoload_plug_path
 
 		" vim-plug
-		call plug#begin(stdpath('data') . '/plugged')
+		call plug#begin(stdpath('config') . '/plugged')
 
 		" Navigate directory tree
 		Plug 'scrooloose/nerdtree'
@@ -153,12 +149,6 @@ if ! config_mark "$NVIM_INIT" '"'; then
 		Plug 'tmhedberg/simpylfold'
 
 		call plug#end()
-
-		" wait to do pluginstall
-		if plug_install
-		    PlugInstall --sync
-		endif
-		unlet plug_install
 
 		" https://github.com/overcache/NeoSolarized
 		set termguicolors
