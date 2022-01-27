@@ -10,28 +10,40 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 # Pass the force flag down
-export FORCE=${FORCE:-false}
+FORCE="${FORCE:-false}"
 FLAGS="${FLAGS:-""}"
+ALIAS="${ALIAS:-false}"
 OPTIND=1
-while getopts "hdvf" opt; do
+while getopts "hdvfa" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Install newvim with all the plugins
 
-			flags: -d debug, -v verbose, -h help
+			flags:  -h help
+				    -d $($DEBUGGING || echo "no ")debugging
+				    -v $($VERBOSE || echo "not ")verbose
+					-f $($FORCE || echo "no ")force install
+				    -a $($ALIAS || echo "no ")set alias as vi
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	f)
-		FORCE=true
+		FORCE="$($FORCE && echo false || echo true)"
 		FLAGS+=" -f "
+		;;
+	a)
+		ALIAS="$($ALIAS && echo false || echo true)"
 		;;
 	*)
 		echo "no flag $opt"
@@ -53,12 +65,32 @@ log_verbose install IDE tools
 "$SCRIPT_DIR/install-lint.sh"
 
 log_verbose "create vi as alias for nvim and set git to use it"
-if ! config_mark; then
-	config_add <<-EOF
-		alias vi=nvim
-		export VISUAL=nvim
-		export EDITOR="$VISUAL"
-	EOF
+if $ALIAS; then
+	# use a null string because this will get the default shell
+	for PROFILE in "" "$(config_zsh_profile)"; do
+		log_verbose "Adding config to ${PROFIlE:-default}"
+		# shellcheck disable=SC2086
+		if ! config_mark $PROFILE; then
+			# shellcheck disable=SC2086
+			config_add $PROFILE <<-EOF
+				if command -v nvim >/dev/null; then
+					VISUAL="$(command -v nvim)"
+					export VISUAL
+					export EDITOR="$VISUAL"
+				fi
+			EOF
+		fi
+	done
+	# note that zsh only has .zshrc but bash has .bash_profile and .bashrc
+	# alias should go into the .bashrc for interactive shell
+	for SHELL_PROFILE in "$(config_profile_shell)" "$(config_zsh_profile)"; do
+		log_verbose "Add alias to the interactive shell to $SHELL_PROFILE"
+		if ! config_mark "$SHELL_PROFILE"; then
+			config_add "$SHELL_PROFILE"
+			if command -v nvim >/dev/null; then alias vi=nvim; fi
+			EOF
+		fi
+	done
 fi
 git config --global core.editor "nvim"
 

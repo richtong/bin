@@ -36,7 +36,9 @@ if in_os mac; then
 	package_install csshx
 	if ! config_mark "$(config_profile_shell)"; then
 		log_verbose adding cssh alias
-		config_add "$(config_profile_shell)" <<<"alias cssh=csshX"
+		config_add "$(config_profile_shell)" <<-EOF
+			if command -v csshx; then alias cssh=csshX; fi
+		EOF
 	fi
 else
 	log_verbose "package install clusterssh"

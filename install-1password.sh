@@ -27,17 +27,19 @@ while getopts "hdvr:" opt; do
 			flags:
 				   -h help
 				   -d $($DEBUGGING || echo "no ")debugging
-				   -v $($VERBOSE || echo ""not "")verbose
+				   -v $($VERBOSE || echo "not ")verbose
 				   -r version number (default: $VERSION)
 		EOF
 		exit 0
 		;;
 	d)
 		# invert the variable when flag is set
-		export DEBUGGING="$DEBUGGING && echo false || echo true"
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE="$VERBOSE && echo false || echo true"
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;

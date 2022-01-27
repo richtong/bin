@@ -20,24 +20,38 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 # Pass the force flag down
 export FORCE=${FORCE:-false}
 FLAGS="${FLAGS:-""}"
+ALIAS="${ALIAS:-false}"
 OPTIND=1
-while getopts "hdvf" opt; do
+while getopts "hdvfa" opt; do
 	case "$opt" in
 	h)
-		echo "$SCRIPTNAME: Install vim plug ins"
-		echo "flags: -d debug, -v verbose, -h help"
-		echo "       -f force reinstall (default: $FORCE)"
+		cat <<-EOF
+			$SCRIPTNAME: Install vim plug ins
+				flags:
+						-h help
+					    -d $($DEBUGGING || echo "no ")debugging
+					    -v $($VERBOSE || echo "not ")verbose
+						-f $($FORCE || echo "no ")force install
+					    -a $($ALIAS || echo "no ")set alias as vi
+		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	f)
-		FORCE=true
+		FORCE="$($FORCE && echo false || echo true)"
 		FLAGS+=" -f "
+		;;
+	a)
+		ALIAS="$($ALIAS && echo false || echo true)"
 		;;
 	*)
 		echo "no flag $opt"
@@ -54,8 +68,6 @@ if [[ $OSTYPE =~ darwin ]]; then
 	package_flags+=" --with-override-system-vi "
 fi
 package_install "${package_flags[@]}" vim
-
-"$SCRIPT_DIR/install-solarized.sh"
 
 # http://eslint.org/docs/user-guide/command-line-interface.html
 # https://github.com/yannickcr/eslint-plugin-react says
@@ -79,6 +91,8 @@ log_verbose make sure node is installed for the linters
 
 # needed for vim-markdown
 package_install markdown
+
+"$SCRIPT_DIR/install-solarized.sh"
 
 # https://github.com/scrooloose/syntastic for multiple syntax checkers
 mkdir -p "$HOME/.vim/bundle"
@@ -125,13 +139,15 @@ if [[ ! -e "$HOME/.vim/spell" ]]; then
 fi
 
 # the {-} says replace with "" if not present so set -u is not tripped
-if ! config_mark; then
+if $ALIAS && ! config_mark; then
 	# note we escape the command line so we check the path of vi at run time
-	config_add <<EOF
-VISUAL="$(command -v vi)"
-export VISUAL
-export EDITOR="\$VISUAL"
-EOF
+	config_add <<-EOF
+		if command -v vi >/dev/null; then
+			VISUAL="$(command -v vi)"
+			export VISUAL
+			export EDITOR="$VISUAL"
+		fi
+	EOF
 	log_verbose "source $(config_profile) to enable vi as default editor or relogin"
 fi
 

@@ -78,19 +78,20 @@ if [[ $OSTYPE =~ darwin ]]; then
 	if ! config_mark "$(config_profile_shell)"; then
 		log_verbose "Adding .dircolors to $PROFILE"
 		log_verbose note on Mac assumes gnu path is loaded first
-		config_add "$(config_profile_shell)" <<'EOF'
-if command -v dircolors >/dev/null; then
-    if [[ -r "$HOME/.dircolors" ]]; then eval "$(dircolors -b "$HOME/.dircolors")"
-                                    else eval "$(dircolors -b)"; fi
-    alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
-EOF
+		config_add "$(config_profile_shell)" <<-'EOF'
+			                if command -v gdircolors >/dev/null; then
+			                    if [[ -r "$HOME/.dircolors" ]]; then eval "$(gdircolors -b "$HOME/.dircolors")"
+			                                                    else eval "$(gdircolors -b)"; fi
+			                    alias ls='ls --color=auto'
+			                    alias grep='grep --color=auto'
+			                    alias fgrep='fgrep --color=auto'
+			                    alias egrep='egrep --color=auto'
+			                fi
+		EOF
 	fi
 # do not exit as we will install dircolors for everyone at the ned
 fi
+
 if [[ $(desktop_environment) =~ xfce ]]; then
 	log_warning Note that in debian xfce implementation the
 	log_verbose Application/Terminal Emulator by default
