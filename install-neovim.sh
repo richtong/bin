@@ -59,7 +59,8 @@ brew_install neovim
 
 log_verbose "get neovim python packages in system python"
 log_warning "All pipenv installation need this in the python world"
-pip_install neovim
+# pynvim for deoplete
+pip_install neovim pynvim
 
 log_verbose install IDE tools
 "$SCRIPT_DIR/install-lint.sh"

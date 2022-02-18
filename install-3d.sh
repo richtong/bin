@@ -57,3 +57,11 @@ if [[ ! -v TOOLS ]]; then
 fi
 
 package_install "${TOOLS[@]}"
+
+# https://github.com/alicevision/AliceVision/issues/1071
+log_verbose "Installing AliceVision currently needs CUDA to run"
+
+# https://connected-environments.org/making/photogrammetry-for-mac-users/
+log_verbose "Installing Regard3D via URL"
+download_url_and_open "https://sourceforge.net/projects/regard3d/files/latest/download"
+log_verbose "Install Pcx into Unity to render point clouds"

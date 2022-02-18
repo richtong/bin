@@ -29,7 +29,7 @@ source_lib lib-mac.sh lib-install.sh lib-util.sh
 set -u
 
 if ! in_os mac; then
-	log_exit 0 "mac only"
+	log_exit "mac only"
 fi
 
 if cask_install nosleep; then
