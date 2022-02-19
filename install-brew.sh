@@ -71,8 +71,8 @@ if in_os linux || in_os wsl-linux; then
 	test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
 	if ! config_mark; then
 		config_add <<-'EOF'
-		    # test for variable in case other apps override homebrew
-			[[ -v $BREW_PREFIX ]] || eval $($(brew --prefix)/bin/brew shellenv)
+			    # test for variable in case other apps override homebrew
+				[[ -v $BREW_PREFIX ]] || eval $($(brew --prefix)/bin/brew shellenv)
 		EOF
 		homebrew_completion
 	fi
@@ -147,5 +147,9 @@ for f in $HOMEBREW_DIRS; do
 	log_verbose "need to change these to your $HOMEBREW_USER"
 	sudo find "$file" \! -user "$HOMEBREW_USER" -a \! -type l -exec chown "$HOMEBREW_USER" {} \;
 done
+
+# https://github.com/Homebrew/homebrew-cask/issues/58046
+log_verbose "Make sure depend_on references are moved"
+find "$(brew --prefix)/Caskroom/"*'/.metadata' -type f -name '*.rb' -print0 | /usr/bin/xargs -0 /usr/bin/perl -i -pe 's/depends_on macos: \[.*?\]//gsm;s/depends_on macos: .*//g'
 
 log_assert "command -v brew > /dev/null" "brew installed"

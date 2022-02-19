@@ -14,25 +14,47 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # trap 'exit $?' ERR
 OPTIND=1
 VERSION="${VERSION:-7}"
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
+NODE_VERSION="${NODE_VERSION:-latest}"
+DIRENV_VERSION="${DIRENV_VERSION:-latest}"
+PYTHON_VERSION="${PYTHON_VERSION:-3.9.10}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt; do
+while getopts "hdvn:e:p:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs asdf multiple runtime version management
 			    usage: $SCRIPTNAME [ flags ]
-				flags: -d debug (not functional use bashdb), -v verbose, -h help"
+				flags: -h help
+				   -d $($DEBUGGING || echo "no ")debugging
+				   -v $($VERBOSE || echo "not ")verbose
+			                   -p Python version (default: $PYTHON_VERSION)
+			                   -e Direnv version (default: $DIRENV_VERSION)
+			                   -n Node.js version (default: $NODE_VERSION)
+
 		EOF
 		exit 0
 		;;
 	d)
-
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
+		;;
+	p)
+		PYTHON_VERSION="$OPTARG"
+		;;
+	e)
+		DIRENV_VERSION="$OPTARG"
+		;;
+	n)
+		NODE_VERSION="$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt"
@@ -59,10 +81,11 @@ package_install gpg gawk
 
 # https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
 # 3.10 does not install properly as of Jan 2022 on Big Sur 11.6.2
+log_verbose "Do not install latest particularly for python as this requires compiling"
 declare -A ASDF+=(
-	[direnv]=latest
-	[nodejs]=latest
-	[python]=latest
+	[direnv]=$DIRENV_VERSION
+	[nodejs]=$NODE_VERSION
+	[python]=$PYTHON_VERSION
 )
 
 # http://asdf-vm.com/guide/getting-started.html#_3-install-asdf
