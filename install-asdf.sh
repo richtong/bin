@@ -96,6 +96,11 @@ for p in "${!ASDF[@]}"; do
 	version="$(asdf list "$p" 2>&1)"
 	if [[ $version =~ "No versions" || ! $version =~ ${ASDF[$p]} ]]; then
 		log_verbose asdf install "$p" "${ASDF[$p]}"
+        # broken as of feb 2021
+        if in_os mac && ! mac_is_arm && [[ $p =~ python ]]; then
+            log_verbose "Current bug in asdf python install skipping"
+            continue
+        fi
 		asdf install "$p" "${ASDF[$p]}"
 	fi
 	log_verbose "Set global for $p with ${ASDF[$p]}"
