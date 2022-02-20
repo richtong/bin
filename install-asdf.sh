@@ -18,7 +18,7 @@ DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 NODE_VERSION="${NODE_VERSION:-latest}"
 DIRENV_VERSION="${DIRENV_VERSION:-latest}"
-PYTHON_VERSION="${PYTHON_VERSION:-3.9.10}"
+PYTHON_VERSION="${PYTHON_VERSION:-latest}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvn:e:p:" opt; do
 	case "$opt" in
