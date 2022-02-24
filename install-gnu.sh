@@ -117,18 +117,19 @@ if ! config_mark; then
 	config_add <<-EOF
 		export PATH
 		[[ \$PATH =~ $NEW_PATH ]] || PATH=\"$NEW_PATH\"
+		        [[ -v BREW_PREFIX ]] || BREW_PREFIX="\$(brew --prefix)"
 	EOF
 	log_verbose "add paths for utilities"
 	for name in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils; do
 		# single quote except where we have the $name entry
-		config_add <<-'EOF'
-			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || PATH="$(brew --prefix)/opt/$name/libexec/gnubin:\$PATH"
+		config_add <<-EOF
+			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || PATH="\$BREW_PREFIX/opt/$name/libexec/gnubin:\$PATH"
 		EOF
 	done
 	log_verbose "install insert paths of the for name/bin"
 	for name in gnu-getopt gettext m4; do
 		config_add <<-EOF
-			[[ \$PATH =~ opt/$name/bin ]] || export PATH="$(brew --prefix)/opt/$name/bin:\$PATH"
+			[[ \$PATH =~ opt/$name/bin ]] || export PATH="\$BREW_PREFIX/opt/$name/bin:\$PATH"
 		EOF
 	done
 

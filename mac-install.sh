@@ -38,7 +38,7 @@ while getopts "hdvw:fu:b:mpa:s:n" opt; do
 			       -m MacOS Software Update beware takes a long time "(default: $SOFTWAREUPDATE)"
 			       -p Install Macports as well as Homebrew "(default: $MACPORTS_INSTALL)"
 			       -s Install a new default shell either bash or zsh "(default: $DESIRED_SHELL)"
-                   -n Do not change to new shell (default: $NO_CHSH)
+			                   -n Do not change to new shell (default: $NO_CHSH)
 		EOF
 
 		exit 0
@@ -70,12 +70,12 @@ while getopts "hdvw:fu:b:mpa:s:n" opt; do
 	a)
 		VMWARE=true
 		;;
-    s)
-        DESIRED_SHELL="$OPTARG"
-        ;;
-    n)
-        NO_CHSH=true
-        ;;
+	s)
+		DESIRED_SHELL="$OPTARG"
+		;;
+	n)
+		NO_CHSH=true
+		;;
 	*)
 		echo "-$opt flag invalid" >&2
 		;;
@@ -238,7 +238,7 @@ hash -r
 # install-divvy uses cask_install underneath but fails over to dmg download
 # use divvy instead of shiftit for the big screens
 # "$SCRIPT_DIR/install-shiftit.sh"
-# now this is a user thing 
+# now this is a user thing
 #"$SCRIPT_DIR/install-divvy.sh"
 
 log_verbose install complete Mac apps via brew
@@ -309,8 +309,8 @@ fi
 # The BASH_PATH check no longer works, so always chsh
 config_add_shell "$(command -v "$DESIRED_SHELL")"
 if ! $NO_CHSH; then
-  log_verbose "Change default shell to $DESIRED_SHELL"
-  config_change_default_shell "$(command -v "$DESIRED_SHELL")"
+	log_verbose "Change default shell to $DESIRED_SHELL"
+	config_change_default_shell "$(command -v "$DESIRED_SHELL")"
 fi
 
 log_verbose Enable ssh so you can get into this machine
@@ -361,5 +361,6 @@ xcode_license_accept
 # shellcheck disable=SC2034
 read -n1 -s -r -p $'Press space to continue after install Xcode...\n' key
 
-log_verbose bash completion used by kubernetes
-"$SCRIPT_DIR/install-bash-completion.sh"
+# this is now installed by homebrew
+#log_verbose "bash completion used by kubernetes"
+#"$SCRIPT_DIR/install-bash-completion.sh"

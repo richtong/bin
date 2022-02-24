@@ -41,24 +41,26 @@ done
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-util.sh lib-config.sh lib-install.sh
 
-if command -v brew; then
+if command -v brew >/dev/null; then
 	log_exit brew already installed
 fi
 
 # https://www.thoughtco.com/instal-ruby-on-linux-2908370#:~:text=How%20to%20Install%20Ruby%20on%20Linux%201%20Open,exact%2C%20but%20if%20you%20are%20...%20See%20More.
 homebrew_completion() {
-	config_add <<-EOF
-		if type brew &>/dev/null; then
-			HOMEBREW_PREFIX="$(brew --prefix)"
-			if [[ -r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]]; then
-				source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
-			else
-				for COMPLETION in "$HOMEBREW_PREFIX/etc/bash_ocmpletion.d}"; do
-				[[ -r "$COMPLETION" ]] && source "$COMPLETION"
-				done
+	if ! config_mark; then
+		config_add <<-'EOF'
+			if type brew &>/dev/null; then
+				[[ -v HOMEBREW_PREFIX ]] || HOMEBREW_PREFIX="$(brew --prefix)"
+				if [[ -r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]]; then
+					source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
+				else
+					for COMPLETION in "$HOMEBREW_PREFIX/etc/bash_completion.d}"*; do
+			                    [[ -r "$COMPLETION" ]] && source "$COMPLETION"
+					done
+				fi
 			fi
-		fi
-	EOF
+		EOF
+	fi
 }
 
 # https://apple.stackexchange.com/questions/175069/how-to-accept-xcode-license
