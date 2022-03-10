@@ -45,22 +45,18 @@ if ! in_os mac; then
 	log_exit "No Linux"
 fi
 
+package_install obs obs-ndi
+
 NDI_VERSION="${NDI_VERSION:-4.5.1}"
 NDI="${NDI:-"https://downloads.ndi.tv/Tools/NDIToolsInstaller.pkg"}"
 log_verbose "open $NDI"
 download_url_open "$NDI"
 log_warning "Restart is required to get NDI and you should see a menu bar item"
 log_verbose "Install NDI Virtual Input as a login item"
-# https://stackoverflow.com/questions/6947925/add-app-to-osx-login-items-during-a-package-maker-installer-postflight-script/7643260#7643260
-# https://stackoverflow.com/questions/9483959/osx-10-8-loginitems
-defaults write "$HOME/Library/Preferences/loginwindow" \
-	AutoLaunchedApplicationDictionary -array-add \
-	-array-add '{ "Path" = "/Applications/NDI Virtual Input.app"; "Hide" = "0"; }'
-
-package_install obs obs-ndi
+mac_login_item_add "/Applications/NDI Virtual Input.app"
 
 log_verbose "Install plugins"
-VERSION="${VERSION:-v0.3.0-beta}"
+VERSION="${VERSION:-v0.4}"
 URL+=("https://github.com/royshil/obs-backgroundremoval/releases/download/$VERSION/obs-backgroundremoval-macosx.zip")
 APP="${APP:-/Applications/OBS.app/Contents}"
 
