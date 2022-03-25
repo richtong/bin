@@ -3,17 +3,14 @@
 ## Flux changes screen color on a mac
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-OPTIND=1
 PHOTOMATIX_URL="${PHOTOMATIX_URL:-https://www.hdrsoft.com/download/photomatix-pro.html}"
+
 DXO_VERSION="${DXO_VERSION:-4}"
-DXO_URL="${DXO_URL:-"https://download-center.dxo.com/PhotoLab/v$DXO_VERSION/Mac/DxO_PhotoLab$DXO_VERSION.dmg"}"
+CAPTUREONE_VERSION="${CAPTUREONE_VERSION:-"15.1.2"}"
+PTGUI_VERSION="${PTGUI_VERSION:-"12.10"}"
 # insert your GUID here but do not check in
-PTGUI_GUID="${PTGUI_GUID="Do_not_check_in_this_guid"}"
-PTGUI_URL="${PTGUI_URL:-"https://www.ptgui.com/downloads/120000/reg/mac105/standard/112205/$PTGUI_GUID/PTGui_12.8.dmg"}"
-CAPTUREONE_GUID="${CAPTUREONE_GUID:-"Do_check_in_this_guid"}"
-CAPTUREONE_URL="${CAPTUREONE_URL:-"https://downloads.phaseone.com/$CAPTUREONE_GUID/International/CaptureOne21.Mac.14.4.1.dmg"}"
 OPTIND=1
-while getopts "hdv" opt; do
+while getopts "hdvp:c:" opt; do
 	case "$opt" in
 	h)
 		echo "$SCRIPTNAME flags: -d debug"
@@ -24,6 +21,12 @@ while getopts "hdv" opt; do
 		;;
 	v)
 		export VERBOSE=true
+		;;
+	p)
+		export PTGUI_GUID="$OPTARG"
+		;;
+	c)
+		export CAPTUREONE_GUID="$OPTARG"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -63,23 +66,31 @@ PACKAGES+=(
 # shellcheck disable=SC2086
 package_install "${PACKAGES[@]}"
 
-log_verbose "install DXO from $DXO_URL"
-download_url_open "$DXO_URL"
-log_verbose "Drag DXO App from Volume to Application Folder"
+if [[ -v DXO_VERSION ]]; then
+	DXO_URL="${DXO_URL:-"https://download-center.dxo.com/PhotoLab/v$DXO_VERSION/Mac/DxO_PhotoLab$DXO_VERSION.dmg"}"
+	log_verbose "install DXO from $DXO_URL"
+	download_url_open "$DXO_URL"
+	log_verbose "Drag DXO App from Volume to Application Folder"
+fi
 
-log_warning "Capture One needs a user specific URLK set as CAPTUREONE_GUID"
-log_verbose "Install Capture One from $CAPTUREONE_URL"
-download_url_open "$CAPTUREONE_URL"
-log_verbose "Drag Capture One and eject the Volume"
+log_warning "Capture One needs a user specific URL set as CAPTUREONE_GUID get by logging in "
+if [[ -v CAPTUREONE_GUID ]]; then
+	CAPTUREONE_URL="${CAPTUREONE_URL:-"https://downloads.phaseone.com/$CAPTUREONE_GUID/International/CaptureOne21.Mac.$CAPTUREONE_VERSION.dmg"}"
+	log_verbose "Install Capture One from $CAPTUREONE_URL"
+	download_url_open "$CAPTUREONE_URL"
+	log_verbose "Drag Capture One and eject the Volume"
+fi
+
+log_warning "Cannot automatically install PTGui for Panaramas"
+log_warning "goto https://www.ptgui.com and type in registration to and set PTGUI_GUID"
+if [[ -v PTGUI_GUID ]]; then
+	PTGUI_URL="${PTGUI_URL:-"https://www.ptgui.com/downloads/120000/reg/mac105/standard/112205/$PTGUI_GUID/PTGui_$PTGUI_VERSION.dmg"}"
+	download_url_open "$PTGUI_URL"
+	log_verbose "Drag PTGUI and eject the Volume"
+fi
 
 log_verbose install Photomatix for HDR photos
-log_warning "PT Gui needs a user specific URLK set as PTGUI_GUID"
 url="$(curl "$PHOTOMATIX_URL" 2>/dev/null |
 	grep -o -m 1 "https://.*mac/Photomatix_Pro.*zip")"
 log_verbose "photomatix url is $url"
 download_url_open "$url"
-
-log_warning "Cannot automatically install PTGui for Panaramas"
-log_warning goto https://www.ptgui.com and type in registration to get
-download_url_open "$PTGUI_URL"
-log_verbose "Drag PTGUI and eject the Volume"
