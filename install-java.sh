@@ -15,19 +15,23 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
-VERSION="${VERSION:-8}"
+JAVA_VERSION="${JAVA_VERSION:-8}"
+ASDF_JAVA="${ASDF_JAVA:-openjdk}"
+HOMEBREW_JAVA="${HOMEBREW_JAVA:-adoptopenjdk}"
 TAP="${TAP:-"adoptopenjdk/openjdk"}"
+JENV="${JENV:-false}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvr:" opt; do
+while getopts "hdvr:j" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs Java SDK
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
-			           -r version number (default: $VERSION)
-			              available versions are 8, 9, 10, and 11
+			           -r version number (default: $JAVA_VERSION)
+			              available versions suffixed 8, 9, 10, and 11
 			           -t tap for all jdks (default: $TAP)
+			                       -j Use jenv and not asdf for java versions (default: $JENV)
 		EOF
 		exit 0
 		;;
@@ -39,8 +43,11 @@ while getopts "hdvr:" opt; do
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
 		;;
+	j)
+		JENV=true
+		;;
 	r)
-		VERSION="$OPTARG"
+		JAVA_VERSION="$OPTARG"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -57,18 +64,25 @@ if ! in_os mac; then
 	log_exit "Mac only"
 fi
 
-log_verbose as of June 2019 can no longer install from Oracle
-log_verbose and there is a conflict version 8 in homebrew
-log_verbose conflicts with the same version in adoptopenjdk
-if [[ $VERSION != 8 ]]; then
-	log_verbose "tapping $TAP"
-	tap_install "$TAP"
-elif brew tap | grep -q "$TAP"; then
-	log_verbose "version 8 is is duplicationed in $TAP so remove"
-	brew untap "$TAP"
+if ! "$JENV"; then
+	log_verbose "Use ASDF to manage java version"
+	"$SCRIPT_DIR/install-asdf.sh"
+	asdf install java "$ASDF_JAVA$JAVA_VERSION"
+	asdf global java "$ASDF_JAVA$JAVA_VERSION"
 fi
-log_verbose installing "adoptopenjdk$VERSION"
-cask_install "adoptopenjdk$VERSION"
+
+log_verbose "as of June 2019 can no longer install from Oracle"
+#log_verbose and there is a conflict version 8 in homebrew
+#log_verbose conflicts with the same version in adoptopenjdk
+##if [[ $HOMEBREW_JAVA != 8 ]]; then
+log_verbose "tapping $TAP"
+tap_install "$TAP"
+#if brew tap | grep -q "$TAP"; then
+#    log_verbose "version 8 is is duplicated in $TAP so remove"
+#    brew untap "$TAP"
+#fi
+log_verbose installing "$HOMEBREW_JAVA$JAVA_VERSION"
+cask_install "$HOMEBREW_JAVA$JAVA_VERSION"
 
 log_verbose install jenv and add all java versions
 "$SCRIPT_DIR/install-jenv.sh"

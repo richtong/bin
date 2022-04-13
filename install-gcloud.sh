@@ -108,3 +108,6 @@ if gcloud auth list |& grep "No credentialed accounts"; then
 	gcloud auth login
 	gcloud config set project "$PROJECT"
 fi
+
+log_verbose "Turn off analytics reporting"
+gcloud config set disable_usage_reporting false

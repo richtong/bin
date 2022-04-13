@@ -19,8 +19,10 @@ VERBOSE="${VERBOSE:-false}"
 NODE_VERSION="${NODE_VERSION:-latest}"
 DIRENV_VERSION="${DIRENV_VERSION:-latest}"
 PYTHON_VERSION="${PYTHON_VERSION:-latest}"
+# openjdk18 is Java 8 for Unifi.app
+JAVA_VERSION="${JAVA_VERSION:-openjdk-18}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvn:e:p:" opt; do
+while getopts "hdvn:e:p:j:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -32,6 +34,7 @@ while getopts "hdvn:e:p:" opt; do
 			                   -p Python version (default: $PYTHON_VERSION)
 			                   -e Direnv version (default: $DIRENV_VERSION)
 			                   -n Node.js version (default: $NODE_VERSION)
+			                   -j Java version (default: $JAVA_VERSION)
 
 		EOF
 		exit 0
@@ -55,6 +58,9 @@ while getopts "hdvn:e:p:" opt; do
 		;;
 	n)
 		NODE_VERSION="$OPTARG"
+		;;
+	j)
+		JAVA_VERSION="$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt"
@@ -86,6 +92,7 @@ declare -A ASDF+=(
 	[direnv]=$DIRENV_VERSION
 	[nodejs]=$NODE_VERSION
 	[python]=$PYTHON_VERSION
+	[java]=$JAVA_VERSION
 )
 
 # http://asdf-vm.com/guide/getting-started.html#_3-install-asdf
@@ -147,5 +154,24 @@ if ! config_mark "$ENVRC"; then
 	direnv allow "$ENVRC"
 	config_add "$ENVRC" <<-'EOF'
 		use asdf
+	EOF
+fi
+
+# https://github.com/halcyon/asdf-java#java_home
+if ! config_mark; then
+	config_add <<-'EOF'
+		source "$HOME/.asdf/plugins/java/set-java-home.bash"
+	EOF
+fi
+
+if ! config_mark "$ZSH_PROFILE"; then
+	config_add "$ZSH_PROFILE" <<-'EOF'
+		        source "$HOME/.asdf/plugins/java/set-java-home.zsh"
+	EOF
+fi
+
+if ! config_mark "$HOME/.asdfrc"; then
+	config_add "$HOME/.asdfrc" <<-'EOF'
+		        java_macos_integration_enable = yes
 	EOF
 fi

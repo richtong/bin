@@ -56,15 +56,16 @@ cask_install ubiquiti-unifi-controller
 log_verbose make sure we are running Java 8 which is really called version 1.8
 "$SCRIPT_DIR/install-java.sh" -r "$VERSION"
 
-if [[ ! -e /Applications/UniFi.app/Contents/Home ]]; then
-	log_exit Could not find the UniFi Application and set the JDK version
-fi
-
-if ! pushd "/Applications/UniFi.app/Contents/Home" >/dev/null; then
+if ! pushd "/Applications/UniFi.app/Contents/Java" >/dev/null; then
 	log_error 1 "no Unifi.app"
 fi
 
-sudo jenv local 1.8
+# use asdf instead
+asdf local java openjdk-18
+#sudo jenv local 1.8
 
-log_verbose as of October 2019 installing the JDK does not work you need to
-log_verbose manually install the JRE 1.8 from the Oracle website
+log_verbose "Running UniFi.app requires Oracle Java 1.8 download"
+# https://ars-codia.raphaelbauer.com/2021/01/running-ubiquiti-unifi-controller-on.html
+log_verbose "To run manually cd to /Applications/UniFi.app/Content/Resources"
+log_verbose "java -jar lib/ace.jar start"
+log_verbose "browse to https://localhost:8443"
