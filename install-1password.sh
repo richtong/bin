@@ -96,7 +96,9 @@ if package_install 1password 1password-cli; then
 			EOF
 		fi
 	done
-	exit
+	log_verbose "Install 1password for safari"
+	mas install 1569813296
+	log_exit "installed 1password 1password-cli and safari add-on"
 fi
 
 log_verbose "brew  install failed trying to cure the package"
