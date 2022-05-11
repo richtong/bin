@@ -86,8 +86,6 @@ package_install asdf
 package_install gpg gawk
 
 # https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
-# 3.10 does not install properly as of Jan 2022 on Big Sur 11.6.2
-log_verbose "Do not install latest particularly for python as this requires compiling"
 declare -A ASDF+=(
 	[direnv]=$DIRENV_VERSION
 	[nodejs]=$NODE_VERSION
@@ -127,10 +125,10 @@ for p in "${!ASDF[@]}"; do
 	if [[ $version =~ "No versions" || ! $version =~ ${ASDF[$p]} ]]; then
 		log_verbose asdf install "$p" "${ASDF[$p]}"
 		# broken as of feb 2021
-		if in_os mac && ! mac_is_arm && [[ $p =~ python ]]; then
-			log_verbose "Current bug in asdf python install skipping"
-			continue
-		fi
+		#if in_os mac && ! mac_is_arm && [[ $p =~ python ]]; then
+		#    log_verbose "Current bug in asdf python install skipping"
+		#    continue
+		#fi
 		asdf install "$p" "${ASDF[$p]}"
 	fi
 	log_verbose "Set global for $p with ${ASDF[$p]}"
