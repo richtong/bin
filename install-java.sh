@@ -65,12 +65,31 @@ if ! in_os mac; then
 fi
 
 if ! "$JENV"; then
+	log_verbose install jenv and add all java versions
+	"$SCRIPT_DIR/install-jenv.sh"
+	log_verbose check to see if jenv already has versions skipping the first line which is always system
+	if [[ $(jenv versions | tail -n +2) == "" ]]; then
+		# note we use find because if there are no files that match
+		# then ls returns the string whereas find returns null and suppress error
+		# messages but find fails on files with spaces and special characters
+		# for d in $(find "/Library/Java/JavaVirtualMachines/*/Contents/Home" -depth 0 2>/dev/null)
+		# so make this bash 4.2 specfic
+		# https://github.com/koalaman/shellcheck/wiki/SC2044
+		shopt -s globstar nullglob
+		for d in "/Library/Java/JavaVirtualMachines/"*"/Contents/Home"; do
+			log_verbose "Adding to jenv: $d"
+			jenv add "$d"
+		done
+	fi
+
+else
 	log_verbose "Use ASDF to manage java version"
 	"$SCRIPT_DIR/install-asdf.sh"
 	asdf install java "$ASDF_JAVA$JAVA_VERSION"
 	asdf global java "$ASDF_JAVA$JAVA_VERSION"
 fi
 
+log_verbose "Bare metal installation of Java but recommend you use jenv or asdf"
 log_verbose "as of June 2019 can no longer install from Oracle"
 #log_verbose and there is a conflict version 8 in homebrew
 #log_verbose conflicts with the same version in adoptopenjdk
@@ -83,21 +102,3 @@ tap_install "$TAP"
 #fi
 log_verbose installing "$HOMEBREW_JAVA$JAVA_VERSION"
 cask_install "$HOMEBREW_JAVA$JAVA_VERSION"
-
-log_verbose install jenv and add all java versions
-"$SCRIPT_DIR/install-jenv.sh"
-
-log_verbose check to see if jenv already has versions skipping the first line which is always system
-if [[ $(jenv versions | tail -n +2) == "" ]]; then
-	# note we use find because if there are no files that match
-	# then ls returns the string whereas find returns null and suppress error
-	# messages but find fails on files with spaces and special characters
-	# for d in $(find "/Library/Java/JavaVirtualMachines/*/Contents/Home" -depth 0 2>/dev/null)
-	# so make this bash 4.2 specfic
-	# https://github.com/koalaman/shellcheck/wiki/SC2044
-	shopt -s globstar nullglob
-	for d in "/Library/Java/JavaVirtualMachines/"*"/Contents/Home"; do
-		log_verbose "Adding to jenv: $d"
-		jenv add "$d"
-	done
-fi
