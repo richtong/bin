@@ -109,15 +109,21 @@ fi
 # for nbconvert
 # http://tug.org/mactex/
 # this library is huge takes 5GB so do not install typically
+# https://pandoc.org/installing.html
 log_verbose "Run mermaid to generate JPGs from .mermaid files"
-log_verbose "Wanring mactex is huge at 5GB so only install if needed for pdfs"
+log_verbose "Warning mactex is huge at 5GB so only basictex and load modules as"
+log_verbose "needed install if needed for pdfs"
 PACKAGE=(
 	mermaid-cli
 	pandoc
-	mactex
+	basictex
 )
 
 package_install "${PACKAGE[@]}"
+
+# https://pandoc.org/installing.html
+log_verbose "Post basictex installation put in the fonts"
+tlmgr install collection-fontsrecommended
 
 # this is for node applications but you need to know the node package names
 # Latex not up to date
