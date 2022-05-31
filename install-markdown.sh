@@ -53,4 +53,13 @@ NPM=" doctoc "
 npm_install -g $NPM
 
 # https://github.com/igorshubovych/markdownlint-cli
-package_install markdownlint-cli
+log_verbose "Installing markdownlint-cli the nodejs version as markdownlint"
+log_verbose "Installing markdownlint-cli2 which has a different interface for VSCode"
+log_verbose "Use with repo: pointed to https://github.com/igorshubovych/markdownlint-cli"
+package_install markdownlint-cli markdownlint-cli2
+
+# https://dev.to/jonasbn/blog-post-markdownlint-24ig
+log_verbose "Installing markdownlint the ruby version as mdl"
+# https://github.com/markdownlint/markdownlint/blob/master/.pre-commit-hooks.yaml
+log_verbose "compatible with pre-commit with entrypoint mdl"
+gem_install mdl

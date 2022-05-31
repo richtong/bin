@@ -13,6 +13,8 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 FORCE="${FORCE:-false}"
 FLAGS="${FLAGS:-""}"
 ALIAS="${ALIAS:-false}"
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 while getopts "hdvfa" opt; do
 	case "$opt" in
@@ -68,7 +70,7 @@ log_verbose install IDE tools
 log_verbose "create vi as alias for nvim and set git to use it"
 if $ALIAS; then
 	# use a null string because this will get the default shell
-	for PROFILE in "" "$(config_zsh_profile)"; do
+	for PROFILE in "" "$(config_profile_zsh)"; do
 		log_verbose "Adding config to ${PROFIlE:-default}"
 		# shellcheck disable=SC2086
 		if ! config_mark $PROFILE; then
@@ -84,7 +86,7 @@ if $ALIAS; then
 	done
 	# note that zsh only has .zshrc but bash has .bash_profile and .bashrc
 	# alias should go into the .bashrc for interactive shell
-	for SHELL_PROFILE in "$(config_profile_shell)" "$(config_zsh_profile)"; do
+	for SHELL_PROFILE in "$(config_profile_shell)" "$(config_profile_zsh)"; do
 		log_verbose "Add alias to the interactive shell to $SHELL_PROFILE"
 		if ! config_mark "$SHELL_PROFILE"; then
 			config_add "$SHELL_PROFILE" <<-EOF
@@ -107,7 +109,7 @@ NVIM_INIT="${NVIM_INIT:-"$NVIM_CONFIG/init.vim"}"
 log_verbose "creating $NVIM_INIT"
 if ! config_mark "$NVIM_INIT" '"'; then
 	log_verbose "creating $NVIM_INIT"
-	config_add "$NVIM_INIT" <<-EOF
+	config_add "$NVIM_INIT" <<-'EOF'
 		" check for vim-plug install if needed
 		" https://github.com/junegunn/vim-plug/issues/739
 		let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'

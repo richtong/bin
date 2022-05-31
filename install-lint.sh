@@ -60,6 +60,8 @@ NODE_PACKAGES+=(
 	jsonlint
 	js-yaml
 	markdownlint
+	htmlhint
+	csslint
 )
 
 log_verbose "install ${NODE_PACKAGES[*]}"

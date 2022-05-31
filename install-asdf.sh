@@ -164,8 +164,8 @@ if ! config_mark; then
 	EOF
 fi
 
-if ! config_mark "$ZSH_PROFILE"; then
-	config_add "$ZSH_PROFILE" <<-'EOF'
+if ! config_mark "$(config_profile_zsh)"; then
+	config_add "$(config_profile_zsh)" <<-'EOF'
 		        source "$HOME/.asdf/plugins/java/set-java-home.zsh"
 	EOF
 fi
