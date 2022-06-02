@@ -71,7 +71,7 @@ if [[ -v PYTHON_VERSION ]]; then
 	PACKAGES+=("python@$PYTHON_VERSION")
 fi
 
-# Kite is Python code completer
+# Kite is Python code completer not used instead use Github copilot
 # https://github.com/kiteco/jupyterlab-kite
 #kite
 PACKAGES=(
@@ -120,10 +120,23 @@ if $ANACONDA; then
 	"$SCRIPT_DIR/install-anaconda.sh"
 fi
 
+# autoimport - add and remove imports
 # argparse complete
+# bandit - check for security problems
+# black - a very strick python formatter
+# mypy - python type checking
+# nptyping - types fo rnumpy
+# pdoc3 - python documentation extraction from comments
+# pydocstyle - python docstring style checker
+# pytest - python test runner
+# pyyaml - python yaml parser
+# tox - python test runner for different versions of python
 log_verbose development shell/python packages normally use pipenv but use anaconda instead
 PYTHON_PACKAGES+=(
+
 	argcomplete
+	autocomplete
+	autoimport
 	bandit
 	black
 	flake8
@@ -137,6 +150,7 @@ PYTHON_PACKAGES+=(
 	pytest-xdist
 	pyyaml
 	tox
+
 )
 
 # currently no python packages are needed

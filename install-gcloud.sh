@@ -13,6 +13,8 @@
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 PACKAGES="${PACKAGES:-" beta "}"
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 INSTALL_DIR="${INSTALL_DIR:-"$HOME/.local/bin"}"
 PROJECT="${PROJECT:-netdrones}"
 # this replace set -e by running exit on any error use for bashdb

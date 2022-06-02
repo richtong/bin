@@ -343,7 +343,6 @@ PACKAGES+=(
 	mmv
 	curl
 	git
-	pre-commit
 )
 
 if ! in_os mac; then

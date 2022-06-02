@@ -160,8 +160,8 @@ fi
 echo starting camera config
 add_config() {
 	if (($# == 2)); then
-		echo '{ "camera0": '"$1"', "camera1": '"$2"' }' > \
-			"$WS_DIR/var/shared/local/app-host.config"
+		echo '{ "camera0": '"$1"', "camera1": '"$2"' }' >"\
+$WS_DIR/var/shared/local/app-host.config"
 	fi
 }
 

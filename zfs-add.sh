@@ -72,4 +72,4 @@ IFS=" " read -r -a layout <<<"$(zfs_disk_configuration "${disks[@]}")"
 log_verbose "using zfs layout ${layout[*]} $POOL"
 # Need an eval to get rid of quotes in the $layout
 # shellcheck disable=SC2086
-eval sudo zpool add $FLAGS "$POOL" "${layout[@]}"
+sudo zpool add $FLAGS "$POOL" "${layout[@]}"

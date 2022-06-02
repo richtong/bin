@@ -145,8 +145,6 @@ if in_os mac; then
 	log_warning it is best to login from the Docker.app
 	open -a Docker.app
 	util_press_key
-	# need to use key to make shellcheck happy
-	log_debug "got $key"
 
 	if ! command -v docker || ! vergte "$(version_extract "$(docker -v)")" "$version_needed"; then
 		log_verbose the installation failed using brew so try the curl

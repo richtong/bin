@@ -123,11 +123,19 @@ git config pull.ff only
 # gh : official github cli
 #	hub : deprecated and break git completions
 # nbdime: jupyter notebook diff and merge with git integration to git diff
+# https://scottbanwart.com/blog/2021/03/weekly-journal-10-asdf-pre-commit-gitlint/
+# gitlint - linting git commits
+# should use https://www.conventionalcommits.org/ format
+# feat(install-1password)!: add feature or breaking change vs. fix:
 log_verbose "do not installed hub the completions interfer with git and it is deprecated"
 PACKAGES+=(
-	gh
+
 	act
+	gh
+	gitlint
 	nbdime
+	pre-commit
+
 )
 
 # meld is ugly compared with the default

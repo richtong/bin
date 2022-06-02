@@ -64,10 +64,10 @@ submodules. The preinstall will take a Mac convert it with enough git and bash
 to run.
 
 To have everything ready, it assumes you have a Veracrypt installation with
-your passwords on it in _your username_.vc which lives on your Google Drive.
+your passwords on it in *your username*.vc which lives on your Google Drive.
 It will link your keys from there into ~/.ssh which is nice
 
-It also assumes you have a src/user/_your name_/dotfiles directory and will
+It also assumes you have a src/user/*your name*/dotfiles directory and will
 link your profile and other configurations there.
 
 If you have a network, then you should do:
@@ -252,8 +252,8 @@ weak MD5 encryption that is the default. Also set the rounds up from the default
 computer and make it hard to brute force your ssh keys. The script prebuild-keys.sh
 does this for you.
 
-1. To keep track of your keys, @rich's scripts use this syntax for keys, _user
-   email_-_web url for the site you want to login to_._type of key_. We use this
+1. To keep track of your keys, @rich's scripts use this syntax for keys, *user
+   email*-*web url for the site you want to login to*.*type of key*. We use this
    instead of the generic id_rsa you see in examples so you can repudiate services
    individually and so that one key loss doesn't mean access to everything you
    have.

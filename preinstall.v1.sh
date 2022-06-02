@@ -28,7 +28,7 @@ OPTIND=1
 while getopts "hdvu:e:r:m:w:s:f:c:l:o:x:" opt; do
 	case "$opt" in
 	h)
-	cat <<EOF
+		cat <<EOF
 $SCRIPTNAME: Prebuild before install.sh can run requires no other files
 	It installs assuming Bash 3.x and add 1Password and a shared Drive
 	This looks for the veracrypt volume with the the keys
@@ -74,18 +74,18 @@ EOF
 	s)
 		SSH_KEY="$OPTARG"
 		;;
-    f)
-        SECRET_FILE="$OPTARG"
-        ;;
-    c)
-        SECRET_USER="$OPTARG"
-        ;;
-    l)
-        SECRET_DRIVE="$OPTARG"
-        ;;
-    o)
-        SECRET_MOUNTPOINT="$OPTARG"
-        ;;
+	f)
+		SECRET_FILE="$OPTARG"
+		;;
+	c)
+		SECRET_USER="$OPTARG"
+		;;
+	l)
+		SECRET_DRIVE="$OPTARG"
+		;;
+	o)
+		SECRET_MOUNTPOINT="$OPTARG"
+		;;
 	*)
 		echo "no -$opt" >&2
 		;;
@@ -148,7 +148,7 @@ else
 
 	brew install veracrypt
 	# finds the first match for of secret file on any matching $SECRET_DRIVE
-	veracrypt_secret="$("$(find -L "$SECRET_DIR_ROOT" -maxdepth 3 -name "$SECRET_FILE" 2>/dev/null | grep -m 1 "$SECRET_DRIVE")"
+	veracrypt_secret="$(find -L "$SECRET_DIR_ROOT" -maxdepth 3 -name "$SECRET_FILE" 2>/dev/null | grep -m 1 "$SECRET_DRIVE")"
 	echo "found $veracrypt_secret"
 	if ! veracrypt -t -l "$veracrypt_secret" >/dev/null 2>&1; then
 		# need to mount as block device with filesystem=none
