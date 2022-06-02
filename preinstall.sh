@@ -74,7 +74,7 @@ if ! grep shellenv "$HOME/.profile"; then
 fi
 
 echo "make sure we can see brew source the profiles" >&2
-# shellcheck disable=SC1091
+# shellcheck disable=SC1091,SC1090
 source "$HOME/.bash_profile"
 
 if [[ $(uname) =~ Linux ]] && ! command -v brew; then

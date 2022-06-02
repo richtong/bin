@@ -176,7 +176,7 @@ if ! command -v port; then
 			# shellcheck disable=SC2016
 			config_add <<<'[[ -e "$HOME/.profile" ]] && source "$HOME/.profile"'
 		fi
-		# shellcheck disable=SC1091
+		# shellcheck disable=SC1091,SC1090
 		[[ -e "$HOME/.profile" ]] && source "$HOME/.profile"
 		popd >/dev/null || true
 	fi
