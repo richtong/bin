@@ -71,6 +71,7 @@ PYTHON_PACKAGES+=(
 	jedi
 	vim-vint
 	beautysh
+	yamlfix
 )
 log_verbose "install ${PYTHON_PACKAGES[*]}"
 pip_install "${PYTHON_PACKAGES[@]}"

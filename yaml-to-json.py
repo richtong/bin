@@ -9,7 +9,7 @@
 from __future__ import print_function
 
 import sys
-import yaml
+import pyyaml as yaml  # type: ignore
 import json
 
 # Need expanduser to interpret the ~ in filenames
@@ -18,7 +18,7 @@ import argparse
 
 
 def main(args):
-    """Runs the dumper.
+    """Run the dumper.
 
     @param args command line
     """
