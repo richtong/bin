@@ -83,7 +83,7 @@ elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then
 		EOF
 		log_verbose "Make sure we can see the new commands"
 		if [ -f "$INSTALL_DIR/google-cloud-sdk/path.bash.inc" ]; then
-			#shellcheck disable=SC1091
+			#shellcheck disable=SC1091,SC1090
 			. "$INSTALL_DIR/google-cloud-sdk/path.bash.inc"
 		fi
 	fi
