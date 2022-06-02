@@ -6,6 +6,8 @@
 # since these are typically third party modules
 # cannot run  markdownlint checks for hugo
 ---
+# need this so gitlint only runs during commit-msg
+default_stages: [commit, push]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     # only language independent hooks
@@ -56,24 +58,35 @@ repos:
     rev: 2.1.6
     hooks:
       # Generating a ruby error with run with all-files
-      # https://github.com/jumanjihouse/pre-commit-hooks/issues/86
+      # this is using the ruby mdl utility so switching to the node version
+      # because it has per line disabling of checks
       #- id: markdownlint
+      - id: shfmt
         # https://github.com/jumanjihouse/pre-commit-hooks/issues/82
         # additional dependency bug in pre-commit v2.10
+        # should be fixed now when doing a pre-commit all
       - id: shellcheck
-        additional_dependencies: []
-      - id: shfmt
+        #additional_dependencies: []
 
   # https://github.com/igorshubovych/markdownlint-cli
-  # node version of markdownlint with better disabling of checks
+  # node version of markdownlint with better disabling of checks by line
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.31.1
     hooks:
-    - id: markdownlint
-  - repo: https://github.com/kynan/nbstripout
-    rev: 0.5.0
+      - id: markdownlint
+
+  # https://jorisroovers.com/gitlint/#using-gitlint-through-pre-commit
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.17.0
     hooks:
-      - id: nbstripout
+      - id: gitlint
+        stages: [commit-msg]
+
+  # strips everything out so use pre-commit-jupyter instead
+  #- repo: https://github.com/kynan/nbstripout
+    #rev: 0.4.0
+    #hooks:
+      #- id: nbstripout
 
   # https://github.com/roy-ht/pre-commit-jupyter
   - repo: https://github.com/aflc/pre-commit-jupyter
