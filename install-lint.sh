@@ -62,6 +62,7 @@ NODE_PACKAGES+=(
 	markdownlint
 	htmlhint
 	csslint
+	dockerfile_lint
 )
 
 log_verbose "install ${NODE_PACKAGES[*]}"
@@ -91,6 +92,7 @@ PACKAGES+=(
 	shfmt
 	yamllint
 	markdownlint-cli
+	hadolint
 )
 log_verbose "install ${PACKAGES[*]}"
 package_install "${PACKAGES[@]}"
