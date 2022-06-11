@@ -86,6 +86,7 @@ log_verbose "Use markdown-cli and not mdl"
 
 # note we install both the ruby mdl and the node markdown-cli
 # but prefer markdown-cli
+# dockerfile lint https://github.com/hadolint/hadolint
 PACKAGES+=(
 	yapf
 	shellcheck
