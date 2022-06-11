@@ -1,4 +1,4 @@
-# ./lib/pre-commit-config.base.yaml
+# ./lib/pre-commit-config.full.yaml
 # now includes all the jupyter and python checks
 # if you want to exclude then use the exclude and put the directories in
 #
@@ -13,7 +13,7 @@
 # need this so gitlint only runs during commit-msg
 default_stages: [commit, push]
 # exclude deprecated files so we do not check them anymore
-exclude: (^archive/)
+exclude: (^archive/|^user/)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     # only language independent hooks
@@ -189,3 +189,12 @@ repos:
   #   rev: 0.4.0
   #   hooks:
   #     - id: nbstripout
+
+  # lint Dockerfiles with hadolint
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.10.0
+    hooks:
+      # use if hadolint is local
+      - id: hadolint
+      # use if you have docker and you do not need hadolint installed
+      # - id: hadolint-docker
