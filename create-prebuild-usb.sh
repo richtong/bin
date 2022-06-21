@@ -5,7 +5,7 @@
 ## Copy prebuild secrets from Dropbox into a USB key
 ##
 #
-set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1

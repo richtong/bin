@@ -85,8 +85,9 @@ log_verbose "Use markdown-cli and not mdl"
 
 # note we install both the ruby mdl and the node markdown-cli
 # but prefer markdown-cli
-# dockerfile lint https://github.com/hadolint/hadolint
-# github workflow actions actionlint
+# hadolint: dockerfile lint https://github.com/hadolint/hadolint
+# actionlint: github workflow actions
+# checkmake: Makefile lint
 PACKAGES+=(
 	yapf
 	shellcheck
@@ -95,6 +96,7 @@ PACKAGES+=(
 	markdownlint-cli
 	hadolint
 	actionlint
+	checkmake
 )
 log_verbose "install ${PACKAGES[*]}"
 package_install "${PACKAGES[@]}"

@@ -19,12 +19,12 @@ VERBOSE="${VERBOSE:-false}"
 EMAIL="${EMAIL:-rich@tongfamily.com}"
 SIGNIN="${SIGNIN:-my}"
 export FLAGS="${FLAGS:-""}"
+
 while getopts "hdvr:e:s:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs 1Password
-
 			usage: $SCRIPTNAME [ flags ]
 			flags:
 				   -h help
