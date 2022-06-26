@@ -98,7 +98,8 @@ if ! config_mark; then
 	log_verbose "installing into profile"
 	config_add <<-'EOF'
 		# shellcheck disable=SC1091
-		source "$(brew --prefix asdf)/libexec/asdf.sh"
+        if command -v asdf >/dev/null; then
+        source "$(brew --prefix asdf)/libexec/asdf.sh"
 	EOF
 	# https://linuxhint.com/associative_array_bash/
 	if [[ -n ${ASDF[direnv]} ]]; then
@@ -108,6 +109,9 @@ if ! config_mark; then
 			direnv() { asdf exec direnv "$@"; }
 		EOF
 	fi
+    config_add <<-'EOF'
+        fi
+    EOF
 fi
 
 # https://github.com/asdf-vm/asdf-nodejs/issues/253

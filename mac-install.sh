@@ -104,6 +104,19 @@ defaults write com.apple.finder ShowStatusBar -bool true
 # Finder: show path bar
 defaults write com.apple.finder ShowPathbar -bool true
 
+
+# Install Mac App Store
+#	497799835
+MAS+=(
+	497799835
+)
+log_verbose "mas install ${MAS[*]}"
+mas install "${MAS[@]}"
+log_verbose "complete Xcode installation in GUI"
+open -a Xcode
+xcode_license_accept
+# shellcheck disable=SC2034
+read -n1 -s -r -p $'Press space to continue after install Xcode...\n' key
 # After Mojave, need the commandline tools
 # https://derflounder.wordpress.com/2018/06/10/updated-xcode-command-line-tools-installer-script-now-available/
 # Now check first
@@ -347,19 +360,6 @@ fi
 "$SCRIPT_DIR/install-kubernetes.sh"
 # Needed for docker for kubernetes minikube
 # "$SCRIPT_DIR/install-xhyve.sh"
-
-# Install Mac App Store
-#	497799835
-MAS+=(
-	497799835
-)
-log_verbose "mas install ${MAS[*]}"
-mas install "${MAS[@]}"
-log_verbose "complete Xcode installation in GUI"
-open -a Xcode
-xcode_license_accept
-# shellcheck disable=SC2034
-read -n1 -s -r -p $'Press space to continue after install Xcode...\n' key
 
 # this is now installed by homebrew
 #log_verbose "bash completion used by kubernetes"

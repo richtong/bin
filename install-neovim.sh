@@ -90,7 +90,7 @@ if $ALIAS; then
 		log_verbose "Add alias to the interactive shell to $SHELL_PROFILE"
 		if ! config_mark "$SHELL_PROFILE"; then
 			config_add "$SHELL_PROFILE" <<-EOF
-				                if command -v nvim >/dev/null; then alias vi=nvim; fi
+                if command -v nvim >/dev/null; then alias vi=nvim; fi
 			EOF
 		fi
 	done

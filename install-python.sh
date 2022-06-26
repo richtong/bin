@@ -3,6 +3,11 @@
 ##
 #
 ## Install Python related pieces
+## As of June 2022 only the stable version of Homebrew Python
+## If you need to use a non stable version, then you
+## they are not installed keg-only so you need to add
+## $(brew --prefix)/opt/python@$VERSION/libexec/bin to your path
+## to get the right symlinks
 ##
 ##
 #
@@ -12,14 +17,14 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 ANACONDA="${ANACONDA:-false}"
 PIPENV="${PIPENV:-true}"
-PYTHON_VERSION="${PYTHON_VERSION:-3.10j}"
-STABLE_PYTHON="${STABLE_PYTHON:-3.9}"
+PYTHON_VERSION="${PYTHON_VERSION:-}"
+NEW_PYTHON="${NEW_PYTHON:-@3.10}"
 # we normally don't need the oldest version
-OLD_PYTHON="${OLD_PYTHON:-3.8}"
+OLD_PYTHON="${OLD_PYTHON:-@3.8}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
-while getopts "hdvaey" opt; do
+while getopts "hdvaeyp:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -34,6 +39,7 @@ while getopts "hdvaey" opt; do
 			              -a disable anaconda (normally installed)
 			              -e disable pipenv (normally installed)
 			  -y install pyenv to manage python versions (default: $PYENV)
+              -p install python version (default: ${PYTHON_VERSION:-stable})
 		EOF
 
 		exit 0
@@ -74,10 +80,22 @@ fi
 # Kite is Python code completer not used instead use Github copilot
 # https://github.com/kiteco/jupyterlab-kite
 #kite
-PACKAGES=(
+PACKAGES+=(
 	black
 	pydocstyle
 )
+
+if [[ -v PYTHON_VERSION ]]; then
+    log_verbose "will install $PYTHON_VERSION"
+	PACKAGES+=("python$PYTHON_VERSION")
+fi
+# if you are using 
+
+# Note do not quote, want to process each as separate arguments
+log_verbose "installing ${PACKAGES[*]}"
+# packages are ok globbed
+# shellcheck disable=SC2086
+package_install "${PACKAGES[@]}"
 
 # we need it to be python and pip to work and not python3 and pip3 only
 # https://docs.brew.sh/Homebrew-and-Python
@@ -85,7 +103,7 @@ if ! config_mark; then
 	# Use the brew location for python
 	config_add <<-'EOF'
 		# shellcheck disable=SC2155
-		[[ $PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH"
+		[[ $PATH =~ $(brew --prefix)/opt/python$VERSION/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python$VERSION/libexec/bin:$PATH"
 	EOF
 	log_warning "source $(config_profile) to get the correct python"
 fi
@@ -102,13 +120,6 @@ if $PIPENV; then
 	PACKAGES+=(pipenv)
 	log_verbose "use pipenv per directory pipenv install"
 fi
-
-# Note do not quote, want to process each as separate arguments
-log_verbose "installing ${PACKAGES[*]}"
-# packages are ok globbed
-# shellcheck disable=SC2086
-
-package_install "${PACKAGES[@]}"
 
 if $PYENV; then
 	log_verbose using pyenv
@@ -162,8 +173,8 @@ fi
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
 
-for version in "$OLD_PYTHON" "$STABLE_PYTHON"; do
-	log_verbose "Install Old python $version"
+for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
+	log_verbose "Install other python $version"
 	package_install "python@$version"
 done
 
