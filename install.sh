@@ -190,7 +190,14 @@ if ! config_mark; then
 	EOF
 fi
 
+log_verbose "Install git and git tooling"
+package_install git
+# the {-} means replace with null if FORCE_FLAG is not set
+"$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"
+log_verbose must be installed is git lfs is used before installing repos
+"$BIN_DIR/install-git-lfs.sh"
 log_verbose install repos only if not in docker
+
 if ! in_os docker &&
 	"$SCRIPT_DIR/install-repos.sh" "${FORCE_FLAG-}"; then
 	log_warning "install-repos.sh returned $?"
@@ -343,6 +350,7 @@ PACKAGES+=(
 	mmv
 	curl
 	git
+	pre-commit
 )
 
 if ! in_os mac; then
@@ -407,11 +415,6 @@ echo "$PATH"
 
 log_verbose "skipping install-flutter but somehow"
 #"$SCRIPT_DIR/install-flutter.sh"
-
-# the {-} means replace with null if FORCE_FLAG is not set
-"$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"
-log_verbose must be installed is git lfs is used before installing repos
-"$BIN_DIR/install-git-lfs.sh"
 
 log_verbose Also allow ssh into this machine so you can switch to using consoler
 if [[ $OSTYPE =~ darwin ]]; then
