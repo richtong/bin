@@ -98,20 +98,31 @@ if ! config_mark; then
 	log_verbose "installing into profile"
 	config_add <<-'EOF'
 		# shellcheck disable=SC1091
-        if command -v asdf >/dev/null; then
-        source "$(brew --prefix asdf)/libexec/asdf.sh"
+		        if command -v asdf >/dev/null; then
+		        source "$(brew --prefix asdf)/libexec/asdf.sh"
 	EOF
 	# https://linuxhint.com/associative_array_bash/
-	if [[ -n ${ASDF[direnv]} ]]; then
-		log_verbose "Found direnv installing config info"
-		config_add <<-'EOF'
-			eval "$(asdf exec direnv hook bash)"
-			direnv() { asdf exec direnv "$@"; }
-		EOF
-	fi
-    config_add <<-'EOF'
-        fi
-    EOF
+fi
+
+if config_mark "$(config_profile_zsh)"; then
+	log_verbose "installing into zsh profile"
+	# no longer need manual installation
+	asdf direnv setup --shell zsh --version "$((ASDF[direnv]))"
+	#config_add "$(config_profile_zsh)" <<-'EOF'
+	#    # shellcheck disable=SC1091
+	#    source "$(brew --prefix asdf)/libexec/asdf.sh"
+	#EOF
+fi
+
+if [[ -n ${ASDF[direnv]} ]]; then
+	log_verbose "Found direnv installing config info"
+	for SHELL_VERSION in bash zsh; do
+		asdf direnv setup --shell "$SHELL_VERSION" --version "$((ASDF[direnv]))"
+	done
+	#config_add <<-'EOF'
+	#    eval "$(asdf exec direnv hook bash)"
+	#    direnv() { asdf exec direnv "$@"; }
+	#EOF
 fi
 
 # https://github.com/asdf-vm/asdf-nodejs/issues/253
@@ -139,16 +150,17 @@ for p in "${!ASDF[@]}"; do
 	asdf global "$p" "${ASDF[$p]}"
 done
 
+# this is no longer needed run the asdf setup instead
 # https://github.com/asdf-community/asdf-direnv
-DIRENVRC="${DIRENVRC:-"$HOME/.config/direnv/direnvrc"}"
-if ! config_mark "$DIRENVRC"; then
-	log_verbose "adding to $DIRENVRC"
-	config_add "$DIRENVRC" <<-'EOF'
-		source "$(asdf direnv hook asdf)"
-		# make direnv silent by default
-		export DIRENV_LOG_FORMAT=""
-	EOF
-fi
+#DIRENVRC="${DIRENVRC:-"$HOME/.config/direnv/direnvrc"}"
+#if ! config_mark "$DIRENVRC"; then
+#    log_verbose "adding to $DIRENVRC"
+#    config_add "$DIRENVRC" <<-'EOF'
+#        source "$(asdf direnv hook asdf)"
+#        # make direnv silent by default
+#        export DIRENV_LOG_FORMAT=""
+#    EOF
+#fi
 
 ENVRC="${ENVRC:-"$HOME/.envrc"}"
 if ! config_mark "$ENVRC"; then
@@ -177,3 +189,6 @@ if ! config_mark "$HOME/.asdfrc"; then
 		        java_macos_integration_enable = yes
 	EOF
 fi
+
+log_warning "Please run 'asdf reshim' to install the plugins"
+log_warning "To enable direnv in every directory with a .envrc run direnv allow there"
