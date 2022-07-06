@@ -8,7 +8,8 @@
 set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
-SSH_DIR="${SSH_DIR:-"$HOME/.ssh"}"
+# delay evauation of $HOME until bash time
+SSH_DIR="${SSH_DIR:-"\$HOME/.ssh"}"
 while getopts "hdvk:" opt; do
 	case "$opt" in
 	h)
@@ -43,28 +44,35 @@ shift $((OPTIND - 1))
 if ! in_os linux; then
 	log_verbose "linux only"
 fi
-
 package_install keychain
 
-if (($# > 1)); then
-	# https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
-	KEYS=("$@")
-else
-	log_verbose "look in $SSH_DIR for keys"
-	# https://stackoverflow.com/questions/23356779/how-can-i-store-the-find-command-results-as-an-array-in-bash/54561526#54561526
-	# these may be symlinks so need -L
-	mapfile -d "" KEYS < <(find -L "$SSH_DIR" -name "*.id_ed25519" -o -name "*.id_rsa")
-	log_verbose "found ${KEYS[*]}"
-fi
-
 # needs to run on each subshell for windows terminal
-if ! config_mark "$(config_shell_profile)"; then
-	config_add "$(config-shell_profile)" <<-EOF
-		keychain "${KEYS[@]}"
+if ! config_mark "$(config_profile_shell)"; then
+    log_verbose "Adding keychain adding to $(config_profile_shell)"
+    if (($# > 1)); then
+        # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
+        log_verbose "Adding specific keys $*"
+        config_add "$(config_profile_shell)" <<-EOF
+keychain "$@"
+EOF
+    else
+        log_verbose "look in $SSH_DIR for keys deferred to bashrc time"
+        # https://stackoverflow.com/questions/23356779/how-can-i-store-the-find-command-results-as-an-array-in-bash/54561526#54561526
+        # these may be symlinks so need -L
+        config_add "$(config_profile_shell)" <<-EOF
+mapfile -d "" KEYS < <(find -L "$SSH_DIR" -name "*.id_ed25519" -o -name "*.id_rsa")
+keychain "\${KEYS[@]}"
+EOF
+    fi
+
+    # delay the hostname determiniation until profile time
+	config_add "$(config_profile_shell)" <<-'EOF'
 		source "$HOME/.keychain/$(uname -n)-sh"
 	EOF
+
+    log_verbose "sourcing profile"
+    source_profile
 fi
-source_profile
 
 log_verbose "using keys ${KEYS[*]}"
 log_verbose "ssh agent is $(env | grep SSH)"
