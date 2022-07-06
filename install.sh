@@ -477,7 +477,7 @@ source_profile
 # Assumes that personal.git is at the same level as src
 log_verbose Chain to your personal installs
 # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
-run_if "$SOURCE_DIR/user/$REPO_USER/bin/install.sh" "$@"
+run_if "$SOURCE_DIR/user/$REPO_USER/bin/user-install.sh" "$@"
 
 # log_verbose update all submodules only for special use cases
 # "$SOURCE_DIR/scripts/build/update-all-submodules.sh"
