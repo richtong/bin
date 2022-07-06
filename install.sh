@@ -165,29 +165,37 @@ source_lib lib-util.sh lib-version-compare.sh lib-git.sh \
 	lib-keychain.sh lib-config.sh
 shift $((OPTIND - 1))
 
-# do not use config_add because this added the comment line
-log_verbose "Add #! to profiles"
-for profile in "$(config_profile)" "$(config_profile_shell)"; do
-	if [[ ! -e $profile ]]; then
-		echo '#!/usr/bin/env bash' >>"$profile"
-	fi
-done
+log_verbose "Run preinstall.sh to get brew and 1Password installed."
+log_verbose "preinstall.sh can be run standalone to bootstrap everything"
+"$SCRIPT_DIR/preinstall.sh"
 
 log_verbose "Add #! for zshrc"
 if [[ ! -e $HOME/.zshrc ]]; then
 	echo "#!/usr/bin/env zsh" .."$HOME/.zshrc"
 fi
 
+# MacOS is not like Ubuntu, bash_profile is run for all Terminal
+# some apps still use .profile so source it. and .bashrc is never called
+# so run that as well.
+# sessions, but with Ubuntu, .profile is run before GUI starts
+# then .bash_profile is run for ssh and .bashrc run for Gnome Terminal
+# .bashrc should have alias and functions, .profile is non-interactive
 # source .profile as early as possible to get the paths right
 # .bash_profile will source profile and bashrc for the first shell
 if ! config_mark; then
-	config_add <<-'EOF'
-		# shellcheck disable=SC1091
-		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
-		if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
-		# shellcheck disable=SC1091
-		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
-	EOF
+    if in_os mac; then
+        config_add <<-'EOF'
+            # shellcheck disable=SC1091
+            if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
+EOF
+    fi
+    config_add <<-'EOF'
+        # shellcheck disable=SC1091
+        if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
+        # .local has mainly pip installed utilities
+        # shellcheck disable=SC1091
+        [[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
+EOF
 fi
 
 log_verbose "Install git and git tooling"
