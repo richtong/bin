@@ -44,6 +44,7 @@ shift $((OPTIND - 1))
 if ! in_os linux; then
 	log_verbose "linux only"
 fi
+source_profile
 package_install keychain
 
 # needs to run on each subshell for windows terminal

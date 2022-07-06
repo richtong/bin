@@ -54,47 +54,69 @@ if ! command -v brew >/dev/null; then
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-echo "make sure on reboot we can see it" >&2
+echo "make sure on we run bash in profiles" >&2
 for file in .profile .bash_profile .bashrc; do
 	if [[ ! -e $HOME/$file ]]; then
 		echo "#!/usr/bin/env bash" >"$HOME/$file"
 	fi
 done
 
-echo ".bash_profile existence shadows .profile so link to it" >&2
-if ! grep .profile "$HOME/.bash_profile"; then
-	cat >>"$HOME/.bash_profile" <<-'EOF'
-		source "$HOME/.profile"
-	EOF
+# echo ".bash_profile existence shadows .profile so link to it" >&2
+# if ! grep .profile "$HOME/.bash_profile"; then
+# 	cat >>"$HOME/.bash_profile" <<-'EOF'
+# 		source "$HOME/.profile"
+# 	EOF
+# fi
+
+echo "Set brew environment variables with .profile" >&2
+if ! grep "brew shellenv" "$HOME/.profile"; then
+    # default is an M1 Mac
+    HOMEBREW_PREFIX="/opt/homebrew"
+    if [[ $(uname) =~ Linux ]]; then
+        HOMEBREW_PREFIX="/home/linuxbrew/.linux"
+    elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
+        HOMEBREW_PREFIX="/usr/local"
+    fi
+    cat >>"$HOME/.profile" <<-EOF
+
+# installed by $SCRIPTNAME on $(date)"
+if ! command -v brew >/dev/null || [[ ! \$PATH =~ \$(brew --prefix) ]]; then eval "\$($HOMEBREW_PREFIX/bin/brew shellenv)"; fi
+EOF
 fi
 
-if ! grep shellenv "$HOME/.profile"; then
+#if [[ $(uname) =~ Linux ]] && ! command -v brew; then
 	# shellcheck disable=SC2016
-	echo '[[ -v HOMEBREW_PROFILE ]] || eval "$(/opt/homebrew/bin/brew shellenv)"' >>"$HOME/.profile"
-fi
+#	if ! grep "$HOME/.profile" /home/linuxbrew; then
+#		echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >>"$HOME/.profile"
+#	fi
+#	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#fi
 
-echo "make sure we can see brew source the profiles" >&2
+echo "make brew available in this script" >&2
 # shellcheck disable=SC1091,SC1090
-source "$HOME/.bash_profile"
+source "$HOME/.profile"
 
-if [[ $(uname) =~ Linux ]] && ! command -v brew; then
-	# shellcheck disable=SC2016
-	if ! grep "$HOME/.profile" /home/linuxbrew; then
-		echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >>"$HOME/.profile"
-	fi
-	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+if ! command -v brew >/dev/null; then
+    echo "Brew installation failed" >&2
+    exit 1
 fi
 
 brew update
 # coreutils gets us readlink
 brew install bash coreutils git gh
 
+if [[ ! $(command -v bash) =~ $HOMEBREW_PREFIX ]]; then
+    echo "Brew installation of bash failed" >&2
+    exit 2
+fi
+
 # https://github.com/thoughtbot/laptop/issues/447
 echo "change login shell to homebrew bash" >&2
-if ! grep "$(brew --prefix)" /etc/shells; then
-	sudo tee -a /etc/shells >/dev/null <<<"$(brew --prefix)/bin/bash"
+if ! grep "$HOMEBREW_PREFIX/bin/bash" /etc/shells; then
+	sudo tee -a /etc/shells >/dev/null <<<"$HOMEBREW_PREFIX/bin/bash"
 fi
-chsh -s "$(brew --prefix)/bin/bash"
+chsh -s "$HOMEBREW_PREFIX/bin/bash"
+
 # using google drive now for rich.vc
 brew install 1password google-drive
 
@@ -104,8 +126,7 @@ echo make sure we can see brew and coreutils on reboot
 if [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
 	echo "In VMWare assume we use 1Password and SS keys from the host"
 else
-	echo "In Native operating system install 1Password, Google Drive and
-	Veracrypt"
+	echo "In Native operating system install 1Password, Google Drive and Veracrypt"
 	if [[ $OSTYPE =~ darwin ]]; then
 		shopt -s failglob
 		open -a "/Applications/1Password"*.app
@@ -126,6 +147,7 @@ else
 		sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
 		curl -sS https://downloads.1password.com/linux/keys/1password.asc |
 			sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+        sudo apt update && sudo apt install 1password
 	fi
 
 fi

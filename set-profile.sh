@@ -3,26 +3,47 @@
 ## vi: ts=4 sw=4 et:
 ## Setting up the profiles correctly
 ## https://www.anintegratedworld.com/basics-of-osx-bashrc-v-profile-v-bash_profile/
+##
+## Because you can get the sourcing wrong whenever you add to PATh 
+## that the command has already been run so look for the string in PATH
+## before you add to it.
+##
 ## On ubuntu
-##  .profile runs once at boot time when the graphical interface unity start must be non-interactive
+## http://unix.stackexchange.com/questions/88106/why-doesnt-my-bash-profile-work
+##  .profile runs once at boot time by sh when the graphical interface starts must be non-interactive
+##   and its output is hidden and also read by just sh
+##   so use for setting environment variables. It is also read by sh if you
+##   invoke in interactively
 ##  .bash_profile runs when you ssh in (but not .profile) because it is a login shell
-##  .bashrc executes every time you do a Terminal/New Window because it is a non-login shell
-##  http://unix.stackexchange.com/questions/88106/why-doesnt-my-bash-profile-work
+##   so it needs .profile settings typically but it can also be interactive.
+##   Unlike the Mac, you do not need to source .profile when you get to bash
+##   because it already has it.
+##  .bashrc executes every time you do a Gnome Terminal/New Window because it is a non-login shell 
+##   so it is used for things like alias and functions which be exported from a
+##   parent shell so be careful on Ubuntu about sourcing it in .bash_profile to
+##   prevent duplication
+##
 ## On Mac
 ## http://stackoverflow.com/questions/18773051/how-to-make-os-x-to-read-bash-profile-not-profile-file
 ## when it boots or when a new Terminal Windows is created because
 ## it thinks it is a login shell (vs ubuntu where gnome terminal
 ## is a non-login shell), or an ssh sessions
-## started, looks for profiles in this order and *stops* on
+## started, looks for profiles in this order and *stops* when a file is found
 ## on the first one it finds
 ##   /etc/.profile
-##   ~/.bash_profile
-##   ~/.bash_login
-##   ~/.profile
-## Note that ~/.bashrc is never sourced
-##   .bashrc
+##   ~/.bash_profile - so put all the interacgtive stuff here. What would
+##   normally go into Ubuntu .profile goes here in the Mac
+##   ~/.bash_login - not commonly used
+##   ~/.profile - read by sh only, so .bash_profile should source it
+##   programs like the old MacPorts puts things into .profile assuming you are
+##   using sh and not bash. Put things in .profile if you want to support sh
+##   and bash
 ##
-## Install the profiles into the folder which defaults to $HOME  assumes SCRIPTNAME is set
+## Note that ~/.bashrc is never sourced but should containe those aliases. Mac
+## Terminal is non-standard in that it assumes every new Window is a new login
+## shell, so typically the bash_profile has to source .bashrc
+##
+## Install the profiles into the folder which defaults to $HOME assumes SCRIPTNAME is set
 ## Also assumes that SOURCE_DIR is set
 ##
 ##
