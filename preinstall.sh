@@ -48,7 +48,7 @@ set -u
 
 echo "install homebrew and bash" >&2
 if [[ $(uname) =~ Linux ]]; then
-	sudo apt install -y -qq curl git
+	sudo apt install -y -qq curl git git-lfs
 fi
 if ! command -v brew >/dev/null; then
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
