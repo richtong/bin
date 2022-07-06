@@ -73,10 +73,6 @@ shift $((OPTIND - 1))
 #log_exit "Mac only"
 #fi
 
-if [[ -v PYTHON_VERSION ]]; then
-	PACKAGES+=("python@$PYTHON_VERSION")
-fi
-
 # Kite is Python code completer not used instead use Github copilot
 # https://github.com/kiteco/jupyterlab-kite
 #kite
@@ -89,7 +85,11 @@ if [[ -v PYTHON_VERSION ]]; then
     log_verbose "will install $PYTHON_VERSION"
 	PACKAGES+=("python$PYTHON_VERSION")
 fi
-# if you are using 
+
+if [[ $PYTHON_VERSION =~ @ ]]; then
+    log_warning "Installing a python variant $PYTHON_VERSION"
+    log_warning "This is keg-only and requires manually linking"
+fi
 
 # Note do not quote, want to process each as separate arguments
 log_verbose "installing ${PACKAGES[*]}"
@@ -175,7 +175,7 @@ log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-package
 
 for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	log_verbose "Install other python $version"
-	package_install "python@$version"
+	package_install "python$version"
 done
 
 # now put the completions in bashrc so subshells can find them like pipenv uses
