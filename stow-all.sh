@@ -75,8 +75,10 @@ stow_if() {
 		log_verbose "$stow_dir/$package does not exist"
 		return
 	fi
+    # disable folding since you may create new files outside of stow
+    # enable -dot so the files can be called dot-bashrc so they are visible
 	log_verbose "$stow_dir/$package exists stowing to $target with --defer"
-	if ! stow --defer=".*" -d "$stow_dir" -t "$target" "$package"; then
+	if ! stow -v --no-folding --dotfiles --defer=".*" -d "$stow_dir" -t "$target" "$package"; then
 		log_verbose "error most likely an existing real file in $target remove to you should backup $target to $target.bak and try again"
 	fi
 }

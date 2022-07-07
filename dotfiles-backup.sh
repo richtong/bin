@@ -90,7 +90,7 @@ while [[ -n "$config_name" ]]; do
 			while IFS= read -r -d '' dotfile; do
 				# https://stackoverflow.com/questions/16623835/remove-a-fixed-prefix-suffix-from-a-string-in-bash#16623897
 				source_file="$SOURCE_ROOT${dotfile#"$dotfiles_dir"}"
-				log_verbose "for $dotfile looking for equivalent $source_file"
+				log_verbose "found $dotfile"
 				if [[ ! -e $source_file ]]; then
 					log_verbose "no $source_file nothing to backup"
 					continue
