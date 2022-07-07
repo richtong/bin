@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
+## vi: se ai sw=4 :
 ## The above gets the latest bash on Mac or Ubuntu
 ##
-#
 ## This script is designed to run *before* you have the git/src
-## Uses Dropbox to get private keys from ecryptfs Private
 ##
-## vi: se et ai sw=4 :
 ##
 #
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
@@ -184,18 +182,18 @@ fi
 # .bash_profile will source profile and bashrc for the first shell
 if ! config_mark; then
     if in_os mac; then
-        config_add <<-'EOF'
-            # shellcheck disable=SC1091
-            if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
-EOF
+		config_add <<-'EOF'
+		# shellcheck disable=SC1091
+			if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
+		EOF
     fi
     config_add <<-'EOF'
-        # shellcheck disable=SC1091
-        if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
-        # .local has mainly pip installed utilities
-        # shellcheck disable=SC1091
-        [[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
-EOF
+		# shellcheck disable=SC1091
+		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
+		# .local has mainly pip installed utilities
+		# shellcheck disable=SC1091
+		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
+	EOF
 fi
 
 log_verbose "Install git and git tooling"

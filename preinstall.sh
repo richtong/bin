@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# vi: sw=4 ts=4 et :
+# vi: sw=4 ts=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## bootstrap to install.sh copy this down and you will have enough to get the
@@ -13,6 +13,7 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 ORG_DOMAIN="${ORG_DOMAIN:-"richtong"}"
 WS_DIR="${WS_DIR:-"$HOME/ws"}"
+PROFILE="${PROFILE:-"$HOME/.bash_profile"}"
 OPTIND=1
 while getopts "hdvu:e:r:m:w:s:f:c:l:o:x:" opt; do
 	case "$opt" in
@@ -68,8 +69,8 @@ done
 # 	EOF
 # fi
 
-echo "Set brew environment variables with .profile" >&2
-if ! grep "brew shellenv" "$HOME/.profile"; then
+echo "Set brew environment variables with .bash_profile" >&2
+if ! grep "brew shellenv" "$PROFILE"; then
     # default is an M1 Mac
     HOMEBREW_PREFIX="/opt/homebrew"
     if [[ $(uname) =~ Linux ]]; then
@@ -77,7 +78,7 @@ if ! grep "brew shellenv" "$HOME/.profile"; then
     elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
         HOMEBREW_PREFIX="/usr/local"
     fi
-    cat >>"$HOME/.profile" <<-EOF
+    cat >>"$PROFILE" <<-EOF
 
 # installed by $SCRIPTNAME on $(date)"
 if ! command -v brew >/dev/null || [[ ! \$PATH =~ \$(brew --prefix) ]]; then eval "\$($HOMEBREW_PREFIX/bin/brew shellenv)"; fi
@@ -86,15 +87,15 @@ fi
 
 #if [[ $(uname) =~ Linux ]] && ! command -v brew; then
 	# shellcheck disable=SC2016
-#	if ! grep "$HOME/.profile" /home/linuxbrew; then
-#		echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >>"$HOME/.profile"
+#	if ! grep "$PROFILE" /home/linuxbrew; then
+#		echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >>"$PROFILE"
 #	fi
 #	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 #fi
 
 echo "make brew available in this script" >&2
 # shellcheck disable=SC1091,SC1090
-source "$HOME/.profile"
+source "$PROFILE"
 
 if ! command -v brew >/dev/null; then
     echo "Brew installation failed" >&2
