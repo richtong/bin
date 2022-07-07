@@ -163,9 +163,9 @@ source_lib lib-util.sh lib-version-compare.sh lib-git.sh \
 	lib-keychain.sh lib-config.sh
 shift $((OPTIND - 1))
 
-log_verbose "Run preinstall.sh to get brew and 1Password installed."
-log_verbose "preinstall.sh can be run standalone to bootstrap everything"
-"$SCRIPT_DIR/preinstall.sh"
+log_verbose "Run pre-install.sh to get brew and 1Password installed."
+log_verbose "pre-install.sh can be run standalone to bootstrap everything"
+"$SCRIPT_DIR/pre-install.sh"
 
 log_verbose "Add #! for zshrc"
 if [[ ! -e $HOME/.zshrc ]]; then
@@ -174,27 +174,42 @@ fi
 
 # MacOS is not like Ubuntu, bash_profile is run for all Terminal
 # some apps still use .profile so source it. and .bashrc is never called
-# so run that as well.
-# sessions, but with Ubuntu, .profile is run before GUI starts
-# then .bash_profile is run for ssh and .bashrc run for Gnome Terminal
-# .bashrc should have alias and functions, .profile is non-interactive
-# source .profile as early as possible to get the paths right
-# .bash_profile will source profile and bashrc for the first shell
+# so run that as well from bash_profile.
+#
+# With Ubuntu .bash_profile is run for ssh but .profile is run for the GUI
+# so make sure to source .profile from .bash_profile to pick up exports
+# .bashrc run all the time so use for alias and functions
+
+# so the adds to .bash_profile on Mac and .profile on Ubuntu
 if ! config_mark; then
     if in_os mac; then
+		log_verbose "Adding source .bash .profile to $(config_profile)"
 		config_add <<-'EOF'
-		# shellcheck disable=SC1091
+			# shellcheck disable=SC1091
 			if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
+			# shellcheck disable=SC1091
+			if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
 		EOF
     fi
+	log_verbose "Adding .local/bin to $(config_profile)"
     config_add <<-'EOF'
-		# shellcheck disable=SC1091
-		if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
 		# .local has mainly pip installed utilities
 		# shellcheck disable=SC1091
 		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
 	EOF
 fi
+# the adds to .bash_profile on Ubuntu to make sure to pick up .profile exports
+if in_os linux && ! config_mark "$(config_profile_interactive)"; then
+	log_verbose "For linux add .profile to $(config_profile_interactive)"
+	config_add "$(config_profile_interactive)" <<-"EOF"
+		# shellcheck disable=SC1091
+		if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
+	EOF
+fi
+exit
+
+# pick up the changes
+source_profile
 
 log_verbose "install needs gnu find etc"
 "$SCRIPT_DIR/install-gnu.sh"
@@ -251,13 +266,15 @@ log_verbose "Install Zsh opions"
 # https://www.computerhope.com/unix/bash/shopt.htm
 # globstart ls **/.profile matches all directoris in the path
 # nullglob: is * doesn't match it is turned into an empty string
+# https://stackoverflow.com/questions/24173875/is-there-a-way-to-export-bash-shell-options-to-subshell
 log_verbose "Add to .bashrc parameters not inherited from login shell"
 if ! config_mark "$(config_profile_shell)"; then
-	config_add <<-'EOF'
+	config_add "$(config_profile_shell)" <<-'EOF'
 		set -o vi
 		shopt -s autocd cdspell cdable_vars checkhash checkjobs \
 				checkwinsize cmdhist direxpand dirspell dotglob \
 				extglob globstar nullglob
+		export BASHOPTS
 	EOF
 fi
 log_verbose "install brew for linux and mac as common installer"

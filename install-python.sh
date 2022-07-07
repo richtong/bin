@@ -104,7 +104,7 @@ if ! config_mark; then
 	# Use the brew location for python
 	config_add <<-EOF
 		# shellcheck disable=SC2155
-		[[ \$PATH =~ \$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin ]] || export PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:$PATH"
+		[[ \$PATH =~ \$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin ]] || export PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
 	EOF
 	log_warning "source $(config_profile) to get the correct python"
 fi

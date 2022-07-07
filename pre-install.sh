@@ -13,7 +13,6 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 ORG_DOMAIN="${ORG_DOMAIN:-"richtong"}"
 WS_DIR="${WS_DIR:-"$HOME/ws"}"
-PROFILE="${PROFILE:-"$HOME/.bash_profile"}"
 OPTIND=1
 while getopts "hdvu:e:r:m:w:s:f:c:l:o:x:" opt; do
 	case "$opt" in
@@ -62,14 +61,14 @@ for file in .profile .bash_profile .bashrc; do
 	fi
 done
 
-# echo ".bash_profile existence shadows .profile so link to it" >&2
-# if ! grep .profile "$HOME/.bash_profile"; then
-# 	cat >>"$HOME/.bash_profile" <<-'EOF'
-# 		source "$HOME/.profile"
-# 	EOF
-# fi
+# no lib-config.sh so do our own simple detection
+if [[ $OSTYPE =~ darwin ]]; then
+    PROFILE="${PROFILE:-"$HOME/.bash_profile"}"
+else
+    PROFILE="${PROFILE:-"$HOME/.profile"}"
+fi
 
-echo "Set brew environment variables with .bash_profile" >&2
+echo "Set brew environment variables $PROFILE" >&2
 if ! grep "brew shellenv" "$PROFILE"; then
     # default is an M1 Mac
     HOMEBREW_PREFIX="/opt/homebrew"
@@ -84,14 +83,6 @@ if ! grep "brew shellenv" "$PROFILE"; then
 if ! command -v brew >/dev/null || [[ ! \$PATH =~ \$(brew --prefix) ]]; then eval "\$($HOMEBREW_PREFIX/bin/brew shellenv)"; fi
 EOF
 fi
-
-#if [[ $(uname) =~ Linux ]] && ! command -v brew; then
-	# shellcheck disable=SC2016
-#	if ! grep "$PROFILE" /home/linuxbrew; then
-#		echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >>"$PROFILE"
-#	fi
-#	eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-#fi
 
 echo "make brew available in this script" >&2
 # shellcheck disable=SC1091,SC1090
