@@ -68,7 +68,6 @@ shift $((OPTIND - 1))
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-install.sh
 
-log_verbose "this needs gnu find"
 
 config_name="$(util_full_version)"
 log_verbose "version is $config_name"
