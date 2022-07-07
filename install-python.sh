@@ -17,6 +17,7 @@ trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 ANACONDA="${ANACONDA:-false}"
 PIPENV="${PIPENV:-true}"
+# If version is set to null then the default python version is used
 PYTHON_VERSION="${PYTHON_VERSION:-}"
 NEW_PYTHON="${NEW_PYTHON:-@3.10}"
 # we normally don't need the oldest version
@@ -101,9 +102,9 @@ package_install "${PACKAGES[@]}"
 # https://docs.brew.sh/Homebrew-and-Python
 if ! config_mark; then
 	# Use the brew location for python
-	config_add <<-'EOF'
+	config_add <<-EOF
 		# shellcheck disable=SC2155
-		[[ $PATH =~ $(brew --prefix)/opt/python$VERSION/libexec/bin ]] || export PATH="$(brew --prefix)/opt/python$VERSION/libexec/bin:$PATH"
+		[[ \$PATH =~ \$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin ]] || export PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:$PATH"
 	EOF
 	log_warning "source $(config_profile) to get the correct python"
 fi
