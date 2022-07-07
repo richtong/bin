@@ -67,7 +67,14 @@ brew_install powerline-go svn
 if in_os mac; then
 	log_verbose "installing powerline fonts"
 	tap_install homebrew/cask-fonts
-	cask_install font-fira-mono-for-powerline \
+	# brew as of June 2022 does not handle reinstall correctly.
+	# throws an error.
+	log_verbose "Manually delete the fonts so install can happen"
+	rm "$HOME/Library/Fonts/FuraMono-"* \
+		"$HOME/Library/Fonts/SF-Mono-Powerline-"* \
+		"$HOME/Library/Fonts/Menlo"*
+	cask_install \
+		font-fira-mono-for-powerline \
 		font-sf-mono-for-powerline \
 		font-menlo-for-powerline
 else

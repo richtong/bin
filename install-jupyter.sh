@@ -121,6 +121,8 @@ PACKAGE=(
 
 package_install "${PACKAGE[@]}"
 
+# need to source again since basictex installs tlmgr
+source_profile
 # https://pandoc.org/installing.html
 log_verbose "Post basictex installation put in the fonts"
 tlmgr install collection-fontsrecommended
