@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-## vi: se ai sw=4 :
+## vi: se ai sw=4 ts=4 noet :
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## This script is designed to run *before* you have the git/src
@@ -195,6 +195,9 @@ if ! config_mark; then
 		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
 	EOF
 fi
+
+log_verbose "install needs gnu find etc"
+"$SCRIPT_DIR/install-gnu.sh"
 
 log_verbose "Install git and git tooling"
 package_install git

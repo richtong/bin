@@ -45,6 +45,7 @@ if command -v brew >/dev/null; then
 	log_exit brew already installed
 fi
 
+# this may no longer be necessary
 # https://www.thoughtco.com/instal-ruby-on-linux-2908370#:~:text=How%20to%20Install%20Ruby%20on%20Linux%201%20Open,exact%2C%20but%20if%20you%20are%20...%20See%20More.
 homebrew_completion() {
 	if ! config_mark; then
@@ -74,7 +75,7 @@ if in_os linux || in_os wsl-linux; then
 	if ! config_mark; then
 		config_add <<-'EOF'
 			    # test for variable in case other apps override homebrew
-				[[ -v $BREW_PREFIX ]] || eval $($(brew --prefix)/bin/brew shellenv)
+				[[ -v HOMEBREW_PREFIX ]] || eval $($HOMEBREW_PREFIX/bin/brew shellenv)
 		EOF
 		homebrew_completion
 	fi

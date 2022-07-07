@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# vi: sw=4 ts=4:
+# vim: sw=4 ts=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## bootstrap to install.sh copy this down and you will have enough to get the
