@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 ##
-## installs keys and the right keychain
+## installs keys and the right keychain (deprecated)
+## Ubuntu 22.04 native gnome key ring now supports id_25519
+## This replaces the gnome key ring with keychain 
+## but now instead of doing this you just need to do an ssh-add
 ##
 ##@author Rich Tong
 ##@returns 0 on success
@@ -37,37 +40,47 @@ done
 
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-keychain.sh lib-install.sh lib-util.sh lib-config.sh
+source_lib lib-keychain.sh lib-install.sh lib-util.sh lib-config.sh lib-version-compare.sh
 set -u
 shift $((OPTIND - 1))
 
 if ! in_os linux; then
 	log_verbose "linux only"
 fi
+
+log_verbose "In linux $(in_linux) with version $(linux_version)"
+if in_linux ubuntu && vergte "$(linux_version)" 22 ; then
+    log_verbose "Latest Ubuntu 22.04 or later can use keyring"
+    if ! config_mark "$HOME/.ssh/config"; then
+        config_add "$HOME/.ssh/config" <<<"AddKeysToAgent yes"
+    fi
+    log_exit "Ubuntu set to automatically add persistent passphrase remembering"
+fi
+
 source_profile
 package_install keychain
 
-# needs to run on each subshell for windows terminal
-if ! config_mark "$(config_profile_shell)"; then
-    log_verbose "Adding keychain adding to $(config_profile_shell)"
+log_verbose "needs to run on each terminal window"
+if ! config_mark; then
+    log_verbose "Adding keychain adding to $(config_profile)"
     if (($# > 1)); then
         # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
         log_verbose "Adding specific keys $*"
-        config_add "$(config_profile_shell)" <<-EOF
+        config_add <<-EOF
 keychain "$@"
 EOF
     else
         log_verbose "look in $SSH_DIR for keys deferred to bashrc time"
         # https://stackoverflow.com/questions/23356779/how-can-i-store-the-find-command-results-as-an-array-in-bash/54561526#54561526
         # these may be symlinks so need -L
-        config_add "$(config_profile_shell)" <<-EOF
+        config_add <<-EOF
 mapfile -d "" KEYS < <(find -L "$SSH_DIR" -name "*.id_ed25519" -o -name "*.id_rsa")
 keychain "\${KEYS[@]}"
 EOF
     fi
 
-    # delay the hostname determiniation until profile time
-	config_add "$(config_profile_shell)" <<-'EOF'
+    # delay the hostname determination until profile time
+	config_add <<-'EOF'
 		source "$HOME/.keychain/$(uname -n)-sh"
 	EOF
 
