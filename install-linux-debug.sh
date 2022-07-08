@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
-## The above gets the latest bash on Mac or Ubuntu
+## vim: se et ai sw=4 :
 ##
 #
-## This script is designed to run *before* you have the git/src
-## Uses Dropbox to get private keys from ecryptfs Private
-##
-## vi: se et ai sw=4 :
-##
+## install grub and moves to passwordless sudo
 #
 # need to use trap and not -e so bashdb works
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"

@@ -206,7 +206,6 @@ if in_os linux && ! config_mark "$(config_profile_interactive)"; then
 		if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
 	EOF
 fi
-exit
 
 # pick up the changes
 source_profile
@@ -380,16 +379,12 @@ PACKAGES+=(
 )
 
 if ! in_os mac; then
-	log_verbose install linux packages
-	# qemu-user-static let's docker run arm containers
-	# note that bootstrap-dev now install python-pip and python-yaml and uuid-runtime
-	# but we repeat here so not dependent on bootstrap-dev
-	PACKAGES+=(uuid-runtime python3-pip python-yaml)
+	log_verbose "install linux packages"
+	PACKAGES+=(uuid-runtime)
 	# qemu-user-static allows qemu to run non-Intel binaries as does bin-fmt-supprt
 	# ppa-purge to remove ubuntu repos
 	# v4l-utils for usb cameras
-	# only needed for surround.io
-	# PACKAGES+=" qemu-user-static binfmt-support v4l-utils "
+	PACKAGES+=(qemu-user-static binfmt-support v4l-utils)
 	# This needs to be installed before docker-py which is no longer needed
 	# PYTHON_PACKAGES+=" requests[security] "
 	# find members of a group needed by ZFS tools
@@ -407,7 +402,7 @@ if ! in_os mac; then
 	if ! in_wsl; then
 		log_verbose install snap packages only in real linux not in wsl
 		# https://snapcraft.io/install/bfg-repo-cleaner/ubunt-
-		sudo snap install bfg-repo-clean --beta
+		sudo snap install bfg-repo-cleaner --beta
 	fi
 
 fi
@@ -434,7 +429,6 @@ log_verbose "installing development and devops systems"
 "$SCRIPT_DIR/install-gcloud.sh"
 "$SCRIPT_DIR/install-netlify.sh"
 "$SCRIPT_DIR/install-terraform.sh"
-echo "$PATH"
 "$SCRIPT_DIR/install-jupyter.sh"
 "$SCRIPT_DIR/install-ruby.sh"
 "$SCRIPT_DIR/install-1password.sh"
