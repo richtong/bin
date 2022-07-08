@@ -12,7 +12,9 @@
 # use the trap on ERR
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-PACKAGES="${PACKAGES:-" beta "}"
+# beta now installed by default at least on Ubuntu
+#PACKAGES="${PACKAGES:-" beta "}"
+PACKAGES="${PACKAGES:-""}"
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 INSTALL_DIR="${INSTALL_DIR:-"$HOME/.local/bin"}"
@@ -52,7 +54,7 @@ source_lib lib-install.sh lib-util.sh lib-config.sh
 
 if in_os mac; then
 	log_verbose install google cloud sdk
-	cask_install google-cloud-sdk
+	package_install google-cloud-sdk
 
 	log_verbose "checking for gcloud in $(config_profile_shell)"
 	if ! config_mark "$(config_profile_shell)"; then
@@ -89,16 +91,29 @@ elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then
 	fi
 
 elif in_os linux; then
-	# https://tecadmin.net/how-to-install-google-cloud-sdk-on-ubuntu-20-04/#:~:text=How%20To%20Install%20Google%20Cloud%20SDK%20on%20Ubuntu,comamnd%20line%20reference%20to%20start%20working%20with%20it.
-	snap_install google-cloud-sdk
+    # https://snapcraft.io/install/google-cloud-sdk/ubuntu
+    # installs but cannot access components
+	# snap_install --classic google-cloud-sdk 
+    # must install from repo instead
+    sudo apt-get install apt-transport-https ca-certificates gnupg
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+    # apt-key deprecated
+    # curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.gpg >/dev/null
+    sudo apt-get -y update && sudo apt-get install -y google-cloud-sdk
 fi
 
 hash -r
 log_verbose install additional packages "$PACKAGES" "$@"
 
-# all packages cannot contain spaces
-# shellcheck disable=SC2086
-gcloud components install --quiet $PACKAGES "$@"
+# Ubuntu has beta already
+if in_os mac; then
+    PACKAGES+=" beta "
+fi
+if [[ -n $PACKAGES ]]; then
+    # shellcheck disable=SC2086
+    gcloud components install --quiet $PACKAGES "$@"
+fi 
 
 # https://stackoverflow.com/questions/42379685/can-i-automate-google-cloud-sdk-gcloud-init-interactive-command
 if [[ $(gcloud config configurations list | wc -l) -lt 2 ]]; then
