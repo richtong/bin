@@ -94,9 +94,9 @@ declare -A ASDF+=(
 )
 
 # http://asdf-vm.com/guide/getting-started.html#_3-install-asdf
-if ! config_mark; then
+if ! config_mark "$(config_profile_nonexportable)"; then
 	log_verbose "installing into profile"
-	config_add <<-'EOF'
+	config_add "$(config_profile_nonexportable)" <<-'EOF'
 		# shellcheck disable=SC1091
 		        if command -v asdf >/dev/null; then
 		        source "$(brew --prefix asdf)/libexec/asdf.sh"

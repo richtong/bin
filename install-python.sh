@@ -40,7 +40,7 @@ while getopts "hdvaeyp:" opt; do
 			              -a disable anaconda (normally installed)
 			              -e disable pipenv (normally installed)
 			  -y install pyenv to manage python versions (default: $PYENV)
-              -p install python version (default: ${PYTHON_VERSION:-stable})
+			              -p install python version (default: ${PYTHON_VERSION:-stable})
 		EOF
 
 		exit 0
@@ -83,13 +83,13 @@ PACKAGES+=(
 )
 
 if [[ -v PYTHON_VERSION ]]; then
-    log_verbose "will install $PYTHON_VERSION"
+	log_verbose "will install $PYTHON_VERSION"
 	PACKAGES+=("python$PYTHON_VERSION")
 fi
 
 if [[ $PYTHON_VERSION =~ @ ]]; then
-    log_warning "Installing a python variant $PYTHON_VERSION"
-    log_warning "This is keg-only and requires manually linking"
+	log_warning "Installing a python variant $PYTHON_VERSION"
+	log_warning "This is keg-only and requires manually linking"
 fi
 
 # Note do not quote, want to process each as separate arguments
@@ -183,8 +183,9 @@ done
 # the --completion is removed as of Nov 2021 so there is a new way
 #eval "$(pipenv --completion)"
 # https://github.com/pypa/pipenv/issues/4860
-if $PIPENV && ! config_mark "$(config_profile_shell)"; then
-	config_add "$(config_profile_shell)" <<-'EOF'
-		eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
-	EOF
-fi
+# fixed as o July 2022 and this causes a long pause in ssh when in .bashrc
+#if $PIPENV && ! config_mark "$(config_profile_shell)"; then
+#    config_add "$(config_profile_shell)" <<-'EOF'
+#        eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
+#    EOF
+#fi

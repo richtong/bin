@@ -138,8 +138,8 @@ if ! $INSTALL_POWERLINE; then
 	# for pipenv shell etc
 	# note max-width seems buggy will sometimes just truncate
 	#-max-width 30 \
-	if ! config_mark "$(config_profile_shell)"; then
-		config_add "$(config_profile_shell)" <<EOF
+	if ! config_mark "$(config_profile_nonexportable)"; then
+		config_add "$(config_profile_nonexportable)" <<EOF
 function _update_ps1() {
     # shellcheck disable=SC2046
     PS1=\$(powerline-go \
@@ -191,8 +191,8 @@ if [[ ! -e $PROFILE/config.json ]]; then
 	cp -r "$config/"* "$PROFILE"
 fi
 
-if ! config_mark "$(config_profile_shell)"; then
-	config_add "$(config_profile_shell)" <<EOF
+if ! config_mark "$(config_profile_nonexportable)"; then
+	config_add "$(config_profile_nonexportable)" <<EOF
 if [[ -r $powerline ]]; then
 	powerline-daemon -q
 	export POWERLINE_BASH_CONTINUATION=1

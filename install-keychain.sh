@@ -60,32 +60,32 @@ fi
 source_profile
 package_install keychain
 
-log_verbose "needs to run on each terminal window"
-if ! config_mark; then
-    log_verbose "Adding keychain adding to $(config_profile)"
-    if (($# > 1)); then
-        # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
-        log_verbose "Adding specific keys $*"
-        config_add <<-EOF
-keychain "$@"
-EOF
-    else
-        log_verbose "look in $SSH_DIR for keys deferred to bashrc time"
-        # https://stackoverflow.com/questions/23356779/how-can-i-store-the-find-command-results-as-an-array-in-bash/54561526#54561526
-        # these may be symlinks so need -L
-        config_add <<-EOF
-mapfile -d "" KEYS < <(find -L "$SSH_DIR" -name "*.id_ed25519" -o -name "*.id_rsa")
-keychain "\${KEYS[@]}"
-EOF
-    fi
+# needs to run on each subshell for windows terminal
+if ! config_mark "$(config_profile_nonexportable)"; then
+	log_verbose "Adding keychain adding to $(config_profile_nonexportable)"
+	if (($# > 1)); then
+		# https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
+		log_verbose "Adding specific keys $*"
+		config_add "$(config_profile_nonexportable)" <<-EOF
+			keychain "$@"
+		EOF
+	else
+		log_verbose "look in $SSH_DIR for keys deferred to bashrc time"
+		# https://stackoverflow.com/questions/23356779/how-can-i-store-the-find-command-results-as-an-array-in-bash/54561526#54561526
+		# these may be symlinks so need -L
+		config_add "$(config_profile_nonexportable)" <<-EOF
+			mapfile -d "" KEYS < <(find -L "$SSH_DIR" -name "*.id_ed25519" -o -name "*.id_rsa")
+			keychain "\${KEYS[@]}"
+		EOF
+	fi
 
-    # delay the hostname determination until profile time
-	config_add <<-'EOF'
+	# delay the hostname determiniation until profile time
+	config_add "$(config_profile_nonexportable)" <<-'EOF'
 		source "$HOME/.keychain/$(uname -n)-sh"
 	EOF
 
-    log_verbose "sourcing profile"
-    source_profile
+	log_verbose "sourcing profile"
+	source_profile
 fi
 
 log_verbose "using keys ${KEYS[*]}"

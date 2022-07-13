@@ -75,10 +75,10 @@ if [[ $OSTYPE =~ darwin ]]; then
 	# But in MacOSX the Terminal.app calls .bash_profile each time and then
 	# .bashrc and with iterm2 it just calls bashrc so put it there
 	#
-	if ! config_mark "$(config_profile_shell)"; then
+	if ! config_mark "$(config_profile_nonexportable)"; then
 		log_verbose "Adding .dircolors to $PROFILE"
 		log_verbose note on Mac assumes gnu path is loaded first
-		config_add "$(config_profile_shell)" <<-'EOF'
+		config_add "$(config_profile_nonexportable)" <<-'EOF'
 			                if command -v gdircolors >/dev/null; then
 			                    if [[ -r "$HOME/.dircolors" ]]; then eval "$(gdircolors -b "$HOME/.dircolors")"
 			                                                    else eval "$(gdircolors -b)"; fi

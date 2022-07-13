@@ -86,11 +86,11 @@ if $ALIAS; then
 	done
 	# note that zsh only has .zshrc but bash has .bash_profile and .bashrc
 	# alias should go into the .bashrc for interactive shell
-	for SHELL_PROFILE in "$(config_profile_shell)" "$(config_profile_zsh)"; do
+	for SHELL_PROFILE in "$(config_profile_nonexportable)" "$(config_profile_zsh)"; do
 		log_verbose "Add alias to the interactive shell to $SHELL_PROFILE"
 		if ! config_mark "$SHELL_PROFILE"; then
 			config_add "$SHELL_PROFILE" <<-EOF
-                if command -v nvim >/dev/null; then alias vi=nvim; fi
+				                if command -v nvim >/dev/null; then alias vi=nvim; fi
 			EOF
 		fi
 	done

@@ -267,8 +267,8 @@ log_verbose "Install Zsh opions"
 # nullglob: is * doesn't match it is turned into an empty string
 # https://stackoverflow.com/questions/24173875/is-there-a-way-to-export-bash-shell-options-to-subshell
 log_verbose "Add to .bashrc parameters not inherited from login shell"
-if ! config_mark "$(config_profile_shell)"; then
-	config_add "$(config_profile_shell)" <<-'EOF'
+if ! config_mark "$(config_profile_nonexportable)"; then
+	config_add "$(config_profile_nonexportable)" <<-'EOF'
 		set -o vi
 		shopt -s autocd cdspell cdable_vars checkhash checkjobs \
 				checkwinsize cmdhist direxpand dirspell dotglob \

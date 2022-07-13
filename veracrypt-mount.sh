@@ -71,10 +71,10 @@ if [[ $OSTYPE =~ linux ]]; then
 	sudo mkdir -p "$SECRET_MOUNTPOINT"
 	log_verbose "add to $(config_profile) and make sure it is before the keychain commands"
 
-	if ! config_mark; then
+	if ! config_mark "$(config_profile_interactive)"; then
 		log_verbose "adding mounting to the $(config_profile)"
 		log_verbose in Linux, the FAT partition is mounted with mask 700 by default
-		config_add <<-EOF
+		config_add "$(config_profile_interactive)" <<-EOF
 			if ! veracrypt -t -l "$SECRET_MOUNTPOINT" >/dev/null 2>&1
 			then
 			    echo now enter the password for the hidden volume this will at least a minute
@@ -106,10 +106,10 @@ log_verbose Mac install
 # note we are using the -v option so we can figure the block device
 mkdir -p "$SECRET_MOUNTPOINT"
 # https://kifarunix.com/how-to-use-veracrypt-on-command-line-to-encrypt-drives-on-ubuntu-18-04/
-if ! config_mark; then
+if ! config_mark "$(config_profile_interactive)"; then
 	log_verbose "adding fstab entry to close permissions"
 	# http://pclosmag.com/html/issues/200709/page07.html
-	config_add <<EOF
+	config_add "$(config_profile_interactive)" <<EOF
 # finds the first match for of secret file on any matching $SECRET_DRIVE
 if ! pgrep -q "Google Drive"; then echo "Start or wait for Google Drive.app"; sleep 60; fi
 veracrypt_secret="\$(find -L "\$HOME" -maxdepth 3 -name "$SECRET_FILE" 2>/dev/null | grep -m 1 "$SECRET_DRIVE")"
