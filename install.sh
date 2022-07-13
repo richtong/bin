@@ -182,7 +182,7 @@ fi
 
 # so the adds to .bash_profile on Mac and .profile on Ubuntu
 if ! config_mark; then
-    if in_os mac; then
+	if in_os mac; then
 		log_verbose "Adding source .bash .profile to $(config_profile)"
 		config_add <<-'EOF'
 			# shellcheck disable=SC1091
@@ -190,9 +190,9 @@ if ! config_mark; then
 			# shellcheck disable=SC1091
 			if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
 		EOF
-    fi
+	fi
 	log_verbose "Adding .local/bin to $(config_profile)"
-    config_add <<-'EOF'
+	config_add <<-'EOF'
 		# .local has mainly pip installed utilities
 		# shellcheck disable=SC1091
 		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
@@ -498,6 +498,9 @@ source_profile
 log_verbose Chain to your personal installs
 # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
 run_if "$SOURCE_DIR/user/$REPO_USER/bin/user-install.sh" "$@"
+
+log_verbose "Now chain to .rc"
+config_setup_end
 
 # log_verbose update all submodules only for special use cases
 # "$SOURCE_DIR/scripts/build/update-all-submodules.sh"
