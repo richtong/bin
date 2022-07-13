@@ -54,8 +54,8 @@ if ! command -v brew >/dev/null; then
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-echo "make sure on we run bash in profiles" >&2
 for file in .profile .bash_profile .bashrc; do
+	echo "no $file create a shebang" >&2
 	if [[ ! -e $HOME/$file ]]; then
 		echo "#!/usr/bin/env bash" >"$HOME/$file"
 	fi
@@ -63,34 +63,34 @@ done
 
 # no lib-config.sh so do our own simple detection
 if [[ $OSTYPE =~ darwin ]]; then
-    PROFILE="${PROFILE:-"$HOME/.bash_profile"}"
+	PROFILE="${PROFILE:-"$HOME/.bash_profile"}"
 else
-    PROFILE="${PROFILE:-"$HOME/.profile"}"
+	PROFILE="${PROFILE:-"$HOME/.profile"}"
 fi
 
 echo "Set brew environment variables $PROFILE" >&2
 if ! grep "brew shellenv" "$PROFILE"; then
-    # default is an M1 Mac
-    HOMEBREW_PREFIX="/opt/homebrew"
-    if [[ $(uname) =~ Linux ]]; then
-        HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
-    elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
-        HOMEBREW_PREFIX="/usr/local"
-    fi
-    cat >>"$PROFILE" <<-EOF
+	# default is an M1 Mac
+	HOMEBREW_PREFIX="/opt/homebrew"
+	if [[ $(uname) =~ Linux ]]; then
+		HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+	elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
+		HOMEBREW_PREFIX="/usr/local"
+	fi
+	cat >>"$PROFILE" <<-EOF
 
-# installed by $SCRIPTNAME on $(date)"
-if ! command -v brew >/dev/null || [[ ! \$PATH =~ \$(brew --prefix) ]]; then eval "\$($HOMEBREW_PREFIX/bin/brew shellenv)"; fi
-EOF
+		# installed by $SCRIPTNAME on $(date)"
+		if ! command -v brew >/dev/null || [[ ! \$PATH =~ \$(brew --prefix) ]]; then eval "\$($HOMEBREW_PREFIX/bin/brew shellenv)"; fi
+	EOF
 fi
 
-echo "make brew available in this script" >&2
+echo "make brew available in this script source $PROFILE" >&2
 # shellcheck disable=SC1091,SC1090
 source "$PROFILE"
 
 if ! command -v brew >/dev/null; then
-    echo "Brew installation failed" >&2
-    exit 1
+	echo "Brew installation failed" >&2
+	exit 1
 fi
 
 brew update
@@ -98,8 +98,8 @@ brew update
 brew install bash coreutils git gh
 
 if [[ ! $(command -v bash) =~ $HOMEBREW_PREFIX ]]; then
-    echo "Brew installation of bash failed" >&2
-    exit 2
+	echo "Brew installation of bash failed" >&2
+	exit 2
 fi
 
 # https://github.com/thoughtbot/laptop/issues/447
@@ -120,7 +120,7 @@ if [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
 else
 	echo "In Native operating system install 1Password, Google Drive and Veracrypt"
 	if [[ $OSTYPE =~ darwin ]]; then
-        brew install 1password google-drive veracrypt
+		brew install 1password google-drive veracrypt
 		read -rp "Connect to 1Password and press enter to continue"
 		open -a "Google Drive"
 		read -rp "Connect to the user account with the Veracrypt with the ssh keys"
@@ -128,26 +128,26 @@ else
 		echo "On Ubuntu go to Settings > Online Accounts > Google and sign on"
 		# https://support.1password.com/install-linux/
 		KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
-        if [[ ! -e $KEYRING ]]; then 
-            curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-                sudo gpg --dearmor --output "$KEYRING"
-        fi
-        REPO="https://downloads.1password.com/linux/debian/amd64"
-        if ! grep -q "$REPO" /etc/apt/sources.list.d/1password.list; then
-            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] $REPO stable main" |
-			    sudo tee /etc/apt/sources.list.d/1password.list
-        fi
-        sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
-        curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol |
-            sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
+		if [[ ! -e $KEYRING ]]; then
+			curl -sS https://downloads.1password.com/linux/keys/1password.asc |
+				sudo gpg --dearmor --output "$KEYRING"
+		fi
+		REPO="https://downloads.1password.com/linux/debian/amd64"
+		if ! grep -q "$REPO" /etc/apt/sources.list.d/1password.list; then
+			echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] $REPO stable main" |
+				sudo tee /etc/apt/sources.list.d/1password.list
+		fi
+		sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
+		curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol |
+			sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
 
 		KEYRING_DIR="/usr/share/debsig/keyrings/AC2D62742012EA22"
 		sudo mkdir -p "KEYRING_DIR"
-        if [[ ! -e $KEYRING_DIR/debsig.gpg ]]; then
-            curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-                sudo gpg --dearmor --output "$KEYRING_DIR/debsig.gpg"
-        fi
-        sudo apt update -y && sudo apt install -y 1password
+		if [[ ! -e $KEYRING_DIR/debsig.gpg ]]; then
+			curl -sS https://downloads.1password.com/linux/keys/1password.asc |
+				sudo gpg --dearmor --output "$KEYRING_DIR/debsig.gpg"
+		fi
+		sudo apt update -y && sudo apt install -y 1password
 	fi
 
 fi
