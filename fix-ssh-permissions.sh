@@ -71,7 +71,7 @@ for path in "${PATHS[@]}"; do
 			# closing up all it $rel_path children recursively note that -R does not follow symlinks properly so we run it ourselves
 			find -L "\$HOME/$rel_path" -type f -exec chmod 600 {} \;
 			# tighten up all keys to just readonly
-			find -L "\$HOME/$rel_path" \( -name "*.id_rsa" -o -name "*.id_ed25519" \) -exec chmod 400 {} \;
+			find -L "\$HOME/$rel_path" -not -type l \( -name "*.id_rsa" -o -name "*.id_ed25519" \) -exec chmod 400 {} \;
 		EOF
 	fi
 done
