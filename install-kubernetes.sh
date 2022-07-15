@@ -12,11 +12,12 @@ DOCKER="${DOCKER:-false}"
 MINIKUBE="${MINIKUBE:-false}"
 FORCE="${FORCE:-false}"
 MICROK8S="${MICROK8S:-true}"
+DEPRECATED_KUBEFLOW="${DEPRECATED_KUBEFLOW:-false}"
 KIND="${KIND:-false}"
 MULTIPASS="${MULTIPASS:-false}"
 COLIMA="${COLIMA:-false}"
 OPTIND=1
-while getopts "hdvmuiofkc" opt; do
+while getopts "hdvmuiofkcb" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -26,9 +27,9 @@ while getopts "hdvmuiofkc" opt; do
 				-c Install Colima with Kubernetes support (default: $COLIMA)
 				-o Install Docker with a single cluster version (default: $DOCKER)
 				-m Install minikube a single node Kubernetes (default: $MINIKUBE)
-				-i Install microK8s using Multipass does not work with kubeflow (default: $MICROK8S)
-				-k Install Kind a lightweight minikube (default $KIND)
-				-u Install Multipass with Microk8s inside VM (default: $MULTIPASS)
+				-k Install a lightweight minikube (default $KIND)
+				-u Install Multipass enables Microk8s from inside VM (default: $MULTIPASS)
+				-i Install microK8s using Multipass with juju's kubeflow (default: $MICROK8S)
 		EOF
 		exit 0
 		;;
@@ -49,6 +50,9 @@ while getopts "hdvmuiofkc" opt; do
 		;;
 	i)
 		MICROK8S=true
+		;;
+	b)
+		DEPRECATED_KUBEFLOW=true
 		;;
 	u)
 		MULTIPASS=false
@@ -156,6 +160,7 @@ if $MINIKUBE; then
 fi
 
 if $MICROK8S; then
+	# https://ubuntu.com/tutorials/installing-microk8s-on-apple-m1-silicon#1-installation
 	log_verbose "Install MicroK8s"
 	tap_install ubuntu/microk8s
 	package_install microk8s multipass
@@ -166,7 +171,7 @@ if $MICROK8S; then
 	if ! microk8s --help >/dev/null; then
 		# https://github.com/canonical-web-and-design/microk8s.io/issues/239
 		log_verbose "microk8s failed delete vm and retry"
-		microk8s un9install
+		microk8s uninstall
 		multipass delete microk8s-vm
 		multipass purge
 		if ! microk8s install; then
@@ -180,7 +185,9 @@ if $MICROK8S; then
 	fi
 	microk8s enable dashboard dns storage
 	log_verbose "run microk8s dashboard-proxy to see dashboard"
+	log_verbose "run microk8s kubectl to use its own kubectl"
 	log_verbose "to turn on and off use microk8s stop and microk8s start"
+
 	log_verbose "enabling the system kubectl to see microk8s"
 	# only works with v3 of y1, can't figure out how to make it work with v4
 	# microk8s config | yq m -i -a append "$HOME/.kube/config" -
@@ -191,41 +198,61 @@ if $MICROK8S; then
 	kubectl konfig import --save "$TEMP"
 	rm "$TEMP"
 	log_verbose "to use the microk8s cluster run kubectl config use-contest microk8s"
-	# https://microk8s.io/docs/addon-kubeflow
-	log_verbose "workaround for kubeflow adding user groups"
-	# note we need an eval to delay finding these shell variable in the VM
-	# because microk8s does sudo for everything and kubeflow does not want
-	# that https://github.com/ubuntu/microk8s/issues/1763#issuecomment-731999949
-	# shellcheck disable=SC2016
-	log_verbose "running usermod"
-	# shellcheck disable=SC2016
-	if ! multipass exec microk8s-vm -- eval 'sudo usermod -a -G microk8s $USER'; then
-		log_error 2 "sudo usermod failed"
+	# metal load balancer does not work on MacOS multipass
+	# https://charmed-kubeflow.io/docs/quickstart
+	microk8s enable dns storage ingress
+	if ! in_os mac; then
+		microk8s enable metal-lb:10.64.140.43-10.64.140.49
 	fi
+	microk8s status --wair-ready
+	package_install juju
+	juju bootstrap microk8s
+	juju add-model kubeflow
+	juju deploy kubeflow-lite --trust
+	# Not clear what the url is
+	# on mac since there is a proxy
+	juju config dex-auth public-url=http://192.168.41.1
+	juju config oidc-auth public-url=http://192.168.41.1
+	juju config dex-auth satic-username=admin
+	juju config dex-auth static-password=admin
+	log_verbose "dex username and password admin/admin"
 
-	# shellcheck disable=SC2016
-	log_verbose "running chown"
-	# shellcheck disable=SC2016
-	if ! multipass exec microk8s-vm -- eval 'sudo chown -f -R $USER $HOME/.kube'; then
-		log_error 3 "sudo chown failed"
+	# https://charmed-kubeflow.io/docs/quickstart as of July 2022
+	if $DEPRECATED_KUBEFLOW; then
+		# https://github.com/canonical/microk8s/issues/1763#issuecomment-731999949
+		log_verbose "As of April 2021 this does not work"
+		# https://microk8s.io/docs/addon-kubeflow deprecated
+		log_verbose "workaround for kubeflow adding user groups"
+		# note we need an eval to delay finding these shell variable in the VM
+		# because microk8s does sudo for everything and kubeflow does not want
+		# that https://github.com/ubuntu/microk8s/issues/1763#issuecomment-731999949
+		# shellcheck disable=SC2016
+		log_verbose "running usermod"
+		# shellcheck disable=SC2016
+		if ! multipass exec microk8s-vm -- eval 'sudo usermod -a -G microk8s $USER'; then
+			log_error 2 "sudo usermod failed"
+		fi
+		# shellcheck disable=SC2016
+		log_verbose "running chown"
+		# shellcheck disable=SC2016
+		if ! multipass exec microk8s-vm -- eval 'sudo chown -f -R $USER $HOME/.kube'; then
+			log_error 3 "sudo chown failed"
+		fi
+		log_verbose "restart microk8s-vm"
+		if ! multipass restart microk8s-vm; then
+			log_error 5 "could not restart microk8s"
+		fi
+		log_verbose "running kubeflow"
+		if ! multipass exec microk8s-vm -- microk8s enable kubeflow --ignore-min-mem --bundle lite; then
+			log_error 4 "enable kubeflow failed"
+		fi
+		# https://ubuntu.com/tutorials/install-microk8s-on-mac-os?_ga=2.190792939.1724531887.1619986586-1495806297.1619986586#6-deploy-an-app
+		log_verbose "Running demonstration apps at kubernetes bootcamp"
+		if $VERBOSE; then
+			microk8s kubectl create deployment kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1
+		fi
+		log_verbose "wait a few minutes then run microk8s get pods and microk8s stop when done"
 	fi
-
-	log_verbose "restart microk8s-vm"
-	if ! multipass restart microk8s-vm; then
-		log_error 5 "could not restart microk8s"
-	fi
-
-	log_verbose "running kubeflow"
-	if ! multipass exec microk8s-vm -- microk8s enable kubeflow --ignore-min-mem --bundle lite; then
-		log_error 4 "enable kubeflow failed"
-	fi
-
-	# https://ubuntu.com/tutorials/install-microk8s-on-mac-os?_ga=2.190792939.1724531887.1619986586-1495806297.1619986586#6-deploy-an-app
-	log_verbose "Running demonstration apps at kubernetes bootcamp"
-	if $VERBOSE; then
-		microk8s kubectl create deployment kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1
-	fi
-	log_verbose "wait a few minutes then run microk8s get pods and microk8s stop when done"
 fi
 
 # https://www.techrepublic.com/article/how-to-quickly-spin-up-microk8s-with-multipass/
