@@ -62,7 +62,7 @@ if [[ -e $HOME/.docker/config.json && -n "$(jq '.auths[].auth' "$HOME/.docker/co
 	log_error 1 "config.json already has a logon do not overwrite"
 fi
 
-if ostype mac; then
+if in_os mac; then
 	if [[ ! -e /Applications/Docker.app ]] && ! docker-machine active; then
 		if ! docker-machine status "$DOCKER_MACHINE" | grep Running; then
 			if ! docker-machine ls | grep "$DOCKER_MACHINE"; then

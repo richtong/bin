@@ -109,47 +109,52 @@ if ! grep "$HOMEBREW_PREFIX/bin/bash" /etc/shells; then
 fi
 chsh -s "$HOMEBREW_PREFIX/bin/bash"
 
-# using google drive now for rich.vc
-brew install 1password google-drive
-
 echo make sure we can see brew and coreutils on reboot
 
 # fail the next command if no 1Password.app
-if [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
-	echo "In VMWare assume we use 1Password and SS keys from the host"
-else
-	echo "In Native operating system install 1Password, Google Drive and Veracrypt"
-	if [[ $OSTYPE =~ darwin ]]; then
+if [[ $OSTYPE =~ darwin ]]; then
+        # using google drive now for rich.vc
 		brew install 1password google-drive veracrypt
 		read -rp "Connect to 1Password and press enter to continue"
 		open -a "Google Drive"
 		read -rp "Connect to the user account with the Veracrypt with the ssh keys"
-	else
-		echo "On Ubuntu go to Settings > Online Accounts > Google and sign on"
-		# https://support.1password.com/install-linux/
-		KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
-		if [[ ! -e $KEYRING ]]; then
-			curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-				sudo gpg --dearmor --output "$KEYRING"
-		fi
-		REPO="https://downloads.1password.com/linux/debian/amd64"
-		if ! grep -q "$REPO" /etc/apt/sources.list.d/1password.list; then
-			echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] $REPO stable main" |
-				sudo tee /etc/apt/sources.list.d/1password.list
-		fi
-		sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
-		curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol |
-			sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
+elif [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
+	echo "In VMWare assume we use 1Password and SS keys from the host"
+else
+    echo "In native operating system install 1Password, Google Drive and Veracrypt"
+    # https://support.1password.com/install-linux/
+    KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
+    if [[ ! -e $KEYRING ]]; then
+        curl -sS https://downloads.1password.com/linux/keys/1password.asc |
+            sudo gpg --dearmor --output "$KEYRING"
+    fi
+    REPO="https://downloads.1password.com/linux/debian/amd64"
+    if ! grep -q "$REPO" /etc/apt/sources.list.d/1password.list; then
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] $REPO stable main" |
+            sudo tee /etc/apt/sources.list.d/1password.list
+    fi
+    DEBSIG="/etc/debsig/policies/AC2D62742012EA22/"
+    sudo mkdir -p "$DEBSIG"
+    if [[ ! -e $DEBSIG/1password.pol ]]; then
+        curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | 
+            sudo tee "$DEBSIG/1password.pol"
+    fi
+    KEYRING_DIR="/usr/share/debsig/keyrings/AC2D62742012EA22"
+    sudo mkdir -p "$KEYRING_DIR"
+    if [[ ! -e $KEYRING_DIR/debsig.gpg ]]; then
+        curl -sS https://downloads.1password.com/linux/keys/1password.asc |
+            sudo gpg --dearmor --output "$KEYRING_DIR/debsig.gpg"
+    fi
+    sudo apt-get update -y && sudo apt-get install -y 1password
 
-		KEYRING_DIR="/usr/share/debsig/keyrings/AC2D62742012EA22"
-		sudo mkdir -p "KEYRING_DIR"
-		if [[ ! -e $KEYRING_DIR/debsig.gpg ]]; then
-			curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-				sudo gpg --dearmor --output "$KEYRING_DIR/debsig.gpg"
-		fi
-		sudo apt update -y && sudo apt install -y 1password
-	fi
+    echo "install veracrypt"
+    # https://linuxhint.com/install-use-veracrypt-ubuntu-22-04/
+    sudo add-apt-repository -y ppa:unit193/encryption
+    sudo apt-get update -y && sudo apt-get install -y veracrypt
 
+
+    # https://linuxhint.com/google_drive_installation_ubuntu/
+    echo "On Ubuntu go to Settings > Online Accounts > Google and sign on"
 fi
 
 if ! mkdir -p "$WS_DIR/git"; then
