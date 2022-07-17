@@ -19,6 +19,8 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 # Pass the force flag down
 export FORCE=${FORCE:-false}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 FLAGS="${FLAGS:-""}"
 ALIAS="${ALIAS:-false}"
 OPTIND=1
@@ -165,8 +167,6 @@ scriptencoding utf-8
 " <D-x> rarely used as it conflicts with the terminal but this is Command ⌘ key
 " You can use change this in Terminal or iterm
 " :Map shows you all mapping interactively
-
-" Added by install-vim.sh on Thu Dec 29 12:20:51 PST 2016
 
 if !has('nvim')
     let g:data_dir = '~/.vim'

@@ -62,4 +62,5 @@ package_install markdownlint-cli markdownlint-cli2
 log_verbose "Installing markdownlint the ruby version as mdl"
 # https://github.com/markdownlint/markdownlint/blob/master/.pre-commit-hooks.yaml
 log_verbose "compatible with pre-commit with entrypoint mdl"
+package_install ruby
 gem_install mdl

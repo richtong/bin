@@ -139,24 +139,24 @@ if ! $INSTALL_POWERLINE; then
 	# note max-width seems buggy will sometimes just truncate
 	#-max-width 30 \
 	if ! config_mark "$(config_profile_nonexportable)"; then
-		config_add "$(config_profile_nonexportable)" <<EOF
-function _update_ps1() {
-    # shellcheck disable=SC2046
-    PS1=\$(powerline-go \
-			-max-width 50 -cwd-max-dir-size 4 -cwd-max-depth 4 -condensed \
-			-theme solarized-dark16 \
-			-colorize-hostname -hostname-only-if-ssh \
-			-shorten-gke-names -shorten-eks-names \\
-			-modules \
-				"$MODULES" \
-			-priority \
-				"$PRIORITIES" \
-			-error \$? -jobs "\$(jobs -p | wc -l)")
-}
-if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then
-    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
-fi
-EOF
+		config_add "$(config_profile_nonexportable)" <<-EOF
+			function _update_ps1() {
+			    # shellcheck disable=SC2046
+			    PS1=\$(powerline-go \
+						-max-width 50 -cwd-max-dir-size 4 -cwd-max-depth 4 -condensed \
+						-theme solarized-dark16 \
+						-colorize-hostname -hostname-only-if-ssh \
+						-shorten-gke-names -shorten-eks-names \\
+						-modules \
+							"$MODULES" \
+						-priority \
+							"$PRIORITIES" \
+						-error \$? -jobs "\$(jobs -p | wc -l)")
+			}
+			if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then
+			    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
+			fi
+			EOF
 	fi
 	# https://github.com/vim-airline/vim-airline
 	log_verbose "Installing vim-airline this needs to go in PlugBegin"
@@ -192,14 +192,14 @@ if [[ ! -e $PROFILE/config.json ]]; then
 fi
 
 if ! config_mark "$(config_profile_nonexportable)"; then
-	config_add "$(config_profile_nonexportable)" <<EOF
-if [[ -r $powerline ]]; then
-	powerline-daemon -q
-	export POWERLINE_BASH_CONTINUATION=1
-	export POWERLINE_BASH_SELECT=1
-	source "$powerline" || true
-fi
-EOF
+	config_add "$(config_profile_nonexportable)" <<-EOF
+		if [[ -r $powerline ]]; then
+			powerline-daemon -q
+			export POWERLINE_BASH_CONTINUATION=1
+			export POWERLINE_BASH_SELECT=1
+			source "$powerline" || true
+		fi
+	EOF
 fi
 
 if ! config_mark "$VIM_PROFILE" \"; then

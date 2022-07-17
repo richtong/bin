@@ -75,7 +75,7 @@ if $ALIAS; then
 		# shellcheck disable=SC2086
 		if ! config_mark $PROFILE; then
 			# shellcheck disable=SC2086
-			config_add $PROFILE <<-EOF
+			config_add $PROFILE <<-'EOF'
 				if command -v nvim >/dev/null; then
 					VISUAL="$(command -v nvim)"
 					export VISUAL
@@ -90,7 +90,7 @@ if $ALIAS; then
 		log_verbose "Add alias to the interactive shell to $SHELL_PROFILE"
 		if ! config_mark "$SHELL_PROFILE"; then
 			config_add "$SHELL_PROFILE" <<-EOF
-				                if command -v nvim >/dev/null; then alias vi=nvim; fi
+				if command -v nvim >/dev/null; then alias vi=nvim; fi
 			EOF
 		fi
 	done
@@ -105,6 +105,8 @@ mkdir -p "$NVIM_CONFIG"
 
 # https://www.linode.com/docs/tools-reference/tools/how-to-install-neovim-and-plugins-with-vim-plug/
 # https://www.reddit.com/r/neovim/comments/3z6c2i/how_does_one_install_vimplug_for_neovim/
+# we actually just source .vimrc and expect install-vim.sh to be nvim
+# compatible
 NVIM_INIT="${NVIM_INIT:-"$NVIM_CONFIG/init.vim"}"
 log_verbose "creating $NVIM_INIT"
 if ! config_mark "$NVIM_INIT" '"'; then
@@ -113,129 +115,10 @@ if ! config_mark "$NVIM_INIT" '"'; then
 		" check for vim-plug install if needed
 		" https://github.com/junegunn/vim-plug/issues/739
 		let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
-		if empty(glob(data_dir . '/autoload/plug.vim'))
-		  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-		  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-		endif
 
-		" vim-plug
-		call plug#begin(stdpath('config') . '/plugged')
-
-		" Navigate directory tree
-		Plug 'scrooloose/nerdtree'
-
-		" Fuzzy search for files
-		Plug 'junegunn/fzf.vim'
-
-		" Press gcc to comment out a line or gc for visual mode
-		Plug 'scrooloose/nerdcommenter'
-
-		" Tagbar that learns from LSR serviers
-		Plug 'liuchengxu/vista.vim'
-
-		" Python specific text objects, classes, functions
-		Plug 'jeetsukumaran/vim-pythonsense'
-
-		" Insert closing quotes and parens as you type
-		Plug 'jiangmiao/auto-pairs'
-
-		" Ugly! Atom inspired color scheme or junngunn/seoul256.vim
-		" "Plug 'joshdick/onedark.vim'
-		" does not work
-		" Plug 'frankmer/neovim-colors-solarized-truecolors'
-
-		" make sure to set termguicolors ; colorscheme NeoSolarized
-		Plug 'overcache/neosolarized'
-
-		" syntax highlighting (can also use sheerun/vim-polyglot)
-		" https://github.com/numirias/semshi/issues/59
-		Plug 'numirias/semshi', { 'do': ':UpdateRemotePlugins' }
-
-		" Python indenting
-		Plug 'vimjas/vim-python-pep8-indent'
-
-		" Asychronous (the point of neovim) multi-language linting
-		" :ALEInfo for available linters :ALEFix to let YAPF fix it
-		" I normally use syntastic, don't use both
-		Plug 'dense-analysis/ale'
-
-		" Interface to jedi (use coc instead) for code completion
-		" \d to definition, \g to assignment, \s goto stub, K for documentation
-		" \r to rename variable, \n all name usages
-		" https://stackoverflow.com/questions/1764263/what-is-the-leader-in-a-vimrc-file
-		Plug 'davidhalter/jedi'
-
-		" Completion using a floating window, neovim only the curring edge
-		" must manally run :CocInstall coc-python coc-json
-		Plug 'neoclide/coc.nvim', {'branch': 'release'}
-
-		" Run :Git inside vim or :G
-		Plug 'tpope/vim-fugitive'
-
-		" vim status line (pretty ugly)
-		Plug 'vim-airline/vim-airline'
-		Plug 'vim-airline/vim-airline-themes'
-
-		" https://www.arthurkoziel.com/setting-up-vim-for-yaml/
-		" Show a thin line for indents
-		Plug 'yggdroot/indentline'
-		" za toggle fold, zR expand all folds, zo open fold, zM close all
-		Plug 'pedrohdz/vim-yaml-folds'
-		Plug 'tmhedberg/simpylfold'
-
-		call plug#end()
-
-		" https://github.com/overcache/NeoSolarized
-		set termguicolors
-		set background=dark
-		colorscheme NeoSolarized
-		" get a lighter char for looking at indent
-		let g:indentLine_char = '⦙'
-		" everything starts unfolded
-		set foldlevelstart=20
-		" Default to make sure tabs work and use python pep8 width
-		set shiftwidth=4 expandtab tabstop=4 wrapmargin=79
-		set number
-
-		" give it the linter list you use taken from rich's .vimrc
-		let g:ale_linters = {
-		    \ 'python' : ['mypy', 'flake8', 'pydocstyle', 'pylint'],
-		    \ 'javascript' : ['eslint', 'jshint'],
-		    \ 'yaml' : ['yamllint']
-		\ }
-		" actually change code with linter
-		let g:ale_fixers = {
-		    \ 'python': ['yapf'],
-		\}
-
-		au BufNewFile,BufRead *.py set foldmethod=indent
-
-		" https://github.com/neoclide/coc.nvim/issues/560
-		" coc-highlight - highlight sysmbol when there is no language server
-		" coc-vimtex - Latex completions
-		let g:coc_global_extensions = [
-		    \ 'coc-markdownlint',
-		    \ 'coc-python',
-		    \ 'coc-flutter',
-		    \ 'coc-json',
-		    \ 'coc-yaml',
-		    \ 'coc-html',
-		    \ 'coc-vimtex',
-		    \ 'coc-git']
-
-		" https://github.com/neoclide/coc.nvim
-		" needs full mapping to get all features
-		nmap <leader>rn <Plug>(coc-rename)
-		nmap <leader>f <Plug>(coc-format-selected)
-		xmap <leader>f <Plug>(coc-format-selected)
-
-		" https://duseev.com/articles/vim-python-pipenv/
-		" switch environments depending on pipenv
-		let pipenv_venv = system('pipenv --venv')
-		if v:shell_error == 0
-		   let venv_path = substitute(pipenv_venv, '\n', '', '')
-		   let g:python3_host_prog = venv_path . '/bin/python'
-		endif
+        set runtimepath^=~/.vim runtimepath+=~/.vim/after
+        let &packpath = &runtimepath
+        source ~/.vimrc
 
 	EOF
 fi

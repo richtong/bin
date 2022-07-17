@@ -172,40 +172,8 @@ if [[ ! -e $HOME/.zshrc ]]; then
 	echo "#!/usr/bin/env zsh" .."$HOME/.zshrc"
 fi
 
-# MacOS is not like Ubuntu, bash_profile is run for all Terminal
-# some apps still use .profile so source it. and .bashrc is never called
-# so run that as well from bash_profile.
-#
-# With Ubuntu .bash_profile is run for ssh but .profile is run for the GUI
-# so make sure to source .profile from .bash_profile to pick up exports
-# .bashrc run all the time so use for alias and functions
-
-# so the adds to .bash_profile on Mac and .profile on Ubuntu
-if ! config_mark; then
-	if in_os mac; then
-		log_verbose "Adding source .bash .profile to $(config_profile)"
-		config_add <<-'EOF'
-			# shellcheck disable=SC1091
-			if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
-			# shellcheck disable=SC1091
-			if [[ -e $HOME/.bashrc ]]; then source "$HOME/.bashrc"; fi
-		EOF
-	fi
-	log_verbose "Adding .local/bin to $(config_profile)"
-	config_add <<-'EOF'
-		# .local has mainly pip installed utilities
-		# shellcheck disable=SC1091
-		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
-	EOF
-fi
-# the adds to .bash_profile on Ubuntu to make sure to pick up .profile exports
-if in_os linux && ! config_mark "$(config_profile_interactive)"; then
-	log_verbose "For linux add .profile to $(config_profile_interactive)"
-	config_add "$(config_profile_interactive)" <<-"EOF"
-		# shellcheck disable=SC1091
-		if [[ -e $HOME/.profile ]]; then source "$HOME/.profile"; fi
-	EOF
-fi
+log_verbose "setup up bash and zsh profiles basic sourcing and paths"
+config_setup
 
 # pick up the changes
 source_profile
@@ -484,9 +452,10 @@ if [[ ! -e $HOME/.docker/config.json ]] || ! grep -q auth "$HOME/.docker/config.
 	"$BIN_DIR/docker-login.sh" -u "$DOCKER_USER"
 fi
 
-if ! "$SCRIPT_DIR/set-profile.sh"; then
-	log_verbose profile changes so source needed
-fi
+# deprecated now use config_setup to do the same thing
+# if ! "$SCRIPT_DIR/set-profile.sh"; then
+	# log_warning 
+# fi
 log_verbose source profiles in case we did not reboot
 source_profile
 

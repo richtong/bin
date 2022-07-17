@@ -61,26 +61,22 @@ for file in .profile .bash_profile .bashrc; do
 	fi
 done
 
-# no lib-config.sh so do our own simple detection
-if [[ $OSTYPE =~ darwin ]]; then
-	PROFILE="${PROFILE:-"$HOME/.bash_profile"}"
-else
-	PROFILE="${PROFILE:-"$HOME/.profile"}"
-fi
-
+# no lib-config.sh so assume you are only doing path addition which go 
+# into .profile
+PROFILE="${PROFILE:-"$HOME/.profile"}"
 echo "Set brew environment variables $PROFILE" >&2
 if ! grep "brew shellenv" "$PROFILE"; then
-	# default is an M1 Mac
-	HOMEBREW_PREFIX="/opt/homebrew"
-	if [[ $(uname) =~ Linux ]]; then
-		HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
-	elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
-		HOMEBREW_PREFIX="/usr/local"
-	fi
+	# default is an M1 Mac this is not needed with brew --prefix
+	# HOMEBREW_PREFIX="/opt/homebrew"
+	# if [[ $(uname) =~ Linux ]]; then
+	#	HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+	# elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
+	# 	HOMEBREW_PREFIX="/usr/local"
+	# fi
 	cat >>"$PROFILE" <<-EOF
 
 		# installed by $SCRIPTNAME on $(date)"
-		if ! command -v brew >/dev/null || [[ ! \$PATH =~ \$(brew --prefix) ]]; then eval "\$($HOMEBREW_PREFIX/bin/brew shellenv)"; fi
+		if command -v brew >/dev/null && ! echo \$PATH | grep "\$(brew --prefix)"; then eval "\$($brew --prefix/bin/brew shellenv)"; fi
 	EOF
 fi
 
@@ -122,36 +118,40 @@ elif [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
 	echo "In VMWare assume we use 1Password and SS keys from the host"
 else
     echo "In native operating system install 1Password, Google Drive and Veracrypt"
-    # https://support.1password.com/install-linux/
-    KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
-    if [[ ! -e $KEYRING ]]; then
-        curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-            sudo gpg --dearmor --output "$KEYRING"
-    fi
-    REPO="https://downloads.1password.com/linux/debian/amd64"
-    if ! grep -q "$REPO" /etc/apt/sources.list.d/1password.list; then
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] $REPO stable main" |
-            sudo tee /etc/apt/sources.list.d/1password.list
-    fi
-    DEBSIG="/etc/debsig/policies/AC2D62742012EA22/"
-    sudo mkdir -p "$DEBSIG"
-    if [[ ! -e $DEBSIG/1password.pol ]]; then
-        curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | 
-            sudo tee "$DEBSIG/1password.pol"
-    fi
-    KEYRING_DIR="/usr/share/debsig/keyrings/AC2D62742012EA22"
-    sudo mkdir -p "$KEYRING_DIR"
-    if [[ ! -e $KEYRING_DIR/debsig.gpg ]]; then
-        curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-            sudo gpg --dearmor --output "$KEYRING_DIR/debsig.gpg"
-    fi
-    sudo apt-get update -y && sudo apt-get install -y 1password
+	if ! command -v snap >/dev/null && ! snap install 1password; then
+		echo "snap install 1password failed do manually"
+		# https://support.1password.com/install-linux/
+		KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
+		if [[ ! -e $KEYRING ]]; then
+			curl -sS https://downloads.1password.com/linux/keys/1password.asc |
+				sudo gpg --dearmor --output "$KEYRING"
+		fi
+		REPO="https://downloads.1password.com/linux/debian/amd64"
+		if ! grep -q "$REPO" /etc/apt/sources.list.d/1password.list; then
+			echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] $REPO stable main" |
+				sudo tee /etc/apt/sources.list.d/1password.list
+		fi
+		DEBSIG="/etc/debsig/policies/AC2D62742012EA22/"
+		sudo mkdir -p "$DEBSIG"
+		if [[ ! -e $DEBSIG/1password.pol ]]; then
+			curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | 
+				sudo tee "$DEBSIG/1password.pol"
+		fi
+		KEYRING_DIR="/usr/share/debsig/keyrings/AC2D62742012EA22"
+		sudo mkdir -p "$KEYRING_DIR"
+		if [[ ! -e $KEYRING_DIR/debsig.gpg ]]; then
+			curl -sS https://downloads.1password.com/linux/keys/1password.asc |
+				sudo gpg --dearmor --output "$KEYRING_DIR/debsig.gpg"
+		fi
+		sudo apt-get update -y && sudo apt-get install -y 1password
+	fi
 
-    echo "install veracrypt"
-    # https://linuxhint.com/install-use-veracrypt-ubuntu-22-04/
-    sudo add-apt-repository -y ppa:unit193/encryption
-    sudo apt-get update -y && sudo apt-get install -y veracrypt
-
+	echo "install veracrypt"
+	if ! command -v snap >/dev/null || ! snap install veracrypt; then
+		# https://linuxhint.com/install-use-veracrypt-ubuntu-22-04/
+		sudo add-apt-repository -y ppa:unit193/encryption
+		sudo apt-get update -y && sudo apt-get install -y veracrypt
+	fi
 
     # https://linuxhint.com/google_drive_installation_ubuntu/
     echo "On Ubuntu go to Settings > Online Accounts > Google and sign on"

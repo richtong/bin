@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ##
 ## vi: ts=4 sw=4 et:
-## Setting up the profiles correctly
+## Setting up the profiles correctly (deprecated now use config_setup and config_setup_end
 ## https://www.anintegratedworld.com/basics-of-osx-bashrc-v-profile-v-bash_profile/
 ##
 ## Because you can get the sourcing wrong whenever you add to PATh 
@@ -164,8 +164,6 @@ log_verbose install keychain as it is used by linux for profiles
 package_install keychain
 
 profiles=0
-log_verbose checking to .bash_profile used when you ssh into linux
-profile="$PROFILE_DIR/.bash_profile"
 if ! config_mark "$profile"; then
 	log_verbose add to .bash profile which runs on ssh inbound session
 	config_add "$profile" <<-"EOF"
