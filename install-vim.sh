@@ -88,8 +88,10 @@ package_install "${package_flags[@]}" vim
 #
 # To support react we need some more linters
 # https://github.com/facebookincubator/create-react-app/blob/master/template/README.md#displaying-lint-output-in-the-editor
-log_verbose make sure node is installed for the linters
-"$SCRIPT_DIR/install-lint.sh"
+
+log_verbose "install-lint should happen by install.sh"
+#log_verbose make sure node is installed for the linters
+#"$SCRIPT_DIR/install-lint.sh"
 
 # needed for vim-markdown
 package_install markdown

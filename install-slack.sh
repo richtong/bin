@@ -54,10 +54,10 @@ if in_os docker; then
 	log_exit no need for slack in docker
 fi
 
-if cask_install slack; then
-	log_exit "Brew cask installed for Slack"
+if app_install slack; then
+	log_exit "Slack installed"
 fi
-log_verbose homebrew install failed
+log_verbose "App Install failed try alternative ways"
 
 if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose installing on Mac
@@ -74,7 +74,6 @@ if [[ $OSTYPE =~ darwin ]]; then
 fi
 
 log_verbose installing on linux with apt-get
-
 log_verbose gconf2 not installed by default on debian
 log_verbose ubuntu 16.04 not installed libappindicator1 or curl
 package_install gconf2 curl

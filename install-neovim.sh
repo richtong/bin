@@ -64,8 +64,8 @@ log_warning "All pipenv installation need this in the python world"
 # pynvim for deoplete
 pip_install neovim pynvim
 
-log_verbose install IDE tools
-"$SCRIPT_DIR/install-lint.sh"
+log_verbose "install IDE tools done by install.sh"
+#"$SCRIPT_DIR/install-lint.sh"
 
 log_verbose "create vi as alias for nvim and set git to use it"
 if $ALIAS; then

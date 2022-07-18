@@ -67,16 +67,16 @@ PROFILE="${PROFILE:-"$HOME/.profile"}"
 echo "Set brew environment variables $PROFILE" >&2
 if ! grep "brew shellenv" "$PROFILE"; then
 	# default is an M1 Mac this is not needed with brew --prefix
-	# HOMEBREW_PREFIX="/opt/homebrew"
-	# if [[ $(uname) =~ Linux ]]; then
-	#	HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
-	# elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
-	# 	HOMEBREW_PREFIX="/usr/local"
-	# fi
+	HOMEBREW_PREFIX="/opt/homebrew"
+	if [[ $(uname) =~ Linux ]]; then
+		HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+	elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
+	 	HOMEBREW_PREFIX="/usr/local"
+	fi
 	cat >>"$PROFILE" <<-EOF
 
 		# installed by $SCRIPTNAME on $(date)"
-		if command -v brew >/dev/null && ! echo \$PATH | grep "\$(brew --prefix)"; then eval "\$(brew --prefix/bin/brew shellenv)"; fi
+		if ! command -v brew >/dev/null && ! echo \$PATH | grep "$HOMEBREW_PREFIX"; then eval "\$($HOMEBREW_PREFIX/bin/brew shellenv)"; fi
 	EOF
 fi
 
