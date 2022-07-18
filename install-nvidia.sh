@@ -76,8 +76,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh
 
 if ! in_os linux; then
-	log_verbose linux only
-	exit
+	log_exit "linux only"
 fi
 
 if ! has_nvidia; then
@@ -91,6 +90,19 @@ if lsmod | grep nouveau; then
 
 fi
 
+# https://linuxconfig.org/how-to-install-the-nvidia-drivers-on-ubuntu-20-04-focal-fossa-linux
+if in_linux ubuntu; then
+        if ! command -v ubuntu-drivers >/dev/null || ! ubuntu-drivers devices | grep -q NVIDIA; then
+            log_exit "On Ubuntu but no NVidia drivers"
+        fi
+        if $VERBOSE; then
+            log_verbose "Available drivers"
+            ubuntu-drivers devices
+        fi
+        sudo add-apt-repository -y ppa:graphics-drivers/ppa
+        sudo ubuntu-drivers devices autoinstall
+        log_exit "Recommended drivers installed reboot required"
+fi
 log_verbose determine nVidia product type and best driver
 # https://askubuntu.com/questions/524242/how-to-find-out-which-nvidia-gpu-i-have
 sudo update-pciids

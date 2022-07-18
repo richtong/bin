@@ -317,7 +317,7 @@ if in_os linux; then
 	fi
 
 	sudo apt-get -y upgrade
-	log_verbose note that snap does not work on WSL2
+	log_verbose "note that snap does not work on WSL2"
 
 	# not this should no longer exist now that we are on docker
 	run_if "$SOURCE_DIR/scripts/build/install-dev-packages.sh"
@@ -368,7 +368,7 @@ if ! in_os mac; then
 	log_verbose before installing docker-py again
 
 	if ! in_wsl; then
-		log_verbose install snap packages only in real linux not in wsl
+		log_verbose "install snap packages only in real linux not in wsl"
 		# https://snapcraft.io/install/bfg-repo-cleaner/ubunt-
 		sudo snap install bfg-repo-cleaner --beta
 	fi

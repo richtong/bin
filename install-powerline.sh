@@ -154,7 +154,7 @@ if ! $INSTALL_POWERLINE; then
 						-error \$? -jobs "\$(jobs -p | wc -l)")
 			}
 			if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then
-			    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
+			    PROMPT_COMMAND="_update_ps1; \$PROMPT_COMMAND"
 			fi
 			EOF
 	fi

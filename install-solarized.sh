@@ -10,13 +10,13 @@
 set -ue && SCRIPTNAME="$(basename "$0")"
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
-MAC_GIT="${MAC_GIT:-"tomislav"}"
+MAC_GIT_ORG="${MAC_GIT_ORG:-"tomislav"}"
 MAC_REPO="${MAC_REPO:-"osx-terminal.app-colors-solarized"}"
-XFCE_GIT="${XFCE_GIT:-"sgerrand"}"
+XFCE_GIT_ORG="${XFCE_GIT_ORG:-"sgerrand"}"
 XFCE_REPO="{XFCE_REPO:-xfce4-terminal-colors-solarized}"
-GNOME_GIT="${GNOME_GIT:-"Anthony25"}"
+GNOME_GIT_ORG="${GNOME_GIT_ORG:-"Anthony25"}"
 GNOME_REPO="${GNOME_REPO:-"gnome-terminal-colors-solarized"}"
-DIRCOLORS_GIT="${DIRCOLORS_GIT:-"seebi"}"
+DIRCOLORS_GIT_ORG="${DIRCOLORS_GIT_ORG:-"seebi"}"
 DIRCOLORS_REPO="${DIRCOLORS_REPO:-"dircolors-solarized"}"
 OPTIND=1
 while getopts "hdvw:" opt; do
@@ -61,7 +61,7 @@ if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose Make directory listings the right color and vi too
 	# Note we need the quotes in the search string
 	if ! defaults read com.apple.Terminal "Window Settings" | grep -q 'name = "Solarized Dark"'; then
-		git_install_or_update "$MAC_REPO" "$MAC_GIT"
+		git_install_or_update "$MAC_REPO" "$MAC_GIT_ORG"
 		log_warning will open Terminal windows to when adding solarized layouts
 		for terminal in "$WS_DIR/git/$MAC_REPO"/*.terminal; do
 			open "$terminal"
@@ -89,7 +89,7 @@ if [[ $OSTYPE =~ darwin ]]; then
 			                fi
 		EOF
 	fi
-# do not exit as we will install dircolors for everyone at the ned
+# do not exit as we will install dircolors for everyone at the end
 fi
 
 if [[ $(desktop_environment) =~ xfce ]]; then
@@ -108,7 +108,7 @@ if [[ $(desktop_environment) =~ xfce ]]; then
 	# themes as they are entries in the terminal.rc
 	# although you can fool with the system with a wrapper that dynamically
 	# changes terminal based on the command line.
-	git_install_or_update "$XFCE_REPO" "$XFCE_GIT"
+	git_install_or_update "$XFCE_REPO" "$XFCE_GIT_ORG"
 	# do not use install command because we do not want to overwrite
 	# use the cp -n so as not to overwrite
 	# https://stackoverflow.com/questions/9392735/linux-how-to-copy-but-not-overwrite
@@ -139,7 +139,7 @@ fi
 if [[ $(desktop_environment) =~ (xfce|unity|gnome) ]]; then
 	# For the ubuntu local graphical Unity terminal which uses gnome-terminal
 	# Also for debian 9 xfce4 which uses gnome-terminal sometimes so also install
-	git_install_or_update "$GNOME_REPO" "$GNOME_GIT"
+	git_install_or_update "$GNOME_REPO" "$GNOME_GIT_ORG"
 	# Installs the dark vs light scheme into the Default terminal profile
 	# This only works if Default is defined, for new installs it is Undefined,
 	# so do not set dark, just install
@@ -159,7 +159,7 @@ fi
 
 log_verbose for all systems install solarized directory colors
 # Make directory listings the right color
-git_install_or_update "$DIRCOLORS_REPO" "$DIRCOLORS_GIT"
+git_install_or_update "$DIRCOLORS_REPO" "$DIRCOLORS_GIT_ORG"
 log_verbose checking for ~/.dircolors
 if [[ ! -e "$HOME/.dircolors" ]]; then
 	ln -rs "$WS_DIR/git/$DIRCOLORS_REPO/dircolors.ansi-universal" "$HOME/.dircolors"

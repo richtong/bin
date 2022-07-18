@@ -76,7 +76,7 @@ if ! grep "brew shellenv" "$PROFILE"; then
 	cat >>"$PROFILE" <<-EOF
 
 		# installed by $SCRIPTNAME on $(date)"
-		if command -v brew >/dev/null && ! echo \$PATH | grep "\$(brew --prefix)"; then eval "\$($brew --prefix/bin/brew shellenv)"; fi
+		if command -v brew >/dev/null && ! echo \$PATH | grep "\$(brew --prefix)"; then eval "\$(brew --prefix/bin/brew shellenv)"; fi
 	EOF
 fi
 
@@ -118,7 +118,7 @@ elif [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
 	echo "In VMWare assume we use 1Password and SS keys from the host"
 else
     echo "In native operating system install 1Password, Google Drive and Veracrypt"
-	if ! command -v snap >/dev/null && ! snap install 1password; then
+	if ! command -v 1password >/dev/null && ! command -v snap >/dev/null && ! snap install 1password >& /dev/null; then
 		echo "snap install 1password failed do manually"
 		# https://support.1password.com/install-linux/
 		KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
@@ -146,8 +146,8 @@ else
 		sudo apt-get update -y && sudo apt-get install -y 1password
 	fi
 
-	echo "install veracrypt"
-	if ! command -v snap >/dev/null || ! snap install veracrypt; then
+	echo "install veracrypt from unit193"
+	if ! command -v veracrypt >/dev/null && ! command -v snap >/dev/null && ! snap install veracrypt &>/dev/null; then
 		# https://linuxhint.com/install-use-veracrypt-ubuntu-22-04/
 		sudo add-apt-repository -y ppa:unit193/encryption
 		sudo apt-get update -y && sudo apt-get install -y veracrypt
