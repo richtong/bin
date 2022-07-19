@@ -96,7 +96,8 @@ log_verbose "install-lint should happen by install.sh"
 # needed for vim-markdown
 package_install markdown
 
-"$SCRIPT_DIR/install-solarized.sh"
+# installed by outer install.sh
+#"$SCRIPT_DIR/install-solarized.sh"
 
 # https://github.com/scrooloose/syntastic for multiple syntax checkers
 mkdir -p "$HOME/.vim/bundle"

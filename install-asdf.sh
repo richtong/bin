@@ -104,8 +104,10 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 	# https://linuxhint.com/associative_array_bash/
 fi
 
-if config_mark "$(config_profile_zsh)"; then
-	log_verbose "installing into zsh profile"
+# not clear what this is so as login shell should go into .zprofile
+# for efficiency but leave in .zshrc as non-interactive
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	log_verbose "installing into .zshrc nonexportable"
 	# no longer need manual installation
 	asdf direnv setup --shell zsh --version "$((ASDF[direnv]))"
 	#config_add "$(config_profile_zsh)" <<-'EOF'
@@ -178,8 +180,8 @@ if ! config_mark; then
 	EOF
 fi
 
-if ! config_mark "$(config_profile_zsh)"; then
-	config_add "$(config_profile_zsh)" <<-'EOF'
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
 		        source "$HOME/.asdf/plugins/java/set-java-home.zsh"
 	EOF
 fi

@@ -174,15 +174,16 @@ if $COLIMA; then
 
 fi
 
-if ! config_mark "$(config_profile_zsh)"; then
+# should be in .zprofile but put into .zshrc if zsh not used as login shell
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 	if ! $LIMA; then
 		log_verbose "lima code completion not working in zsh as of Dec 2021"
-		config_add "$(config_profile_zsh)" <<-'EOF'
+		config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
 			command -v limactl >/dev/null && limactl completion zsh > "${fpath[1]}/_limactl"
 		EOF
 	fi
 	if ! $COLIMA; then
-		config_add "$(config_profile_zsh)" <<-'EOF'
+		config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
 			command -v colima >/dev/null && colima completion zsh > "${fpath[1]}/_colima"
 		EOF
 	fi
@@ -216,9 +217,11 @@ if $PODMAN; then
 	log_verbose "Adding bash completions"
 	podman completion -f "/etc/bash_completion.d/podman" bash
 
-	if ! config_mark "$(config_profile_zsh)"; then
+    # if zsh is login shell can go into .zprofile but @richtong
+    # uses it as non-login so put into .zshrc
+	if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 		log_verbose "Adding zsh completions"
-		config_add "$(config_profile_zsh)" <<-'EOF'
+		config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
 			command -v podman >/dev/null && podman completion -f"${fpath[1]}/_podman" zsh
 		EOF
 	fi

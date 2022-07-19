@@ -85,8 +85,9 @@ fi
 log_verbose "install zsh integrations"
 curl -L https://iterm2.com/shell_integration/zsh -o ~/.iterm2_shell_integration.zsh
 
-if ! config_mark "$(config_profile_zsh)"; then
-	config_add "$(config_profile_zsh)" <<-'EOF'
+# not sure what is in the integration so run it always in .zshrc
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
 		[[ -e $HOME/.iterm2_shell_integration.zsh ]] && source "$HOME/.iterm2_shell_integration.zsh"
 	EOF
 fi
