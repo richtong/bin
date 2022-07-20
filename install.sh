@@ -454,7 +454,7 @@ fi
 
 # deprecated now use config_setup to do the same thing
 # if ! "$SCRIPT_DIR/set-profile.sh"; then
-	# log_warning 
+# log_warning
 # fi
 log_verbose source profiles in case we did not reboot
 source_profile

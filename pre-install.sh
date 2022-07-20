@@ -61,7 +61,7 @@ for file in .profile .bash_profile .bashrc; do
 	fi
 done
 
-# no lib-config.sh so assume you are only doing path addition which go 
+# no lib-config.sh so assume you are only doing path addition which go
 # into .profile
 PROFILE="${PROFILE:-"$HOME/.profile"}"
 echo "Set brew environment variables $PROFILE" >&2
@@ -71,7 +71,7 @@ if ! grep "brew shellenv" "$PROFILE"; then
 	if [[ $(uname) =~ Linux ]]; then
 		HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
 	elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
-	 	HOMEBREW_PREFIX="/usr/local"
+		HOMEBREW_PREFIX="/usr/local"
 	fi
 	cat >>"$PROFILE" <<-EOF
 
@@ -109,16 +109,16 @@ echo make sure we can see brew and coreutils on reboot
 
 # fail the next command if no 1Password.app
 if [[ $OSTYPE =~ darwin ]]; then
-        # using google drive now for rich.vc
-		brew install 1password google-drive veracrypt
-		read -rp "Connect to 1Password and press enter to continue"
-		open -a "Google Drive"
-		read -rp "Connect to the user account with the Veracrypt with the ssh keys"
+	# using google drive now for rich.vc
+	brew install 1password google-drive veracrypt
+	read -rp "Connect to 1Password and press enter to continue"
+	open -a "Google Drive"
+	read -rp "Connect to the user account with the Veracrypt with the ssh keys"
 elif [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
 	echo "In VMWare assume we use 1Password and SS keys from the host"
 else
-    echo "In native operating system install 1Password, Google Drive and Veracrypt"
-	if ! command -v 1password >/dev/null && ! command -v snap >/dev/null && ! snap install 1password >& /dev/null; then
+	echo "In native operating system install 1Password, Google Drive and Veracrypt"
+	if ! command -v 1password >/dev/null && ! command -v snap >/dev/null && ! snap install 1password >&/dev/null; then
 		echo "snap install 1password failed do manually"
 		# https://support.1password.com/install-linux/
 		KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
@@ -134,7 +134,7 @@ else
 		DEBSIG="/etc/debsig/policies/AC2D62742012EA22/"
 		sudo mkdir -p "$DEBSIG"
 		if [[ ! -e $DEBSIG/1password.pol ]]; then
-			curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | 
+			curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol |
 				sudo tee "$DEBSIG/1password.pol"
 		fi
 		KEYRING_DIR="/usr/share/debsig/keyrings/AC2D62742012EA22"
@@ -153,8 +153,8 @@ else
 		sudo apt-get update -y && sudo apt-get install -y veracrypt
 	fi
 
-    # https://linuxhint.com/google_drive_installation_ubuntu/
-    echo "On Ubuntu go to Settings > Online Accounts > Google and sign on"
+	# https://linuxhint.com/google_drive_installation_ubuntu/
+	echo "On Ubuntu go to Settings > Online Accounts > Google and sign on"
 fi
 
 if ! mkdir -p "$WS_DIR/git"; then

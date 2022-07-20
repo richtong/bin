@@ -92,16 +92,16 @@ fi
 
 # https://linuxconfig.org/how-to-install-the-nvidia-drivers-on-ubuntu-20-04-focal-fossa-linux
 if in_linux ubuntu; then
-        if ! command -v ubuntu-drivers >/dev/null || ! ubuntu-drivers devices | grep -q NVIDIA; then
-            log_exit "On Ubuntu but no NVidia drivers"
-        fi
-        if $VERBOSE; then
-            log_verbose "Available drivers"
-            ubuntu-drivers devices
-        fi
-        sudo add-apt-repository -y ppa:graphics-drivers/ppa
-        sudo ubuntu-drivers devices autoinstall
-        log_exit "Recommended drivers installed reboot required"
+	if ! command -v ubuntu-drivers >/dev/null || ! ubuntu-drivers devices | grep -q NVIDIA; then
+		log_exit "On Ubuntu but no NVidia drivers"
+	fi
+	if $VERBOSE; then
+		log_verbose "Available drivers"
+		ubuntu-drivers devices
+	fi
+	sudo add-apt-repository -y ppa:graphics-drivers/ppa
+	sudo ubuntu-drivers devices autoinstall
+	log_exit "Recommended drivers installed reboot required"
 fi
 log_verbose determine nVidia product type and best driver
 # https://askubuntu.com/questions/524242/how-to-find-out-which-nvidia-gpu-i-have

@@ -61,14 +61,14 @@ if in_os mac; then
 		log_verbose "installing into $(config_profile_nonexportable)"
 		config_add "$(config_profile_nonexportable)" <<-'EOF'
 			# shellcheck disable=SC1091
-			if command -v brew >/dev/null && 
-                [[ -r "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc" ]] then;
-                    source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"; fi
+			if command -v brew >/dev/null &&
+			                [[ -r "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc" ]] then;
+			                    source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"; fi
 			# shellcheck disable=SC1091
-			if command -v brew >/dev/null && 
-                [[ -r "$(brew
-                --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc" ]] then;
-                source "$(brew --prefix/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc"; fi
+			if command -v brew >/dev/null &&
+			                [[ -r "$(brew
+			                --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc" ]] then;
+			                source "$(brew --prefix/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc"; fi
 		EOF
 		log_warning "now source the changes to $(config_profile_nonexportable)"
 	fi
@@ -94,26 +94,26 @@ elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then
 	fi
 
 elif in_os linux; then
-    # https://snapcraft.io/install/google-cloud-sdk/ubuntu
-    # installs but cannot access components
-	# snap_install --classic google-cloud-sdk 
-    # must install from repo instead
-    log_verbose "Linux GCloud install"
-    sudo apt-get install apt-transport-https ca-certificates gnupg
-    APT="/etc/apt/sources.list.d/google-cloud-sdk.list"
-    GPG="/usr/share/keyrings/cloud.google.gpg"
-    PACKAGE="https://packages.cloud.google.com/apt"
-    if ! grep -q "$PACKAGE" "$APT"; then
-        log_verbose "no package found in $APT"
-        echo "deb [signed-by=$GPG] $PACKAGE cloud-sdk main" | 
-            sudo tee -a "$APT"
-    fi
-    # apt-key deprecated
-    # curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-    if [[ ! -e $GPG ]]; then
-        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee "$GPG" >/dev/null
-    fi
-    sudo apt-get -y update && sudo apt-get install -y google-cloud-sdk
+	# https://snapcraft.io/install/google-cloud-sdk/ubuntu
+	# installs but cannot access components
+	# snap_install --classic google-cloud-sdk
+	# must install from repo instead
+	log_verbose "Linux GCloud install"
+	sudo apt-get install apt-transport-https ca-certificates gnupg
+	APT="/etc/apt/sources.list.d/google-cloud-sdk.list"
+	GPG="/usr/share/keyrings/cloud.google.gpg"
+	PACKAGE="https://packages.cloud.google.com/apt"
+	if ! grep -q "$PACKAGE" "$APT"; then
+		log_verbose "no package found in $APT"
+		echo "deb [signed-by=$GPG] $PACKAGE cloud-sdk main" |
+			sudo tee -a "$APT"
+	fi
+	# apt-key deprecated
+	# curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+	if [[ ! -e $GPG ]]; then
+		curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee "$GPG" >/dev/null
+	fi
+	sudo apt-get -y update && sudo apt-get install -y google-cloud-sdk
 fi
 
 hash -r
@@ -121,12 +121,12 @@ log_verbose install additional packages "$PACKAGES" "$@"
 
 # Ubuntu has beta already
 if in_os mac; then
-    PACKAGES+=" beta "
+	PACKAGES+=" beta "
 fi
 if [[ -n $PACKAGES ]]; then
-    # shellcheck disable=SC2086
-    gcloud components install --quiet $PACKAGES "$@"
-fi 
+	# shellcheck disable=SC2086
+	gcloud components install --quiet $PACKAGES "$@"
+fi
 
 # https://stackoverflow.com/questions/42379685/can-i-automate-google-cloud-sdk-gcloud-init-interactive-command
 if [[ $(gcloud config configurations list | wc -l) -lt 2 ]]; then

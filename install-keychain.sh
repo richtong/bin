@@ -2,7 +2,7 @@
 ##
 ## installs keys and the right keychain (deprecated)
 ## Ubuntu 22.04 native gnome key ring now supports id_25519
-## This replaces the gnome key ring with keychain 
+## This replaces the gnome key ring with keychain
 ## but now instead of doing this you just need to do an ssh-add
 ##
 ##@author Rich Tong
@@ -49,12 +49,12 @@ if ! in_os linux; then
 fi
 
 log_verbose "In linux $(in_linux) with version $(linux_version)"
-if in_linux ubuntu && vergte "$(linux_version)" 22 ; then
-    log_verbose "Latest Ubuntu 22.04 or later can use keyring"
-    if ! config_mark "$HOME/.ssh/config"; then
-        config_add "$HOME/.ssh/config" <<<"AddKeysToAgent yes"
-    fi
-    log_exit "Ubuntu set to automatically add persistent passphrase remembering"
+if in_linux ubuntu && vergte "$(linux_version)" 22; then
+	log_verbose "Latest Ubuntu 22.04 or later can use keyring"
+	if ! config_mark "$HOME/.ssh/config"; then
+		config_add "$HOME/.ssh/config" <<<"AddKeysToAgent yes"
+	fi
+	log_exit "Ubuntu set to automatically add persistent passphrase remembering"
 fi
 
 source_profile

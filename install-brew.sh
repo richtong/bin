@@ -107,7 +107,7 @@ fi
 if ! config_mark "$(config_profile)"; then
 	config_add "$(config_profile)" <<-'EOF'
 		# add the check because asdf and pipenv override homebrew
-        if command -v brew >/dev/null && [[ ! $PATH =~ $(brew --prefix) ]]; then eval "$(brew shellenv)"; fi
+		        if command -v brew >/dev/null && [[ ! $PATH =~ $(brew --prefix) ]]; then eval "$(brew shellenv)"; fi
 	EOF
 fi
 

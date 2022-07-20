@@ -4,7 +4,7 @@
 ## Setting up the profiles correctly (deprecated now use config_setup and config_setup_end
 ## https://www.anintegratedworld.com/basics-of-osx-bashrc-v-profile-v-bash_profile/
 ##
-## Because you can get the sourcing wrong whenever you add to PATh 
+## Because you can get the sourcing wrong whenever you add to PATh
 ## that the command has already been run so look for the string in PATH
 ## before you add to it.
 ##
@@ -18,7 +18,7 @@
 ##   so it needs .profile settings typically but it can also be interactive.
 ##   Unlike the Mac, you do not need to source .profile when you get to bash
 ##   because it already has it.
-##  .bashrc executes every time you do a Gnome Terminal/New Window because it is a non-login shell 
+##  .bashrc executes every time you do a Gnome Terminal/New Window because it is a non-login shell
 ##   so it is used for things like alias and functions which be exported from a
 ##   parent shell so be careful on Ubuntu about sourcing it in .bash_profile to
 ##   prevent duplication

@@ -118,9 +118,9 @@ if ! config_mark "$NVIM_INIT" '"'; then
 		" https://github.com/junegunn/vim-plug/issues/739
 		let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
 
-        set runtimepath^=~/.vim runtimepath+=~/.vim/after
-        let &packpath = &runtimepath
-        source ~/.vimrc
+		        set runtimepath^=~/.vim runtimepath+=~/.vim/after
+		        let &packpath = &runtimepath
+		        source ~/.vimrc
 
 	EOF
 fi

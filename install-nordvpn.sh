@@ -53,12 +53,12 @@ source_lib lib-install.sh lib-util.sh
 
 DEB="${DEB:-"https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn-release_1.0.0_all.deb"}"
 if in_os mac; then
-    package_install nordvpn
+	package_install nordvpn
 elif in_os linux; then
-    log_verbose "No Snap so install from repo"
+	log_verbose "No Snap so install from repo"
 	download_url "$DEB"
-    sudo apt-get install "$WS_DIR/cache/$(basename "$DEB")"
-    sudo apt-get update
-    sudo apt-get install nordvpn
-    snap_install nordvpn-electron
+	sudo apt-get install "$WS_DIR/cache/$(basename "$DEB")"
+	sudo apt-get update
+	sudo apt-get install nordvpn
+	snap_install nordvpn-electron
 fi

@@ -156,7 +156,7 @@ if ! $INSTALL_POWERLINE; then
 			if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then
 			    PROMPT_COMMAND="_update_ps1; \$PROMPT_COMMAND"
 			fi
-			EOF
+		EOF
 	fi
 	# https://github.com/vim-airline/vim-airline
 	log_verbose "Installing vim-airline this needs to go in PlugBegin"
