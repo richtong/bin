@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Swaps Docker for Mac edge vs stable release
 ##
@@ -8,10 +9,11 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 # this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 DRYRUN="${DRYRUN:-false}"
@@ -28,12 +30,15 @@ while getopts "hdvn" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	n)
 		DRYRUN=true

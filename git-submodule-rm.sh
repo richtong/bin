@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Change the origin of a cloned submodule
 ## This is actually much hard than it looks there do not seem to
@@ -30,10 +31,10 @@
 # 3. git submodule sync --recursive or git remote set-url
 #
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 ROOT="${ROOT:-""}"
 MAIN="${MAIN:-""}"
@@ -46,7 +47,9 @@ while getopts "hdvm:fr:" opt; do
 		cat <<-EOF
 			    Delete git submodule
 			    usage: $SCRIPTNAME [ flags ] [ submodule_within_main_repo_full_relative_to_main ]
-			    flags: -d debug, -v verbose, -h help
+			    flags: -h help
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
 			           -m location of the submodules the default is SOURCEDIR/extern
 			           -f the default is dry run this is so destructive force to do the work
 			           -r root of the repo the default is SOURCE_DIR note if
@@ -55,12 +58,15 @@ while getopts "hdvm:fr:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	m)
 		MAIN="$OPTARG"

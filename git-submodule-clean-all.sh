@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Reset submodules when they break
 ##
@@ -11,11 +12,11 @@
 # 2. Fix [submodule _dirname_releative_to_git_root ] entry in .git/config
 # 3. then do a git submodule sysn --recursive in git > 2.1 or In the repo ielf run `git config remote.origin.url [new_url]
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 DRY_RUN="${DRY_RUN:-false}"
 DRY_RUN_FLAG="${DRY_RUN_FLAG:-""}"
@@ -26,16 +27,23 @@ while getopts "hdvn:" opt; do
 		cat <<-EOF
 			Delete a submodule
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help
+			    flags: -h help
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
 				-n Dry run (default: DRY_RUN)
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
 		;;

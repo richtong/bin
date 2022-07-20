@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ##install and login docker
@@ -10,9 +11,11 @@
 ##@author Rich Tong
 ##
 #
-set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 DOCKER_USER=${DOCKER_USER:-surround$USER}
 DOCKER_MACHINE=${DOCKER_MACHINE:-default}
@@ -28,10 +31,15 @@ while getopts "hdvu:m:f" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	u)
 		DOCKER_USER="$OPTARG"

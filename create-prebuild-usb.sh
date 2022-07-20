@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## Copy prebuild source files from ws/src/git
@@ -9,6 +10,8 @@ set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 INPUT_ENCRYPTED_DIR=${INPUT_ENCRYPTED_DIR:-"$HOME/Dropbox/.Private"}
 OUTPUT_ENCRYPTED_DIR=${OUTPUT_ENCRYPTED_DIR:-$(find "/media/$USER" -maxdepth 5 -name .Private)}
 while getopts "hdvi:o:" opt; do
@@ -26,10 +29,15 @@ while getopts "hdvi:o:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	i)
 		INPUT_ENCRYPTED_DIR="$OPTARG"

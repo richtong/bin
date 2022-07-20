@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 # https://github.com/koalaman/shellcheck/issues/779
 # Note this needs to be right after shebang to disable
 # the check we need to do this for DRY_RUN since we don't want to glob
@@ -15,10 +16,10 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 GITHUB_URL="${GITHUB_URL:-"git@github.com:"}"
 UPSTREAM_REMOTE="${UPSTREAM_REMOTE:-upstream}"
@@ -40,7 +41,9 @@ while getopts "hdvug:u:r:p:w:m:l:fn" opt; do
 			Merge upstream changes from $UPSTREAM_REMOTE/$UPSTREAM_DEFAULT to $ORIGIN_REMOTE/$ORIGIN_DEFAULT
 			Rebase current branches to $ORIGIN_REMOTE/$ORIGIN_DEFAULT and push the changes
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
+			    flags: -h help"
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
 					   -f force pushs (default: $FORCE_FLAG)
 					   -n dry run (default: $DRY_RUN_FLAG)
 			           -u Upstream remote name to clone from (default: $UPSTREAM_REMOTE)

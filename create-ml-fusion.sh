@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Create a machine learning instance with vmware fusion
 ##
@@ -8,22 +9,31 @@ set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 OPTIND=1
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 MACHINE=${MACHINE:-ml}
 while getopts "hdvm" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			$SCRIPTNAME: create a vmware fusion machine with machine learning in it
-			flags: -d debug -v verbose
+			flags:
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
 			       -m name of machine learning machine
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	m)
 		MACHINE="$OPTARG"

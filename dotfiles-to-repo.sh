@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Copies dotfiles into your personal repo on a per user basis
 ## Then relink them with dotfiles-stow.sh
@@ -11,11 +12,11 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 export FLAGS="${FLAGS:-""}"
 DOTFILES_ROOT=${DOTFILES_ROOT:-"$(cd "$SCRIPT_DIR/../user/$USER/dotfiles" && pwd -P)"}
 FORCE="${FORCE:-false}"
@@ -38,7 +39,9 @@ while getopts "hdvfs:t:p:" opt; do
 
 			    usage: $SCRIPTNAME [ flags ] [ destination for dotfiles]
 
-			    flags: -d debug, -v verbose, -h help"
+			    flags: -h help"
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
 			           -f force the copy of the dotfiles on top of existing files in targer (default: $FORCE)
 			           -s source of your dotfiles (default: $SRC)
 			           -t target directory of dotfiles (default: $DOTFILES_ROOT)
@@ -54,12 +57,15 @@ while getopts "hdvfs:t:p:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	f)
 		FORCE=true

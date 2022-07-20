@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## install 1Password
 ## https://news.ycombinator.com/item?id=9091691 for linux gui
@@ -28,8 +29,8 @@ while getopts "hdvr:e:s:" opt; do
 			usage: $SCRIPTNAME [ flags ]
 			flags:
 				   -h help
-				   -d $($DEBUGGING || echo "no ")debugging
-				   -v $($VERBOSE || echo "not ")verbose
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
 				   -r version number (default: $VERSION)
 				   -e email for login (default: $EMAIL)
 			                   -s signin subdomain add to .1password.com (default: $SIGNIN)

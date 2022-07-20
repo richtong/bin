@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## clean ssh keys
 ## remove ssh keys from the ssh-add list
@@ -15,6 +16,8 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 OPTIND=1
 GROUP="${GROUP:-"$(id -gn)"}"
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 DEST="${DEST:-"$HOME/.ssh"}"
 if [[ $OSTYPE =~ darwin ]]; then
 	export PRIVATE_KEY_SOURCE_DIR=${PRIVATE_KEY_SOURCE_DIR:-"/Volumes/Private"}
@@ -38,10 +41,15 @@ while getopts "hdv" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "no -$opt"

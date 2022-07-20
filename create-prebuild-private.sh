@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## create the .Private secrets for prebuild
 ##
@@ -9,6 +10,8 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 OPTIND=1
 ENCRYPTED_DIR=${ENCRYPTED_DIR:-"/media/$USER/.Private"}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 DROPBOX_ENCRYPTED=${DROPBOX_ENCRYPTED:-"$HOME/Dropbox/.Private"}
 while getopts "hdvurp:e:" opt; do
 	case "$opt" in
@@ -22,10 +25,15 @@ while getopts "hdvurp:e:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	u)
 		ENCRYPTED_DIR="/media/$USER/.Private"

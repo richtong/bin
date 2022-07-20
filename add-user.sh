@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Add a new user to the machine
 ##
@@ -8,6 +9,8 @@
 set -ue && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 SET_PASSWORD=${SET_PASSWORD:-false}
 # Hint The default is an encrypted version of the usual password
@@ -28,7 +31,11 @@ while getopts "hdvk:fx:i:g:s:e:n:m:t:" opt; do
 	case "$opt" in
 	h)
 		echo "$SCRIPTNAME: reads user and uid from standard input"
-		echo flags: -d debug, -h help -v verbose
+		echo flags: 
+        cat <<-EOF
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
+		EOF
 		echo "      -k key repo (default: $GIT_REPOS/$KEY_DIR)"
 		echo "      -f force the password reset (default: $SET_PASSWORD)"
 		echo "      -x default password (the default is the normal one"
@@ -43,10 +50,15 @@ while getopts "hdvk:fx:i:g:s:e:n:m:t:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	k)
 		KEY_DIR="$OPTARG"

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## authorized keys of users into a single authorized_keys for automated accounts
 ## so that any user can access any of the automated agents
@@ -9,6 +10,8 @@
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 KEY_DIR="${KEY_DIR:-public-keys}"
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 BOT_KEY_DIR="${BOT_KEY_DIR:-personal/rich/public-keys/agent}"
 OPTIND=1
 while getopts "hdv" opt; do
@@ -16,15 +19,22 @@ while getopts "hdv" opt; do
 	h)
 		cat <<-EOF
 			            $SCRIPTNAME: Take all public keys and make an authorized one
-			            echo flags: -d debug, -v verbose, -h help
+			        flags: -h help
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "no -$opt" >&2

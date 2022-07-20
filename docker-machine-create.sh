@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## Create a swarm for the current user
@@ -6,10 +7,11 @@
 ## @author Rich Tong
 ## @returns 0 on success
 #
-set -u && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 REMOTE_USER=${REMOTE_USER:-root}
 ORG=${ORG:-tongfamily.com}
 KEY=${KEY:-"$HOME/.ssh/$USER@$ORG-$ORG.id_ed25519"}
@@ -28,10 +30,15 @@ while getopts "hdvu:k:f" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	u)
 		REMOTE_USER="$OPTARG"

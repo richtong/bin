@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## Runs the cloud installation for selfhost
@@ -17,6 +18,8 @@ CLOUD_USER=${CLOUD_USER:-"$USER"}
 ORG_NAME="${ORG_NAME:-tongfamily}"
 DOCKER_USER=${DOCKER_USER:-"${ORG_NAME}build"}
 GIT_EMAIL=${GIT_EMAIL:-"build@$ORG_NAME"}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 CLOUD_SSL_PEM=${CLOUD_SSL_PEM:-"$CLOUD_USER.key.pem"}
 BRANCH=${BRANCH:-"master"}
 while getopts "hdvw:u:e:r:s:b:" opt; do
@@ -25,6 +28,8 @@ while getopts "hdvw:u:e:r:s:b:" opt; do
 		cat <<-EOF
 			            $SCRIPTNAME: create a self-host cloud entry
 			flags: -d debug, -h help"
+			-d debug $($DEBUGGING && echo "off" || echo "on")
+			-v verbose $($VERBOSE && echo "off" || echo "on")
 			-c user for cloud instance (default: $CLOUD_USER)"
 			-w WS directory (default: $WS_DIR)"
 			-e Github user for cloud (default $GIT_EMAIL)"
@@ -39,10 +44,15 @@ while getopts "hdvw:u:e:r:s:b:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	w)
 		WS_DIR="$OPTARG"

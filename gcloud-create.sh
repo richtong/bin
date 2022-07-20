@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Connects Terrafrom on the local machine to Gcloud
 ## Creates a service account and preps the projects
@@ -10,8 +11,10 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 BILLING="${BILLING:-""}"
 ACCOUNT="${ACCOUNT:-"terraform"}"
 PROJECT_SUFFIX="${PROJECT_SUFFIX:-"terraform-admin"}"
@@ -27,7 +30,9 @@ while getopts "hdvb:s:a:o:p:k:" opt; do
 		cat <<-EOF
 			Installs Google Cloud and components
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
+			    flags: -h help"
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
 			           -b billing account number
 			           -o project prefix (default is github orgname of current directory)
 			           -s project suffix (default: $PROJECT_SUFFIX)
@@ -39,12 +44,15 @@ while getopts "hdvb:s:a:o:p:k:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	b)
 		BILLING="$OPTARG"

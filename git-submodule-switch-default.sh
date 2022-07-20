@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 # the check we need to do this for DRY_RUN since we don't want to glob
 ##
 ##
@@ -10,11 +11,11 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 ORIGIN_REMOTE="${ORIGIN_REMOTE:-origin}"
 ORIGIN_DEFAULT="${ORIGIN_DEFAULT:-main}"
 FORCE_FLAG="${FORCE_FLAG:-false}"
@@ -31,7 +32,9 @@ while getopts "hdvfng:p:m:l:" opt; do
 			Merge upstream changes from $UPSTREAM_ORG/$UPSTREAM_DEFAULT to origin/$ORIGIN_DEFAULT
 			Rebase current branches to origin/$MAIN and push the changes to origin/$MAIN
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
+			    flags: -h help"
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
 					   -f force pushs (default: $FORCE_FLAG)
 					   -n dry run (default: $DRY_RUN)
 					   -l Origin remote name (default: $ORIGIN_REMOTE)
@@ -43,12 +46,15 @@ while getopts "hdvfng:p:m:l:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	f)
 		FORCE_FLAG=true

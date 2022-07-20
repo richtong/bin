@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## install docker-machine certs and configurations
 ## https://gist.github.com/schickling/2c48da462a7def0a577e
@@ -11,9 +12,11 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 MACHINE_STORAGE_PATH=${MACHNE_STORAGE_PATH:-"$HOME/.docker/machine"}
 FORCE=false
 OPTIND=1
@@ -30,10 +33,15 @@ while getopts "hdvfs:p:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	f)
 		FORCE=true

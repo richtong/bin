@@ -1,8 +1,9 @@
 #!/bin/bash
+## vim: set noet ts=4 sw=4:
 #
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
 mkdir -p "$HOME/ws/cache"
 ORG_NAME="${ORG_NAME:-tongfamily}"

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## fix the .ssh keys so that they are not too open
 ## Also adds an entry in .profile to do this all the time
@@ -9,8 +10,10 @@
 ## @author Rich Tong
 ## @returns 0 on success
 #
-set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 
 OPTIND=1
 while getopts "hdvw:" opt; do
@@ -23,10 +26,15 @@ while getopts "hdvw:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	w)
 		export WS_DIR="$OPTARG"

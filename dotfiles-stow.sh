@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Install dotfiles by symlink with stow
 ##@author Rich Tong
@@ -7,12 +8,11 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR="${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}"
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
-VERBOSE_FLAG=${VERBOSE_FLAG:-" -v "}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 # we do not use readlink because it is linux specific note that this assumes the
 # directory exists
 #DOTFILES_ROOT="${DOTFILES_ROOT:-"$(cd "$SCRIPT_DIR/../user/$USER/dotfiles" 2>/dev/null && pwd -P || echo "")"}"
@@ -27,7 +27,9 @@ while getopts "hdvt:" opt; do
 
 			usage: $SCRIPTNAME [ flags ] [ destinition directory ]
 
-			flags: -d debug, -v verbose, -h help
+			flags: -h help
+					-d debug $($DEBUGGING && echo "off" || echo "on")
+					-v verbose $($VERBOSE && echo "off" || echo "on")
 			       -t dotfile root (default: $DOTFILES_ROOT)
 
 
@@ -37,12 +39,15 @@ while getopts "hdvt:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export VFLAG+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	t)
 		DOTFILES_ROOT="$OPTARG"

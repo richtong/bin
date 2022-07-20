@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Recreate the Mac Virtualbox default to be ready for compile
 ##
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -u && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 MACHINE=${MACHINE:-default}
 OPTIND=1
 while getopts "hdvm:" opt; do
@@ -20,10 +22,15 @@ while getopts "hdvm:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	m)
 		MACHINE="$OPTARG"
