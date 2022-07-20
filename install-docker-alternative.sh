@@ -217,8 +217,8 @@ if $PODMAN; then
 	log_verbose "Adding bash completions"
 	podman completion -f "/etc/bash_completion.d/podman" bash
 
-    # if zsh is login shell can go into .zprofile but @richtong
-    # uses it as non-login so put into .zshrc
+	# if zsh is login shell can go into .zprofile but @richtong
+	# uses it as non-login so put into .zshrc
 	if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 		log_verbose "Adding zsh completions"
 		config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'

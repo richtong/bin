@@ -47,9 +47,8 @@ source_lib lib-install.sh lib-util.sh
 #fi
 
 if package_install awscli aws-cdk; then
-    log_exit "install awscli aws-cdk"
+	log_exit "install awscli aws-cdk"
 fi
-
 
 if in_os mac; then
 	log_verbose "installing awscli if brew install failed"
@@ -62,7 +61,7 @@ if in_os mac; then
 			sudo port select awscli py27-awscli
 		fi
 	fi
-    log_exit "Mac installed"
+	log_exit "Mac installed"
 fi
 
 NODE_PACKAGE=(

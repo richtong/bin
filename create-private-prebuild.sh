@@ -20,7 +20,7 @@ while getopts "hdv" opt; do
 	h)
 		cat <<-EOF
 			$SCRIPTNAME: Copy prebuild scripts to /Private
-			flags: 
+			flags:
 					-d debug $($DEBUGGING && echo "off" || echo "on")
 					-v verbose $($VERBOSE && echo "off" || echo "on")
 		EOF

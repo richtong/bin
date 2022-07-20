@@ -31,10 +31,10 @@ while getopts "hdvk:fx:i:g:s:e:n:m:t:" opt; do
 	case "$opt" in
 	h)
 		echo "$SCRIPTNAME: reads user and uid from standard input"
-		echo flags: 
-        cat <<-EOF
-					-d debug $($DEBUGGING && echo "off" || echo "on")
-					-v verbose $($VERBOSE && echo "off" || echo "on")
+		echo flags:
+		cat <<-EOF
+			-d debug $($DEBUGGING && echo "off" || echo "on")
+			-v verbose $($VERBOSE && echo "off" || echo "on")
 		EOF
 		echo "      -k key repo (default: $GIT_REPOS/$KEY_DIR)"
 		echo "      -f force the password reset (default: $SET_PASSWORD)"

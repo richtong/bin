@@ -20,7 +20,7 @@ while getopts "hdvg:" opt; do
 		cat <<-EOF
 			$SCRIPTNAME: adds the standard groups for our corporate machines
 			        flags: -h help
-                    -g list of new groups in a text file (default: $GROUP_FILE)
+			                    -g list of new groups in a text file (default: $GROUP_FILE)
 					-d debug $($DEBUGGING && echo "off" || echo "on")
 					-v verbose $($VERBOSE && echo "off" || echo "on")
 		EOF

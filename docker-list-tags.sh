@@ -15,7 +15,6 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
-
 OPTIND=1
 while getopts "hdv" opt; do
 	case "$opt" in

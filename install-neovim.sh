@@ -70,8 +70,8 @@ log_verbose "install IDE tools done by install.sh"
 log_verbose "create vi as alias for nvim and set git to use it"
 if $ALIAS; then
 	# use a null string because this will get the default shell
-    # put into .zshrc even though it could go into .zprofile
-    # since these are just paths
+	# put into .zshrc even though it could go into .zprofile
+	# since these are just paths
 	for PROFILE in "" "$(config_profile_nonexportable_zsh)"; do
 		log_verbose "Adding config to ${PROFIlE:-default}"
 		# shellcheck disable=SC2086
