@@ -12,7 +12,7 @@ set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
 # delay evauation of $HOME until bash time
-SSH_DIR="${SSH_DIR:-"\$HOME/.ssh"}"
+SSH_DIR="${SSH_DIR:-"$HOME/.ssh"}"
 while getopts "hdvk:" opt; do
 	case "$opt" in
 	h)

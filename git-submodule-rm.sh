@@ -153,7 +153,7 @@ for repo_path in $REPOS; do
 		log_warning "$MAIN/$repo does not exist so skip trying to remove it"
 	elif ! $FORCE; then
 		log_warning dryrun: git rm -rf "$repo" and rm-rf "$repo" if that fails
-	elif [[ -e "$repo" ]] && ! git rm -rf "$repo"; then
+	elif [[ -e $repo ]] && ! git rm -rf "$repo"; then
 		log_warning "try to git rm main repo at $repo"
 		if ! rm -rf "$repo"; then
 			log_warning rm -rf "$repo" also failed

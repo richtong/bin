@@ -99,7 +99,7 @@ log_warning Then choose Virtual Machine/Settings/Shared Setting/Enable Shared Fo
 log_warning Then add at least your home directory
 read -rp "Please click on Mac VMWare Fusion app, Choose Virtual Machine/Install VMware Tools, press enter when done"
 
-if [[ ! -e "$TOOLS_CD" ]]; then
+if [[ ! -e $TOOLS_CD ]]; then
 	log_error 2 "No VMware Tools found, did you run select VirtualMachine/Install VMware Tools?"
 fi
 

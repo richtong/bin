@@ -50,7 +50,7 @@ if ! in_os linux; then
 	log_error 1 "only works on ubuntu"
 fi
 
-if [[ -z "$*" ]]; then
+if [[ -z $* ]]; then
 	log_error 2 "need to enter some network interfaces"
 fi
 

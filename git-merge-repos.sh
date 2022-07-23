@@ -56,7 +56,7 @@ fi
 for repo in "$DEST" "$@"; do
 	repo_user=$(dirname "$repo")
 	repo_dir=$WS_DIR/git/$repo_user
-	if [[ ! -e "$repo_dir" ]]; then
+	if [[ ! -e $repo_dir ]]; then
 		mkdir -p "$repo_dir"
 		cd "$repo_dir"
 		git clone "git@github.com:$repo"

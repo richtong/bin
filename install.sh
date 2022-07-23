@@ -276,9 +276,9 @@ if in_os linux; then
 
 	log_verbose Adding sudoers entry ignored if running under iam-key
 	SUDOERS_FILE="/etc/sudoers.d/10-$USER"
-	if [[ "$NO_SUDO_PASSWORD" == true ]]; then
+	if [[ $NO_SUDO_PASSWORD == true ]]; then
 		log_verbose trying to remove need for sudo password
-		if ! groups | grep sudo || [[ ! -e "$SUDOERS_FILE" ]]; then
+		if ! groups | grep sudo || [[ ! -e $SUDOERS_FILE ]]; then
 			log_warning no sudo available please enter root password
 			# note we need to escape the here document quotes so they
 			# get passed to su and also around the file name

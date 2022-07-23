@@ -15,7 +15,7 @@ trap 'exit $?' ERR
 OPTIND=1
 export FLAGS=${FLAGS:-" -v "}
 VERSION="${VERSION:-"7.5p1"}"
-URL="${URL:-"https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-\$VERSION.tar.gz"}"
+URL="${URL:-"https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-$VERSION.tar.gz"}"
 PGP_URL="${PGP_URL:-"$URL.asc"}"
 # https://www.openssh.com/portable.html
 SIGNER_URL="${SIGNER_URL:-"https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/RELEASE_KEY.asc"}"

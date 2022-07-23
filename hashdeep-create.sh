@@ -57,7 +57,7 @@ error=0
 log_verbose now create the hash
 # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
 for dir in "$@"; do
-	if [[ ! -d "$dir" ]]; then
+	if [[ ! -d $dir ]]; then
 		log_verbose "$dir is not a directory skipping"
 		continue
 	fi

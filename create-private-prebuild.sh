@@ -48,8 +48,8 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 set -u
 
-if [[ ! -e "$PRIVATE_DIR" ]]; then
-	if [[ ! -e "$PRIVATE_DMG" ]]; then
+if [[ ! -e $PRIVATE_DIR ]]; then
+	if [[ ! -e $PRIVATE_DMG ]]; then
 		hdiutil create "$PRIVATE_DMG" -encryption AES-256 -volname "Private" -size 16 -fs HFS+J
 	fi
 	hdiutil attach "$PRIVATE_DMG"

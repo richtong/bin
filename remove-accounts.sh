@@ -61,7 +61,7 @@ debug_off
 while read -r NEW_UID NEW_USER UNNEEDED; do
 
 	# Skip comment lines or existing users
-	[[ "$NEW_UID" =~ ^# || -z "$NEW_UID" ]] && continue
+	[[ $NEW_UID =~ ^# || -z $NEW_UID ]] && continue
 	$VERBOSE && echo processing "$NEW_UID $NEW_USER"
 
 	# Do not delete the current user!
@@ -88,9 +88,9 @@ debug_on
 while read -u 10 -r NEW_GID NEW_GROUP PASSWORD_LESS_SUDO; do
 
 	# Skip comment or blank lines or existing users
-	[[ "$NEW_GID" =~ ^# || -z "$NEW_GID" ]] && continue
+	[[ $NEW_GID =~ ^# || -z $NEW_GID ]] && continue
 	# do not delet vital groups
-	[[ "$NEW_GROUP" = "$(id -u)" ]] && continue
+	[[ $NEW_GROUP == "$(id -u)" ]] && continue
 
 	$VERBOSE && echo "processing $NEW_GID $NEW_GROUP"
 

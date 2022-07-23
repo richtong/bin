@@ -52,7 +52,7 @@ log_verbose "mount $ENCRYPTED_DIR to $MOUNTPOINT"
 # http://forum.synology.com/enu/viewtopic.php?f=160&t=41568
 # http://www.everything-linux-101.com/how-to/encrypt-files-folders/encrypt-folders-with-ecryptfs-on-the-fly/
 # http://stackoverflow.com/questions/1473981/how-to-check-if-a-string-has-spaces-in-bash-shell
-if [[ "$ENCRYPTED_DIR" != "${ENCRYPTED_DIR%[[:space:]]*}" ]]; then
+if [[ $ENCRYPTED_DIR != "${ENCRYPTED_DIR%[[:space:]]*}" ]]; then
 	log_warning "no white space is allowed in path \"$ENCRYPTED_DIR\""
 	exit 1
 fi

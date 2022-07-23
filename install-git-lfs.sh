@@ -39,7 +39,7 @@ package_install git-lfs
 if ! command -v git-lfs &>/dev/null; then
 	if in_os mac; then
 		log_verbose "package install failed try to download"
-		if [[ ! -e "$DOWNLOAD_DIR" ]]; then
+		if [[ ! -e $DOWNLOAD_DIR ]]; then
 			download_url_open "$DOWNLOAD_URL"
 		fi
 		# Note that the git install must be run out of the working directory

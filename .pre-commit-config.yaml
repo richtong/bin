@@ -71,12 +71,20 @@ repos:
       # this is using the ruby mdl utility so switching to the node version
       # because it has per line disabling of checks
       # - id: markdownlint
-      - id: shfmt
+      # this requires a local shfmt but act does not handle snap install
+      # properly so use the pre-commit that does its own install
+      # - id: shfmt
       # https://github.com/jumanjihouse/pre-commit-hooks/issues/82
       # additional dependency bug in pre-commit v2.10
       # should be fixed now when doing a pre-commit all
       - id: shellcheck
       # additional_dependencies: []
+
+  # this is bettert han the jumanji version as it uses go to build
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.5.1-1
+    hooks:
+      - id: shfmt
 
   # Use shellcheck instead
   # - repo: https://github.com/detailyang/pre-commit-shell
@@ -195,6 +203,6 @@ repos:
     rev: v2.10.0
     hooks:
       # use if hadolint is local
-      - id: hadolint
-      # use if you have docker and you do not need hadolint installed
-      # - id: hadolint-docker
+      #- id: hadolint
+      # using docker container because necktos act will not homebrew install
+      - id: hadolint-docker

@@ -61,7 +61,7 @@ fi
 for remote in "${@:-$REMOTES}"; do
 	log_message "trying $remote enter passphrase if needed"
 
-	if [[ -e "$authorized" ]]; then
+	if [[ -e $authorized ]]; then
 		# http://stackoverflow.com/questions/13650312/copy-and-append-files-to-a-remote-machine-cat-error
 		log_verbose "checking $remote for authorized_keys edits"
 		# expand on client side

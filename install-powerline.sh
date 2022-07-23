@@ -92,10 +92,10 @@ else
 			# https://www.raymondcamden.com/2017/09/25/calling-a-powershell-script-from-wsl
 			log_verbose "will install fonts"
 			if $VERBOSE; then
-				powershell.exe -File ".\\install.ps1" -WhatIf
+				powershell.exe -File '.\install.ps1' -WhatIf
 			fi
 			if $FORCE; then
-				powershell.exe -File ".\\install.ps1"
+				powershell.exe -File '.\install.ps1'
 			fi
 			log_warning "change the Terminal font to use a Powerline one and"
 			log_warning "restart the terminal session"

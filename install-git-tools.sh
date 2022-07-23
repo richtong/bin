@@ -175,7 +175,7 @@ gh alias set default-branch \
 # https://medium.com/usevim/git-and-vimdiff-a762d72ced86
 
 # https://github.blog/2020-07-27-highlights-from-git-2-28/#introducing-init-defaultbranch
-log_verbose "install vimdiff can edit all files with vi \$(git diff --name-only)"
+log_verbose "install vimdiff can edit all files with vi $(git diff --name-only)"
 git config --global diff.tool vimdiff
 git config --global merge.tool vimdiff
 # no prompting for next file

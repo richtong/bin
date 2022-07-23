@@ -22,7 +22,7 @@ while getopts "hdvw:" opt; do
 		echo "$SCRIPTNAME: Fix ssh keys"
 		echo "flags: -d debug, -h help"
 		echo "       -w workspace directory"
-		echo "for paths in \$PATHS"
+		echo "for paths in $PATHS"
 		exit 0
 		;;
 	d)

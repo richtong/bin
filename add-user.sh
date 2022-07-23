@@ -102,7 +102,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 # note the git repo location only after WS_DIR found by include.sh
 GIT_REPOS=${GIT_REPOS:-"$WS_DIR/git"}
 
-if [[ -z "$NEW_UID" || "$NEW_UID" =~ ^# ]]; then
+if [[ -z $NEW_UID || $NEW_UID =~ ^# ]]; then
 	log_verbose ignore absent uid or if it starts with a # sign
 	exit 0
 fi
@@ -121,7 +121,7 @@ if ! getent passwd "$NEW_USER" >/dev/null; then
 	sudo usermod -a -G "$EXTRA_GROUPS" "$NEW_USER"
 
 	# set a password only if asked and one is not already there
-	if $SET_PASSWORD && ! sudo grep "^$NEW_USER" /etc/shadow | cut -d':' -f2 | grep -v "\$"; then
+	if $SET_PASSWORD && ! sudo grep "^$NEW_USER" /etc/shadow | cut -d':' -f2 | grep -v '$'; then
 		log_verbose "Changing $NEW_USER password"
 		# Make sure to use sha512 as the strongest password
 		echo "$NEW_USER:$PASSWORD" | sudo chpasswd -e

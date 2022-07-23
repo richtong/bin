@@ -50,7 +50,7 @@ if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh
 shift $((OPTIND - 1))
 
-if [[ ! $(util_os) == linux ]]; then
+if [[ $(util_os) != linux ]]; then
 	log_exit "Real linux only"
 fi
 

@@ -54,7 +54,7 @@ set -u
 # NEW_GROUP=ops
 # NEW_GID=8000
 add_group() {
-	if [[ -z "$NEW_GID" || "$NEW_GID" =~ ^# ]]; then
+	if [[ -z $NEW_GID || $NEW_GID =~ ^# ]]; then
 		log_verbose skipping blank line or comment line with a #
 		return
 	fi
@@ -79,7 +79,7 @@ add_group() {
 
 	# see if we need to add no password sudo line
 	SUDOERS_FILE="/etc/sudoers.d/10-$NEW_GROUP"
-	if [[ "$NO_PASSWORD_SUDO" == true && (! -e "$SUDOERS_FILE") ]]; then
+	if [[ $NO_PASSWORD_SUDO == true && (! -e $SUDOERS_FILE) ]]; then
 		sudo tee "$SUDOERS_FILE" <<<"%$NEW_GROUP ALL=(ALL:ALL) NOPASSWD:ALL" >/dev/null
 		sudo chmod 440 "$SUDOERS_FILE"
 	fi

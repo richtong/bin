@@ -118,7 +118,7 @@ fi
 log_verbose "looking for ${ENCRYPTED_PATH[*]} and mount at $ENCRYPTED_MOUNTPOINT"
 
 if [[ $OSTYPE =~ darwin ]]; then
-	if [[ ! -e "$ENCRYPTED_MOUNTPOINT" ]]; then
+	if [[ ! -e $ENCRYPTED_MOUNTPOINT ]]; then
 		log_verbose "attaching ${ENCRYPTED_PATH[*]} to $ENCRYPTED_MOUNTPOINT"
 		hdiutil attach "${ENCRYPTED_PATH[0]}"
 	else

@@ -110,7 +110,7 @@ for target in "${TARGETS[@]}"; do
 	# as an example macos.arm64.12.1 would b
 	config_name="$full_version_name"
 	# This non zero check guards against null full_version_names
-	while [[ -n "$config_name" ]]; do
+	while [[ -n $config_name ]]; do
 		log_verbose "trying to stow $config_name"
 		# dir structure is ./, ./os, ./os.major, ./os.major.minor...
 		# --defer means do not mind collisions

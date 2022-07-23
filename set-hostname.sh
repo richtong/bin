@@ -66,7 +66,7 @@ FORCE=${FORCE:-false}
 shift "$((OPTIND - 1))"
 NEW_HOSTNAME="$1"
 
-if [[ ! -e "$WORDLIST" ]]; then
+if [[ ! -e $WORDLIST ]]; then
 	# If not wordlist.txt exists then create it
 	wget -O "$WORDLIST" "$WORDURL"
 fi

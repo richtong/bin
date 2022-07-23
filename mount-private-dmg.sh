@@ -46,7 +46,7 @@ if [[ ! $OSTYPE =~ darwin ]]; then
 	log_error 1 "Only runs on a Mac not $OSTYPE"
 fi
 
-if [[ ! -e "$ENCRYPTED" ]]; then
+if [[ ! -e $ENCRYPTED ]]; then
 	# http://www.theinstructional.com/guides/disk-management-from-the-command-line-part-3
 	hdiutil create "$ENCRYPTED" -volname "Private" \
 		-srcfolder "$HOME/.ssh" \
@@ -54,7 +54,7 @@ if [[ ! -e "$ENCRYPTED" ]]; then
 	log_error 1 "no $ENCRYPTED exists you should create"
 fi
 
-if [[ ! -e "$MOUNTPOINT" ]]; then
+if [[ ! -e $MOUNTPOINT ]]; then
 	hdiutil attach "$ENCRYPTED"
 else
 	log_warning Private volume already exists using it instead

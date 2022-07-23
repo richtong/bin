@@ -107,7 +107,7 @@ if [[ ! -e "$(dirname "$SHARED_MOUNTPOINT")" ]]; then
 	target="$(basename "$SHARED_MOUNTPOINT")"
 	for dropbox in $("$SCRIPT_DIR/find-dropbox.sh"); do
 		dir="$dropbox/$target"
-		if [[ -e "$dir" ]]; then
+		if [[ -e $dir ]]; then
 			log_verbose could not find "$SHARED_MOUNTPOINT" but found "$dir" replacing
 			SHARED_MOUNTPOINT="$dir"
 			break

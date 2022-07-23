@@ -19,7 +19,7 @@ find_ws() {
 			dirname "$found"
 			return 0
 		fi
-		if [[ $dir = / ]]; then break; fi
+		if [[ $dir == / ]]; then break; fi
 		dir=$(dirname "$dir")
 	done
 	# https://stackoverflow.com/questions/1489277/how-to-use-prune-option-of-find-in-sh

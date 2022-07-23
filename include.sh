@@ -30,7 +30,7 @@ lib_name=${lib_name//-/_}
 # note how we use the escaped $ to get the reference
 # This does not work as a bash
 # if [[ ! -z $BASH &&  -z ${!lib_name} ]]
-if [[ ! -v "$lib_name" ]]; then
+if [[ ! -v $lib_name ]]; then
 	eval "$lib_name=true"
 
 	find_ws() {
@@ -46,7 +46,7 @@ if [[ ! -v "$lib_name" ]]; then
 				dirname "$found"
 				return 0
 			fi
-			if [[ $dir = / ]]; then break; fi
+			if [[ $dir == / ]]; then break; fi
 			dir=$(dirname "$dir")
 		done
 		# https://stackoverflow.com/questions/1489277/how-to-use-prune-option-of-find-in-sh

@@ -64,12 +64,12 @@ fi
 # http://forum.synology.com/enu/viewtopic.php?f=160&t=41568
 # http://www.everything-linux-101.com/how-to/encrypt-files-folders/encrypt-folders-with-ecryptfs-on-the-fly/
 # http://stackoverflow.com/questions/1473981/how-to-check-if-a-string-has-spaces-in-bash-shell
-if [[ "$ENCRYPTED_DIR" != "${ENCRYPTED_DIR%[[:space:]]*}" ]]; then
+if [[ $ENCRYPTED_DIR != "${ENCRYPTED_DIR%[[:space:]]*}" ]]; then
 	log_warning "no white space is allows in the path \"$ENCRYPTED_DIR\""
 	exit 1
 fi
 
-if [[ ! -d "$ENCRYPTED_DIR" ]]; then
+if [[ ! -d $ENCRYPTED_DIR ]]; then
 	log_warning "$ENCRYPTED_DIR does not exist or is not a directory, no copy"
 	exit 0
 fi

@@ -112,7 +112,7 @@ git fetch origin
 local_commit=$(git rev-parse @)
 # shellcheck disable=SC1083
 remote_commit=$(git rev-parse @{u})
-if ! $FORCED && [[ "$local_commit" == "$remote_commit" ]]; then
+if ! $FORCED && [[ $local_commit == "$remote_commit" ]]; then
 	log_error 5 "No need to build, local same as remote"
 fi
 

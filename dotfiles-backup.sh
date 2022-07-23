@@ -76,7 +76,7 @@ source_lib lib-util.sh lib-install.sh
 
 config_name="$(util_full_version)"
 log_verbose "version is $config_name"
-while [[ -n "$config_name" ]]; do
+while [[ -n $config_name ]]; do
 	dotfiles_dir="$DOTFILES_ROOT/$config_name"
 	log_verbose "trying $dotfiles_dir"
 	if [[ -e $dotfiles_dir ]]; then

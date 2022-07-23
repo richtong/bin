@@ -58,7 +58,7 @@ relpath() {
 # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
 for file in "$@"; do
 	log_verbose "working on $file"
-	if [[ ! -e "$file" ]]; then
+	if [[ ! -e $file ]]; then
 		log_warning "$file does not exist"
 		break
 	fi
@@ -75,7 +75,7 @@ for file in "$@"; do
 	fi
 
 	log_verbose "trying to sym link $file into src/local-bin"
-	if [[ ! -e "$command_name" ]]; then
+	if [[ ! -e $command_name ]]; then
 		ln -s "$(relpath "$full_path")" "$command_name"
 		log_verbose symlinked into src/local-bin
 	fi
@@ -87,7 +87,7 @@ for file in "$@"; do
 	if "$FORCE"; then
 		rm -f "$command_name"
 	fi
-	if [[ ! -e "$command_name" ]]; then
+	if [[ ! -e $command_name ]]; then
 		ln -s ws-rel-cmd "$command_name"
 		log_verbose symlinked into src/bin
 	fi

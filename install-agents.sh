@@ -53,7 +53,7 @@ agent_install="$WS_DIR/git/user/agent/bin/install-dev-packages.sh"
 # Note install.sh is sudo-less and can be run by agent
 # install-dev-packages.sh needs sudo and must be run by a super user
 log_verbose installing package prerequisites
-if [[ -e "$agent_install" ]]; then
+if [[ -e $agent_install ]]; then
 	log_verbose installing package prerequisites
 	"$SHELL" "$agent_install"
 fi

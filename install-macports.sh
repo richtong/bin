@@ -154,7 +154,7 @@ if ! command -v port; then
 		# sudo make install fails when it is called from mac-install.sh and not clear seems to be trying to run /bin/sh
 		# seems as if the environment is somehow wrong, but do not have time to debug so use the package instead
 		macports_dir="${macports_filename%.*}"
-		if [[ ! -e "$macports_dir" ]]; then
+		if [[ ! -e $macports_dir ]]; then
 			tar xf "$macports_filename"
 		fi
 		# https://stackoverflow.com/questions/538504/uses-for-this-bash-filename-extraction-technique
