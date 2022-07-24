@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# vi:set ts=4 sw=4 noet:
 ##
 ## Install Google Cloud SDK and major components
 ## So that at the end you are ready to deploy against GCloud
@@ -10,8 +11,11 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+
+VERSION="${VERSION:-7}"
+DEBUGGING="${DEBUGGING:-false}"
 # beta now installed by default at least on Ubuntu
 #PACKAGES="${PACKAGES:-" beta "}"
 PACKAGES="${PACKAGES:-""}"
@@ -34,12 +38,15 @@ while getopts "hdv" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -56,18 +63,15 @@ if in_os mac; then
 	log_verbose install google cloud sdk
 	package_install google-cloud-sdk
 
-	log_verbose "checking for gcloud in $(config_profile_nonexportable)"
-	if ! config_mark "$(config_profile_nonexportable)"; then
-		log_verbose "installing into $(config_profile_nonexportable)"
-		config_add "$(config_profile_nonexportable)" <<-'EOF'
+	log_verbose "checking for gcloud in $(config_profile)"
+	if ! config_mark; then
+		log_verbose "installing into $(config_profile)"
+		config_add <<-'EOF'
 			# shellcheck disable=SC1091
-			if command -v brew >/dev/null &&
-			                [[ -r "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc" ]] then;
-			                    source "$(brew --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"; fi
+			            if [ -r "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc" ]] then;
+			                source "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc"; fi
 			# shellcheck disable=SC1091
-			if command -v brew >/dev/null &&
-			                [[ -r "$(brew
-			                --prefix)/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc" ]] then;
+			            if [ -r "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc" ] then;
 			                source "$(brew --prefix/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc"; fi
 		EOF
 		log_warning "now source the changes to $(config_profile_nonexportable)"
@@ -84,7 +88,7 @@ elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then
 			if [ -f '$INSTALL_DIR/google-cloud-sdk/path.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/path.bash.inc'; fi
 
 			# The next line enables shell command completion for gcloud.
-			if [ -f 'INSTALL_DIR/google-cloud-sdk/completion.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/completion.bash.inc'; fi
+			if [ -f '$INSTALL_DIR/google-cloud-sdk/completion.bash.inc' ]; then . '$INSTALL_DIR/google-cloud-sdk/completion.bash.inc'; fi
 		EOF
 		log_verbose "Make sure we can see the new commands"
 		if [ -f "$INSTALL_DIR/google-cloud-sdk/path.bash.inc" ]; then

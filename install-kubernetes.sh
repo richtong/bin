@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Installs Kubernetes both the kubectl
 ##
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -e && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 DOCKER="${DOCKER:-false}"
 MINIKUBE="${MINIKUBE:-false}"
@@ -16,13 +17,17 @@ DEPRECATED_KUBEFLOW="${DEPRECATED_KUBEFLOW:-false}"
 KIND="${KIND:-false}"
 MULTIPASS="${MULTIPASS:-false}"
 COLIMA="${COLIMA:-false}"
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 while getopts "hdvmuiofkcb" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			$SCRIPTNAME: Install Kubernetes command line and then a k8s implementation
-			flags: -d debug, -v verbose, -h help
+			flags: -h help
+			               -d $(! $DEBUGGING || echo "no ")debugging
+			               -v $(! $VERBOSE || echo "not ")verbose
 				-f force installation (default: $FORCE)
 				-c Install Colima with Kubernetes support (default: $COLIMA)
 				-o Install Docker with a single cluster version (default: $DOCKER)
@@ -34,10 +39,15 @@ while getopts "hdvmuiofkcb" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	f)
 		FORCE=true
@@ -98,7 +108,7 @@ log_verbose "Base installation of tools ${PACKAGES[*]}"
 
 package_install "${PACKAGES[@]}"
 
-log_verbose "closing up secretes in .kube/config"
+log_verbose "closing up secrets in .kube/config"
 mkdir -p "$HOME/.kube"
 chmod 700 "$HOME/.kube"
 touch "$HOME/.kube/config"
@@ -110,25 +120,25 @@ log_verbose "configure helm"
 helm repo add bitnami https://charts.bitnami.com/bitnami
 log_verbose "to use helm install rich-wp bitnami/wordpress"
 
-log_verbose "installing bash autocomplete and krew into $(config_profile)"
-if ! config_mark; then
-	# https://github.com/corneliusweig/konfig
-	config_add <<-'EOF'
-		# shellcheck disable=SC1090
-	EOF
-fi
-[[ $PATH =~ .krew/bin ]] || export PATH="$PATH:$HOME/.krew/bin"
-
-hash -r
-
+# https://github.com/corneliusweig/konfig
 # completions can go into the profile
+# this must in /bin/sh format for .profile
+#if command -v helm >/dev/null; then source <(helm completion bash); fi
+#if command -v kubectl > /dev/null; then source <(kubectl completion bash); fi
 if ! config_mark; then
 	log_verbose "adding completions"
 	config_add <<-'EOF'
 		# shellcheck disable=SC1090
-		if command -v helm >/dev/null; then source <(helm completion bash); fi
+				echo "$PATH" | grep ".krew/bin" || export PATH="$HOME/.krew/bin:$PATH"
+	EOF
+fi
+
+if ! config_mark "$(config_profile_nonexportable)"; then
+	config_add "$(config_profile_nonexportable)" <<-'EOF'
 		# shellcheck disable=SC1090
-		if command -v kubectl > /dev/null; then source <(kubectl completion bash); fi
+		if command -v helm >/dev/null; then eval "$(helm completion bash)"; fi
+		# shellcheck disable=SC1090
+		if command -v kubectl > /dev/null; then eval "$(kubectl completion bash)"; fi
 	EOF
 fi
 # https://github.com/corneliusweig/konfig

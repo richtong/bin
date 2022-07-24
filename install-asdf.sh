@@ -99,7 +99,9 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 	config_add "$(config_profile_nonexportable)" <<-'EOF'
 		# shellcheck disable=SC1091
 		        if command -v asdf >/dev/null; then
-		        source "$(brew --prefix asdf)/libexec/asdf.sh"
+		                    # shellcheck disable=SC1090
+		                    source "$(brew --prefix asdf)/libexec/asdf.sh"
+		                fi
 	EOF
 	# https://linuxhint.com/associative_array_bash/
 fi
@@ -111,7 +113,7 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 	# no longer need manual installation
 	asdf direnv setup --shell zsh --version "$((ASDF[direnv]))"
 	#config_add "$(config_profile_zsh)" <<-'EOF'
-	#    # shellcheck disable=SC1091
+	#    # shellcheck disable=SC1090
 	#    source "$(brew --prefix asdf)/libexec/asdf.sh"
 	#EOF
 fi

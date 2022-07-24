@@ -45,7 +45,7 @@ package_install mysql-client
 log_verbose "installing into $(config_profile)"
 if ! config_mark; then
 	config_add $ <<-'EOF'
-		[[ $PATH =~ mysql-client/bin ]] || PATH="/usr/local/opt/mysql-client/bin:$PATH"
+		echo "$PATH" | grep -q "mysql-client/bin" || PATH="$HOMEBREW_PREFIX/opt/mysql-client/bin:$PATH"
 	EOF
 fi
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## install yq and command completion
 ## https://mikefarah.gitbook.io/yq
@@ -9,10 +10,10 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+VERSION="${VERSION:-7}"
+DEBUGGING="${DEBUGGING:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdv" opt; do
@@ -21,17 +22,22 @@ while getopts "hdv" opt; do
 		cat <<-EOF
 			Installs 1Password
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
+			    flags: -h help"
+				-d $(! $DEBUGGING || echo "no ")debugging
+				-v $(! $VERBOSE || echo "not ")verbose
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "not flag -$opt"
@@ -52,11 +58,11 @@ log_verbose "installing yq"
 package_install yq
 hash -r
 
-# goes into the shell so subshells pick up completion
+# needs to go into .bashrc as it is a bunch of functions
 if ! config_mark; then
 	log_verbose "installing command completion"
-	config_add <<-EOF
+	config_add "$(config_profile_nonexportable)" <<-'EOF'
 		# shellcheck disable=SC1090
-		source <(yq shell-completion bash)
+		if command -v yq >/dev/null; then source <(yq shell-completion bash)"; fi
 	EOF
 fi

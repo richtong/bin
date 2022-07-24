@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vi: se noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 #
@@ -11,10 +12,11 @@
 ##
 ##
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-# need to use trap and not -e so bashdb works
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+
+VERSION="${VERSION:-7}"
+DEBUGGING="${DEBUGGING:-false}"
 ANACONDA="${ANACONDA:-false}"
 PIPENV="${PIPENV:-true}"
 # If version is set to null then the default python version is used
@@ -29,20 +31,17 @@ while getopts "hdvaeyp:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-
 			Install python components
-
 			usage: $SCRIPTNAME [flags...]
 
 			  -h help
-			  -v verbose
-			  -d single step debugging
-			              -a disable anaconda (normally installed)
-			              -e disable pipenv (normally installed)
+			              -d $(! $DEBUGGING || echo "no ")debugging
+			              -v  $(! $VERBOSE || echo "not ")verbose
+			  -a disable anaconda (normally installed)
+			  -e disable pipenv (normally installed)
 			  -y install pyenv to manage python versions (default: $PYENV)
-			              -p install python version (default: ${PYTHON_VERSION:-stable})
+			  -p install python version (default: ${PYTHON_VERSION:-stable})
 		EOF
-
 		exit 0
 		;;
 	d)
@@ -103,8 +102,8 @@ package_install "${PACKAGES[@]}"
 if ! config_mark; then
 	# Use the brew location for python
 	config_add <<-EOF
-		# shellcheck disable=SC2155
-		[[ \$PATH =~ \$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin ]] || export PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
+		    # shellcheck disable=SC2155
+			echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
 	EOF
 	log_warning "source $(config_profile) to get the correct python"
 fi

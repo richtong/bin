@@ -10,15 +10,12 @@
 #
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# do not need To enable compatibility with bashdb instead of set -e
-# https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
-# trap 'exit $?' ERR
-OPTIND=1
-VERSION="${VERSION:-7}"
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
+VERSION="${VERSION:-7}"
 EMAIL="${EMAIL:-rich@tongfamily.com}"
 SIGNIN="${SIGNIN:-my}"
+OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
 while getopts "hdvr:e:s:" opt; do

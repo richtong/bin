@@ -244,6 +244,7 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 		export BASHOPTS
 	EOF
 fi
+
 log_verbose "install brew for linux and mac as common installer"
 "$SCRIPT_DIR/install-brew.sh"
 "$SCRIPT_DIR/install-python.sh"
@@ -476,7 +477,7 @@ config_setup_end
 
 # This next section is for linux only
 if [[ $OSTYPE =~ darwin ]]; then
-	exit 0
+	log_exit "mac finished"
 fi
 
 log_verbose set hostname if needed

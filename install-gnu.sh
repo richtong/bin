@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## install GNU utilities
 ##
@@ -8,9 +9,10 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 # This is for Brew
 # https://apple.stackexchange.com/questions/69223/how-to-replace-mac-os-x-utilities-with-gnu-core-utilities
 # for m1 macs it is /opt/homebrew and for intel macs it is /usr/local use brew --prefix to make portable
@@ -24,16 +26,20 @@ while getopts "hdv" opt; do
 		cat <<-EOF
 			Install GNU Utilities because macOS only has old Berkeley Unix tools
 			usage: $SCRIPTNAME [ flags ]
-
-			flags: -d debug, -v verbose, -h help
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -100,12 +106,9 @@ package_install emacs
 log_verbose "adding $BREW_GNU to path for this script and export for called"
 
 log_verbose Make sure gnu sed is used instead of the Mac default permanently
-NEW_PATH="${NEW_PATH:-"$BREW_GNU:\$PATH"}"
-log_verbose "adding $NEW_PATH"
 
 if [[ ! $PATH =~ $BREW_GNU ]]; then
-	# need eval so the $PATH gets expanded
-	eval export PATH="$NEW_PATH"
+	export PATH="$BREW_GNU:$PATH"
 	hash -r
 fi
 
@@ -113,27 +116,21 @@ fi
 # other apps like Goodsync do not add one
 # Note this assume line_add_or_change appends at bottom so that GNU_PATH goes
 # first in the path masking the system utils like ls
+# note we use /bin/sh for this since it goes into .profile
 if ! config_mark; then
-	config_add <<-EOF
-		export PATH
-		[[ \$PATH =~ $NEW_PATH ]] || PATH=\"$NEW_PATH\"
-		        [[ -v BREW_PREFIX ]] || BREW_PREFIX="\$(brew --prefix)"
-	EOF
 	log_verbose "add paths for utilities"
-	for name in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils; do
-		# single quote except where we have the $name entry
-		config_add <<-EOF
-			[[ \$PATH =~ opt/$name/libexec/gnubin ]] || PATH="\$BREW_PREFIX/opt/$name/libexec/gnubin:\$PATH"
-		EOF
-	done
-	log_verbose "install insert paths of the for name/bin"
-	for name in gnu-getopt gettext m4; do
-		config_add <<-EOF
-			[[ \$PATH =~ opt/$name/bin ]] || export PATH="\$BREW_PREFIX/opt/$name/bin:\$PATH"
-		EOF
-	done
-
+	# single quote except where we have the $NAME entry
+	config_add <<-"EOF"
+		        echo "$PATH" | grep -q "$BREW_GNU" || PATH="$BREW_GNU:\$PATH"
+		        for NAME in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils; do
+		            echo "$PATH" | grep -q "opt/$NAME/libexec/gnubin" ||
+		                PATH="$HOMEBREW_PREFIX/opt/$NAME/libexec/gnubin:$PATH"
+		        done
+		        for NAME in gnu-getopt gettext m4; do
+		            echo "$PATH" | grep -q "opt/$NAME/bin" ||
+		                PATH="$BREW_PREFIX/opt/$NAME/bin:$PATH"
+		        done
+	EOF
 fi
 
 log_verbose "make sure to run lib/lib-util.sh/source_profile to get the new paths"
-# echo $NEW_PATH

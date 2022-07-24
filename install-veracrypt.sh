@@ -56,10 +56,11 @@ if [[ $OSTYPE =~ darwin ]]; then
 	cask_install veracrypt
 
 	# note this works for case insensitive files systems since if stored as
-	# VeraCrypt but we call it as veracrypt
-	if ! config_mark "$(config_profile_interactive)"; then
-		config_add "$(config_profile_interactive)" <<-EOF
-			[[ -e /Applications/VeraCrypt.app/Contents/MacOS ]] && PATH+=":/Applications/VeraCrypt.app/Contents/MacOS"
+	# VeraCrypt but we call it as veracrypt and use /bin/sh syntax
+	if ! config_mark; then
+		config_add <<-EOF
+			echo "$PATH" | grep -q "/Applications/VeraCrypt.app/Contents/MacOS" || \
+			                PATH="/Applications/VeraCrypt.app/Contents/MacOS:$PATH"
 		EOF
 	fi
 	log_exit "Veracrypt installed"
@@ -75,4 +76,4 @@ if vergte "$(mac_version)" 10.13; then
 	log_warning see the checkbox, you will need to reboot and to see it
 fi
 
-package_install veracrypt
+snap_install veracrypt

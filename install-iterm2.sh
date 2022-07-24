@@ -74,11 +74,11 @@ fi
 log_verbose "install shell integrations"
 curl -L https://iterm2.com/shell_integration/install_shell_integration.sh | bash
 
-if ! config_mark; then
+if ! config_mark "$(config_shell_nonexportable)"; then
 	# shellcheck disable=SC2016
-	config_add <<-'EOF'
+	config_add "$(config_shell_nonexportable)" <<-'EOF'
 		# shellcheck disable=SC2015,SC1090
-		[[ -e $HOME/.iterm2_shell_integration.bash ]] && source "$HOME/.iterm2_shell_integration.bash" || true
+		[ -e "$HOME/.iterm2_shell_integration.bash" ] && source "$HOME/.iterm2_shell_integration.bash" || true
 	EOF
 fi
 
