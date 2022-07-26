@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-##
+## vim: set noet ts=4 sw=4:
 ## Mounts a veracrypt volume to a mountpoint
 ##
 ##@author Rich Tong
@@ -75,12 +75,14 @@ if [[ $OSTYPE =~ linux ]]; then
 		log_verbose "adding mounting to the $(config_profile)"
 		log_verbose in Linux, the FAT partition is mounted with mask 700 by default
 		config_add "$(config_profile_interactive)" <<-EOF
-			if ! veracrypt -t -l "$SECRET_MOUNTPOINT" >/dev/null 2>&1
-			then
-			    echo now enter the password for the hidden volume this will at least a minute
-			    # https://forums.macrumors.com/threads/can-not-mount-truecrypt-container-hdiutil-attach-failed-no-mountable-file.1689590/
-			    veracrypt -t --pim=0 -k "" --protect-hidden=no "$SECRET_VOLUME" "$SECRET_MOUNTPOINT"
-			fi
+			            if [[ $- =~ i ]]; then
+			                if ! veracrypt -t -l "$SECRET_MOUNTPOINT" >/dev/null 2>&1
+			                then
+			                    echo now enter the password for the hidden volume this will at least a minute
+			                    # https://forums.macrumors.com/threads/can-not-mount-truecrypt-container-hdiutil-attach-failed-no-mountable-file.1689590/
+			                    veracrypt -t --pim=0 -k "" --protect-hidden=no "$SECRET_VOLUME" "$SECRET_MOUNTPOINT"
+			                fi
+						fi
 		EOF
 	fi
 
@@ -109,26 +111,28 @@ mkdir -p "$SECRET_MOUNTPOINT"
 if ! config_mark "$(config_profile_interactive)"; then
 	log_verbose "adding fstab entry to close permissions"
 	# http://pclosmag.com/html/issues/200709/page07.html
-	config_add "$(config_profile_interactive)" <<EOF
-# finds the first match for of secret file on any matching $SECRET_DRIVE
-if ! pgrep -q "Google Drive"; then echo "Start or wait for Google Drive.app"; sleep 60; fi
-veracrypt_secret="\$(find -L "\$HOME" -maxdepth 3 -name "$SECRET_FILE" 2>/dev/null | grep -m 1 "$SECRET_DRIVE")"
-if [[ -n \$veracrypt_secret ]] && ! veracrypt -t -l "\$veracrypt_secret" >/dev/null 2>&1
-then
-	# need to mount as block device with filesystem=none
-	echo enter the password for the hidden volume this will take at least a minute
-	veracrypt -t --pim=0 -k "" --protect-hidden=no --filesystem=none "\$veracrypt_secret"
-fi
-echo Enter your macOS password
-mkdir -p "$SECRET_MOUNTPOINT"
-# mode must be 700 need 700 for directory access and no one else can see it
-veracrypt_disk="\$(veracrypt -t -v -l "\$veracrypt_secret" | awk '/^Virtual Device/ {print \$(NF)}')"
-if [[ -n \$veracrypt_disk ]] && ! mount | grep -q "\$veracrypt_disk"
-then
-	#  mount in user space so private to a user
-	sudo mount -t msdos -o -u="\$UID,-m=700" "\$veracrypt_disk" "$SECRET_MOUNTPOINT"
-fi
-EOF
+	config_add "$(config_profile_interactive)" <<-EOF
+		    # finds the first match for of secret file on any matching $SECRET_DRIVE
+		if [[ $- =~ - ]];
+		    if ! pgrep -q "Google Drive"; then echo "Start or wait for Google Drive.app"; sleep 60; fi
+		    veracrypt_secret="\$(find -L "\$HOME" -maxdepth 3 -name "$SECRET_FILE" 2>/dev/null | grep -m 1 "$SECRET_DRIVE")"
+		    if [[ -n \$veracrypt_secret ]] && ! veracrypt -t -l "\$veracrypt_secret" >/dev/null 2>&1
+		    then
+		        # need to mount as block device with filesystem=none
+		        echo enter the password for the hidden volume this will take at least a minute
+		        veracrypt -t --pim=0 -k "" --protect-hidden=no --filesystem=none "\$veracrypt_secret"
+		    fi
+		    echo Enter your macOS password
+		    mkdir -p "$SECRET_MOUNTPOINT"
+		    # mode must be 700 need 700 for directory access and no one else can see it
+		    veracrypt_disk="\$(veracrypt -t -v -l "\$veracrypt_secret" | awk '/^Virtual Device/ {print \$(NF)}')"
+		    if [[ -n \$veracrypt_disk ]] && ! mount | grep -q "\$veracrypt_disk"
+		    then
+		        #  mount in user space so private to a user
+		        sudo mount -t msdos -o -u="\$UID,-m=700" "\$veracrypt_disk" "$SECRET_MOUNTPOINT"
+		    fi
+		fi
+	EOF
 fi
 log_warning "OSX Fuse must run and be allowed in Security and Privacy"
 log_verbose "now run the mount from the profile script"
