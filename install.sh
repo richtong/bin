@@ -269,62 +269,9 @@ log_warning mac-install.sh must be run first before sourcing libraries
 # the installation of packages
 
 if in_os linux; then
+	log_verbose "checking if this is bare metal linux"
+	"$SCRIPT_DIR/linux-install.sh"
 
-	log_verbose "install sudo and lua"
-	# lua used by lib-config
-	package_install sudo lua5.2
-	"$SCRIPT_DIR/install-keychain.sh"
-
-	log_verbose Adding sudoers entry ignored if running under iam-key
-	SUDOERS_FILE="/etc/sudoers.d/10-$USER"
-	if [[ $NO_SUDO_PASSWORD == true ]]; then
-		log_verbose trying to remove need for sudo password
-		if ! groups | grep sudo || [[ ! -e $SUDOERS_FILE ]]; then
-			log_warning no sudo available please enter root password
-			# note we need to escape the here document quotes so they
-			# get passed to su and also around the file name
-			su -c "tee \"$SUDOERS_FILE\" <<<\"$USER ALL=(ALL:ALL) NOPASSWD:ALL\" && \
-               chmod 440 \"$SUDOERS_FILE\""
-		fi
-	fi
-
-	log_verbose checking if this is bare metal linux
-	if in_os linux; then
-		log_verbose configure linux for bootstrap debug
-		"$SCRIPT_DIR/install-linux-debug.sh"
-	fi
-
-	# surround.io only
-	# log_verbose check for vmware
-	# "$SCRIPT_DIR/install-vmware-tools.sh"
-	# the first number indicates priority, make account sudo-less
-	# "$SCRIPT_DIR/install-iam-key-daemon.sh"
-
-	# Per http://unix.stackexchange.com/questions/9940/convince-apt-get-not-to-use-ipv6-method
-	if ! sudo touch /etc/apt/apt.conf.d/99force-ipv4; then
-		echo "$SCRIPTNAME: Could not create 99force-ipv4"
-	elif ! grep "^Acquire::ForceIPv4" /etc/apt/apt.conf.d/99force-ipv4; then
-		sudo tee -a /etc/apt/apt.conf.d/99force-ipv4 <<<'Acquire::ForceIPv4 "true";'
-	fi
-
-	# Problems here include internet not up or the dreaded Hash Mismatch
-	# This is usually due to bad ubuntu mirrors
-	# See # http://askubuntu.com/questions/41605/trouble-downloading-packages-list-due-to-a-hash-sum-mismatch-error
-	if ! sudo apt-get -y update; then
-		echo "$SCRIPTNAME: apt-get update failed with $?"
-		echo "  either no internet or a bad ubuntu mirror"
-		echo "  retry or sudo rm -rf /var/list/apt/lists* might help"
-		exit 4
-	fi
-
-	sudo apt-get -y upgrade
-	log_verbose "note that snap does not work on WSL2"
-
-	# not this should no longer exist now that we are on docker
-	run_if "$SOURCE_DIR/scripts/build/install-dev-packages.sh"
-	# The new location for boot strap file and the Mac section below should do
-	# it all
-	run_if "$SOURCE_DIR/scripts/build/bootstrap-dev"
 fi
 
 mkdir -p "$WS_DIR"
