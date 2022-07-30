@@ -63,11 +63,10 @@ if (($# > 0)); then
 	SETTING=("$@")
 fi
 
-if ! is_package_installed zfs-auto-snapshot; then
-	log_verbose "setup zfs-auto-snapshot as of Ubuntu 16.04.2 not in standard install"
-	repository_install ppa:bob-ziuchkovski/zfs-auto-snapshot
-	package_install zfs-auto-snapshot
-fi
+log_verbose "setup zfs-auto-snapshot as of Ubuntu 16.04.2 not in standard install"
+repository_install ppa:bob-ziuchkovski/zfs-auto-snapshot
+package_install zfs-auto-snapshot
+
 sudo zfs set com.sun:auto-snapshot=true "$POOL"
 log_verbose "change zfs-auto-snapshot to only do weekly and monthly backups"
 log_verbose to turn on set period to frequent, hourly or daily

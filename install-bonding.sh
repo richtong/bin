@@ -54,7 +54,7 @@ if [[ -z $* ]]; then
 	log_error 2 "need to enter some network interfaces"
 fi
 
-if ! $FORCE && is_package_installed network_manager; then
+if ! $FORCE && apt_is_installed network_manager; then
 	log_message "To use Network Manager, choose the Add Network and select Bond"
 	log_message "Chose Add Interface for each Mac id you want and make sure to go to general tab and select access if available"
 	log_message "Choose the Bond General tab and do the same and remove the individual interfaces at the top"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ## vim: set noet ts=4 sw=4:
 ##
-## Swaps Docker for Mac edge vs stable release
+## Swaps Docker for Mac edge vs stable release (deprecated)
 ##
 ##@author Rich Tong
 ##@returns 0 on success
@@ -22,6 +22,8 @@ while getopts "hdvn" opt; do
 	h)
 		cat <<-EOF
 			Installs Edge or Stable release of docker, the default is to swap
+			Deprecated docker now implements this with an experimental flag in
+			Docker desktop
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 			           -n show the commands you would run (default: $DRYRUN)
@@ -53,22 +55,20 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh
 
-if ! in_os mac; then
-	log_exit Mac only
-fi
+log_exit "Deprecated no more docker edge or stable installations in homebrew"
 
-if is_package_installed docker; then
+if brew_is_installed; then
 	log_verbose docker is installed so remove it
-	package_uninstall docker
+	brew_uninstall docker
 	log_verbose install docker edge
 	# docker-edge is now in homebrew
 	# tap_install caskroom/versions
-	package_install docker-edge
+	brew_install docker-edge
 	log_exit Docker Edge installed
 fi
 
 log_verbose uninstall docker-edge if present
-package_uninstall docker-edge || true
+brew_uninstall docker-edge || true
 log_verbose installing docker stable
-package_install docker
+brew_install docker
 log_exit Docker stable installed

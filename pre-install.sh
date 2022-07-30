@@ -8,7 +8,7 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 ORG_DOMAIN="${ORG_DOMAIN:-"richtong"}"
@@ -55,7 +55,7 @@ if ! command -v brew >/dev/null; then
 fi
 
 for file in .profile .bash_profile .bashrc; do
-	echo "no $file create a shebang" >&2
+	echo "$SCRIPTNAME: no $file create a shebang" >&2
 	if [[ ! -e $HOME/$file ]]; then
 		echo "#!/usr/bin/env bash" >"$HOME/$file"
 	fi
@@ -64,56 +64,65 @@ done
 # no lib-config.sh so assume you are only doing path addition which go
 # into .profile
 PROFILE="${PROFILE:-"$HOME/.profile"}"
-echo "Set brew environment variables $PROFILE" >&2
-if ! grep "brew shellenv" "$PROFILE"; then
-	# default is an M1 Mac this is not needed with brew --prefix
-	HOMEBREW_PREFIX="/opt/homebrew"
-	if [[ $(uname) =~ Linux ]]; then
-		HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
-	elif [[ $(uname) =~ Darwin && $(uname -m) =~ x86_64 ]]; then
-		HOMEBREW_PREFIX="/usr/local"
-	fi
+echo "$SCRIPTNAME: Set brew environment variables $PROFILE" >&2
+if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
 	cat >>"$PROFILE" <<-EOF
-
-		# installed by $SCRIPTNAME on $(date)"
-		if ! command -v brew >/dev/null && ! echo \$PATH | grep "$HOMEBREW_PREFIX"; then eval "\$($HOMEBREW_PREFIX/bin/brew shellenv)"; fi
+		# Added by $SCRIPTNAME on $(date)"
+		if ! command -v brew >/dev/null && ! echo \$PATH | grep "\$HOMEBREW_PREFIX"; then
+		            HOMEBREW_PREFIX="/opt/homebrew"
+		            if  uname | grep -q Linux; then
+		                HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+		            elif uname | grep -q Darwin && uname -m | grep -q x86_64; then
+		                HOMEBREW_PREFIX="/usr/local"
+		            fi
+		            eval "\$(\$HOMEBREW_PREFIX/bin/brew shellenv)"
+		        fi
 	EOF
 fi
 
-echo "make brew available in this script source $PROFILE" >&2
+echo "$SCRIPTNAME: make brew available in this script source $PROFILE" >&2
+# need to turn off set -u as undefined variables is a common idium
+set +u
 # shellcheck disable=SC1091,SC1090
 source "$PROFILE"
-
+set -u
 if ! command -v brew >/dev/null; then
-	echo "Brew installation failed" >&2
+	echo "$SCRIPTNAME: Brew installation failed" >&2
 	exit 1
 fi
 
 brew update
 # coreutils gets us readlink
-brew install bash coreutils git gh
+for package in bash coreutils git gh; do
+	if ! brew list "$package" &>/dev/null; then
+		brew install "$package"
+	fi
+done
 
 if [[ ! $(command -v bash) =~ $HOMEBREW_PREFIX ]]; then
-	echo "Brew installation of bash failed" >&2
+	echo "$SCRIPTNAME: Brew installation of bash failed" >&2
 	exit 2
 fi
 
 # https://github.com/thoughtbot/laptop/issues/447
-echo "change login shell to homebrew bash" >&2
+echo "$SCRIPTNAME: change login shell to homebrew bash" >&2
 if ! grep "$HOMEBREW_PREFIX/bin/bash" /etc/shells; then
 	sudo tee -a /etc/shells >/dev/null <<<"$HOMEBREW_PREFIX/bin/bash"
 fi
 chsh -s "$HOMEBREW_PREFIX/bin/bash"
 
-echo make sure we can see brew and coreutils on reboot
+echo "$SCRIPTNAME: make sure we can see brew and coreutils on reboot"
 
 # fail the next command if no 1Password.app
 if [[ $OSTYPE =~ darwin ]]; then
 	# using google drive now for rich.vc
-	brew install 1password google-drive veracrypt
-	read -rp "Connect to 1Password and press enter to continue"
+	for package in 1password google-drive veracrypt; do
+		if ! brew list "$package" &>/dev/null; then
+			brew install "$package"
+		fi
+	done
+	read -rp "$SCRIPTNAME: Login with Google Drive with Veracrypt vault, press enter when done"
 	open -a "Google Drive"
-	read -rp "Connect to the user account with the Veracrypt with the ssh keys"
 elif [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
 	echo "In VMWare assume we use 1Password and SS keys from the host"
 else
@@ -146,7 +155,7 @@ else
 		sudo apt-get update -y && sudo apt-get install -y 1password
 	fi
 
-	echo "install veracrypt from unit193"
+	echo "$SCRIPTNAME: install veracrypt"
 	if ! command -v veracrypt >/dev/null && ! command -v snap >/dev/null && ! snap install veracrypt &>/dev/null; then
 		# https://linuxhint.com/install-use-veracrypt-ubuntu-22-04/
 		sudo add-apt-repository -y ppa:unit193/encryption
@@ -158,7 +167,7 @@ else
 fi
 
 if ! mkdir -p "$WS_DIR/git"; then
-	echo "Cannot create $WS_DIR/git"
+	echo "SCRIPT_NAME: Cannot create $WS_DIR/git"
 	exit 2
 fi
 

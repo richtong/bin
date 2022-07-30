@@ -127,14 +127,11 @@ if ! command -v zfs >/dev/null; then
 	ubuntu)
 		case $(linux_version) in
 		12* | 14*)
+			log_verbose "on Ubuntu 14.40 need standalone repo"
+			apt_repository_install ppa:zfs-native/stable
+			package_install ubuntu-zfs
+			mod_install zfs
 
-			if ! is_package_installed ubuntu-zfs; then
-				log_verbose on Ubuntu 14.40 need standalone repo
-				sudo apt-add-repository ppa:zfs-native/stable
-				sudo apt-get update
-				package_install ubuntu-zfs
-				mod_install zfs
-			fi
 			;;
 		15* | 16*)
 			log_verbose part of native installation
@@ -222,11 +219,9 @@ else
 fi
 
 # https://bugs.launchpad.net/ubuntu/+source/zfs-linux/+bug/1602409
-if ! is_package_installed zfs-auto-snapshot; then
-	log_verbose setup zfs-auto-snapshot as of Ubuntu 16.04.2 not in standard install
-	repository_install ppa:bob-ziuchkovski/zfs-auto-snapshot
-	package_install zfs-auto-snapshot
-fi
+log_verbose "setup zfs-auto-snapshot as of Ubuntu 16.04.2 not in standard install"
+apt_repository_install ppa:bob-ziuchkovski/zfs-auto-snapshot
+package_install zfs-auto-snapshot
 
 # https://docs.oracle.com/cd/E19120-01/open.solaris/817-2271/gbcxl/
 log_verbose zfs-auto-snapshot by default creates a dataset snapshot every 15 minute
