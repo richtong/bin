@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# vim: sw=4 ts=4:
+# vim: sw=4 ts=4 noet:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## bootstrap to install.sh copy this down and you will have enough to get the
@@ -68,7 +68,7 @@ echo "$SCRIPTNAME: Set brew environment variables $PROFILE" >&2
 if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
 	cat >>"$PROFILE" <<-EOF
 		# Added by $SCRIPTNAME on $(date)"
-		if ! command -v brew >/dev/null && ! echo \$PATH | grep "\$HOMEBREW_PREFIX"; then
+		if ! command -v brew &>/dev/null; then
 		            HOMEBREW_PREFIX="/opt/homebrew"
 		            if  uname | grep -q Linux; then
 		                HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
@@ -175,4 +175,4 @@ if [[ ! -e "$WS_DIR/git/src" ]]; then
 	gh auth login
 	git clone --recurse-submodules "https://github.com/$ORG_DOMAIN/src" "$WS_DIR/git"
 fi
-echo "Restart the terminal to get new bash and profile"
+echo "$SCRIPTNAME: Restart the terminal to get new bash and profile"

@@ -10,7 +10,7 @@
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 # This is for Brew
@@ -46,7 +46,7 @@ while getopts "hdv" opt; do
 		;;
 	esac
 done
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-config.sh lib-util.sh

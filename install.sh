@@ -6,11 +6,10 @@
 ##
 ##
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-export SCRIPTNAME
-# need to use trap and not -e so bashdb works
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 export REPO_USER="${REPO_USER:-"$USER"}"
 export REPO_DOMAIN="${REPO_DOMAIN:-"tongfamily.com"}"
 export GIT_REPO_NAME="${GIT_REPO_NAME:-"richtong"}"
@@ -85,18 +84,23 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tz" opt; do
 			       -z create all the accounts deprecated (default: $ACCOUNTS)
 
 			Debugging flags:
-			        -v verbose output for script
-			        -d single step debugging
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
 			        -h you are reading it now
 		EOF
 
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	l)
 		REPO_USER="$OPTARG"
@@ -157,7 +161,6 @@ done
 # disable following source
 # shellcheck disable=SC1091
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
-log_verbose "WS_DIR is $WS_DIR"
 source_lib lib-util.sh lib-version-compare.sh lib-git.sh \
 	lib-ssh.sh lib-install.sh lib-docker.sh \
 	lib-keychain.sh lib-config.sh
@@ -175,10 +178,10 @@ fi
 log_verbose "setup up bash and zsh profiles basic sourcing and paths"
 config_setup
 
-# pick up the changes
+log_verbose "source latest profiles with BASH=$BASH"
 source_profile
 
-log_verbose "install needs gnu find etc"
+log_verbose "install gnu with BASH=$BASH"
 "$SCRIPT_DIR/install-gnu.sh"
 
 log_verbose "Install git and git tooling"

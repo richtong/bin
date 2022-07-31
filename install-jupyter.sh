@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Install Jupyter
 ##
@@ -8,10 +9,11 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 # this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdv" opt; do
@@ -21,18 +23,24 @@ while getopts "hdv" opt; do
 			Installs Jupyter and other good parts in a bare metal installation
 			You should really run this in pipenv or a container
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
+			    flags: -h help"
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
 			           -r version number (default: $VERSION)
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
+		export VERBOSE=true
 		;;
 	*)
 		echo "not flag -$opt"
@@ -121,9 +129,20 @@ PACKAGE=(
 
 package_install "${PACKAGE[@]}"
 
+# https://tex.stackexchange.com/questions/307483/setting-up-basictex-homebrew
+# recommends running path_helper but this does not work it odes add the
+# additional library but also masks everything else with /usr/bin and other
+# things in the standard /etc/paths.d/ directory.
+#log_verbose "Add to the path"
+#eval "$(/usr/libexec/path_helper)"
 # need to source again since basictex installs tlmgr
-source_profile
 # https://pandoc.org/installing.html
+if ! config_mark; then
+	config_add <<-'EOF'
+		# shellcheck disable=SC1090
+		echo "$PATH" | grep -q "/Library/TeX/texbin" || PATH="/Library/TeX/texbin:$PATH"
+	EOF
+fi
 log_verbose "Post basictex installation put in the fonts"
 tlmgr install collection-fontsrecommended
 
@@ -146,9 +165,6 @@ log_verbose "Enable git to use nbdime to diff notebooks"
 nbdime config-git --enable --global
 # nbdime extenstions enabled at install
 #nddime extensions --enable
-
-log_verbose "Add to the path"
-eval "$(/usr/libexec/path_helper)"
 
 if [[ ! -e $HOME/.jupyter/nbconfig.json ]]; then
 	# https://stackoverflow.com/questions/36419342/how-to-wrap-code-text-in-jupyter-notebooks
