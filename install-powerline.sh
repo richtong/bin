@@ -62,21 +62,28 @@ source_lib lib-install.sh lib-util.sh lib-config.sh
 log_verbose "install powerline-go and powerline-status packages"
 pip_install powerline-status powerline-gitstatus
 
-brew_install powerline-go svn
+package_install powerline-go svn
 
 if in_os mac; then
-	log_verbose "installing powerline fonts"
+	FONT=(
+		font-fira-mono-for-powerline
+		font-sf-mono-for-powerline
+		font-menlo-for-powerline
+	)
+
 	tap_install homebrew/cask-fonts
 	# brew as of June 2022 does not handle reinstall correctly.
-	# throws an error.
-	log_verbose "Manually delete the fonts so install can happen"
-	rm "$HOME/Library/Fonts/FuraMono-"* \
-		"$HOME/Library/Fonts/SF-Mono-Powerline-"* \
-		"$HOME/Library/Fonts/Menlo"*
-	cask_install \
-		font-fira-mono-for-powerline \
-		font-sf-mono-for-powerline \
-		font-menlo-for-powerline
+	# throws an error. So uninstall it and reinstall do not just delete
+	# as it will show as installed.
+	log_verbose "uninstalling powerline ${FONT[*]}"
+	package_uninstall "${FONT[@]}"
+	#log_verbose "Manually delete the fonts so install can happen"
+	#rm -f "$HOME/Library/Fonts/FuraMono-"* \
+	#    "$HOME/Library/Fonts/SF-Mono-Powerline-"* \
+	#    "$HOME/Library/Fonts/Menlo"*
+	log_verbose "installing powerline ${FONT[*]}"
+	package_install "${FONT[@]}"
+
 else
 	log_verbose "In linux have to install fonts from repo"
 	if [[ ! -e $SOURCE_DIR/extern/fonts ]]; then
