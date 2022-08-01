@@ -59,7 +59,7 @@ package_install yq
 hash -r
 
 # needs to go into .bashrc as it is a bunch of functions
-if ! config_mark; then
+if ! config_mark "$(config_profile_nonexportable)"; then
 	log_verbose "installing command completion"
 	config_add "$(config_profile_nonexportable)" <<-'EOF'
 		# shellcheck disable=SC1090
