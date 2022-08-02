@@ -183,7 +183,6 @@ if $MICROK8S; then
 		tap_install ubuntu/microk8s
 		package_install microk8s multipass
 		hash -r
-		log_verbose "microk8s installed waiting for it to start"
 		microk8s install
 		# https://ubuntu.com/tutorials/install-microk8s-on-mac-os#4-wait-for-microk8s-to-start
 		if ! microk8s --help >/dev/null; then
@@ -200,28 +199,85 @@ if $MICROK8S; then
 		if $VERBOSE; then
 			microk8s kubectl get nodes
 			microk8s kubectl get services
+			microk8s status
 		fi
-		microk8s enable dashboard dns storage
-		log_verbose "run microk8s dashboard-proxy to see dashboard"
-		log_verbose "run microk8s kubectl to use its own kubectl"
 		log_verbose "to turn on and off use microk8s stop and microk8s start"
-		log_verbose "enabling the system kubectl to see microk8s"
-		# only works with v3 of y1, can't figure out how to make it work with v4
-		# microk8s config | yq m -i -a append "$HOME/.kube/config" -
+		log_verbose "to enter multipass host run multipass shell microk8s-vm"
+
+		# https://microk8s.io/docs/working-with-kubectl
+		# for v3 or earlier: icrok8s config | yq m -i -a append "$HOME/.kube/config" -
+		if $VERBOSE; then microk8s config; fi
 		TEMP=$(mktemp)
 		microk8s config >"$TEMP"
 		# need sponge so that the redirect doesn't kill the original file
 		# https://github.com/corneliusweig/konfig
 		kubectl konfig import --save "$TEMP"
+		log_verbose "Microk8s cluster can be accessed as kubectl config set-cluster microk8s-cluster"
 		rm "$TEMP"
-		log_verbose "to use the microk8s cluster run kubectl config use-contest microk8s"
+		log_verbose "changing kubectl context to microk8s to use kubectl"
+		log_verbose "access clust with kubectl -n kube-system get pods"
+		kubectl config set-context microk8s
+		if $VERBOSE; then
+			kubectl get nodes
+			kubectl -n kube-system get pods
+		fi
+
+		log_verbose "run microk8s dashboard-proxy to see dashboard"
+		# https://microk8s.io/docs/addon-dashboard
+		microk8s enable dashboard
+		log_verbose "Token for Dashboard..."
+		multipass exec microk8s-vm -- sudo /snap/bin/microk8s kubectl \
+			-n kube-system \
+			describe secret \
+			"$(multipass exec MicroK8-VM -- \
+				sudo /snap/bin/microk8s kubectl -n kube-system get secrets |
+				grep default-token | cut -d " " -f1)"
+		# alternative way not reaching deep into multipass and use system
+		# kubectl
+		kubectl -n kube-system describe secrets \
+			"$(kubectl -n kube-system get secrets | grep default-token | cut -d " " -f 1)"
+
+		log_verbose "Port forward from multipass to Mac in background"
+		kubectl -n kube-system port-forward \
+			service/kubernetes-dashboard 10443:443 \
+			--address 0.0.0.0 &
+		IP=$(multipass info microk8s-vm | grep IPv4 | awk '{print $2}')
+		log_verbose "Cannot Access dashboard at https://$IP:10443 as of August 2022"
+
+		if $KUBEFLOW; then
+			log_verbose "Kubeflow on MacOS install"
+			# https://charmed-kubeflow.io/docs/quickstart trying Linux on Mac
+			# insturction
+			# dns installed by default
+			# lbmetal not on machine
+			# kubeflow as of August 2002 not available for 1.22
+			# https://microk8s.io/docs/install-alternatives
+			log_verbose "Install ingress service"
+			microk8s enable istio
+			log_verbose "Add juju controller should already exist"
+			microk8s juju bootstrap microk8s
+			log_verbose "GEtting the application model kubeflow"
+			microk8s juju add-model kubeflow
+			log_verbose "Install kubeflow lite"
+			microk8s juju deploy kubeflow-lite trust
+			log_verbose "Simple authentication admin/admin"
+			microk8s juju dex-auth static-username=admin
+			microk8s juju dex-auth static-password=admin
+
+		fi
+
 	elif in_os linux; then
+		log_verbose "Ensable dashboard on Linux"
+		microk8s enable dashboard
+		microk8s kubectl create token default
+		microk8s kubectl port-forard -n kube-system service/kubernetes-dashboard 10443:433
+		log_verbose "Access dashboard at https:localhost:10443"
+		# https://charmed-kubeflow.io/docs/quickstart
 		# https://charmed-kubeflow.io/docs/install
-		#https://charmed-kubeflow.io/docs/install https://charmed-kubeflow.io/docs/quickstart
 		log_verbose "Install Kubeflow 1.4 not compatible with 1.22"
 		if $KUBEFLOW; then
 			log_verbose "install kubeflow on linux on microk8s"
-			snap_insdall --classic --channel=1.21/stable microk8s
+			snap_install --classic --channel=1.21/stable microk8s
 			sudo usermod -a -G microk8S "$USER"
 			newgrp microk8s
 			sudo chown -f -R "$USER" "$HOME/.kube"

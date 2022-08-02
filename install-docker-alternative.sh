@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Install Podman and Lima instead of Docker
 ## https://podman.io/getting-started/installation
@@ -246,4 +247,11 @@ if $PODMAN; then
 	#log_verbose "Install podman-compose"
 	#pip_install podman-compose
 
+fi
+
+if $MULTIPASS; then
+	package_install Multipass
+	# https://ubuntu.com/blog/docker-on-mac-and-windows-multipass
+	multipass launch docker
+	log_verbose "Run docker with Multipass with the command multipass docker"
 fi
