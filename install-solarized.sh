@@ -48,8 +48,8 @@ source_lib lib-git.sh lib-util.sh lib-install.sh lib-config.sh
 
 set -u
 
-log_verbose on Mac requires coreutils dircolors to start
-"$SCRIPT_DIR/install-gnu.sh"
+log_verbose "on Mac requires coreutils dircolors to start assumes gnucore installed"
+#"$SCRIPT_DIR/install-gnu.sh"
 
 # fall through is no match
 # https://www.cyberciti.biz/faq/bash-loop-over-file/

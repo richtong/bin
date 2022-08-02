@@ -11,18 +11,19 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
-DOCKER="${DOCKER:-false}"
-MINIKUBE="${MINIKUBE:-false}"
-FORCE="${FORCE:-false}"
-MICROK8S="${MICROK8S:-true}"
-DEPRECATED_KUBEFLOW="${DEPRECATED_KUBEFLOW:-false}"
-KIND="${KIND:-false}"
-MULTIPASS="${MULTIPASS:-false}"
 COLIMA="${COLIMA:-false}"
+DOCKER="${DOCKER:-false}"
+FORCE="${FORCE:-false}"
+K3AI="${K3AI:-false}"
+K3S="${K3S:-false}"
+KIND="${KIND:-false}"
 KUBEFLOW="${KUBEFLOW:-false}"
+MICROK8S="${MICROK8S:-false}"
+MINIKUBE="${MINIKUBE:-false}"
+MULTIPASS="${MULTIPASS:-false}"
 
 OPTIND=1
-while getopts "hdvmuiofkcb" opt; do
+while getopts "hdvmuiofkcbsa" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -31,13 +32,16 @@ while getopts "hdvmuiofkcb" opt; do
 			   -d $(! $DEBUGGING || echo "no ")debugging
 			   -v $(! $VERBOSE || echo "not ")verbose
 				-f force installation (default: $FORCE)
-				-c Install Colima with Kubernetes support (default: $COLIMA)
-				-o Install Docker with a single cluster version (default: $DOCKER)
-				-m Install minikube a single node Kubernetes (default: $MINIKUBE)
-				-k Install a lightweight minikube (default $KIND)
-				-u Install Multipass enables Microk8s from inside VM (default: $MULTIPASS)
-				-i Install microK8s using Multipass with (default: $MICROK8S)
-				-b Install kubeflow using Juju on Ubuntu with microk8s (default: $KUBEFLOW)
+			   -d $(! $DEBUGGING || echo "no ")debugging
+				-c $(! $COLIMA || echo "No ")Install Colima with Kubernetes support
+				-o $(! $DOCKER || echo "No ")Install Docker with a single cluster version
+				-m $(! $MINIKUBE || echo "No ")Install minikube a single node Kubernetes
+				-k $(! $KIND || echo "No ")Install a lightweight KIND
+				-s $(! $K3S || echo "No ")Install a lightweight Rancher K3S
+				-a $(! $K3AI || echo "No ")Install a K3S tunes for AI as K3AI
+				-u $(! $MULTIPASS || echo "No ")Install Multipass enables Canonical Microk8s from inside VM
+				-i $(! $MICROK8S || echo "No ")Install microK8s using Multipass
+				-b $(! $KUBEFLOW || echo "No ")Install kubeflow
 		EOF
 		exit 0
 		;;
@@ -53,28 +57,28 @@ while getopts "hdvmuiofkcb" opt; do
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	f)
-		FORCE=true
+		FORCE="$($FORCE && echo false || echo true)"
 		;;
 	c)
-		COLIMA=true
+		COLIMA="$($COLIMA && echo false || echo true)"
 		;;
 	m)
-		MINIKUBE=true
+		MINIKUBE="$($MINIKUBE && echo false || echo true)"
 		;;
 	i)
-		MICROK8S=true
-		;;
-	b)
-		DEPRECATED_KUBEFLOW=true
+		MICROK8S="$($MICROK8S && echo false || echo true)"
 		;;
 	u)
-		MULTIPASS=false
+		MULTIPASS="$($MULTIPASS && echo false || echo true)"
 		;;
 	k)
-		KIND=true
+		KIND="$($KIND && echo false || echo true)"
 		;;
 	o)
-		DOCKER=true
+		DOCKER="$($DOCKER && echo false || echo true)"
+		;;
+	b)
+		KUBEFLOW="$($KUBEFLOW && echo false || echo true)"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -161,9 +165,43 @@ if $COLIMA; then
 	"$BIN_DIR/install-docker-alternative.sh" -k
 fi
 
+# https://www.kubeflow.org/docs/components/pipelines/installation/localcluster-deployment/
 if $KIND; then
 	log_verbose "Install KinD"
 	brew install kind
+	if ! config_mark "$(config_profile_nonexportable)"; then
+		config_add "$(config_profile_nonexportable)" <<-'EOF'
+			command -v kind || source kind completion bash
+		EOF
+	fi
+	if ! kind get clusters | grep -q cluster; then
+		log_verbose "No Kind cluster creating it"
+		kind create cluster
+	fi
+fi
+if $K3S; then
+	log_verbose "Install Redhat Rancher K3S"
+	sudo k3 server
+	if command -v nvidia-smi &>/dev/null; then
+		curl -sFL https://get.k3ai.in | bash -s -- --gpu --plugin_kfpipelines
+	else
+		curl -sFL https://get.k3ai.in | bash -s -- --cpu --plugin_kfpipelines
+	fi
+fi
+if $K3AI; then
+	log_verbose "Install K3AI using Rancher K3S"
+	curl -sFL "https://get.k3ai.in" | sh -
+	log_verbose "start with k3ai up"
+fi
+
+if $KUBEFLOW && ($KIND || $K3S || $K3AI); then
+	log_verbose "Running Argo against KIND, K3S or K3AI"
+	export PIPELINE_VERSION=1.8.3
+	kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref=$PIPELINE_VERSION"
+	kubectl wait --for condition=established --timeout=60s crd/applications.app.k8s.io
+	kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/env/platform-agnostic-pns?ref=$PIPELINE_VERSION"
+	kubectl port-forward -n kubeflow sv/ml-pipeline-ui 8080:80
+	log_verbose "http://localhost:8080 for Kubeflow Pipeline"
 fi
 
 if $DOCKER; then
@@ -226,12 +264,13 @@ if $MICROK8S; then
 		# https://microk8s.io/docs/addon-dashboard
 		microk8s enable dashboard
 		log_verbose "Token for Dashboard..."
-		multipass exec microk8s-vm -- sudo /snap/bin/microk8s kubectl \
-			-n kube-system \
-			describe secret \
-			"$(multipass exec MicroK8-VM -- \
-				sudo /snap/bin/microk8s kubectl -n kube-system get secrets |
-				grep default-token | cut -d " " -f1)"
+		# with the code above to integrate into system kubectl do not need this
+		#multipass exec microk8s-vm -- sudo /snap/bin/microk8s kubectl \
+		#    -n kube-system \
+		#    describe secret \
+		#    "$(multipass exec microk8s-vm -- \
+		#        sudo /snap/bin/microk8s kubectl -n kube-system get secrets |
+		#        grep default-token | cut -d " " -f1)"
 		# alternative way not reaching deep into multipass and use system
 		# kubectl
 		kubectl -n kube-system describe secrets \
