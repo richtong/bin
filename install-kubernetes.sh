@@ -98,7 +98,7 @@ fi
 
 # krew - kubectl plugin manager
 PACKAGES+=(
-	kubenetes-cli
+	kubernetes-cli
 	helm
 	krew
 )
@@ -141,6 +141,10 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 		if command -v kubectl > /dev/null; then eval "$(kubectl completion bash)"; fi
 	EOF
 fi
+
+log_verbose "Pick up profile changes"
+source_profile
+
 # https://github.com/corneliusweig/konfig
 # used by microk8s to merge its config file
 kubectl krew install konfig
@@ -175,9 +179,9 @@ if $MICROK8S; then
 	tap_install ubuntu/microk8s
 	package_install microk8s multipass
 	hash -r
+	log_verbose "microk8s installed waiting for it to start"
 	microk8s install
 	# https://ubuntu.com/tutorials/install-microk8s-on-mac-os#4-wait-for-microk8s-to-start
-	log_verbose "microk8s installed waiting for it to start"
 	if ! microk8s --help >/dev/null; then
 		# https://github.com/canonical-web-and-design/microk8s.io/issues/239
 		log_verbose "microk8s failed delete vm and retry"
@@ -214,7 +218,7 @@ if $MICROK8S; then
 	if ! in_os mac; then
 		microk8s enable metal-lb:10.64.140.43-10.64.140.49
 	fi
-	microk8s status --wair-ready
+	microk8s status --wait-ready
 	package_install juju
 	juju bootstrap microk8s
 	juju add-model kubeflow
