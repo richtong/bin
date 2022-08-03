@@ -203,7 +203,9 @@ if $MACPORTS_INSTALL && ! command -v port >/dev/null; then
 fi
 
 log_verbose update all package repos
-package_update
+if ! package_update; then
+	log_warning "some packages failed to update"
+fi
 
 log_verbose rehash commands updated packages
 hash -r
@@ -216,11 +218,12 @@ hash -r
 # so you can also export from it
 # Needs to run before the config_mark and other commands since
 # these use readlink
-log_verbose install packages that need special flags
-"$SCRIPT_DIR/install-gnu.sh"
-log_verbose The path for getting to gnu utilities needed so source the new profile
-source_profile
-hash -r
+# this is now down in install.sh
+#log_verbose install packages that need special flags
+#"$SCRIPT_DIR/install-gnu.sh"
+#log_verbose The path for getting to gnu utilities needed so source the new profile
+#source_profile
+#hash -r
 
 # this is now done at the istall-brew level
 #log_verbose checking to see if should update .bash_profile

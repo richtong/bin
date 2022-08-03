@@ -174,7 +174,7 @@ if $KIND; then
 			command -v kind || source kind completion bash
 		EOF
 	fi
-	if ! kind get clusters | grep -q cluster; then
+	if ! kind get clusters | grep -q kind; then
 		log_verbose "No Kind cluster creating it"
 		kind create cluster
 	fi
@@ -193,14 +193,13 @@ if $K3AI; then
 	curl -sFL "https://get.k3ai.in" | sh -
 	log_verbose "start with k3ai up"
 fi
-
 if $KUBEFLOW && ($KIND || $K3S || $K3AI); then
 	log_verbose "Running Argo against KIND, K3S or K3AI"
 	export PIPELINE_VERSION=1.8.3
 	kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref=$PIPELINE_VERSION"
 	kubectl wait --for condition=established --timeout=60s crd/applications.app.k8s.io
 	kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/env/platform-agnostic-pns?ref=$PIPELINE_VERSION"
-	kubectl port-forward -n kubeflow sv/ml-pipeline-ui 8080:80
+	kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80
 	log_verbose "http://localhost:8080 for Kubeflow Pipeline"
 fi
 
