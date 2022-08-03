@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ##install sphinx for Mac
@@ -8,10 +9,10 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-
-trap 'exit $?' ERR
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 
 EXTENSIONS="${EXTENSIONS:-"googlechart googlemaps plantuml exceltable httpdomain"}"
 
@@ -24,7 +25,9 @@ while getopts "hdve:" opt; do
 
 			Usage  $SCRIPTNAME [flags...]
 
-			flags: -d debug, -h help
+			flags: -h help
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
 			       -e extensions
 			          (default: $EXTENSIONS)
 
@@ -46,11 +49,15 @@ while getopts "hdve:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
-		FLAGS+=" -v "
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	e)
 		EXTENSIONS="$OPTARG"
@@ -123,11 +130,8 @@ fi
 
 log_verbose install tex
 if [[ $OSTYPE =~ darwin ]]; then
-	log_verbose install mactex
-	if ! cask_install mactex; then
-		log_verbose brew mactex not found trying mac prots texlive
-		package_install texlive
-	fi
+	log_verbose "install basictex the small version of mactex"
+	package_install basictex
 	# should never need this but leave just in case
 	# log_verbose checking for py27-sphinx
 	# if port installed py27-sphinx | grep "not installed"

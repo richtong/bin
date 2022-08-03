@@ -51,7 +51,7 @@ shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
-source_lib lib-install.sh lib-util.sh
+source_lib lib-install.sh lib-util.sh lib-mac.sh lib-config.sh
 log_verbose "You can also install as a docker container from tongfamily/jupyterlab"
 
 if ! in_os mac; then
@@ -144,7 +144,8 @@ if ! config_mark; then
 	EOF
 fi
 log_verbose "Post basictex installation put in the fonts"
-tlmgr install collection-fontsrecommended
+sudo tlmgr update --self
+sudo tlmgr install collection-fontsrecommended
 
 # this is for node applications but you need to know the node package names
 # Latex not up to date
