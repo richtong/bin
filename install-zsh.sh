@@ -168,21 +168,24 @@ brew install zinit
 # test if compaudit returns any bad permissions and if it does seal it up.
 # https://stackoverflow.com/questions/12137431/test-if-a-command-outputs-an-empty-string
 # note that compaudit does not always exist so check for it and then its output
-if ! config_mark "$ZSH_PROFILE"; then
-	config_add "$ZSH_PROFILE" <<-EOF
-		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
-		# close off shared directories
-		command -v compaudit >/dev/null && [[ \$(compaudit) ]] && compaudit | xargs chmod g-w,o-w
-		# deactivate conda if installed
-		command -v conda >/dev/null && conda deactivate
 
-		source "$(brew --prefix)/opt/zinit/zinit.zsh"
-		zinit ice wait
-		zinit light zsh-users/zsh-autosuggestions
-		zinit light zsh-users/zsh-syntax-highlighting
-		zinit light romkatv/powerlevel10k
-		zinit light joel-porquet/zsh-dircolors-solarized.git
-		setupsolarized
+if ! config_mark "$(config_profile_zsh)"; then
 
+	config_add "$(config_profile_zsh)" <<-'EOF'
+		    [[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
+		        command -v compaudit >/dev/null && [[ $(compaudit) ]] && compaudit | xargs chmod g-w,o-w
+		        # close off shared directories
+		        # deactivate conda if installed
+		        command -v conda >/dev/null && conda deactivate
+		        source $ZSH/oh-my-zsh.sh
+		        source "$(brew --prefix)/opt/zinit/zinit.zsh"
+		        # https://github.com/zdharma-continuum/zinit
+		        zinit ice depth"1"  # git clone depth
+		        zinit ice wait
+		        zinit light zsh-users/zsh-autosuggestions
+		        zinit light zsh-users/zsh-syntax-highlighting
+		        zinit light romkatv/powerlevel10k
+		        zinit light oldratlee/hacker-quotes
+		        zinit light joel-porquet/zsh-dircolors-solarized
 	EOF
 fi

@@ -42,7 +42,7 @@ shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
-source_lib lib-install.sh
+source_lib lib-install.sh lib-util.sh
 
 if ! in_os mac; then
 	log_exit "Mac only"
