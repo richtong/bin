@@ -46,7 +46,7 @@ if in_os mac; then
 	RUBY_PATH="${RUBY_PATH:-"/usr/local/opt/ruby/bin/"}"
 	RUBY_LIB="${RUBY_LIB:-"/usr/local/lib/ruby/gems"}"
 	log_verbose "installing ruby"
-	brew_nstall ruby
+	brew_install ruby
 	log_verbose "raw version is $("$RUBY_PATH/ruby" -v)"
 	version="$("$RUBY_PATH/ruby" -v | cut -d ' ' -f 2)"
 	log_verbose "ruby version $version"

@@ -54,7 +54,7 @@ shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
-source_lib lib-util.sh lib-config.sh
+source_lib lib-util.sh lib-config.sh lib-install.sh
 
 brew_install zsh
 # install these with zinit so we don't have to add source
@@ -164,7 +164,7 @@ PLUGIN+=(
 )
 
 # use -x so we don't replace if it is already there
-config_replace -x "$ZSH_PROFILE" plugins "plugins = (${PLUGIN[*]})"
+config_replace -x "$(config_profile_zsh)" plugins "plugins = (${PLUGIN[*]})"
 
 log_verbose "adding zinit plugins"
 # https://gist.github.com/laggardkernel/4a4c4986ccdcaf47b91e8227f9868ded
