@@ -168,7 +168,7 @@ fi
 # https://www.kubeflow.org/docs/components/pipelines/installation/localcluster-deployment/
 if $KIND; then
 	log_verbose "Install KinD"
-	brew install kind
+	brew_install kind
 	if ! config_mark "$(config_profile_nonexportable)"; then
 		config_add "$(config_profile_nonexportable)" <<-'EOF'
 			command -v kind || source kind completion bash

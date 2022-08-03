@@ -51,7 +51,7 @@ if in_os mac; then
 	log_verbose mac install
 	package_install ansible
 	if ! command -v ansible >/dev/null; then
-		log_verbose brew install failed trying pip
+		log_verbose "install failed trying pip"
 		pip_install --upgrade --user ansible
 	fi
 	log_verbose checking maxfiles limit

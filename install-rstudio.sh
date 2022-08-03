@@ -38,7 +38,7 @@ source_lib lib-install.sh lib-util.sh
 
 set -u
 shift $((OPTIND - 1))
-source_lib lib-mac.sh
+source_lib lib-mac.sh lib-install.sh
 
 if in_os mac; then
 	if [[ ! -e /Applications/RStudio.app ]]; then
@@ -48,7 +48,7 @@ if in_os mac; then
 		# https://github.com/Homebrew/homebrew-science/issues/6365
 		# is deprecated and R is in the core now
 		# brew tap homebrew/science
-		brew install --with-x11 r
+		brew_install --with-x11 r
 		# http://macappstore.org/rstudio/
 		log_verbose using Brew to install RStudio
 		cask_install rstudio

@@ -53,4 +53,4 @@ if ! in_os mac; then
 fi
 
 tap_install mongodb/brew
-brew install mongodb-community
+brew-install mongodb-community

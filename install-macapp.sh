@@ -41,7 +41,7 @@ if ! in_os mac; then
 fi
 
 if [[ ! -e /Applications/$APP.app ]]; then
-	log_verbose "brew install $APP"
+	log_verbose "brew --cask install $APP"
 	# https://stackoverflow.com/questions/2264428/converting-string-to-lower-case-in-bash
 	if cask_install "${APP,,}"; then
 		log_exit "$APP installed"

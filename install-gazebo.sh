@@ -50,7 +50,7 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 tap_install dartsim/dart
 brew_install dartsim
 tap_install osrf/simulation
-brew install "gazebo$VERSION" --build-from-source
+brew_install --build-from-source "gazebo$VERSION"
 # http://gazebosim.org/tutorials?tut=quick_start&cat=get_started
 log_verbose "available worlds"
 if $VERBOSE; then

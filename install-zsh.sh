@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## install Zsh
 ## https://phuctm97.com/blog/zsh-antigen-ohmyzsh
@@ -9,32 +10,37 @@
 #
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 # do not need To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # trap 'exit $?' ERR
 OPTIND=1
 CHSH="${CHSH:-false}"
-ZSH_PROFILE="${ZSH_PROFILE:-"$HOME/.zshrc"}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvc" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs 1Password
+			Installs Zsh
 			    usage: $SCRIPTNAME [ flags ]
-				flags: -d debug (not functional use bashdb), -v verbose, -h help"
+				flags: -h help
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
 				-c change default shell (default: $CHSH)
 		EOF
 		exit 0
 		;;
 	d)
-
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	c)
 		CHSH=true
@@ -50,7 +56,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-util.sh lib-config.sh
 
-brew install zsh
+brew_install zsh
 # install these with zinit so we don't have to add source
 #zsh-autosuggestion zsh-syntax-highlighting
 
@@ -111,7 +117,7 @@ fi
 # gcloud - completions
 # git-lfs - completions
 log_verbose "Adding OMZ plugins"
-brew install pygments
+brew_install pygments
 log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 
 PLUGIN+=(
@@ -162,7 +168,7 @@ config_replace -x "$ZSH_PROFILE" plugins "plugins = (${PLUGIN[*]})"
 
 log_verbose "adding zinit plugins"
 # https://gist.github.com/laggardkernel/4a4c4986ccdcaf47b91e8227f9868ded
-brew install zinit
+brew_install zinit
 # powerlevel10k - status bar
 # zsh-autosuggestions - long suggestions
 # test if compaudit returns any bad permissions and if it does seal it up.
