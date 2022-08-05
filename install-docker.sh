@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 # Need to use /usr/bin/env for Mac OS to get the correct bash
 #
 ##install docker
@@ -9,9 +10,10 @@
 ##@author Rich Tong
 ##
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-trap 'exit $?' ERR
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 
 OPTIND=1
 DOCKER_CONTENT_TRUST="${DOCKER_CONTENT_TRUST:-false}"
@@ -22,15 +24,18 @@ DOCKER_VERSION="${DOCKER_VERSION:-20.10.11}"
 DOCKER_INSTALL_EDGE_VERSION="${DOCKER_INSTALL_EDGE_VERSION:-20.10.12}"
 DOCKER_MACHINE_VERSION="${DOCKER_MACHINE_VERSION:-0.16.1}"
 DOCKER_COMPOSE_VERSION="${DOCKER_COMPOSE_VERSION:-1.26.2}"
+BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-50000000}"
 FORCE="${FORCE:-false}"
 INSTALL_EDGE="${INSTALL_EDGE:-false}"
-while getopts "hdvctr:m:o:fns:" opt; do
+while getopts "hdvctr:m:o:fns:l:" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
 $SCRIPTNAME: installs docker and other support programs like docker-machine and docker-compose
 
-flags: -d debug, -h help
+flags: -h help
+       -d $(! $DEBUGGING || echo "no ")debugging
+       -v $(! $VERBOSE || echo "not ")verbose
        -c enable content trust (default: $DOCKER_CONTENT_TRUST)
        -t your private trust key directory (default: $DOCKER_TRUST_PRIVATE)
        -r docker version to install (default: $DOCKER_VERSION)
@@ -40,14 +45,20 @@ flags: -d debug, -h help
        -f force redownload of installation (default: $FORCE)
 	   -n install edge release deprecated can now switch in main (default: $INSTALL_EDGE)
        -s docker edge version minimum (default: $DOCKER_INSTALL_EDGE_VERSION)
+       -l buildx log size (default: $BUILDKIT_STEP_LOG_MAX_SIZE)
 EOF
 		exit 0
 		;;
-	v)
-		export VERBOSE=true
-		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
+		;;
+	v)
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	c)
 		DOCKER_CONTENT_TRUST=true
@@ -73,6 +84,9 @@ EOF
 	s)
 		DOCKER_INSTALL_EDGE_VERSION="$OPTARG"
 		;;
+	l)
+		BUILDKIT_STEP_LOG_MAX_SIZE="$OPTARG"
+		;;
 	*)
 		log_warning "no $opt flag"
 		;;
@@ -90,7 +104,6 @@ if in_os docker; then
 	log_exit "already in docker"
 fi
 
-set -u
 version_needed="$DOCKER_VERSION"
 if $INSTALL_EDGE; then
 	version_needed="$DOCKER_INSTALL_EDGE_VERSION"
@@ -109,7 +122,7 @@ fi
 # ${var-} means if $var is unset then replace it with a null string
 # https://stackoverflow.com/questions/7832080/test-if-a-variable-is-set-in-bash-when-using-set-o-nounset
 # http://stackoverflow.com/questions/12983137/how-do-detect-if-travis-ci-or-not
-if [[ -n ${TRAVIS-} ]]; then
+if [[ -v TRAVIS ]]; then
 	log_message "in Travis CI setting services : docker in .travis.yml"
 	# note that lib-install.sh/package-install.sh will not work we need to
 	# upgrade
@@ -121,7 +134,7 @@ if [[ -n ${TRAVIS-} ]]; then
 	exit
 fi
 
-if [[ -n ${CIRCLECI-} ]]; then
+if [[ -v CIRCLECI ]]; then
 	log_exit "Circle CI already has a hacked version of docker"
 fi
 
@@ -131,18 +144,18 @@ if in_os mac; then
 	if $INSTALL_EDGE; then
 		# https://github.com/caskroom/homebrew-versions
 		# log_verbose installing alternative beta and edge versions for tap
-		log_warning "Edge now included in mainline docker"
-		tap_install homebrew/cask-versions
-		# So swap docker_edge for docker if installed
-		log_verbose install docker-edge
-		cask_swap docker-edge docker
-	else
-		log_verbose install docker and uninstall docker-edge if needed
-		cask_swap docker docker-edge
+		log_warning "Edge now included in mainline docker ignore edge"
+	#    tap_install homebrew/cask-versions
+	#    # So swap docker_edge for docker if installed
+	#    log_verbose install docker-edge
+	#    cask_swap docker-edge docker
+	#else
+	#    log_verbose install docker and uninstall docker-edge if needed
+	#    cask_swap docker docker-edge
 	fi
 	cask_install docker
-	log_warning docker now installed by homebrew open it up and fill it in before continuing
-	log_warning it is best to login from the Docker.app
+	log_warning "docker now installed by homebrew open it up and fill it in before continuing"
+	log_warning "it is best to login from the Docker.app"
 	open -a Docker.app
 	util_press_key
 
@@ -155,11 +168,16 @@ if in_os mac; then
 		download_url_open "https://download.docker.com/mac/stable/Docker.dmg"
 		find_in_volume_copy_then_detach Docker.app
 	fi
-	log_warning "this installs Docker for Mac but if you have an old Mac run"
-	log_warning "run $WS_DIR/bin/install-docker-toolbox.sh"
+	#log_warning "this installs Docker for Mac but if you have an old Mac run"
+	#log_warning "run $WS_DIR/bin/install-docker-toolbox.sh"
+
+	log_verbose "create buildx instance with $BUILDKIT_STEP_LOG_MAX_SIZE log size"
+	docker buildx create --name docker-buildx --use --driver-opt \
+		env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-10000000}"
 	exit
 fi
 
+log_verbose "Non-Mac installation"
 # log_verbose docker-py needed for wscons in all versions of linux
 # pip_install docker-py
 PACKAGES=(
@@ -253,9 +271,10 @@ install_docker_module() {
 	fi
 }
 
-log_verbose Linux packages are out of date so direct install
-install_docker_module docker-machine "$DOCKER_MACHINE_VERSION" "$DOCKER_MACHINE"
-install_docker_module docker-compose "$DOCKER_COMPOSE_VERSION" "$DOCKER_COMPOSE"
+log_verbose "docker machine and compose are deprecated"
+log_verbose "Linux packages are out of date so direct install"
+#install_docker_module docker-machine "$DOCKER_MACHINE_VERSION" "$DOCKER_MACHINE"
+#install_docker_module docker-compose "$DOCKER_COMPOSE_VERSION" "$DOCKER_COMPOSE"
 
 # If this isn't your first docker installation, you need to provide your super
 # secret signing keys
@@ -265,24 +284,24 @@ if [ -d "$DOCKER_TRUST_PRIVATE" ]; then
 fi
 
 # If a non-root users, add to the docker group
-log_warning docker is sudoless which is a security risk but convenient
-echo If you want to be safer run but you always need to sudo docker but certain command break
-echo "sudo deluser $USER docker"
-echo note that this is superceded if you are a using iamuser sync and are in the iamusers group
+log_warning "docker is sudoless which is a security risk but convenient"
+log_warning "If you want to be safer run but you always need to sudo docker but certain command break"
+log_warning "sudo deluser $USER docker"
+log_warning "note that this is superceded if you are a using iamuser sync and are in the iamusers group"
 sudo usermod -aG docker "$USER"
 
-log_verbose see if you can use docker if not see if it is running and see if you are in the right group
+log_verbose "see if you can use docker if not see if it is running and see if you are in the right group"
+
 if ! docker_available; then
-	log_warning docker installed but you are not in the docker group
-	echo If you want to test right away use "newgrp docker" in an interactive
-	echo shell and re-run the script
-	echo
-	echo On Ubuntu, logout and logon again to get new group
-	echo On Debian, reboot to get the new group
-	echo "If you want docker managed by IAM user usermod -aG $USER iamusers"
-	echo and this will manage docker access through /etc/opt/tongfamily
-	echo
-	echo Make sure to run a "docker login" or "docker-login.sh" to pull private
-	echo repos
-	exit 1
+	log_warning "If you want to test right away use newgrp docker in an interactive"
+	log_warning "shell and re-run the script"
+	log_warning "On Ubuntu, logout and logon again to get new group"
+	log_warning "On Debian, reboot to get the new group"
+	log_warning "If you want docker managed by IAM user usermod -aG $USER iamusers"
+	log_warning "and this will manage docker access through /etc/opt/tongfamily"
+	log_warning "Make sure to run a docker login to pull private images"
+	log_error 1 "docker installed but you are not in the docker group"
 fi
+
+docker buildx create --name docker-buildx --use --driver-opt \
+	env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-10000000}"

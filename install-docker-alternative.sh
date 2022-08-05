@@ -158,8 +158,10 @@ if $COLIMA; then
 	log_verbose "Set docker to use colima context"
 	log_verbose "To use Docker Desktop run docker context use default"
 	docker context use colima
-	log_verbose "Create buildx instance"
-	docker buildx create --name colima-buildx --use
+	log_verbose "Create buildx instance with 50MB log"
+	# https://stackoverflow.com/questions/65819424/is-there-a-way-to-increase-the-log-size-in-docker-when-building-a-container
+	docker buildx create --name colima-buildx \
+		--driver-opt env.BUILDKIT_STEP_LOG_MAX_SIZE=500000000 --use
 
 	if $VERBOSE; then
 		log_verbose "colima works kubectl using containerd"
