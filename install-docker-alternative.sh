@@ -148,12 +148,18 @@ if $COLIMA; then
 	# the default
 	log_verbose "colima works with docker ps"
 	# --runtime docker is the default
-	COLIMA_FLAGS=(--cpu 2 --memory 4 --disk 100)
+	COLIMA_FLAGS=(--cpu 4 --memory 16 --disk 100)
 	if $KUBERNETES; then
 		COLIMA_FLAGS+=(--with-kubernetes)
 	fi
 	log_verbose "Starting colima with ${COLIMA_FLAGS[*]}"
 	colima start "${COLIMA_FLAGS[@]}"
+
+	log_verbose "Set docker to use colima context"
+	log_verbose "To use Docker Desktop run docker context use default"
+	docker context use colima
+	log_verbose "Create buildx instance"
+	docker buildx create --name colima-buildx --use
 
 	if $VERBOSE; then
 		log_verbose "colima works kubectl using containerd"

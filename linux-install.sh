@@ -63,7 +63,7 @@ if ! in_os linux; then
 fi
 
 if ! config_mark; then
-    config_add <<-'EOF'
+	config_add <<-'EOF'
 		echo $PATH | grep "$HOME/Applications" || PATH="$HOME/Applications/$PATH"
 	EOF
 fi
@@ -76,14 +76,14 @@ package_install sudo lua5.2
 log_verbose Adding sudoers entry ignored if running under iam-key
 SUDOERS_FILE="/etc/sudoers.d/10-$USER"
 if [[ $NO_SUDO_PASSWORD == true ]]; then
-    log_verbose trying to remove need for sudo password
-    if ! groups | grep sudo || [[ ! -e $SUDOERS_FILE ]]; then
-        log_warning no sudo available please enter root password
-        # note we need to escape the here document quotes so they
-        # get passed to su and also around the file name
-        su -c "tee \"$SUDOERS_FILE\" <<<\"$USER ALL=(ALL:ALL) NOPASSWD:ALL\" && \
+	log_verbose trying to remove need for sudo password
+	if ! groups | grep sudo || [[ ! -e $SUDOERS_FILE ]]; then
+		log_warning no sudo available please enter root password
+		# note we need to escape the here document quotes so they
+		# get passed to su and also around the file name
+		su -c "tee \"$SUDOERS_FILE\" <<<\"$USER ALL=(ALL:ALL) NOPASSWD:ALL\" && \
            chmod 440 \"$SUDOERS_FILE\""
-    fi
+	fi
 fi
 
 # surround.io only
@@ -93,18 +93,18 @@ fi
 # "$SCRIPT_DIR/install-iam-key-daemon.sh"
 # Per http://unix.stackexchange.com/questions/9940/convince-apt-get-not-to-use-ipv6-method
 if ! sudo touch /etc/apt/apt.conf.d/99force-ipv4; then
-    echo "$SCRIPTNAME: Could not create 99force-ipv4"
+	echo "$SCRIPTNAME: Could not create 99force-ipv4"
 elif ! grep "^Acquire::ForceIPv4" /etc/apt/apt.conf.d/99force-ipv4; then
-    sudo tee -a /etc/apt/apt.conf.d/99force-ipv4 <<<'Acquire::ForceIPv4 "true";'
+	sudo tee -a /etc/apt/apt.conf.d/99force-ipv4 <<<'Acquire::ForceIPv4 "true";'
 fi
 # Problems here include internet not up or the dreaded Hash Mismatch
 # This is usually due to bad ubuntu mirrors
 # See # http://askubuntu.com/questions/41605/trouble-downloading-packages-list-due-to-a-hash-sum-mismatch-error
 if ! sudo apt-get -y update; then
-    echo "$SCRIPTNAME: apt-get update failed with $?"
-    echo "  either no internet or a bad ubuntu mirror"
-    echo "  retry or sudo rm -rf /var/list/apt/lists* might help"
-    exit 4
+	echo "$SCRIPTNAME: apt-get update failed with $?"
+	echo "  either no internet or a bad ubuntu mirror"
+	echo "  retry or sudo rm -rf /var/list/apt/lists* might help"
+	exit 4
 fi
 sudo apt-get -y upgrade
 log_verbose "note that snap does not work on WSL2"
@@ -126,7 +126,6 @@ log_verbose "check for sudo"
 if [[ $(sudo passwd -S root | awk '{print $2}') == P ]] && ! $FORCE; then
 	log_exit root password already set choose -f if you want to overwrite
 fi
-
 
 log_warning set the root password which is needed if the machine borks and you are running in debug mode
 sudo passwd

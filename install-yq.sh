@@ -63,6 +63,6 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 	log_verbose "installing command completion"
 	config_add "$(config_profile_nonexportable)" <<-'EOF'
 		# shellcheck disable=SC1090
-		if command -v yq >/dev/null; then source <(yq shell-completion bash)"; fi
+		if command -v yq >/dev/null; then source <(yq shell-completion bash); fi
 	EOF
 fi

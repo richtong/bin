@@ -218,7 +218,7 @@ hash -r
 # so you can also export from it
 # Needs to run before the config_mark and other commands since
 # these use readlink
-# this is now down in install.sh
+# now installed in install.sh
 #log_verbose install packages that need special flags
 #"$SCRIPT_DIR/install-gnu.sh"
 #log_verbose The path for getting to gnu utilities needed so source the new profile

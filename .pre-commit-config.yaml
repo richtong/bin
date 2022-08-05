@@ -65,7 +65,7 @@ repos:
       - id: check-docstring-first
 
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
-    rev: 2.1.6
+    rev: 3.0.0
     hooks:
       # Generating a ruby error with run with all-files
       # this is using the ruby mdl utility so switching to the node version
@@ -130,7 +130,7 @@ repos:
     hooks:
       - id: mypy
   - repo: https://github.com/pycqa/flake8
-    rev: 4.0.1
+    rev: 5.0.4
     hooks:
       - id: flake8
   - repo: https://github.com/pycqa/pydocstyle
@@ -167,7 +167,7 @@ repos:
   # sync all notebooks with their corresponding markdown files
   # use black to format the python code
   - repo: https://github.com/mwouts/jupytext
-    rev: v1.14.0
+    rev: v1.14.1
     hooks:
       - id: jupytext
         args: [--sync, --pipe, black]
