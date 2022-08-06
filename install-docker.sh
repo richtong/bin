@@ -303,5 +303,6 @@ if ! docker_available; then
 	log_error 1 "docker installed but you are not in the docker group"
 fi
 
+log_verbose "Create dedicated docker buildx with 50MB log size"
 docker buildx create --name docker-buildx --use --driver-opt \
 	env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-10000000}"
