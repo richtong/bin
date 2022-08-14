@@ -56,7 +56,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-util.sh lib-config.sh lib-install.sh
 
-brew_install zsh
+brew_install zsh zinit
 # install these with zinit so we don't have to add source
 #zsh-autosuggestion zsh-syntax-highlighting
 
@@ -168,7 +168,6 @@ config_replace -x "$(config_profile_zsh)" plugins "plugins = (${PLUGIN[*]})"
 
 log_verbose "adding zinit plugins"
 # https://gist.github.com/laggardkernel/4a4c4986ccdcaf47b91e8227f9868ded
-brew_install zinit
 # powerlevel10k - status bar
 # zsh-autosuggestions - long suggestions
 # test if compaudit returns any bad permissions and if it does seal it up.
