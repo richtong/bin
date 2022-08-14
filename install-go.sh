@@ -70,7 +70,7 @@ fi
 # https://github.com/golang/go/wiki/Ubuntu
 if [[ $OSTYPE =~ linux ]]; then
 	log_verbose 16.04 has Go v 1.6 so try to install newer
-	repository_install ppa:gophers/archive
+	apt_repository_install ppa:gophers/archive
 	sudo apt-get update
 	sudo apt-get install "golang-$VERSION-go"
 fi

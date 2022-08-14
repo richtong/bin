@@ -57,8 +57,8 @@ else
 	log_verbose linux install
 	if in_linux ubuntu && [[ $(linux_version) =~ ^14 ]]; then
 		log_verbose installing ppa for java
-		# usage: repository_install [team/repo | single_repo string]
-		repository_install ppa:webupd8team/java
+		# usage: apt_repository_install [team/repo | single_repo string]
+		apt_repository_install ppa:webupd8team/java
 		package_install oracel-java8-installer
 	else
 		log_verbose install java 8 jdk
@@ -67,7 +67,7 @@ else
 	log_verbose adding Bazel gpg
 	curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
 	log_verbose adding Bazel repo
-	repository_install "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8"
+	apt_repository_install "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8"
 fi
 
 package_install bazel

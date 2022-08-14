@@ -9,12 +9,13 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
+SUDO_PASSWORD="${SUDO_PASSWORD:-false}"
 
 OPTIND=1
 FORCE=${FORCE:-false}
 # which user is the source of secrets
 
-while getopts "hdvf" opt; do
+while getopts "hdvfs" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -29,6 +30,7 @@ while getopts "hdvf" opt; do
 			flags: -v verbose
 				   -d $(! $DEBUGGING || echo "no ")debugging
 				   -v $(! $VERBOSE || echo "not ")verbose
+				   -s $(! $SUDO_PASSWORD || echo "no ")sudo password
 			       -f force a new password for root
 
 		EOF
@@ -45,6 +47,9 @@ while getopts "hdvf" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
+	r)
+		SUDO_PASSWORD="$($SUDO_PASSWORD && echo false || echo true)"
+		;;
 	f)
 		FORCE=true
 		;;
@@ -55,7 +60,7 @@ while getopts "hdvf" opt; do
 done
 # shellcheck source=./include.sh
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-util.sh
+source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
 
 if ! in_os linux; then
@@ -75,7 +80,7 @@ package_install sudo lua5.2
 # "$SCRIPT_DIR/install-keychain.sh"
 log_verbose Adding sudoers entry ignored if running under iam-key
 SUDOERS_FILE="/etc/sudoers.d/10-$USER"
-if [[ $NO_SUDO_PASSWORD == true ]]; then
+if ! $SUDO_PASSWORD; then
 	log_verbose trying to remove need for sudo password
 	if ! groups | grep sudo || [[ ! -e $SUDOERS_FILE ]]; then
 		log_warning no sudo available please enter root password

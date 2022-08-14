@@ -65,10 +65,10 @@ fi
 log_verbose install ubuntu
 case $(linux_distribution) in
 ubuntu)
-	repository_install ppa:ansible/ansible
+	apt_repository_install ppa:ansible/ansible
 	;;
 debian)
-	repository_install "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main"
+	apt_repository_install "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main"
 	sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
 	;;
 esac

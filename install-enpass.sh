@@ -46,7 +46,7 @@ fi
 
 if in_linux ubuntu; then
 	log_verbose ubuntu installation
-	repository_install "deb http://repo.sinew.in/ stable main"
+	apt_repository_install "deb http://repo.sinew.in/ stable main"
 	curl -L "https://dl.sinew.in/keys/enpass-linux.key" | sudo apt-key add -
 	package_install enpass
 fi

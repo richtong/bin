@@ -68,7 +68,7 @@ fi
 
 # https://www.linuxbabe.com/ubuntu/install-veracrypt-ubuntu-16-04-16-10
 log_verbose installing repo
-repository_install ppa:unit193/encryption
+apt_repository_install ppa:unit193/encryption
 log_verbose installing veracrypt
 
 if vergte "$(mac_version)" 10.13; then

@@ -64,7 +64,7 @@ if (($# > 0)); then
 fi
 
 log_verbose "setup zfs-auto-snapshot as of Ubuntu 16.04.2 not in standard install"
-repository_install ppa:bob-ziuchkovski/zfs-auto-snapshot
+apt_repository_install ppa:bob-ziuchkovski/zfs-auto-snapshot
 package_install zfs-auto-snapshot
 
 sudo zfs set com.sun:auto-snapshot=true "$POOL"

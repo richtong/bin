@@ -41,7 +41,7 @@ fi
 
 sudo apt-get purge laptop-mode-tools
 
-repository_install ppa:linrunner/tlp
+apt_repository_install ppa:linrunner/tlp
 package_install tlp
 
 log_verbose starting tlp

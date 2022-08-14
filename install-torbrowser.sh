@@ -36,5 +36,5 @@ source_lib lib-install.sh
 set -u
 shift $((OPTIND - 1))
 
-repository_install ppa:webupd8team/tor-browser
+apt_repository_install ppa:webupd8team/tor-browser
 package_install tor-browser

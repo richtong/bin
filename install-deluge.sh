@@ -40,13 +40,13 @@ fi
 
 if in_linux ubuntu; then
 	# http://dev.deluge-torrent.org/wiki/Installing/Linux/Ubuntu
-	repository_install ppa:deluge-team/ppa
+	apt_repository_install ppa:deluge-team/ppa
 	package_install deluged deluge-web deluge-console
 elif in_linux debian; then
 	# http://forum.deluge-torrent.org/viewtopic.php?t=54413
 	# install the ubuntu trusty version from latest ppa on ubuntu does not work
 	# http://forum.deluge-torrent.org/viewtopic.php?t=54413
-	# repository_install 'deb http://ppa.launchpad.net/deluge-team/ppa/ubuntu trusty main'
+	# apt_repository_install 'deb http://ppa.launchpad.net/deluge-team/ppa/ubuntu trusty main'
 	# sudo apt-get install -t trusty libtorrent-rasterbar8 python-libtorrent deluged deluge-web
 	# so we just take whatever is in the distro
 	package_install deluged deluge-web

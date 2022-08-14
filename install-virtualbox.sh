@@ -57,7 +57,7 @@ wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-
 wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
 
 log_verbose add vbox repo
-repository_install "deb http://download.virtualbox.org/virtualbox/debian $(linux_codename) contrib"
+apt_repository_install "deb http://download.virtualbox.org/virtualbox/debian $(linux_codename) contrib"
 
 log_verbose "install virtualbox $RELEASE"
 
