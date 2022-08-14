@@ -15,7 +15,7 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
-OPTIND=1
+DOCKER_REGISTRY="${DOCKER_REGISTRY:-docker.io}"
 DOCKER_CONTENT_TRUST="${DOCKER_CONTENT_TRUST:-false}"
 DOCKER_TRUST_PRIVATE="${DOCKER_TRUST_PRIVATE:-"$SCRIPT_DIR/ssh/docker"}"
 DOCKER_VERSION="${DOCKER_VERSION:-20.10.11}"
@@ -25,9 +25,11 @@ DOCKER_INSTALL_EDGE_VERSION="${DOCKER_INSTALL_EDGE_VERSION:-20.10.12}"
 DOCKER_MACHINE_VERSION="${DOCKER_MACHINE_VERSION:-0.16.1}"
 DOCKER_COMPOSE_VERSION="${DOCKER_COMPOSE_VERSION:-1.26.2}"
 BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-50000000}"
-FORCE="${FORCE:-false}"
 INSTALL_EDGE="${INSTALL_EDGE:-false}"
-while getopts "hdvctr:m:o:fns:l:" opt; do
+
+FORCE="${FORCE:-false}"
+OPTIND=1
+while getopts "hdvctr:m:o:fns:l:i:" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
@@ -36,16 +38,21 @@ $SCRIPTNAME: installs docker and other support programs like docker-machine and 
 flags: -h help
        -d $(! $DEBUGGING || echo "no ")debugging
        -v $(! $VERBOSE || echo "not ")verbose
-       -c enable content trust (default: $DOCKER_CONTENT_TRUST)
+	   -c $(! $DOCKER_CONTENT_TRUST || echo "do not ") enable content trust
+	   -f $(! $FORCE || echo "do not ")force redownload of installation
+
+
+       -l buildx log size (default: $BUILDKIT_STEP_LOG_MAX_SIZE)
+	   -i use docker image registry (default: $DOCKER_REGISTRY)
+
+	   deprecated:
        -t your private trust key directory (default: $DOCKER_TRUST_PRIVATE)
        -r docker version to install (default: $DOCKER_VERSION)
-          note this is the docker engine version not the Mad App bundle
+          note this is the docker engine version not the Mac App version
        -m docker machine version (default: $DOCKER_MACHINE_VERSION)
        -o docker compose version (default: $DOCKER_COMPOSE_VERSION)
-       -f force redownload of installation (default: $FORCE)
-	   -n install edge release deprecated can now switch in main (default: $INSTALL_EDGE)
-       -s docker edge version minimum (default: $DOCKER_INSTALL_EDGE_VERSION)
-       -l buildx log size (default: $BUILDKIT_STEP_LOG_MAX_SIZE)
+	   -n install edge release now switch in main (default: $INSTALL_EDGE)
+	   -s docker edge version minimum (default: $DOCKER_INSTALL_EDGE_VERSION)
 EOF
 		exit 0
 		;;
@@ -60,8 +67,18 @@ EOF
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
+	l)
+		BUILDKIT_STEP_LOG_MAX_SIZE="$OPTARG"
+		;;
+	i)
+		DOCKER_REGISTRY="$OPTARG"
+		;;
+	f)
+		FORCE="$($FORCE && echo false || echo true)"
+		export FORCE
+		;;
 	c)
-		DOCKER_CONTENT_TRUST=true
+		DOCKER_CONTENT_TRUST="$($DOCKER_CONTENT_TRUST && echo false || echo true)"
 		;;
 	t)
 		DOCKER_TRUST_PRIVATE="$OPTARG"
@@ -75,17 +92,11 @@ EOF
 	o)
 		DOCKER_COMPOSE_VERSION="$OPTARG"
 		;;
-	f)
-		FORCE=true
-		;;
 	n)
-		INSTALL_EDGE=false
+		INSTALL_EDGE="$($INSTALL_EDGE && echo false || echo true)"
 		;;
 	s)
 		DOCKER_INSTALL_EDGE_VERSION="$OPTARG"
-		;;
-	l)
-		BUILDKIT_STEP_LOG_MAX_SIZE="$OPTARG"
 		;;
 	*)
 		log_warning "no $opt flag"
@@ -171,138 +182,134 @@ if in_os mac; then
 	#log_warning "this installs Docker for Mac but if you have an old Mac run"
 	#log_warning "run $WS_DIR/bin/install-docker-toolbox.sh"
 
-	log_verbose "create buildx instance with $BUILDKIT_STEP_LOG_MAX_SIZE log size"
-	docker buildx create --name docker-buildx --use --driver-opt \
-		env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-10000000}"
-	exit
-fi
-
-log_verbose "Non-Mac installation"
-# log_verbose docker-py needed for wscons in all versions of linux
-# pip_install docker-py
-PACKAGES=(
-	apt-transport-https
-	ca-certificates
-	curl
-	gnupg
-	lsb-release
-)
-if in_wsl; then
-	log_exit "WSL does not need docker install in Windows"
-fi
-if in_linux debian; then
-	log_verbose "installnig for debian"
-	# https://docs.docker.com/engine/installation/linux/docker-ce/debian/#install-docker-ce
-	package_install "${PACKAGES[@]}"
-	curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add
-	# need |& because stderr warns not to pipe output
-	# need the asterisks because spaces vary in the string
-	if ! apt-key list 0EBFCD88 |&
-		grep -q '9DC8 *5822 *9FC7 *DD38 *854A *E2D8 *8D81 *803C *0EBF *CD88'; then
-		log_error 2 "bad apt-key fingerprint"
+else
+	log_verbose "Non-Mac installation"
+	# log_verbose docker-py needed for wscons in all versions of linux
+	# pip_install docker-py
+	PACKAGES=(
+		apt-transport-https
+		ca-certificates
+		curl
+		gnupg
+		lsb-release
+	)
+	if in_wsl; then
+		log_exit "WSL does not need docker install in Windows"
 	fi
-	repository_install "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-	package_install docker-ce
-elif in_linux ubuntu; then
-	# https://phoenixnap.com/kb/install-docker-on-ubuntu-20-04
-	# https://docs.docker.com/engine/install/ubuntu/
-	log_verbose "trying to install docker for ubuntu"
-	if package_install docker; then
-		log_exit "linux docker installed"
-	else
-		log_verbose "docker.io package failed so install pieces"
+	if in_linux debian; then
+		log_verbose "installnig for debian"
+		# https://docs.docker.com/engine/installation/linux/docker-ce/debian/#install-docker-ce
 		package_install "${PACKAGES[@]}"
-		curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-			sudo gpg --deearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-		sudo add-apt-repository \
-			"deb [arch=amd64] signed-by /usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-		sudo apt-get update
-		sudo apt-get install docker-ce docker-ce-cli containerd.io
-
-		if $VERBOSE; then
-			log_verbose "docker versions available"
-			apt-cache madison docker-ce
+		curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add
+		# need |& because stderr warns not to pipe output
+		# need the asterisks because spaces vary in the string
+		if ! apt-key list 0EBFCD88 |&
+			grep -q '9DC8 *5822 *9FC7 *DD38 *854A *E2D8 *8D81 *803C *0EBF *CD88'; then
+			log_error 2 "bad apt-key fingerprint"
 		fi
+		repository_install "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+		package_install docker-ce
+	elif in_linux ubuntu; then
+		# https://phoenixnap.com/kb/install-docker-on-ubuntu-20-04
+		# https://docs.docker.com/engine/install/ubuntu/
+		log_verbose "trying to install docker for ubuntu"
+		if package_install docker; then
+			log_exit "linux docker installed"
+		else
+			log_verbose "docker.io package failed so install pieces"
+			package_install "${PACKAGES[@]}"
+			curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+				sudo gpg --deearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+			sudo add-apt-repository \
+				"deb [arch=amd64] signed-by /usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+			sudo apt-get update
+			sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+			if $VERBOSE; then
+				log_verbose "docker versions available"
+				apt-cache madison docker-ce
+			fi
+		fi
+
+		if ! command -v docker || ! docker -v | grep "$version_needed"; then
+			# We could have old docker components from ubuntu oritented installs
+			# It is ok if we do not find it
+			sudo apt-get purge -y lxc-docker* || true
+		fi
+
+		# the dangerous version do not install opaque scripts
+		# curl -fsSL  https://get.docker.com/ | sh
+		service_start docker
+
 	fi
 
-	if ! command -v docker || ! docker -v | grep "$version_needed"; then
-		# We could have old docker components from ubuntu oritented installs
-		# It is ok if we do not find it
-		sudo apt-get purge -y lxc-docker* || true
+	"$SCRIPT_DIR/install-node.sh"
+	NPM_PACKAGES=(dockerfilelint)
+	#shellcheck disable=SC2086
+	npm_install -g "${NPM_PACKAGES[@]}"
+	log_verbose "turn off sudo checks they do not work for sudo group"
+	if ! config_mark "$HOME/.dockerfilelintrc"; then
+		config_add "$HOME/.dockerfilelintrc" <<-EOF
+			rules:
+			  disable_sudo: off
+		EOF
 	fi
 
-	# the dangerous version do not install opaque scripts
-	# curl -fsSL  https://get.docker.com/ | sh
-	service_start docker
+	log_verbose "Install hub-tools for Docker Hub CLI login with hub-tool login"
+	GO111MODULE=on go get github.com/docker/hub-tool
 
-fi
-
-"$SCRIPT_DIR/install-node.sh"
-NPM_PACKAGES=(dockerfilelint)
-#shellcheck disable=SC2086
-npm_install -g "${NPM_PACKAGES[@]}"
-log_verbose "turn off sudo checks they do not work for sudo group"
-if ! config_mark "$HOME/.dockerfilelintrc"; then
-	config_add "$HOME/.dockerfilelintrc" <<-EOF
-		rules:
-		  disable_sudo: off
-	EOF
-fi
-
-log_verbose "Install hub-tools for Docker Hub CLI login with hub-tool login"
-GO111MODULE=on go get github.com/docker/hub-tool
-
-# https://docs.docker.com/security/trust/content_trust/
-if $DOCKER_CONTENT_TRUST && ! grep "$DOCKER_CONTENT_TRUST" ~/.bashrc; then
-	echo "# Added by $SCRIPTNAME on $(date)" >>"$HOME/.bashrc"
-	echo "export DOCKER_CONTENT_TRUST=$DOCKER_CONTENT_TRUST" >>"$HOME/.bashrc"
-fi
-
-install_docker_module() {
-	if [[ $# -lt 2 ]]; then return 1; fi
-	local tool="$1"
-	local version="$2"
-	local url="$3"
-	# only download if the tool does not exist or has a lower version number than desired
-	if ! command -v "$tool" || verlt "$(version_extract "$("$tool" version)")" "$version"; then
-		# use tee because sudo does not work on redirection
-		curl -L "$url" | sudo tee "/usr/local/bin/$tool" >/dev/null
-		sudo chmod +x "/usr/local/bin/$tool"
+	# https://docs.docker.com/security/trust/content_trust/
+	if $DOCKER_CONTENT_TRUST && ! grep "$DOCKER_CONTENT_TRUST" ~/.bashrc; then
+		echo "# Added by $SCRIPTNAME on $(date)" >>"$HOME/.bashrc"
+		echo "export DOCKER_CONTENT_TRUST=$DOCKER_CONTENT_TRUST" >>"$HOME/.bashrc"
 	fi
-}
 
-log_verbose "docker machine and compose are deprecated"
-log_verbose "Linux packages are out of date so direct install"
-#install_docker_module docker-machine "$DOCKER_MACHINE_VERSION" "$DOCKER_MACHINE"
-#install_docker_module docker-compose "$DOCKER_COMPOSE_VERSION" "$DOCKER_COMPOSE"
+	install_docker_module() {
+		if [[ $# -lt 2 ]]; then return 1; fi
+		local tool="$1"
+		local version="$2"
+		local url="$3"
+		# only download if the tool does not exist or has a lower version number than desired
+		if ! command -v "$tool" || verlt "$(version_extract "$("$tool" version)")" "$version"; then
+			# use tee because sudo does not work on redirection
+			curl -L "$url" | sudo tee "/usr/local/bin/$tool" >/dev/null
+			sudo chmod +x "/usr/local/bin/$tool"
+		fi
+	}
 
-# If this isn't your first docker installation, you need to provide your super
-# secret signing keys
-if [ -d "$DOCKER_TRUST_PRIVATE" ]; then
-	mkdir -p ~/.docker/trust/private
-	rsync -a "$DOCKER_TRUST_PRIVATE/*" ~/.docker/trust/private/
+	log_verbose "docker machine and compose are deprecated"
+	log_verbose "Linux packages are out of date so direct install"
+	#install_docker_module docker-machine "$DOCKER_MACHINE_VERSION" "$DOCKER_MACHINE"
+	#install_docker_module docker-compose "$DOCKER_COMPOSE_VERSION" "$DOCKER_COMPOSE"
+
+	# If this isn't your first docker installation, you need to provide your super
+	# secret signing keys
+	if [ -d "$DOCKER_TRUST_PRIVATE" ]; then
+		mkdir -p ~/.docker/trust/private
+		rsync -a "$DOCKER_TRUST_PRIVATE/*" ~/.docker/trust/private/
+	fi
+
+	# If a non-root users, add to the docker group
+	log_warning "docker is sudoless which is a security risk but convenient"
+	log_warning "If you want to be safer run but you always need to sudo docker but certain command break"
+	log_warning "sudo deluser $USER docker"
+	log_warning "note that this is superceded if you are a using iamuser sync and are in the iamusers group"
+	sudo usermod -aG docker "$USER"
+
+	log_verbose "see if you can use docker if not see if it is running and see if you are in the right group"
+
+	if ! docker_available; then
+		log_warning "If you want to test right away use newgrp docker in an interactive"
+		log_warning "shell and re-run the script"
+		log_warning "On Ubuntu, logout and logon again to get new group"
+		log_warning "On Debian, reboot to get the new group"
+		log_warning "If you want docker managed by IAM user usermod -aG $USER iamusers"
+		log_warning "and this will manage docker access through /etc/opt/tongfamily"
+		log_warning "Make sure to run a docker login to pull private images"
+		log_error 1 "docker installed but you are not in the docker group"
+	fi
 fi
 
-# If a non-root users, add to the docker group
-log_warning "docker is sudoless which is a security risk but convenient"
-log_warning "If you want to be safer run but you always need to sudo docker but certain command break"
-log_warning "sudo deluser $USER docker"
-log_warning "note that this is superceded if you are a using iamuser sync and are in the iamusers group"
-sudo usermod -aG docker "$USER"
-
-log_verbose "see if you can use docker if not see if it is running and see if you are in the right group"
-
-if ! docker_available; then
-	log_warning "If you want to test right away use newgrp docker in an interactive"
-	log_warning "shell and re-run the script"
-	log_warning "On Ubuntu, logout and logon again to get new group"
-	log_warning "On Debian, reboot to get the new group"
-	log_warning "If you want docker managed by IAM user usermod -aG $USER iamusers"
-	log_warning "and this will manage docker access through /etc/opt/tongfamily"
-	log_warning "Make sure to run a docker login to pull private images"
-	log_error 1 "docker installed but you are not in the docker group"
-fi
-
-log_verbose "Create dedicated docker buildx with 50MB log size"
+log_verbose "Create dedicated docker buildx with large log size"
 docker buildx create --name docker-buildx --use --driver-opt \
 	env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-10000000}"
