@@ -9,7 +9,7 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
-SUDO_PASSWORD="${SUDO_PASSWORD:-false}"
+PASSWORDLESS_SUDO="${PASSWORDLESS_SUDO:-false}"
 
 OPTIND=1
 FORCE=${FORCE:-false}
@@ -30,7 +30,7 @@ while getopts "hdvfs" opt; do
 			flags: -v verbose
 				   -d $(! $DEBUGGING || echo "no ")debugging
 				   -v $(! $VERBOSE || echo "not ")verbose
-				   -s $(! $SUDO_PASSWORD || echo "no ")sudo password
+				   -s $(! $PASSWORDLESS_SUDO || echo "no ")sudo password
 			       -f force a new password for root
 
 		EOF
@@ -48,7 +48,7 @@ while getopts "hdvfs" opt; do
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	r)
-		SUDO_PASSWORD="$($SUDO_PASSWORD && echo false || echo true)"
+		PASSWORDLESS_SUDO="$($PASSWORDLESS_SUDO && echo false || echo true)"
 		;;
 	f)
 		FORCE=true
@@ -80,14 +80,18 @@ package_install sudo lua5.2
 # "$SCRIPT_DIR/install-keychain.sh"
 log_verbose Adding sudoers entry ignored if running under iam-key
 SUDOERS_FILE="/etc/sudoers.d/10-$USER"
-if ! $SUDO_PASSWORD; then
-	log_verbose trying to remove need for sudo password
-	if ! groups | grep sudo || [[ ! -e $SUDOERS_FILE ]]; then
-		log_warning no sudo available please enter root password
-		# note we need to escape the here document quotes so they
-		# get passed to su and also around the file name
-		su -c "tee \"$SUDOERS_FILE\" <<<\"$USER ALL=(ALL:ALL) NOPASSWD:ALL\" && \
-           chmod 440 \"$SUDOERS_FILE\""
+if $PASSWORDLESS_SUDO; then
+	log_verbose "Not recommended enable passwordless sudo good for scripts only"
+	log_verbose "For Ubuntu 20.04 and later sudoers.d not enabled"
+	package_install sudo
+	if ! groups | grep sudo; then
+		log_warning "$USER not in sudo group add them"
+	else
+		if [[ ! -e $SUDOERS_FILE ]]; then
+			sudo tee "$SUDOERS_FILE" <<<"$USER ALL=(ALL:ALL) NOPASSWD:ALL"
+			sudo chmod 440 "$SUDOERS_FILE"
+			EOF
+		fi
 	fi
 fi
 

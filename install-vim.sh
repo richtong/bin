@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-## The above gets the latest bash on Mac or Ubuntu
-##
+#
 ## Install vi tools
 ## https://davidosomething.com/blog/vim-for-javascript/
 ## There are a couple flavors of tools:
@@ -12,10 +11,10 @@
 ## Use install-vim.py for Ubuntu only. This is the same script but
 ## works for Darwin or for Ubuntu
 ##
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
-export SCRIPTNAME
-trap 'exit $?' ERR
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 
 # Pass the force flag down
 export FORCE=${FORCE:-false}
@@ -67,9 +66,9 @@ source_lib lib-install.sh lib-util.sh lib-config.sh
 package_flags=""
 if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose will override vi as well as vim
-	package_flags+=" --with-override-system-vi "
+	package_flags+=("--with-override-system-vi")
 fi
-package_install "${package_flags[@]}" vim
+package_install ${package_flags[@]} vim
 
 # http://eslint.org/docs/user-guide/command-line-interface.html
 # https://github.com/yannickcr/eslint-plugin-react says

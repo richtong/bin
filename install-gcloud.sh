@@ -103,7 +103,7 @@ elif in_os linux; then
 	# snap_install --classic google-cloud-sdk
 	# must install from repo instead
 	log_verbose "Linux GCloud install"
-	sudo apt-get install apt-transport-https ca-certificates gnupg
+	package_install apt-transport-https ca-certificates gnupg
 	APT="/etc/apt/sources.list.d/google-cloud-sdk.list"
 	GPG="/usr/share/keyrings/cloud.google.gpg"
 	PACKAGE="https://packages.cloud.google.com/apt"
@@ -117,7 +117,10 @@ elif in_os linux; then
 	if [[ ! -e $GPG ]]; then
 		curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee "$GPG" >/dev/null
 	fi
-	sudo apt-get -y update && sudo apt-get install -y google-cloud-sdk
+	sudo apt-get -y update
+	# note we cannot use package_install here since snap will be tried first
+	# and this does not have the right version of the google-cloud-sdk
+	apt_install google-cloud-sdk
 fi
 
 hash -r

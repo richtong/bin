@@ -91,3 +91,8 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 		[[ -e $HOME/.iterm2_shell_integration.zsh ]] && source "$HOME/.iterm2_shell_integration.zsh"
 	EOF
 fi
+
+log_verbose "Install customer iterm2 colors with $SCRIPT_DIR/iterm2-color-schemes"
+"$SCRIPT_DIR/../iterm2-color-schemes/tools/import-scheme.sh" \
+	"Cyberdyne" \
+	"Nord"

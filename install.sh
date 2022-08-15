@@ -414,6 +414,9 @@ source_profile
 # "$SCRIPT_DIR/install-sphinx.sh"
 "$SCRIPT_DIR/install-markdown.sh"
 
+log_verbose "install QGroundControl"
+"$SCRIPT_DIR/install-qgc.sh"
+
 # Assumes that personal.git is at the same level as src
 log_verbose Chain to your personal installs
 # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
