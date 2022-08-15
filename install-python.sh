@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 ## vi: se noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
@@ -68,10 +67,7 @@ done
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
-
-#if ! in_os mac; then
-#log_exit "Mac only"
-#fi
+log_verbose "PATH=$PATH"
 
 # Kite is Python code completer not used instead use Github copilot
 # https://github.com/kiteco/jupyterlab-kite
@@ -96,13 +92,14 @@ log_verbose "installing ${PACKAGES[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
 package_install "${PACKAGES[@]}"
+log_verbose "PATH=$PATH"
 
 # we need it to be python and pip to work and not python3 and pip3 only
 # https://docs.brew.sh/Homebrew-and-Python
 if ! config_mark; then
 	# Use the brew location for python
 	config_add <<-EOF
-		    # shellcheck disable=SC2155
+			# shellcheck disable=SC2155
 			echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
 	EOF
 	log_warning "source $(config_profile) to get the correct python"
@@ -112,9 +109,11 @@ fi
 # you cannot just source it again because this will
 # cause the default paths to be put in before this path
 #source_profile
-export PATH
-[[ $PATH =~ $(brew --prefix)/opt/python/libexec/bin ]] || PATH="$(brew --prefix)/opt/python/libexec/bin:$PATH"
+log_verbose "Pre PATH=$PATH"
+[[ $PATH =~ $(brew --prefix)/opt/python$PYTHON_VERSION/libexec/bin ]] || PATH="$(brew --prefix)/opt/python$PYTHON_VERSION/libexec/bin:$PATH"
 hash -r
+export PATH
+log_verbose "PATH=$PATH"
 
 if $PIPENV; then
 	PACKAGES+=(pipenv)
@@ -165,9 +164,9 @@ PYTHON_PACKAGES+=(
 )
 
 # currently no python packages are needed
-log_verbose "installing python packages ${PYTHON_PACKAGES[*]} in user mode and upgrade dependencies"
 
 if [[ -n ${PYTHON_PACKAGES[*]} ]]; then
+	log_verbose "installing python packages ${PYTHON_PACKAGES[*]} in user mode and upgrade dependencies"
 	pip_install --upgrade "${PYTHON_PACKAGES[@]}"
 fi
 

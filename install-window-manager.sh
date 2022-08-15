@@ -54,6 +54,6 @@ if in_os mac; then
     log_verbose "If using dotfiles, then symlink ~/Library/Preferences/com.knollsoft.Retangle.plist"
 elif in_os linux; then
     # https://github.com/Airblader/i3/wiki/installation
-    apt_repository_install regolith-linux/release
+    apt_repository_install ppa:regolith-linux/release
     package_install i3-gaps
 fi

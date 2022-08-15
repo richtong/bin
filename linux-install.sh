@@ -69,7 +69,7 @@ fi
 
 if ! config_mark; then
 	config_add <<-'EOF'
-		echo $PATH | grep "$HOME/Applications" || PATH="$HOME/Applications/$PATH"
+		echo $PATH | grep "$HOME/Applications" || PATH="$HOME/Applications/:$PATH"
 	EOF
 fi
 

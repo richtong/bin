@@ -67,16 +67,16 @@ PROFILE="${PROFILE:-"$HOME/.profile"}"
 echo "$SCRIPTNAME: Set brew environment variables $PROFILE" >&2
 if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
 	cat >>"$PROFILE" <<-EOF
-		# Added by $SCRIPTNAME on $(date)"
+		# Added by $SCRIPTNAME on $(date)
 		if ! command -v brew &>/dev/null; then
-		            HOMEBREW_PREFIX="/opt/homebrew"
-		            if  uname | grep -q Linux; then
-		                HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
-		            elif uname | grep -q Darwin && uname -m | grep -q x86_64; then
-		                HOMEBREW_PREFIX="/usr/local"
-		            fi
-		            eval "\$(\$HOMEBREW_PREFIX/bin/brew shellenv)"
-		        fi
+			HOMEBREW_PREFIX="/opt/homebrew"
+			if  uname | grep -q Linux; then
+				HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+			elif uname | grep -q Darwin && uname -m | grep -q x86_64; then
+				HOMEBREW_PREFIX="/usr/local"
+			fi
+			eval "\$(\$HOMEBREW_PREFIX/bin/brew shellenv)"
+		fi
 	EOF
 fi
 
