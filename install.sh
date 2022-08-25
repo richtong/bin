@@ -13,7 +13,6 @@ VERBOSE="${VERBOSE:-false}"
 export REPO_USER="${REPO_USER:-"$USER"}"
 export REPO_DOMAIN="${REPO_DOMAIN:-"tongfamily.com"}"
 export GIT_REPO_NAME="${GIT_REPO_NAME:-"richtong"}"
-
 export DOCKER_USER="${DOCKER_USER:-"$REPO_USER"}"
 export GIT_USERNAME="${GIT_USERNAME:-"${REPO_USER^}"}"
 

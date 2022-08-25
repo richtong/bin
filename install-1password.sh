@@ -57,7 +57,7 @@ while getopts "hdvr:e:s:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 # just source if we are running in a mountable drive

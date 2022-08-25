@@ -166,7 +166,7 @@ PLUGIN+=(
 # use -x so we don't replace if it is already there
 config_replace -x "$(config_profile_zsh)" plugins "plugins = (${PLUGIN[*]})"
 
-log_verbose "adding zinit plugins"
+log_verbose "adding zinit plugins must be done early in installation"
 # https://gist.github.com/laggardkernel/4a4c4986ccdcaf47b91e8227f9868ded
 # powerlevel10k - status bar
 # zsh-autosuggestions - long suggestions
@@ -175,22 +175,21 @@ log_verbose "adding zinit plugins"
 # note that compaudit does not always exist so check for it and then its output
 
 if ! config_mark "$(config_profile_zsh)"; then
-
 	config_add "$(config_profile_zsh)" <<-'EOF'
-		    [[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
-		        command -v compaudit >/dev/null && [[ $(compaudit) ]] && compaudit | xargs chmod g-w,o-w
-		        # close off shared directories
-		        # deactivate conda if installed
-		        command -v conda >/dev/null && conda deactivate
-		        source $ZSH/oh-my-zsh.sh
-		        source "$(brew --prefix)/opt/zinit/zinit.zsh"
-		        # https://github.com/zdharma-continuum/zinit
-		        zinit ice depth"1"  # git clone depth
-		        zinit ice wait
-		        zinit light zsh-users/zsh-autosuggestions
-		        zinit light zsh-users/zsh-syntax-highlighting
-		        zinit light romkatv/powerlevel10k
-		        zinit light oldratlee/hacker-quotes
-		        zinit light joel-porquet/zsh-dircolors-solarized
+		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
+		command -v compaudit >/dev/null && [[ $(compaudit) ]] && compaudit | xargs chmod g-w,o-w
+		source $ZSH/oh-my-zsh.sh
+		source "$(brew --prefix)/opt/zinit/zinit.zsh"
+		# https://github.com/zdharma-continuum/zinit
+		# git clone depth
+		zinit depth"1" wait for \
+			zsh-users/zsh-autosuggestions \
+			zsh-users/zsh-syntax-highlighting \
+			oldratlee/hacker-quotes \
+			richtong/bash-my-gcp
+		# cannot wait still have to call
+		zinit light romkatv/powerlevel10k
+		zinit light joel-porquet/zsh-dircolors-solarized
+		setupsolarized
 	EOF
 fi

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## install Anaconda for Mac only
 ## https://medium.com/ayuth/install-anaconda-on-macos-with-homebrew-c94437d63a37
@@ -6,10 +7,10 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 NOFORGE="${NOFORGE:-false}"
 PYTHON="${PYTHON:-3.9}"
@@ -24,6 +25,8 @@ while getopts "hdvacfp:r:u:" opt; do
 			Installs Miniconda (you can install anaconda but more dependency issues)
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
+			                       -d $(! $DEBUGGING || echo "no ")debugging
+			                       -v $(! $VERBOSE || echo "not ")verbose
 			           -a install full Anaconda (default: not $ANACONDA)
 					   -c do not install conda-forge (defualt: $NOFORGE)
 					   -p install python version (default: $PYTHON)
@@ -33,12 +36,15 @@ while getopts "hdvacfp:r:u:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	c)
 		NOFORGE=true
@@ -100,5 +106,11 @@ log_warning "you should not install into base create your own environment"
 conda deactivate
 log_debug "do not conda on by default"
 if ! config_mark; then
-	config_add <<<"conda deactivate"
+	config_add <<<"if command -v conda >/dev/null; then conda deactivate; fi"
+fi
+
+if ! config_mark "$(config_profile_zsh)"; then
+	config_add "$(config_profile_zsh)" <<-EOF
+		        if command -v conda >/dev/null; then conda deactivate; fi
+	EOF
 fi
