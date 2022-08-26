@@ -23,12 +23,12 @@ while getopts "hdvg:" opt; do
 	h)
 		cat <<-EOF
 			Installs Go
-				usage: $SCRIPTNAME [ flags ]
-				flags: -h help"
-					   -d $(! $DEBUGGING || echo "no ")debugging
-					   -v $(! $VERBOSE || echo "not ")verbose
-					   -g path for go (default: $GOPATH)
-					   -r release of go (default: $VERSION)
+			    usage: $SCRIPTNAME [ flags ]
+			    flags: , -h help"
+			                       -d $(! $DEBUGGING || echo "no ")debugging
+			                       -v $(! $VERBOSE || echo "not ")verbose
+			           -g path for go (default: $GOPATH)
+			           -r release of go (default: $VERSION)
 
 		EOF
 		exit 0
@@ -39,10 +39,10 @@ while getopts "hdvg:" opt; do
 		export DEBUGGING
 		;;
 	v)
-		if $VERBOSE; then export FLAGS+=" -v "; fi
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	g)
 		GOPATH="$OPTARG"
@@ -53,7 +53,7 @@ while getopts "hdvg:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-config.sh lib-util.sh
 
@@ -83,9 +83,8 @@ fi
 
 # https://www.digitalocean.com/community/tutorials/how-to-install-go-on-ubuntu-20-04
 
-
 # no longer work with later Ubuntus
-	#log_verbose 16.04 has Go v 1.6 so try to install newer
-	#apt_repository_install ppa:gophers/go
-	#sudo apt-get update
-	#sudo apt-get install "golang-$VERSION-go"
+#log_verbose 16.04 has Go v 1.6 so try to install newer
+#apt_repository_install ppa:gophers/go
+#sudo apt-get update
+#sudo apt-get install "golang-$VERSION-go"

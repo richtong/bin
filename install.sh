@@ -247,6 +247,15 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 	EOF
 fi
 
+if ! config_mark; then
+	config_add <<-'EOF'
+		# this runs everytime on login and for each interactive shell Mac Terminal
+		# creates. Chains to ~/.bashrc for aliases what needs to run on each subshell
+		# shellcheck disable=SC1091
+		if echo "$BASH" | grep -q "bash" && [ -f "$HOME/.bashrc" ]; then source "$HOME/.bashrc"; fi
+	EOF
+fi
+
 log_verbose "install brew for linux and mac as common installer"
 "$SCRIPT_DIR/install-brew.sh"
 
