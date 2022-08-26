@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## install Go
 ## http://www.golangbootcamp.com/book/get_setup
@@ -9,10 +10,10 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 GOPATH="${GOPATH:-"$HOME/go"}"
 VERSION="${VERSION:-"1.10"}"
 OPTIND=1
@@ -22,18 +23,23 @@ while getopts "hdvg:" opt; do
 	h)
 		cat <<-EOF
 			Installs Go
-			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
-			           -g path for go (default: $GOPATH)
-			           -r release of go (default: $VERSION)
+				usage: $SCRIPTNAME [ flags ]
+				flags: -h help"
+					   -d $(! $DEBUGGING || echo "no ")debugging
+					   -v $(! $VERBOSE || echo "not ")verbose
+					   -g path for go (default: $GOPATH)
+					   -r release of go (default: $VERSION)
 
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		export VERBOSE=true
 		# add the -v which works for many commands
 		export FLAGS+=" -v "
@@ -51,26 +57,35 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-config.sh lib-util.sh
 
-if in_os mac; then
-	log_verbose git install on MacOS
-	package_install --cross-compile-common go
-	if ! config_mark "$HOME/.bash_profile"; then
-		log_verbose no config adding
-		mkdir -p "$GOPATH"
-		# https://golang.org/doc/code.html#GOPATH
-		# quotes mean do not interpret
-		config_add <<-EOF
-			export GOPATH="$GOPATH"
-			export PATH="\$PATH:\$(go env GOPATH)/bin"
-		EOF
-	fi
-	log_exit 0 "make sure to source .bash_profile"
+log_verbose git install on MacOS
+mkdir -p "$GOPATH"
+if ! config_mark; then
+	log_verbose "no config adding"
+	# https://golang.org/doc/code.html#GOPATH
+	# quotes mean do not interpret
+	config_add <<-EOF
+		export GOPATH="$GOPATH"
+		export PATH="\$PATH:\$(go env GOPATH)/bin"
+	EOF
+fi
+log_exit 0 "make sure to source .bash_profile"
+
+if package_install --cross-compile-common go; then
+	log_exit "package installed"
 fi
 
 # https://github.com/golang/go/wiki/Ubuntu
-if [[ $OSTYPE =~ linux ]]; then
-	log_verbose 16.04 has Go v 1.6 so try to install newer
-	apt_repository_install ppa:gophers/archive
-	sudo apt-get update
-	sudo apt-get install "golang-$VERSION-go"
+# https://launchpad.net/~gophers/+archive/ubuntu/go
+if ! snap_install --classic go; then
+	log_verbose "Snap install failed trying apt-get"
+	apt_install golang
 fi
+
+# https://www.digitalocean.com/community/tutorials/how-to-install-go-on-ubuntu-20-04
+
+
+# no longer work with later Ubuntus
+	#log_verbose 16.04 has Go v 1.6 so try to install newer
+	#apt_repository_install ppa:gophers/go
+	#sudo apt-get update
+	#sudo apt-get install "golang-$VERSION-go"
