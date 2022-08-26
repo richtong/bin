@@ -75,7 +75,7 @@ fi
 
 log_verbose "install sudo and lua"
 # lua used by lib-config
-package_install sudo lua5.2
+package_install sudo lua5.2 ppa-purge
 # no longer need keychain as of July 2022 Ubuntu has ed_25519 support
 # "$SCRIPT_DIR/install-keychain.sh"
 log_verbose Adding sudoers entry ignored if running under iam-key
