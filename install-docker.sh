@@ -310,6 +310,8 @@ else
 	fi
 fi
 
-log_verbose "Create dedicated docker buildx with large log size"
-docker buildx create --name docker-buildx --use --driver-opt \
-	env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-10000000}"
+if ! docker buildx ls | grep -q docker-buildx; then
+	log_verbose "Find and create dedicated docker buildx with large log size"
+	docker buildx create --name docker-buildx --use --driver-opt \
+		env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-10000000}"
+fi
