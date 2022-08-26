@@ -18,7 +18,7 @@ VERBOSE="${VERBOSE:-false}"
 DOCKER_REGISTRY="${DOCKER_REGISTRY:-docker.io}"
 DOCKER_CONTENT_TRUST="${DOCKER_CONTENT_TRUST:-false}"
 DOCKER_TRUST_PRIVATE="${DOCKER_TRUST_PRIVATE:-"$SCRIPT_DIR/ssh/docker"}"
-DOCKER_VERSION="${DOCKER_VERSION:-20.10.11}"
+DOCKER_VERSION="${DOCKER_VERSION:-20.10.17}"
 # Do not make too high as this will fail the minimum version needed test
 # Also this is not the Mac Docker App version, it is engine version
 DOCKER_INSTALL_EDGE_VERSION="${DOCKER_INSTALL_EDGE_VERSION:-20.10.12}"
@@ -124,7 +124,7 @@ log_verbose "check for docker looking for version $version_needed"
 if ! $FORCE && command -v docker &>/dev/null; then
 	INSTALLED_DOCKER="$(version_extract "$(docker -v)")"
 	if vergte "$INSTALLED_DOCKER" "$version_needed"; then
-		log_exit "docker installed $INSTALLED_DOCKER greater or equal to desired $version_needed"
+		log_warning "docker installed $INSTALLED_DOCKER greater or equal to desired $version_needed"
 	fi
 fi
 
@@ -212,10 +212,8 @@ else
 	elif in_linux ubuntu; then
 		# https://phoenixnap.com/kb/install-docker-on-ubuntu-20-04
 		# https://docs.docker.com/engine/install/ubuntu/
-		log_verbose "trying to install docker for ubuntu"
-		if package_install docker; then
-			log_exit "linux docker installed"
-		else
+		log_verbose "trying to install docker for ubuntu with brew"
+		if ! package_install docker; then
 			log_verbose "docker.io package failed so install pieces"
 			package_install "${PACKAGES[@]}"
 			curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
@@ -255,8 +253,10 @@ else
 		EOF
 	fi
 
+	# does not seem to be supported
 	log_verbose "Install hub-tools for Docker Hub CLI login with hub-tool login"
-	GO111MODULE=on go get github.com/docker/hub-tool
+	#GO111MODULE=on go get github.com/docker/hub-tool
+	go install github.com/docker/hub-tool@latest
 
 	# https://docs.docker.com/security/trust/content_trust/
 	if $DOCKER_CONTENT_TRUST && ! grep "$DOCKER_CONTENT_TRUST" ~/.bashrc; then
