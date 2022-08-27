@@ -110,18 +110,6 @@ fi
 	#EOF
 #fi
 
-if [[ -n ${ASDF[direnv]} ]]; then
-	log_verbose "Found direnv installing config info"
-	for SHELL_VERSION in bash zsh; do
-        log_verbose "direnv setup $SHELL_VERSION with ${ASDF[direnv]}"
-		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
-	done
-	#config_add <<-'EOF'
-	#    eval "$(asdf exec direnv hook bash)"
-	#    direnv() { asdf exec direnv "$@"; }
-	#EOF
-fi
-
 # https://github.com/asdf-vm/asdf-nodejs/issues/253
 log_verbose "must source otherwise reshim will fail"
 source_profile
@@ -146,6 +134,19 @@ for p in "${!ASDF[@]}"; do
 	log_verbose "Set global for $p with ${ASDF[$p]}"
 	asdf global "$p" "${ASDF[$p]}"
 done
+
+
+if [[ -n ${ASDF[direnv]} ]]; then
+	log_verbose "Found direnv installing config info"
+	for SHELL_VERSION in bash zsh; do
+        log_verbose "direnv setup $SHELL_VERSION with ${ASDF[direnv]}"
+		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
+	done
+	#config_add <<-'EOF'
+	#    eval "$(asdf exec direnv hook bash)"
+	#    direnv() { asdf exec direnv "$@"; }
+	#EOF
+fi
 
 # this is no longer needed run the asdf setup instead
 # https://github.com/asdf-community/asdf-direnv
