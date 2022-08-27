@@ -1,33 +1,39 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Install [Homebrew](https://brew.sh)
 ##
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -u && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
-trap 'exit $?' ERR
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
-
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 HOMEBREW_USER="${HOMEBREW_USER:-"$USER"}"
 while getopts "hdvu:" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
-$SCRIPTNAME: Install homebrew
-
-        flags: -d debug, -h help -v verbose
+        $SCRIPTNAME: Install homebrew
+        flags: -h help
+               -d $(! $DEBUGGING || echo "no ")debugging
+               -v $(! $VERBOSE || echo "not ")verbose
                -u homebrew must have a single user (default: $HOMEBREW_USER)
-
 EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	u)
 		HOMEBREW_USER="$OPTARG"
@@ -45,24 +51,6 @@ if command -v brew >/dev/null; then
 	log_exit brew already installed
 fi
 
-# https://www.thoughtco.com/instal-ruby-on-linux-2908370#:~:text=How%20to%20Install%20Ruby%20on%20Linux%201%20Open,exact%2C%20but%20if%20you%20are%20...%20See%20More.
-homebrew_completion() {
-	if ! config_mark; then
-		config_add <<-'EOF'
-			if type brew &>/dev/null; then
-				[ -z "$HOMEBREW_PREFIX" ] || HOMEBREW_PREFIX="$(brew --prefix)"
-				if [ -r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]; then
-					source "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
-				else
-					for COMPLETION in "$HOMEBREW_PREFIX/etc/bash_completion.d}"*; do
-			                    [[ -r "$COMPLETION" ]] && source "$COMPLETION"
-					done
-				fi
-			fi
-		EOF
-	fi
-}
-
 # https://apple.stackexchange.com/questions/175069/how-to-accept-xcode-license
 if in_os linux || in_os wsl-linux; then
 	log_verbose installing linuxbrew
@@ -71,16 +59,17 @@ if in_os linux || in_os wsl-linux; then
 	test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
 	test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 	test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
-	if ! config_mark; then
-		config_add <<-'EOF'
-			    # test for variable in case other apps override homebrew
-				[[ -v HOMEBREW_PREFIX ]] || eval $($HOMEBREW_PREFIX/bin/brew shellenv)
-		EOF
-		homebrew_completion
-	fi
+	#if ! config_mark; then
+	#    config_add <<-'EOF'
+	#            # test for variable in case other apps override homebrew
+	#            [[ -v HOMEBREW_PREFIX ]] || eval $($HOMEBREW_PREFIX/bin/brew shellenv)
+	#    EOF
+	#homebrew_completion
+	#fi
 	log_exit "Linux brew installed"
 fi
 
+log_verbose "Install Mac Homebrew"
 xcode_license_accept
 if ! command -v brew >/dev/null; then
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -97,18 +86,18 @@ if [[ ! -e $SBIN ]]; then
 	$(config_sudo "$SBIN") mkdir -p "$SBIN"
 fi
 log_verbose "adding $SBIN to the profile if needed"
-if ! config_mark; then
-	# this no longer seems to work in Bash 5.0
-	# config_add <<<"export PATH+=:/usr/local/sbin"
-	homebrew_completion
-fi
+#if ! config_mark; then
+# this no longer seems to work in Bash 5.0
+# config_add <<<"export PATH+=:/usr/local/sbin"
+#homebrew_completion
+#fi
 
-if ! config_mark "$(config_profile)"; then
-	config_add "$(config_profile)" <<-'EOF'
-		# add the check because asdf and pipenv override homebrew
-		        if command -v brew >/dev/null && [[ ! $PATH =~ $(brew --prefix) ]]; then eval "$(brew shellenv)"; fi
-	EOF
-fi
+#if ! config_mark "$(config_profile)"; then
+#    config_add "$(config_profile)" <<-'EOF'
+#        # add the check because asdf and pipenv override homebrew
+#                if command -v brew >/dev/null && [[ ! $PATH =~ $(brew --prefix) ]]; then eval "$(brew shellenv)"; fi
+#    EOF
+#fi
 
 # make sure we can write the brew files you can have access problems
 # If another user uses brew
@@ -123,14 +112,15 @@ fi
 # the recommendation is to create a dedicated 'brew' user and use sudo -u brew
 # We take the easier way out and just chown to the current user
 HOMEBREW_DIRS="${HOMEBREW_DIRS:-"
-Cellar
-Homebrew
-Frameworks
-share
-lib
-etc
-sbin
+    Cellar
+    Homebrew
+    Frameworks
+    share
+    lib
+    etc
+    sbin
 "}"
+
 for f in $HOMEBREW_DIRS; do
 	log_verbose "checking $HOMEBREW"
 	file="$(brew --prefix)/$f"

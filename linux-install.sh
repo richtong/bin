@@ -47,7 +47,7 @@ while getopts "hdvfs" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
-	r)
+	s)
 		PASSWORDLESS_SUDO="$($PASSWORDLESS_SUDO && echo false || echo true)"
 		;;
 	f)
@@ -58,7 +58,7 @@ while getopts "hdvfs" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
@@ -69,7 +69,9 @@ fi
 
 if ! config_mark; then
 	config_add <<-'EOF'
-		echo $PATH | grep "$HOME/Applications" || PATH="$HOME/Applications/:$PATH"
+		if uname | grep -q Linux; then
+			echo $PATH | grep "$HOME/Applications" || PATH="$HOME/Applications/:$PATH"
+		fi
 	EOF
 fi
 
