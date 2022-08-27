@@ -133,6 +133,7 @@ log_verbose "installing ${PACKAGES[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
 package_install "${PACKAGES[@]}"
+log_verbose "PATH=$PATH"
 
 # autoimport - add and remove imports
 # argparse complete
