@@ -15,6 +15,7 @@ OPTIND=1
 NOFORGE="${NOFORGE:-false}"
 PYTHON="${PYTHON:-3.9}"
 ANACONDA="${ANACONDA:-miniconda}"
+CONDA_BIN="${CONDA_BIN:-$HOME/miniconda3}"
 URL="${URL:-https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh}"
 VERSION="${VERSION:-2020.11}"
 export FLAGS="${FLAGS:-""}"
@@ -79,11 +80,34 @@ elif ! command -v conda &>/dev/null; then
 	# https://docs.continuum.io/anaconda/install/linux/
 	download_url "$URL"
 	log_verbose "run script"
-	bash "$WS_DIR/cache/$(basename "$URL")"
+	if [[ ! -e $CONDA_BIN ]]; then
+		log_verbose "install $CONDA_BIN"
+		bash "$WS_DIR/cache/$(basename "$URL")"
+	fi
+fi
+
+log_verbose "install conda into .zshrc"
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
+		# >>> conda initialize >>>
+		# !! Contents within this block are managed by 'conda init' !!
+		__conda_setup="$('$HOME/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+		if [ $? -eq 0 ]; then
+			eval "$__conda_setup"
+		else
+			if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+				. "$HOME/miniconda3/etc/profile.d/conda.sh"
+			else
+				export PATH="$HOME/miniconda3/bin:$PATH"
+			fi
+		fi
+		unset __conda_setup
+		# <<< conda initialize <<<
+	EOF
 fi
 
 log_verbose "run .profile to make sure conda setup runs"
-source_profile
+source_profile "$(config_profile_nonexportable)"
 
 if ! $NOFORGE; then
 	conda config --env --add channels conda-forge
@@ -91,9 +115,7 @@ if ! $NOFORGE; then
 fi
 
 # return true in case there are errors in the source
-source_profile
 conda init "$(basename "$SHELL")"
-source_profile
 log_verbose take all the updates
 
 # https://github.com/conda/conda/issues/9589

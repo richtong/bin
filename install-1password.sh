@@ -30,7 +30,7 @@ while getopts "hdvr:e:s:" opt; do
 				   -v $(! $VERBOSE || echo "not ")verbose
 				   -r version number (default: $VERSION)
 				   -e email for login (default: $EMAIL)
-			                   -s signin subdomain add to .1password.com (default: $SIGNIN)
+				   -s signin subdomain add to .1password.com (default: $SIGNIN)
 		EOF
 		exit 0
 		;;

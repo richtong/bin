@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 ## vi: se noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
@@ -14,9 +15,9 @@
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
-VERSION="${VERSION:-7}"
+VERBOSE="${VERBOSE:-false}"
 DEBUGGING="${DEBUGGING:-false}"
-ANACONDA="${ANACONDA:-false}"
+ANACONDA="${ANACONDA:-true}"
 PIPENV="${PIPENV:-true}"
 # If version is set to null then the default python version is used
 PYTHON_VERSION="${PYTHON_VERSION:-}"
@@ -32,31 +33,35 @@ while getopts "hdvaeyp:" opt; do
 		cat <<-EOF
 			Install python components
 			usage: $SCRIPTNAME [flags...]
-
 			  -h help
-			              -d $(! $DEBUGGING || echo "no ")debugging
-			              -v  $(! $VERBOSE || echo "not ")verbose
-			  -a disable anaconda (normally installed)
-			  -e disable pipenv (normally installed)
-			  -y install pyenv to manage python versions (default: $PYENV)
+			  -d $(! $DEBUGGING || echo "no ")debugging
+			  -v $(! $VERBOSE || echo "not ")verbose
+			  -a $(! $ANACONDA || echo "no ")anaconda install
+			  -e $(! $PIPENV || echo "no ")pipenv install
+			  -e $(! $PYENV || echo "no ")pyenv install
 			  -p install python version (default: ${PYTHON_VERSION:-stable})
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	a)
-		ANACONDA=false
+		ANACONDA="$($ANACONDA && echo false || echo true)"
 		;;
 	e)
-		PIPENV=false
+		PIPENV="$($PIPENV && echo false || echo true)"
 		;;
 	y)
-		PYENV=true
+		PYENV="$($PYENV && echo false || echo true)"
 		;;
 	*)
 		echo "no -$opt flag" >&2
@@ -86,13 +91,6 @@ if [[ $PYTHON_VERSION =~ @ ]]; then
 	log_warning "Installing a python variant $PYTHON_VERSION"
 	log_warning "This is keg-only and requires manually linking"
 fi
-
-# Note do not quote, want to process each as separate arguments
-log_verbose "installing ${PACKAGES[*]}"
-# packages are ok globbed
-# shellcheck disable=SC2086
-package_install "${PACKAGES[@]}"
-log_verbose "PATH=$PATH"
 
 # we need it to be python and pip to work and not python3 and pip3 only
 # https://docs.brew.sh/Homebrew-and-Python
@@ -127,8 +125,15 @@ fi
 
 if $ANACONDA; then
 	log_verbose "use anaconda"
-	"$SCRIPT_DIR/install-anaconda.sh"
+	"$SCRIPT_DIR/install-conda.sh"
 fi
+
+
+# Note do not quote, want to process each as separate arguments
+log_verbose "installing ${PACKAGES[*]}"
+# packages are ok globbed
+# shellcheck disable=SC2086
+package_install "${PACKAGES[@]}"
 
 # autoimport - add and remove imports
 # argparse complete

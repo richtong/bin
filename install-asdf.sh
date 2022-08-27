@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Install asdf and dotenv for language and tool management
 ## Like pipenv for the system
@@ -27,15 +28,14 @@ while getopts "hdvn:e:p:j:" opt; do
 	h)
 		cat <<-EOF
 			Installs asdf multiple runtime version management
-			    usage: $SCRIPTNAME [ flags ]
+			usage: $SCRIPTNAME [ flags ]
 				flags: -h help
-				   -d $($DEBUGGING || echo "no ")debugging
-				   -v $($VERBOSE || echo "not ")verbose
-			                   -p Python version (default: $PYTHON_VERSION)
-			                   -e Direnv version (default: $DIRENV_VERSION)
-			                   -n Node.js version (default: $NODE_VERSION)
-			                   -j Java version (default: $JAVA_VERSION)
-
+				-d $($DEBUGGING || echo "no ")debugging
+				-v $($VERBOSE || echo "not ")verbose
+				-p Python version (default: $PYTHON_VERSION)
+				-e Direnv version (default: $DIRENV_VERSION)
+				-n Node.js version (default: $NODE_VERSION)
+				-j Java version (default: $JAVA_VERSION)
 		EOF
 		exit 0
 		;;
@@ -90,10 +90,10 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 	log_verbose "installing into profile"
 	config_add "$(config_profile_nonexportable)" <<-'EOF'
 		# shellcheck disable=SC1091
-		        if command -v asdf >/dev/null; then
-		                    # shellcheck disable=SC1090
-		                    source "$(brew --prefix asdf)/libexec/asdf.sh"
-		                fi
+		if command -v asdf >/dev/null; then
+		    # shellcheck disable=SC1090
+		    source "$(brew --prefix asdf)/libexec/asdf.sh"
+		fi
 	EOF
 	# https://linuxhint.com/associative_array_bash/
 fi

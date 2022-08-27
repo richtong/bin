@@ -243,7 +243,6 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 		shopt -s autocd cdspell cdable_vars checkhash checkjobs \
 				checkwinsize cmdhist direxpand dirspell dotglob \
 				extglob globstar nullglob
-		export BASHOPTS
 	EOF
 fi
 
