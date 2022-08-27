@@ -259,6 +259,8 @@ fi
 log_verbose "install brew for linux and mac as common installer"
 "$SCRIPT_DIR/install-brew.sh"
 
+"$SCRIPT_DIR/install-asdf.sh"
+
 log_verbose "install python and go"
 "$SCRIPT_DIR/install-python.sh"
 "$SCRIPT_DIR/install-go.sh"

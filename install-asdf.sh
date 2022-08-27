@@ -73,14 +73,6 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
-if ! in_os mac; then
-	# obsoleted by official 1passworld cli
-	# https://app-updates.agilebits.com/product_history/CLI
-	## https://www.npmjs.com/package/onepass-cli for npm package
-	# git_install_or_update 1pass georgebrock
-	log_exit "Mac only"
-fi
-
 log_verbose "Install asdf core"
 package_install asdf
 package_install gpg gawk
@@ -108,20 +100,21 @@ fi
 
 # not clear what this is so as login shell should go into .zprofile
 # for efficiency but leave in .zshrc as non-interactive
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	log_verbose "installing into .zshrc nonexportable"
+#if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	#log_verbose "installing into .zshrc nonexportable"
 	# no longer need manual installation
-	asdf direnv setup --shell zsh --version "$((ASDF[direnv]))"
+	#asdf direnv setup --shell zsh --version "$((ASDF[direnv]))"
 	#config_add "$(config_profile_zsh)" <<-'EOF'
 	#    # shellcheck disable=SC1090
 	#    source "$(brew --prefix asdf)/libexec/asdf.sh"
 	#EOF
-fi
+#fi
 
 if [[ -n ${ASDF[direnv]} ]]; then
 	log_verbose "Found direnv installing config info"
 	for SHELL_VERSION in bash zsh; do
-		asdf direnv setup --shell "$SHELL_VERSION" --version "$((ASDF[direnv]))"
+        log_verbose "direnv setup $SHELL_VERSION with ${ASDF[direnv]}"
+		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
 	done
 	#config_add <<-'EOF'
 	#    eval "$(asdf exec direnv hook bash)"
