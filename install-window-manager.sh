@@ -19,7 +19,7 @@ while getopts "hdv" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs Tiling Window Manager 
+			Installs Tiling Window Manager
 			    usage: $SCRIPTNAME [ flags ]
 				flags: -h help"
 				   -d $(! $DEBUGGING || echo "no ")debugging
@@ -50,10 +50,10 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
 if in_os mac; then
-    package_install rectangle
-    log_verbose "If using dotfiles, then symlink ~/Library/Preferences/com.knollsoft.Retangle.plist"
+	package_install rectangle
+	log_verbose "If using dotfiles, then symlink ~/Library/Preferences/com.knollsoft.Retangle.plist"
 elif in_os linux; then
-    # https://github.com/Airblader/i3/wiki/installation
-    apt_repository_install ppa:regolith-linux/release
-    package_install i3-gaps
+	# https://github.com/Airblader/i3/wiki/installation
+	apt_repository_install ppa:regolith-linux/release
+	package_install i3-gaps
 fi

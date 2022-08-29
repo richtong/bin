@@ -97,8 +97,8 @@ fi
 if ! config_mark; then
 	# Use the brew location for python
 	config_add <<-EOF
-			# shellcheck disable=SC2155
-			echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
+		# shellcheck disable=SC2155
+		echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
 	EOF
 	log_warning "source $(config_profile) to get the correct python"
 fi
@@ -127,7 +127,6 @@ if $ANACONDA; then
 	log_verbose "use anaconda"
 	"$SCRIPT_DIR/install-conda.sh"
 fi
-
 
 # Note do not quote, want to process each as separate arguments
 log_verbose "installing ${PACKAGES[*]}"

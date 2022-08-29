@@ -73,13 +73,13 @@ for path in "${PATHS[@]}"; do
 		# subdirectory but does not seem to work with chmod in .bash_profile not
 		# sure why
 		rel_path="$(realpath --relative-base-"$HOME")"
-		config_add <<-'EOF'
-			chmod og-w "$HOME/$rel_path/.." "$HOME/$rel_path"
-			find -L "$HOME/$rel_path" -type d -exec chmod og-rwx {} \;
+		config_add <<-EOF
+			chmod og-w "\$HOME/$rel_path/.." "\$HOME/$rel_path"
+			find -L "\$HOME/$rel_path" -type d -exec chmod og-rwx {} \;
 			# closing up all it $rel_path children recursively note that -R does not follow symlinks properly so we run it ourselves
-			find -L "$HOME/$rel_path" -type f -exec chmod 600 {} \;
+			find -L "\$HOME/$rel_path" -type f -exec chmod 600 {} \;
 			# tighten up all keys to just readonly
-			find -L "$HOME/$rel_path" -not -type l \( -name "*.id_rsa" -o -name "*.id_ed25519" \) -exec chmod 400 {} \;
+			find -L "\$HOME/$rel_path" -not -type l \( -name "*.id_rsa" -o -name "*.id_ed25519" \) -exec chmod 400 {} \;
 		EOF
 	fi
 done

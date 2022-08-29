@@ -101,13 +101,13 @@ fi
 # not clear what this is so as login shell should go into .zprofile
 # for efficiency but leave in .zshrc as non-interactive
 #if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	#log_verbose "installing into .zshrc nonexportable"
-	# no longer need manual installation
-	#asdf direnv setup --shell zsh --version "$((ASDF[direnv]))"
-	#config_add "$(config_profile_zsh)" <<-'EOF'
-	#    # shellcheck disable=SC1090
-	#    source "$(brew --prefix asdf)/libexec/asdf.sh"
-	#EOF
+#log_verbose "installing into .zshrc nonexportable"
+# no longer need manual installation
+#asdf direnv setup --shell zsh --version "$((ASDF[direnv]))"
+#config_add "$(config_profile_zsh)" <<-'EOF'
+#    # shellcheck disable=SC1090
+#    source "$(brew --prefix asdf)/libexec/asdf.sh"
+#EOF
 #fi
 
 # https://github.com/asdf-vm/asdf-nodejs/issues/253
@@ -135,11 +135,10 @@ for p in "${!ASDF[@]}"; do
 	asdf global "$p" "${ASDF[$p]}"
 done
 
-
 if [[ -n ${ASDF[direnv]} ]]; then
 	log_verbose "Found direnv installing config info"
 	for SHELL_VERSION in bash zsh; do
-        log_verbose "direnv setup $SHELL_VERSION with ${ASDF[direnv]}"
+		log_verbose "direnv setup $SHELL_VERSION with ${ASDF[direnv]}"
 		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
 	done
 	#config_add <<-'EOF'

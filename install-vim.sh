@@ -68,6 +68,7 @@ if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose will override vi as well as vim
 	package_flags+=("--with-override-system-vi")
 fi
+# shellcheck disable=SC2068
 package_install ${package_flags[@]} vim
 
 # http://eslint.org/docs/user-guide/command-line-interface.html
