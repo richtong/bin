@@ -68,7 +68,7 @@ while getopts "hdvn:e:p:j:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
@@ -85,30 +85,68 @@ declare -A ASDF+=(
 	[java]=$JAVA_VERSION
 )
 
+# replaced by asdf-direnv setup
 # http://asdf-vm.com/guide/getting-started.html#_3-install-asdf
-if ! config_mark "$(config_profile_nonexportable)"; then
-	log_verbose "installing into profile"
-	config_add "$(config_profile_nonexportable)" <<-'EOF'
-		# shellcheck disable=SC1091
+#if ! config_mark "$(config_profile_nonexportable_bash)"; then
+#    config_add "$(config_profile_nonexportable_bash)" <<-'EOF'
+#        if command -v asdf >/dev/null && command -v direnv && [[ $- =~ i ]]; then
+#            # https://direnv.net/docs/hook.html must be last
+#            # shellcheck disable=SC1090,SC1091
+#            source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/bashrc"
+#        fi
+#    EOF
+#fi
+#if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+#    config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
+#        if command -v asdf >/dev/null && command -v direnv && [[ $- =~ i ]]; then
+#            # https://direnv.net/docs/hook.html must be last
+#            # shellcheck disable=SC1090,SC1091
+#            source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/bashrc"
+#        fi
+#    EOF
+#fi
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
 		if command -v asdf >/dev/null; then
-		    # shellcheck disable=SC1090
+		    # shellcheck disable=SC1090,SC1091
+		    source "$(brew --prefix asdf)/libexec/asdf.sh"
+		    source "$HOME/.asdf/plugins/java/set-java-home.zsh"
+		fi
+	EOF
+fi
+# instead of running setup, use this and this will insert it directly
+# do not use this setup instead just add directly because if asdsdff direnv
+# is not installed then this direnv setup will generate an error
+if [[ -n ${ASDF[direnv]} ]]; then
+	log_verbose "Found direnv installing config info"
+	for SHELL_VERSION in bash zsh; do
+		log_verbose "direnv setup $SHELL_VERSION with ${ASDF[direnv]}"
+		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
+	done
+	# this is replaced by the direnv setup
+	#config_add <<-'EOF'
+	#    eval "$(asdf exec direnv hook bash)"
+	#    direnv() { asdf exec direnv "$@"; }
+	#EOF
+fi
+
+# .profile is only called from bash, also set .zshrc
+# https://github.com/halcyon/asdf-java#java_home
+if ! config_mark; then
+	config_add <<-'EOF'
+		source "$HOME/.asdf/plugins/java/set-java-home.bash"
+	EOF
+fi
+
+# Added by install-asdf.sh on Thu Sep 30 23:10:17 CEST 2021
+if ! config_mark "$(config_profile_bash)"; then
+	config_add "$(config_profile_bash)" <<-'EOF'
+		if command -v asdf >/dev/null; then
+			# shellcheck disable=SC1090,SC1091
 		    source "$(brew --prefix asdf)/libexec/asdf.sh"
 		fi
 	EOF
-	# https://linuxhint.com/associative_array_bash/
 fi
-
-# not clear what this is so as login shell should go into .zprofile
-# for efficiency but leave in .zshrc as non-interactive
-#if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-#log_verbose "installing into .zshrc nonexportable"
-# no longer need manual installation
-#asdf direnv setup --shell zsh --version "$((ASDF[direnv]))"
-#config_add "$(config_profile_zsh)" <<-'EOF'
-#    # shellcheck disable=SC1090
-#    source "$(brew --prefix asdf)/libexec/asdf.sh"
-#EOF
-#fi
 
 # https://github.com/asdf-vm/asdf-nodejs/issues/253
 log_verbose "must source otherwise reshim will fail"
@@ -135,18 +173,6 @@ for p in "${!ASDF[@]}"; do
 	asdf global "$p" "${ASDF[$p]}"
 done
 
-if [[ -n ${ASDF[direnv]} ]]; then
-	log_verbose "Found direnv installing config info"
-	for SHELL_VERSION in bash zsh; do
-		log_verbose "direnv setup $SHELL_VERSION with ${ASDF[direnv]}"
-		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
-	done
-	#config_add <<-'EOF'
-	#    eval "$(asdf exec direnv hook bash)"
-	#    direnv() { asdf exec direnv "$@"; }
-	#EOF
-fi
-
 # this is no longer needed run the asdf setup instead
 # https://github.com/asdf-community/asdf-direnv
 #DIRENVRC="${DIRENVRC:-"$HOME/.config/direnv/direnvrc"}"
@@ -168,22 +194,9 @@ if ! config_mark "$ENVRC"; then
 	EOF
 fi
 
-# https://github.com/halcyon/asdf-java#java_home
-if ! config_mark; then
-	config_add <<-'EOF'
-		source "$HOME/.asdf/plugins/java/set-java-home.bash"
-	EOF
-fi
-
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
-		        source "$HOME/.asdf/plugins/java/set-java-home.zsh"
-	EOF
-fi
-
 if ! config_mark "$HOME/.asdfrc"; then
 	config_add "$HOME/.asdfrc" <<-'EOF'
-		        java_macos_integration_enable = yes
+		java_macos_integration_enable = yes
 	EOF
 fi
 
