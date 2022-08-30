@@ -51,9 +51,19 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
 if in_os mac; then
 	package_install rectangle
-	log_verbose "If using dotfiles, then symlink ~/Library/Preferences/com.knollsoft.Retangle.plist"
-elif in_os linux; then
+	log_warning "If using dotfiles, then symlink ~/Library/Preferences/com.knollsoft.Rectangle.plist"
+elif in_os linux && ! in_os docker; then
+	# if the two listed are not good enough try i3
 	# https://github.com/Airblader/i3/wiki/installation
-	apt_repository_install ppa:regolith-linux/release
-	package_install i3-gaps
+	#apt_repository_install ppa:regolith-linux/release
+	#package_install i3-gaps
+	log_verbose "checking and adding tiling window managers"
+	if [[ $(desktop_environment) =~ (unity|gnome) ]]; then
+		log_verbose "install Compiz Grid allows keyboard shortcuts to move windows around"
+		PACKAGE+=(compizconfig-settings-manager)
+	elif [[ $(desktop_environment) =~ xfce ]]; then
+		log_verbose if in debian assume running xfce so need quicktile
+		"$BIN_DIR/install-quicktile.sh"
+	fi
+	log_verbose "finish window manager install"
 fi
