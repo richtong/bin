@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## Installs the latest ruby
@@ -8,22 +9,35 @@
 ## @author Rich Tong
 ## @returns 0 on success
 #
-set -e && SCRIPTNAME="$(basename "$0")"
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 
+VERSION=${VERSION:-2.1}
 OPTIND=1
 while getopts "hdvr:" opt; do
 	case "$opt" in
 	h)
-		echo "$SCRIPTNAME: install ruby"
-		echo "flags: -d debug, -h help, -r ruby version"
+		cat <<-EOF
+			            $SCRIPTNAME: install ruby
+			            flags: -d debug, -h help, -r ruby version
+			               -d $(! $DEBUGGING || echo "no ")debugging
+			               -v $(! $VERBOSE || echo "not ")verbose
+			               -r ruby version (default: $VERSION)
+		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	r)
 		VERSION="$OPTARG"
@@ -38,26 +52,24 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 log_verbose "about to source"
 source_lib lib-version-compare.sh lib-util.sh lib-config.sh lib-install.sh
 
-VERSION=${VERSION:-2.1}
-
 set -u
 
 if in_os mac; then
-	RUBY_PATH="${RUBY_PATH:-"/usr/local/opt/ruby/bin/"}"
-	RUBY_LIB="${RUBY_LIB:-"/usr/local/lib/ruby/gems"}"
 	log_verbose "installing ruby"
 	brew_install ruby
-	log_verbose "raw version is $("$RUBY_PATH/ruby" -v)"
-	version="$("$RUBY_PATH/ruby" -v | cut -d ' ' -f 2)"
+	version="$("$(brew prefix ruby)/ruby" -v | cut -d ' ' -f 2)"
 	log_verbose "ruby version $version"
 	version="$(echo "$version" | util_semver)"
 	log_verbose "ruby version after util_semvar $version"
 	if ! config_mark; then
 		log_verbose "installing gem bin $version and ruby"
+		# this must be in /bin/sh format
 		# shellcheck disable=SC2016
 		config_add <<-EOF
-			[[ \$PATH =~ $RUBY_PATH ]] || PATH="$RUBY_PATH:\$PATH"
-			[[ \$PATH =~ $RUBY_LIB/$version/bin ]] || PATH+=":$RUBY_LIB/$version/bin"
+			RUBY_LIB="${RUBY_LIB:-"$(brew prefix ruby)/lib/ruby/gems"}"
+			echo \$PATH | grep "\$(brew prefix ruby"/bin || PATH="\$(brew prefix ruby)/bin:\$PATH"
+			echo  \$PATH | grep "\$(brew prefix ruby)/lib/ruby/gems/$version/bin" ]] || \
+				PATH="\$(brew prefix ruby)/lib/ruby/gems/$version/bin"
 		EOF
 	fi
 	exit
@@ -87,5 +99,4 @@ if ! command -v ruby || verlt "$(ruby -v | cut -d' ' -f 2)" 1.9.3; then
 	install "ruby2.1" "ppa:brightbox/ruby-ng"
 	sudo apt-get install -y ruby-switch "ruby$VERSION-dev"
 	sudo ruby-switch --set ruby "$VERSION"
-
 fi
