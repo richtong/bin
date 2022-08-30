@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Install Terraform and Packer
 ##
@@ -10,10 +11,10 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdv" opt; do
@@ -22,17 +23,22 @@ while getopts "hdv" opt; do
 		cat <<-EOF
 			Installs Terraform
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
+			                -h help
+			               -d $(! $DEBUGGING || echo "no ")debugging
+			               -v $(! $VERBOSE || echo "not ")verbose
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -40,18 +46,20 @@ while getopts "hdv" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1090,SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-util.sh lib-install.sh lib-config.sh
 
-if ! in_os mac; then
-	log_exit "only tested on the mac"
-fi
-
 package_install terraform packer
 
-if ! terraform -install-autocomplete; then
-	log_verbose autocomplete already installed
+#if ! terraform -install-autocomplete; then
+#    log_verbose autocomplete already installed
+#fi
+# note that completions are exported to subshells so they can all be in profile
+if ! config_mark; then
+	config_add <<-'EOF'
+		        command -v terraform >/dev/null && complete -C "$(brew --prefix)/terraform" terraform
+	EOF
 fi
 
-log_verbose "source ~/.bashrc to install autocomplete"
+log_verbost "source ~/.bashrc to install autocomplete"

@@ -14,17 +14,18 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
+VERSION=${VERSION:-3.0.0}
+
 VERSION=${VERSION:-2.1}
 OPTIND=1
 while getopts "hdvr:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			            $SCRIPTNAME: install ruby
-			            flags: -d debug, -h help, -r ruby version
-			               -d $(! $DEBUGGING || echo "no ")debugging
-			               -v $(! $VERBOSE || echo "not ")verbose
-			               -r ruby version (default: $VERSION)
+			$SCRIPTNAME: install ruby
+			flags: -r ruby version (default: $VERSION)
+			           -d $(! $DEBUGGING || echo "no ")debugging
+			           -v $(! $VERBOSE || echo "not ")verbose
 		EOF
 		exit 0
 		;;
@@ -47,32 +48,29 @@ while getopts "hdvr:" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1090,SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 log_verbose "about to source"
 source_lib lib-version-compare.sh lib-util.sh lib-config.sh lib-install.sh
 
 set -u
 
-if in_os mac; then
-	log_verbose "installing ruby"
-	brew_install ruby
-	version="$("$(brew prefix ruby)/ruby" -v | cut -d ' ' -f 2)"
+RUBY_PATH="${RUBY_PATH:-"$(brew --prefix)/opt/ruby/bin/"}"
+log_verbose "installing ruby"
+if brew_install ruby; then
+	log_verbose "raw version is $("$RUBY_PATH/ruby" -v)"
+	version="$("$RUBY_PATH/ruby" -v | cut -d ' ' -f 2)"
 	log_verbose "ruby version $version"
 	version="$(echo "$version" | util_semver)"
 	log_verbose "ruby version after util_semvar $version"
 	if ! config_mark; then
 		log_verbose "installing gem bin $version and ruby"
-		# this must be in /bin/sh format
-		# shellcheck disable=SC2016
 		config_add <<-EOF
-			RUBY_LIB="${RUBY_LIB:-"$(brew prefix ruby)/lib/ruby/gems"}"
-			echo \$PATH | grep "\$(brew prefix ruby"/bin || PATH="\$(brew prefix ruby)/bin:\$PATH"
-			echo  \$PATH | grep "\$(brew prefix ruby)/lib/ruby/gems/$version/bin" ]] || \
-				PATH="\$(brew prefix ruby)/lib/ruby/gems/$version/bin"
+			command -v brew >/dev/null && echo \$PATH | grep -q $RUBY_PATH || PATH="\$(brew --prefix):/opt/ruby/bin:\$PATH"
+			command -v brew >/dev/null && echo \$PATH | gpre -q "\$(brew --prefix)/lib/ruby/gems" || PATH+="\$(brew --prefix)lib/ruby/gem/$version/bin"
 		EOF
 	fi
-	exit
+	log_exit "brew installed ruby"
 fi
 
 # https://www.thoughtco.com/instal-ruby-on-linux-2908370#:~:text=How%20to%20Install%20Ruby%20on%20Linux%201%20Open,exact%2C%20but%20if%20you%20are%20...%20See%20More.

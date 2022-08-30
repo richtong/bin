@@ -64,7 +64,7 @@ while getopts "hdvfa:r:u:b:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1090,SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-util.sh lib-install.sh lib-config.sh
@@ -72,6 +72,10 @@ source_lib lib-util.sh lib-install.sh lib-config.sh
 if in_wsl; then
 	log_verbose "Downloading Reality Capture"
 	download_url_open "$RC_URL"
+fi
+
+if ! in_os mac; then
+	log_exit "Mac Only"
 fi
 
 log_verbose "Downloading $COLMAP_NAME"
@@ -85,7 +89,7 @@ mv "$WS_DIR/cache/$COLMAP_NAME.app" "$(dirname "$COLMAP_DIR")"
 log_verbose "Making CLI available"
 if ! config_mark; then
 	config_add <<-EOF
-		[[ \$PATH =~ $COLMAP_BIN ]] || PATH+=":$COLMAP_BIN"
+		echo "\$PATH" | grep -q "$COLMAP_BIN" ]] || PATH="\$PATH:$COLMAP_BIN"
 	EOF
 fi
 log_verbose "Download sample images from https://colmap.github.io/datasets.html#datasets"
