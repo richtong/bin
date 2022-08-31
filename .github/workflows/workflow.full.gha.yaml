@@ -112,6 +112,8 @@ jobs:
         uses: artemnovichkov/action-homebrew@0.1.0
       - name: Install hadolint
         run: brew install hadolint
+      - name: Install shellcheck
+        run: shellcheck --version && brew install shellcheck && shellcheck --version
 
       # https://github.com/pre-commit/action
       # if you are using public repo then you can use pre-commit.ci
