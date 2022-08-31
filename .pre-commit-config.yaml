@@ -67,6 +67,9 @@ repos:
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 3.0.0
     hooks:
+      # dependent on local shellcheck install
+      - id: shellcheck
+        args: [-x]
       # Generating a ruby error with run with all-files
       # this is using the ruby mdl utility so switching to the node version
       # because it has per line disabling of checks
@@ -77,21 +80,20 @@ repos:
       # https://github.com/jumanjihouse/pre-commit-hooks/issues/82
       # additional dependency bug in pre-commit v2.10
       # should be fixed now when doing a pre-commit all
-      - id: shellcheck
       # additional_dependencies: []
+
+  # this hook requires docker to get shellcheck
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.8.0
+    hooks:
+      - id: shellcheck
+        args: [-x]
 
   # this is bettert han the jumanji version as it uses go to build
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.5.1-1
     hooks:
       - id: shfmt
-
-  # Use shellcheck instead
-  # - repo: https://github.com/detailyang/pre-commit-shell
-  #  rev: 1.0.5
-  #  hooks:
-  #    - id: shell-lint
-  #      args: [--format=json]
 
   # https://github.com/igorshubovych/markdownlint-cli
   # node version of markdownlint with better disabling of checks by line

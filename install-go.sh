@@ -53,7 +53,7 @@ while getopts "hdvg:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck disable=SC1091
+# shellcheck disable=SC1091,SC1090
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-config.sh lib-util.sh
 

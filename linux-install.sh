@@ -58,7 +58,7 @@ while getopts "hdvfs" opt; do
 		;;
 	esac
 done
-# shellcheck disable=SC1091
+# shellcheck disable=SC1091,SC1090
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))

@@ -69,7 +69,6 @@ while getopts "hdvn:e:p:j:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh

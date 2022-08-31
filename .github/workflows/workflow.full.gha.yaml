@@ -30,8 +30,14 @@ jobs:
       - name: Checkout action
         uses: actions/checkout@v3
         with:
+
           lfs: true
-          # submodules should be tested one at a time
+          # The default GITHUB_TOKEN token does note work for submodules
+          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+          # https://github.com/actions/checkout/issues/116
+          # but this requires a personal access token that you must create and
+          # store in GitHub secrets
+          # token: '{{ secrets.GITHUB_PAT }}'
           # submodules: recursive
       # install latest python version
       - name: Setup python
@@ -102,10 +108,10 @@ jobs:
         run: npm install -g markdownlint-cli
       # https://github.com/marketplace/actions/github-action-for-homebrew
       # brew not found in act so used dockerized version in pre-commit
-      # - name: Install homebrew
-      #   uses: artemnovichkov/action-homebrew@0.1.0
-      # - name: Install hadolint
-      #  run: brew install hadolint
+      - name: Install homebrew
+        uses: artemnovichkov/action-homebrew@0.1.0
+      - name: Install hadolint
+        run: brew install hadolint
 
       # https://github.com/pre-commit/action
       # if you are using public repo then you can use pre-commit.ci
