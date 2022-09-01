@@ -49,6 +49,7 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 "$SCRIPT_DIR/install-node.sh"
 log_verbose install linters
+# note that markdownlint here is API only the cli is separately installed
 NODE_PACKAGES+=(
 	eslint
 	babel-eslint
@@ -59,7 +60,6 @@ NODE_PACKAGES+=(
 	jslint
 	jsonlint
 	js-yaml
-	markdownlint
 	htmlhint
 	csslint
 )
@@ -93,13 +93,14 @@ PACKAGES+=(
 	shellcheck
 	shfmt
 	yamllint
-	markdownlint-cli
 	hadolint
 	actionlint
 	checkmake
 )
 log_verbose "install ${PACKAGES[*]}"
 package_install "${PACKAGES[@]}"
+
+"$SCRIPT_DIR/install-markdown.sh"
 
 # Not compatible with PostCSS use stylelint below although this also seems to
 # have issues and not report bugs to vi.

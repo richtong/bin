@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## Markdown utilities
 ## https://github.com/thlorenz/doctoc
@@ -10,10 +11,10 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdv" opt; do
@@ -22,18 +23,23 @@ while getopts "hdv" opt; do
 		cat <<-EOF
 			Installs Markdown utilities
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
-			           -r version number (default: $VERSION)
+			                flags:
+				   -h help
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "not flag -$opt"
@@ -46,21 +52,25 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh
 
-NPM=" doctoc "
+log_verbose "installing doctoc and the api for markdownlint"
+NPM+=(doctoc markdownlint-cli2)
 
 # We want to allow splitting by white space for packages
 #shellcheck disable=SC2086
-npm_install -g $NPM
+log_verbose "Installing markdownlint-cli2 which has a different interface for VSCode"
+npm_install -g "${NPM[@]}"
 
 # https://github.com/igorshubovych/markdownlint-cli
 log_verbose "Installing markdownlint-cli the nodejs version as markdownlint"
-log_verbose "Installing markdownlint-cli2 which has a different interface for VSCode"
 log_verbose "Use with repo: pointed to https://github.com/igorshubovych/markdownlint-cli"
-package_install markdownlint-cli markdownlint-cli2
+log_verbose "Install markdown which is basic markdown processor"
+PACKAGE+=(markdown markdownlint-cli)
+
+package_install "${PACKAGE[@]}"
 
 # https://dev.to/jonasbn/blog-post-markdownlint-24ig
-log_verbose "Installing markdownlint the ruby version as mdl"
+log_verbose "Installing markdownlint the ruby version as mdl for compatibility"
 # https://github.com/markdownlint/markdownlint/blob/master/.pre-commit-hooks.yaml
 log_verbose "compatible with pre-commit with entrypoint mdl"
-package_install ruby
+"$SCRIPT_DIR/install-ruby.sh"
 gem_install mdl

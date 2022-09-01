@@ -93,8 +93,8 @@ log_verbose "install-lint should happen by install.sh"
 #log_verbose make sure node is installed for the linters
 #"$SCRIPT_DIR/install-lint.sh"
 
-# needed for vim-markdown
-package_install markdown
+# the markdown package is needed for vim-markdown
+"$SCRIPT_DIR/install-markdown.sh"
 
 # installed by outer install.sh
 #"$SCRIPT_DIR/install-solarized.sh"
