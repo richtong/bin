@@ -59,10 +59,12 @@ source_lib lib-install.sh lib-util.sh lib-config.sh
 
 brew_install neovim
 
-log_verbose "get neovim python packages in system python"
-log_warning "All pipenv installation need this in the python world"
-# pynvim for deoplete
-pip_install neovim pynvim
+log_warning "If you are using asdf or conda or pipenv then pip install neovim
+all environments"
+log_warning "if you get python3 not found error in neovim the pip install
+neovim"
+# pynvim for deoplete is a dependency of neovim so just need one installations
+pip_install neovim
 
 log_verbose "install IDE tools done by install.sh"
 #"$SCRIPT_DIR/install-lint.sh"
