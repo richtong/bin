@@ -57,3 +57,4 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
 cask_install android-studio
+log_warning "To complete installation, start Android Studio and download the SDK"
