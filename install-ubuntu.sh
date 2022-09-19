@@ -53,3 +53,7 @@ if ! in_os mac; then
 fi
 
 package_install balenaetcher
+
+log_warning "For 20.04 enter https://releases.ubuntu.com/20.04/ubuntu-20.04.5-desktop-amd64.iso"
+log_warning "For 22.04 enter https://www.releases.ubuntu.com/22.04/ubuntu-22.04.1-desktop-amd64.iso"
+log_warning "You will need a 16GB USB drive and run Balena Etcher"

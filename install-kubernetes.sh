@@ -18,7 +18,7 @@ K3AI="${K3AI:-false}"
 K3S="${K3S:-false}"
 KIND="${KIND:-false}"
 KUBEFLOW="${KUBEFLOW:-false}"
-MICROK8S="${MICROK8S:-false}"
+MICROK8S="${MICROK8S:-true}"
 MINIKUBE="${MINIKUBE:-false}"
 MULTIPASS="${MULTIPASS:-false}"
 
@@ -305,7 +305,7 @@ if $MICROK8S; then
 		fi
 
 	elif in_os linux; then
-		log_verbose "Ensable dashboard on Linux"
+		log_verbose "Enable dashboard on Linux"
 		microk8s enable dashboard
 		microk8s kubectl create token default
 		microk8s kubectl port-forard -n kube-system service/kubernetes-dashboard 10443:433
