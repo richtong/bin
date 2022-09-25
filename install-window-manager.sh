@@ -2,7 +2,8 @@
 ##
 ## install Tiling window manager
 ## rectange for Mac
-## i3-gaps  for Linux
+## compiz for Ubuntu Unity for older versions of Ubuntu before 18.04
+## quicktile for Debian
 ##
 ##@author Rich Tong
 ##@returns 0 on success
@@ -58,9 +59,14 @@ elif in_os linux && ! in_os docker; then
 	#apt_repository_install ppa:regolith-linux/release
 	#package_install i3-gaps
 	log_verbose "checking and adding tiling window managers"
-	if [[ $(desktop_environment) =~ (unity|gnome) ]]; then
+	if [[ $(desktop_environment) =~ gnome ]]; then
+		# https://addons.mozilla.org/en-US/firefox/addon/gnome-shell-integration/
+		log_warning "Must install go to extensions.gnome.org and load gtile"
+		# https://github.com/gTile/gTile
+		package_install chrome-gnome-shell
+	elif [[ $(desktop_environment) =~ unity ]]; then
 		log_verbose "install Compiz Grid allows keyboard shortcuts to move windows around"
-		PACKAGE+=(compizconfig-settings-manager)
+		package_install compizconfig-settings-manager
 	elif [[ $(desktop_environment) =~ xfce ]]; then
 		log_verbose if in debian assume running xfce so need quicktile
 		"$BIN_DIR/install-quicktile.sh"

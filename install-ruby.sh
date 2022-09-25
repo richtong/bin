@@ -67,7 +67,7 @@ if brew_install ruby; then
 		log_verbose "installing gem bin $version and ruby"
 		config_add <<-EOF
 			command -v brew >/dev/null && echo \$PATH | grep -q $RUBY_PATH || PATH="\$(brew --prefix):/opt/ruby/bin:\$PATH"
-			command -v brew >/dev/null && echo \$PATH | gpre -q "\$(brew --prefix)/lib/ruby/gems" || PATH+="\$(brew --prefix)lib/ruby/gem/$version/bin"
+			command -v brew >/dev/null && echo \$PATH | grep -q "\$(brew --prefix)/lib/ruby/gems" || PATH+="\$(brew --prefix)lib/ruby/gem/$version/bin"
 		EOF
 	fi
 	log_exit "brew installed ruby"
