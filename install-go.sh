@@ -57,7 +57,22 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-config.sh lib-util.sh
 
-log_verbose git install on MacOS
+PACKAGE+=(
+	go
+)
+
+if in_os mac; then
+	OPTION+=(
+		--cross-compile-common
+	)
+fi
+	
+log_verbose "go installation"
+# shellcheck disable=SC2048
+if package_install ${OPTION[*]} "${PACKAGE[@]}"; then
+	log_exit "package installed"
+fi
+
 mkdir -p "$GOPATH"
 if ! config_mark; then
 	log_verbose "no config adding"
@@ -67,11 +82,6 @@ if ! config_mark; then
 		export GOPATH="$GOPATH"
 		export PATH="\$PATH:\$(go env GOPATH)/bin"
 	EOF
-fi
-log_exit 0 "make sure to source .bash_profile"
-
-if package_install --cross-compile-common go; then
-	log_exit "package installed"
 fi
 
 # https://github.com/golang/go/wiki/Ubuntu
@@ -88,3 +98,5 @@ fi
 #apt_repository_install ppa:gophers/go
 #sudo apt-get update
 #sudo apt-get install "golang-$VERSION-go"
+
+log_exit 0 "make sure to source .profile"

@@ -62,4 +62,4 @@ if ! config_mark; then
 	EOF
 fi
 
-log_verbost "source ~/.bashrc to install autocomplete"
+log_verbose "source ~/.bashrc to install autocomplete"
