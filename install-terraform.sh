@@ -58,7 +58,7 @@ package_install terraform packer
 # note that completions are exported to subshells so they can all be in profile
 if ! config_mark; then
 	config_add <<-'EOF'
-		        command -v terraform >/dev/null && complete -C "$(brew --prefix)/terraform" terraform
+		command -v terraform >/dev/null && complete -C "$(brew --prefix)/terraform" terraform
 	EOF
 fi
 

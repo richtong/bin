@@ -70,7 +70,7 @@ fi
 if ! config_mark; then
 	config_add <<-'EOF'
 		if uname | grep -q Linux; then
-			echo $PATH | grep "$HOME/Applications" || PATH="$HOME/Applications/:$PATH"
+			echo $PATH | grep -q "$HOME/Applications" || PATH="$HOME/Applications/:$PATH"
 		fi
 	EOF
 fi
