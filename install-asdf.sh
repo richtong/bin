@@ -89,8 +89,8 @@ log_warning "use oh-my-zsh asdf plugin to install paths"
 
 PROFILE_TO_ADD="$(config_profile_shell_bash)"
 if in_os linux; then
-	log_verbose "In linux add to $CONFIG_TO_ADD"
-	CONFIG_TO_ADD="$(config_profile_interactive_bash)"
+	log_verbose "In linux add to $PROFILE_TO_ADD"
+	PROFILE_TO_ADD="$(config_profile_interactive_bash)"
 fi
 
 if ! config_mark "$PROFILE_TO_ADD"; then
