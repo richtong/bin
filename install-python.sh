@@ -72,7 +72,7 @@ done
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
-log_verbose "PATH=$PATH"
+# log_verbose "PATH=$PATH"
 
 # Kite is Python code completer not used instead use Github copilot
 # https://github.com/kiteco/jupyterlab-kite
@@ -107,11 +107,11 @@ fi
 # you cannot just source it again because this will
 # cause the default paths to be put in before this path
 #source_profile
-log_verbose "Pre PATH=$PATH"
+#log_verbose "Pre PATH=$PATH"
 [[ $PATH =~ $(brew --prefix)/opt/python$PYTHON_VERSION/libexec/bin ]] || PATH="$(brew --prefix)/opt/python$PYTHON_VERSION/libexec/bin:$PATH"
 hash -r
 export PATH
-log_verbose "PATH=$PATH"
+#log_verbose "PATH=$PATH"
 
 if $PIPENV; then
 	PACKAGES+=(pipenv)
@@ -133,7 +133,7 @@ log_verbose "installing ${PACKAGES[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
 package_install "${PACKAGES[@]}"
-log_verbose "PATH=$PATH"
+#log_verbose "PATH=$PATH"
 
 # autoimport - add and remove imports
 # argparse complete
@@ -146,7 +146,7 @@ log_verbose "PATH=$PATH"
 # pytest - python test runner
 # pyyaml - python yaml parser
 # tox - python test runner for different versions of python
-log_verbose development shell/python packages normally use pipenv but use anaconda instead
+log_verbose "development shell/python packages normally use pipenv but use anaconda instead"
 PYTHON_PACKAGES+=(
 
 	argcomplete
