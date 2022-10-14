@@ -49,7 +49,7 @@
 ## bind to the same ssh-keyagent
 ## .bash_profile - Since this called before .profile, this is a good place to
 ## put commands that are just for ssh in, right now we have no diffeence
-## betweeen this. Note that we have to source .profile below, because in the
+## between this. Note that we have to source .profile below, because in the
 ## case that the machine is remote (an AWS machine for instance) we may never start
 ##    a graphical session (that is login to unity), so the way this kicks off is
 ##    to first call .bash_profile
@@ -68,7 +68,9 @@
 ## .profile. gets all the PATHS and things done in /bin/sh syntax.
 ## .bashrc. gets your aliases and functions in bash syntax. it can interactive
 ##          but check $- =~ i first since it might be a ssh -c one-liner
-## .bash_profile. source .profile and then you get .bashrc as well
+## .bash_profile. source .profile and then you get .bashrc as well and it
+##		   should have nothing else all the real work should be done by profile
+##		   as none of this is read by Ubuntu
 ##
 ## On Mac
 ## http://stackoverflow.com/questions/18773051/how-to-make-os-x-to-read-bash-profile-not-profile-file
