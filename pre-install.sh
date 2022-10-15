@@ -64,8 +64,8 @@ done
 # no lib-config.sh so assume you are only doing path addition which go
 # into .profile
 PROFILE="${PROFILE:-"$HOME/.profile"}"
-echo "$SCRIPTNAME: Set brew environment variables $PROFILE" >&2
 if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
+	echo "$SCRIPTNAME: update $PROFILE" >&2
 	cat >>"$PROFILE" <<-EOF
 		# Added by $SCRIPTNAME on $(date)
 		if ! command -v brew &>/dev/null; then
@@ -81,8 +81,9 @@ if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
 fi
 
 echo "$SCRIPTNAME: make brew available in this script source $PROFILE" >&2
-# need to turn off set -u as undefined variables is a common idium
+# need to turn off set -u as undefined variables as the profile may have these
 set +u
+echo "source $PRPFILE" >&2
 # shellcheck disable=SC1091,SC1090
 source "$PROFILE"
 set -u

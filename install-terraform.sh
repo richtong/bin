@@ -56,8 +56,10 @@ package_install terraform packer
 #    log_verbose autocomplete already installed
 #fi
 # note that completions are exported to subshells so they can all be in profile
-if ! config_mark; then
-	config_add <<-'EOF'
+# note command completions are bash idea not .profile
+# so goes into .bash_profile for macos and .bashrc for ubuntu
+if ! config_mark "$(config_profile_for_bash)"; then
+	config_add "$(config_profile_for_bash)" <<-'EOF'
 		command -v terraform >/dev/null && complete -C "$(brew --prefix)/terraform" terraform
 	EOF
 fi

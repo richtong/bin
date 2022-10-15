@@ -63,9 +63,8 @@ if in_os mac; then
 	log_verbose install google cloud sdk
 	package_install google-cloud-sdk
 
-	log_verbose "checking for gcloud in $(config_profile)"
-	if ! config_mark; then
-		log_verbose "installing into $(config_profile)"
+	if ! config_mark "$(config_profile_for_bash)"; then
+		log_verbose "installing into $(config_profile_for_bash)"
 		config_add <<-'EOF'
 			if [ -r "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc" ]; then
 				source \
@@ -77,7 +76,6 @@ if in_os mac; then
 			    "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc";
 			fi
 		EOF
-		log_warning "now source the changes to $(config_profile_nonexportable)"
 	fi
 
 elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then

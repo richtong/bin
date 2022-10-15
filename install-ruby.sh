@@ -55,7 +55,7 @@ source_lib lib-version-compare.sh lib-util.sh lib-config.sh lib-install.sh
 
 set -u
 
-RUBY_PATH="${RUBY_PATH:-"\$(brew --prefix ruby)"}"
+RUBY_PATH="${RUBY_PATH:-"$(brew --prefix ruby)"}"
 log_verbose "installing ruby"
 if brew_install ruby; then
 	log_verbose "raw version is $("$RUBY_PATH/bin/ruby" -v)"
@@ -66,8 +66,8 @@ if brew_install ruby; then
 	if ! config_mark; then
 		log_verbose "installing gem bin $version and ruby"
 		config_add <<-EOF
-			command -v brew >/dev/null && echo \$PATH | grep -q $RUBY_PATH/bin || PATH="\$(brew --prefix ruby)/bin:\$PATH"
-			command -v brew >/dev/null && echo \$PATH | grep -q "\$(brew --prefix)/lib/ruby/gems" || PATH+="\$(brew --prefix)lib/ruby/gem/$version/bin"
+			command -v brew >/dev/null && echo \$PATH | grep -q "\$(brew --prefix ruby)/bin" || PATH="\$(brew --prefix ruby)/bin:\$PATH"
+			command -v brew >/dev/null && echo \$PATH | grep -q "\$(brew --prefix)/lib/ruby/gems" || PATH="\$(brew --prefix)lib/ruby/gem/$version/bin:\$PATH"
 		EOF
 	fi
 	log_exit "brew installed ruby"
