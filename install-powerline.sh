@@ -108,7 +108,6 @@ else
 			log_warning "restart the terminal session"
 		else
 			sudo apt-get install fontconfig
-			./install.sh
 			log_verbose "Installed fonts are:"
 			if $VERBOSE; then
 				fc-list

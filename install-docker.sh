@@ -18,10 +18,10 @@ VERBOSE="${VERBOSE:-false}"
 DOCKER_REGISTRY="${DOCKER_REGISTRY:-docker.io}"
 DOCKER_CONTENT_TRUST="${DOCKER_CONTENT_TRUST:-false}"
 DOCKER_TRUST_PRIVATE="${DOCKER_TRUST_PRIVATE:-"$SCRIPT_DIR/ssh/docker"}"
-DOCKER_VERSION="${DOCKER_VERSION:-20.10.17}"
+DOCKER_VERSION="${DOCKER_VERSION:-20.10.12}"
 # Do not make too high as this will fail the minimum version needed test
 # Also this is not the Mac Docker App version, it is engine version
-DOCKER_INSTALL_EDGE_VERSION="${DOCKER_INSTALL_EDGE_VERSION:-20.10.12}"
+DOCKER_INSTALL_EDGE_VERSION="${DOCKER_INSTALL_EDGE_VERSION:-20.10.19}"
 DOCKER_MACHINE_VERSION="${DOCKER_MACHINE_VERSION:-0.16.1}"
 DOCKER_COMPOSE_VERSION="${DOCKER_COMPOSE_VERSION:-1.26.2}"
 BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-50000000}"
@@ -197,7 +197,7 @@ else
 		log_exit "WSL does not need docker install in Windows"
 	fi
 	if in_linux debian; then
-		log_verbose "installnig for debian"
+		log_verbose "installing for debian"
 		# https://docs.docker.com/engine/installation/linux/docker-ce/debian/#install-docker-ce
 		package_install "${PACKAGES[@]}"
 		curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add
@@ -212,8 +212,8 @@ else
 	elif in_linux ubuntu; then
 		# https://phoenixnap.com/kb/install-docker-on-ubuntu-20-04
 		# https://docs.docker.com/engine/install/ubuntu/
-		log_verbose "trying to install docker for ubuntu with brew"
-		if ! package_install docker; then
+		log_verbose "install docker for ubuntu"
+		if ! package_install docker.io; then
 			log_verbose "docker.io package failed so install pieces"
 			package_install "${PACKAGES[@]}"
 			curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
@@ -229,14 +229,19 @@ else
 			fi
 		fi
 
-		if ! command -v docker || ! docker -v | grep "$version_needed"; then
-			# We could have old docker components from ubuntu oritented installs
-			# It is ok if we do not find it
-			sudo apt-get purge -y lxc-docker* || true
+		CURRENT_VERSION="$(version_extract "$(docker -v)")"
+		log_verbose "Installed docker version $CURRENT_VERSION"
+
+		if ! command -v docker >/dev/null || ! vergte "$CURRENT_VERSION" "$version_needed"; then
+			log_warning "Have $CURRENT_VERSION but need $version_needed try to purge lxc-docker"
+			if ! sudo apt-get purge -y "lxc-docker*"; then
+				log_warning "cannot find $version_needed"
+			fi
 		fi
 
 		# the dangerous version do not install opaque scripts
 		# curl -fsSL  https://get.docker.com/ | sh
+		log_verbose "Starting docker service"
 		service_start docker
 
 	fi

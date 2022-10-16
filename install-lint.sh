@@ -100,7 +100,8 @@ PACKAGES+=(
 log_verbose "install ${PACKAGES[*]}"
 package_install "${PACKAGES[@]}"
 
-"$SCRIPT_DIR/install-markdown.sh"
+# now installed by main install.sh
+#"$SCRIPT_DIR/install-markdown.sh"
 
 # Not compatible with PostCSS use stylelint below although this also seems to
 # have issues and not report bugs to vi.
