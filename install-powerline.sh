@@ -158,9 +158,9 @@ if ! $INSTALL_POWERLINE; then
 							"$MODULES" \
 						-priority \
 							"$PRIORITIES" \
-						-error \$? -jobs "\$(jobs -p | wc -l)")
+						-error \$? -jobs \$(jobs -p | wc -l))
 			}
-			if [[ $TERM != linux ]] && command -v powerline-go >& /dev/null; then
+			if [[ \$TERM != linux ]] && command -v powerline-go >& /dev/null; then
 			    PROMPT_COMMAND="_update_ps1; \$PROMPT_COMMAND"
 			fi
 		EOF
