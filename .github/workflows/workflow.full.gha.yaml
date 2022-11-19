@@ -112,8 +112,9 @@ jobs:
         uses: artemnovichkov/action-homebrew@0.1.0
       - name: Install hadolint
         run: brew install hadolint
+      # needs at least v0.8 to handle SC1091 with shellcheck -x
       - name: Install shellcheck
-        run: shellcheck --version && brew install shellcheck && shellcheck --version
+        run: brew install shellcheck && shellcheck --version
 
       # https://github.com/pre-commit/action
       # if you are using public repo then you can use pre-commit.ci

@@ -125,7 +125,7 @@ conda update conda --all -y
 conda install "python=$PYTHON"
 
 log_warning "you should not install into base create your own environment"
-if [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then
+if [[ -v CONDA_SHLVL ]] && ((CONDA_SHLVL > 0)); then
 	log_warning "currently in conda so deactivate"
 	conda deactivate
 fi
@@ -139,6 +139,6 @@ fi
 
 if ! config_mark "$(config_profile_zsh)"; then
 	config_add "$(config_profile_zsh)" <<-'EOF'
-	        if command -v conda >/dev/null; [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
+		        if command -v conda >/dev/null; [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
 	EOF
 fi

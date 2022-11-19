@@ -66,10 +66,11 @@ if in_os mac; then
 		--cross-compile-common
 	)
 fi
-	
+
 log_verbose "go installation"
-# shellcheck disable=SC2048
-if package_install ${OPTION[*]} "${PACKAGE[@]}"; then
+# do not quote options in case there are none and you should ignore it.
+# shellcheck disable=SC2068
+if package_install ${OPTION[@]} "${PACKAGE[@]}"; then
 	log_exit "package installed"
 fi
 

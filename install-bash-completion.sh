@@ -59,7 +59,7 @@ if ! config_mark "$(config_profile_for_bash)"; then
 	# config_add "$(config_profile_shell)" <<<'source "$(brew --prefix)/etc/bash_completion"'
 	# latest for brew completions
 	# https://docs.brew.sh/Shell-Completion
-    config_add "$(config_profile_for_bash)" <<'EOF'
+	config_add "$(config_profile_for_bash)" <<'EOF'
 if type brew &>/dev/null; then
 	if [[ -r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]]; then
 		# shellcheck disable=SC1090

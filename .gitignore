@@ -1,15 +1,38 @@
+.DS_store
 .sconsign.dblite
-.DS_Store
-*.sublime-project
-sublime-workspace
 *.cache
 *.bak
 *~
-*.pyc
 *.swp
-*cscope.out
-*cscope.po.out
-*cscope.in.out
-.ctags
+
+# no big files
+*.zip
+*.exe
+
+# sublime excludes
+*.sublime-project
+sublime-workspace
+
+# scons excludes
+*cscope*
 /scons.err
 /scons.log
+
+# python related
+*.pyc
+__pycache__
+.ipynb_checkpoints/
+.local/
+.cache/
+.ipython/
+.jupyter/
+.virtual_documents/
+
+# for python virtual environments
+venv/
+
+# Local Netlify folder
+.netlify
+
+# Nodes folders
+node_modules

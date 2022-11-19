@@ -62,7 +62,7 @@ fi
 if ! config_mark "$(config_profile_for_bash)"; then
 	log_verbose "set file ulimit higher"
 	# this no longer seems to work in Bash 5.0
-    config_add "$(config_profile_for_bash)"<<<"ulimit -S -n 2048"
+	config_add "$(config_profile_for_bash)" <<<"ulimit -S -n 2048"
 	ulimit -S -n 2048
 fi
 

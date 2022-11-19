@@ -62,7 +62,7 @@ elif in_os linux && ! in_os docker; then
 	if [[ $(desktop_environment) =~ gnome ]]; then
 		# https://addons.mozilla.org/en-US/firefox/addon/gnome-shell-integration/
 		log_warning "Must install go to extensions.gnome.org and load gtile"
-        log_warning "set parameters with Gnome Tweaks"
+		log_warning "set parameters with Gnome Tweaks"
 		# https://github.com/gTile/gTile
 		package_install chrome-gnome-shell gnome-tweaks
 	elif [[ $(desktop_environment) =~ unity ]]; then

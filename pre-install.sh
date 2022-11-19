@@ -83,7 +83,7 @@ fi
 echo "$SCRIPTNAME: make brew available in this script source $PROFILE" >&2
 # need to turn off set -u as undefined variables as the profile may have these
 set +u
-echo "source $PRPFILE" >&2
+echo "source $PROFILE" >&2
 # shellcheck disable=SC1091,SC1090
 source "$PROFILE"
 set -u
