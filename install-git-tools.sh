@@ -109,6 +109,12 @@ fi
 
 log_verbose "in the newest version of git specify fast forward only so you do not get accidental merges"
 git config pull.ff only
+
+# https://stackoverflow.com/questions/11514075/what-is-the-difference-between-an-annotated-and-unannotated-tag
+# https://stackoverflow.com/questions/5195859/how-do-you-push-a-tag-to-a-remote-repository-using-git
+log_verbose "Only push followable tags that are annotated"
+git config --global push.followTags true
+
 # https://git-scm.com/docs/git-config show summary of submodules
 # the number of commits to show -1 means all of them
 # this is very slow so remove for now particularly for WSL to Windows
