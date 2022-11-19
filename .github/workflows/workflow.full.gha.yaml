@@ -106,10 +106,12 @@ jobs:
           node-version: '14'
       - name: Install markdownlint-cli
         run: npm install -g markdownlint-cli
-      # https://github.com/marketplace/actions/github-action-for-homebrew
       # brew not found in act so used dockerized version in pre-commit
-      - name: Install homebrew
-        uses: artemnovichkov/action-homebrew@0.1.0
+      # This actually runs homebrew commands does not install it
+      #- name: Install homebrew
+      #  uses: artemnovichkov/action-homebrew@0.1.0
+      - name: Enable Homebrew (since removed Sept 22)
+        uses: raviqqe/enable-homebrew@v1.0.0
       - name: Install hadolint
         run: brew install hadolint
       # needs at least v0.8 to handle SC1091 with shellcheck -x
