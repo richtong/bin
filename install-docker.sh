@@ -213,7 +213,9 @@ else
 		# https://phoenixnap.com/kb/install-docker-on-ubuntu-20-04
 		# https://docs.docker.com/engine/install/ubuntu/
 		log_verbose "install docker for ubuntu"
-		if ! package_install docker.io; then
+		# https://github.com/git-lfs/git-lfs/issues/3400
+		# ca-certificates need because the root CA is not installed
+		if ! package_install ca-certificates docker.io; then
 			log_verbose "docker.io package failed so install pieces"
 			package_install "${PACKAGES[@]}"
 			curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
@@ -315,7 +317,8 @@ else
 	fi
 fi
 
-if ! docker buildx ls | grep -q docker-buildx; then
+# if there is buildx set it
+if docker buildx &> /dev/null && ! docker buildx ls | grep -q docker-buildx; then
 	log_verbose "Find and create dedicated docker buildx with large log size"
 	docker buildx create --name docker-buildx --use --driver-opt \
 		env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-10000000}"

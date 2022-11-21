@@ -17,7 +17,7 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 OPTIND=1
-DOCKER_USER=${DOCKER_USER:-surround$USER}
+DOCKER_USER=${DOCKER_USER:-netdrones-$USER}
 DOCKER_MACHINE=${DOCKER_MACHINE:-default}
 FORCE=false
 while getopts "hdvu:m:f" opt; do
@@ -110,7 +110,7 @@ fi
 # Need to make groups take effect immediately not run
 # http://stackoverflow.com/questions/299728/how-do-you-use-newgrp-in-a-script-then-stay-in-that-group-when-the-script-exits
 # now that newgrp doesn't work because this is interactive
-echo "$SCRIPTNAME: Enter hub.docker.com password for $DOCKER_USER"
+echo "$SCRIPTNAME: Enter hub.docker.com personal access token for $DOCKER_USER"
 docker login --username="$DOCKER_USER"
 
 if "$VERBOSE"; then
