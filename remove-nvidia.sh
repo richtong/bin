@@ -38,7 +38,7 @@ if in_linux debian; then
 	log_warning only a complete reinstall seems to work
 
 	sudo apt-get purge nvidia.
-	if desktop_environment gnome; then
+    if [[ $(desktop_environment) =~ gnome ]]; then
 		# hangs the machine on debian 9
 		/etc/init.d/gdm3 stop
 	fi

@@ -117,7 +117,7 @@ log_verbose need flake8 for python linting
 if [[ $OSTYPE =~ darwin ]]; then
 	brew_install flake8
 else
-	pip_install --user --upgrade flake8
+	pip_install --upgrade flake8
 fi
 
 # https://github.com/yannickcr/eslint-plugin-react
