@@ -36,27 +36,44 @@ DRIVER_GTX[7]=${DRIVER_GTX[7]:-340}
 DRIVER_GTX[8]=${DRIVER_GTX[8]:-340}
 DRIVER_GTX[9]=${DRIVER_GTX[9]:-340}
 DRIVER_GTX[10]=${DRIVER_GTX[10]:-375}
-DEFAULT_MODEL=${DEFAULT_MODEL:-10}
-DRIVER_REPO=${DRIVER_REPO:-graphics-drivers}
+DEFAULT_MODEL="${DEFAULT_MODEL:-10}"
+DRIVER_REPO="${DRIVER_REPO:-graphics-drivers}"
+DRIVER_VERSION="${DRIVER_VERSION:-520-open}"
+RECOMMENDED="${RECOMMENDED:=true}"
 NVIDIA_REPO=false
+BETA="${BETA:-false}"
+VERBOSE="${VERBOSE:-false}"
+DEBUGGING="${DEBUGGING:-false}"
 
-while getopts "hdvn:r:s" opt; do
+while getopts "hdvn:r:sob" opt; do
 	case "$opt" in
 	h)
-		echo "$SCRIPTNAME: Install proprietary nvidia drivers but not cuda"
-		echo "flags: -d debug -v verbose -h help"
-		echo "       -n version (default: $DRIVER_VERSION)"
-		echo "          note must be version 352 or greater to run CuDNN 7.5"
-		echo "       -r name of special repo for drivers (default: $DRIVER_REPO)"
-		echo "       -s use special NVIDIA new driver repo (currently: $NVIDIA_REPO)"
+		cat <<-EOF
+		$SCRIPTNAME: Install proprietary nvidia drivers but not cuda
+		flags: -d debug -v verbose -h help
+		       -n version (default: $DRIVER_VERSION)
+		          note must be version 352 or greater to run CuDNN 7.5
+               -o choose the recommended version (default: $RECOMMENDED)
+               -b use the beta drivers (default: $BETA)
+		       -r name of special repo for drivers (default: $DRIVER_REPO)
+		       -s use special NVIDIA new driver repo (currently: $NVIDIA_REPO)
+EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
+    o)
+		RECOMMENDED="$($RECOMMENDED && echo false || echo true)"
+        ;;
 	n)
 		DRIVER_VERSION="$OPTARG"
 		;;
@@ -64,7 +81,7 @@ while getopts "hdvn:r:s" opt; do
 		DRIVER_REPO="$OPTARG"
 		;;
 	s)
-		NVIDIA_REPO=false
+		NVIDIA_REPO="$($NVIDIA_REPO && echo false || echo true)"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -92,17 +109,27 @@ fi
 
 # https://linuxconfig.org/how-to-install-the-nvidia-drivers-on-ubuntu-20-04-focal-fossa-linux
 if in_linux ubuntu; then
-	if ! command -v ubuntu-drivers >/dev/null || ! ubuntu-drivers devices | grep -q NVIDIA; then
+	if ! command -v ubuntu-drivers >/dev/null || ! ubuntu-drivers devices | grep -iq nvidia; then
 		log_exit "On Ubuntu but no NVidia drivers"
 	fi
 	if $VERBOSE; then
 		log_verbose "Available drivers"
 		ubuntu-drivers devices
 	fi
-	sudo add-apt-repository -y ppa:graphics-drivers/ppa
-	sudo ubuntu-drivers devices autoinstall
-	log_exit "Recommended drivers installed reboot required"
+
+    if $BETA; then
+        log_verbose "Installing beta driver repo"
+        sudo add-apt-repository -y ppa:graphics-drivers/ppa
+    fi
+    
+    if $RECOMMENDED; then
+        sudo ubuntu-drivers devices autoinstall
+    else
+        sudo apt-get install "nvidia-driver-$DRIVER_VERSION"
+    fi
+    log_exit "drivers installed reboot maybe required"
 fi
+
 log_verbose determine nVidia product type and best driver
 # https://askubuntu.com/questions/524242/how-to-find-out-which-nvidia-gpu-i-have
 sudo update-pciids
@@ -162,9 +189,7 @@ if in_linux debian; then
 		mod_install nvidia_uvm
 	fi
 
-fi
-
-if in_linux ubuntu; then
+elif in_linux ubuntu; then
 	# http://stackoverflow.com/questions/13125714/how-to-get-the-nvidia-driver-version-from-the-command-line
 	if [[ ! -e /proc/driver/nvidia/version ]] || ! grep -q "$DRIVER_VERSION" /proc/driver/nvidia/version; then
 
