@@ -38,33 +38,82 @@ if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh
 set -u
 
-if ! in_os mac; then
-	log_error 1 only work on a Mac
-fi
-
-log_verbose handbrake needs libdvdcss from el capitan on
-PACKAGES=(libdvdcss handbrake)
-
 # log_verbose really want gimp 2.9, but load 2.8 for now
 # blender - 3D editor
 # exiftools - Read EXIF from files
 # gimp - 2D editor
 # handbrake - transcoding
 # hugin - panaramas
-# mkvnixtools - editing of MKV video files
+# mkvtoolnix - MKV Matrovska edit tools
 
-PACKAGES+=(
-	blender
+log_verbose "handbrake needs libdvdcss from el capitan on"
+PACKAGE+=(
+
+    libdvdcss 
 	exiftool
-	geotag
-	gimp
-	handbrake
-	hugin
-	mkvnixtools
+	mkvtoolnix
+
 )
 
+Log_verbose "Install ${PACKAGE[*]}"
 # shellcheck disable=SC2086
-package_install "${PACKAGES[@]}"
+package_install "${PACKAGE[@]}"
+
+# hugin not in snap or apt-get
+# https://ubuntuhandbook.org/index.php/2022/04/hugin-panorama-stitcher-ubuntu-22-04/
+if in_os linux; then
+    apt_repository_install "ppa:ubuntuhandbook1/apps"
+fi
+
+# installs a cask on Mac or snap or apt-get on Ubuntu
+APP+=(
+
+	gimp
+    hugin
+
+)
+
+log_verbose "Install common apps on MacOS and Linux"
+package_install "${APP[@]}"
+
+CASK+=(
+
+    blender
+	geotag
+	handbrake
+	hugin
+
+)
+
+
+SNAP+=(
+
+    handbrake-jz
+
+)
+SNAP_CANDIDATE+=(
+
+    kgeotag
+_
+)
+SNAP_CLASSIC+=(
+
+    blender
+)
+
+if in_os mac; then
+    # shellcheck disable=SC2068
+    cask_install ${CASK[@]}
+
+elif in_os linux; then
+    # shellcheck disable=SC2068
+    snap_install ${SNAP[@]}
+    snap_install --classic ${SNAP_CLASSIC[@]}
+    snap_install --candidate ${SNAP_CANDIDATE[@]}
+    log_exit "Linux finished"
+fi
+
+log_verbose "Install Mac specific downloads"
 
 if [[ -v DXO_VERSION ]]; then
 	DXO_URL="${DXO_URL:-"https://download-center.dxo.com/PhotoLab/v$DXO_VERSION/Mac/DxO_PhotoLab$DXO_VERSION.dmg"}"
