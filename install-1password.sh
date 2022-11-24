@@ -67,41 +67,49 @@ else
 	source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 fi
 
-if ! in_os mac; then
+if in_os linux; then
+
+	log_verbose "Install Linux graphical 1Password"
+	snap_install 1password
+	log_verbose "Install linux 1Password cli"
+	apt_install 1password-cli
 	# obsoleted by official 1passworld cli
 	# https://app-updates.agilebits.com/product_history/CLI
 	## https://www.npmjs.com/package/onepass-cli for npm package
 	# git_install_or_update 1pass georgebrock
-	log_verbose "install 1Password X for Chrome to use it"
-	log_exit "Only manual installation supported see https://support.1password.com/command-line-getting-started/"
+	log_verbose "Also install 1Password X for Chrome to use it"
 fi
 
-if [[ -n $(find /Applications -maxdepth 1 -name "1Password*" -print -quit) ]]; then
-	log_verbose "1Password for Mac already installed"
-	exit
-fi
+elif in_os mac; then
 
-log_verbose using brew to install on Mac 1Password and the CLI
-if package_install 1password 1password-cli; then
-	for PROFILE in "" "$(config_zsh_profile)"; do
-		# shellcheck disable=SC2086
-		if ! config_mark $PROFILE; then
+	if [[ -n $(find /Applications -maxdepth 1 -name "1Password*" -print -quit) ]]; then
+		log_verbose "1Password for Mac already installed"
+		exit
+	fi
+
+	log_verbose using brew to install on Mac 1Password and the CLI
+	if package_install 1password 1password-cli; then
+		for PROFILE in "" "$(config_zsh_profile)"; do
 			# shellcheck disable=SC2086
-			config_add $PROFILE <<-EOF
-				if command -v op >/dev/null && [[ ! -v OP_SESSION_$SIGNIN ]]; then
-				    eval "\$(op $SIGNIN.1password.com $EMAIL)"; fi
-			EOF
-		fi
-	done
-	log_verbose "Install 1password for safari"
-	mas install 1569813296
-	log_exit "installed 1password 1password-cli and safari add-on"
-fi
+			if ! config_mark $PROFILE; then
+				# shellcheck disable=SC2086
+				config_add $PROFILE <<-EOF
+					if command -v op >/dev/null && [[ ! -v OP_SESSION_$SIGNIN ]]; then
+						eval "\$(op $SIGNIN.1password.com $EMAIL)"; fi
+				EOF
+			fi
+		done
+		log_verbose "Install 1password for safari"
+		mas install 1569813296
+		log_exit "installed 1password 1password-cli and safari add-on"
+	fi
 
-log_verbose "brew  install failed trying to cure the package"
-# download_url_open "https://d13itkw33a7sus.cloudfront.net/dist/1P/mac4/1Password-6.0.2.zip"
-# more general location
-# usage: download_url url [dest_file [dest_dir [md5 [sha256]]]]
-# Have to increment the OPM number as versions increase
-log_verbose "installed 1Password Version $VERSION"
-download_url_open "https://app-updates.agilebits.com/download/OPM$VERSION" "1Password.pkg"
+	log_verbose "brew install failed trying to download the package"
+	# download_url_open "https://d13itkw33a7sus.cloudfront.net/dist/1P/mac4/1Password-6.0.2.zip"
+	# more general location
+	# usage: download_url url [dest_file [dest_dir [md5 [sha256]]]]
+	# Have to increment the OPM number as versions increase
+	log_verbose "installed 1Password Version $VERSION"
+	download_url_open "https://app-updates.agilebits.com/download/OPM$VERSION" "1Password.pkg"
+
+fi

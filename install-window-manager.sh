@@ -64,7 +64,11 @@ elif in_os linux && ! in_os docker; then
 		log_warning "Must install go to extensions.gnome.org and load gtile"
 		log_warning "set parameters with Gnome Tweaks"
 		# https://github.com/gTile/gTile
-		package_install chrome-gnome-shell gnome-tweaks
+        # https://wiki.gnome.org/Projects/GnomeShellIntegration
+        # chrome-gnome-shell is now but not for Ubuntu 20.04
+        # https://bugs.launchpad.net/ubuntu/+source/chrome-gnome-shell/+bug/1983851
+        package_install chrome-gnome-shell gnome-tweaks
+		#package_install gnome-browser-connector gnome-tweaks
 	elif [[ $(desktop_environment) =~ unity ]]; then
 		log_verbose "install Compiz Grid allows keyboard shortcuts to move windows around"
 		package_install compizconfig-settings-manager

@@ -78,89 +78,116 @@ fi
 
 # https://travis.media/top-10-oh-my-zsh-plugins-for-productive-developers/
 # from @atong suggestions and https://travis.media/top-10-oh-my-zsh-plugins-for-productive-developers/
-# git -  ga git add, gca git commit -av, gd - git diff, gfa - git fetch --all --prune
-#        gp - git push
-# gh - add command completions for gh
-# git-lfs - glfsi git lfs install , glfst - git lfs track
-#gnu-utils - use gnu without the g prefix
-# helm - command completions
-# kubectl - completions and k kubectl, kaf kubectl apply -f
-# gcloud - google cloud completions
-# pip - command completion
-# pipenv - completions, psh pipenv shell, pi - pipenv install
-# rg - completions
+
+# 1password - opswd wraps the op command so opswd github will put your us
+# alias - acs shows all alias by group
 # asdf - completions (not working)
-# macos - ofd - open in finder, pfd - print finder path, cdf - change to finder
-#       - tab open current directory in a new term tab, music - start Muisc,
-#       - pushdf - push finder dir, showfiles - sho hidden in Finder
-# 		- btrestart - restart bluetooth
-# web-search - type "google any-string"
-# copydir - copydir will copy the last path onto clipboard
-# copyfile - copy the file to your clipboard
-# thefuck - ESC twice to correct command (conflicts with sudo plugin)
-# https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/vi-mode
-# vi-mode - ESC to enter vi edit mode. Another ESC puts in you in normal mode
-#           While in command mode, typing vv quickly will bring you to the full
-#           vi with the command in a window.
-# one of these is useful probably z
-# dirhistory - ALT-Left goes to previous directory, ALT-right so like dirs (does not work with AnnePro2)
-# wd - warp directory do a wd add to add to a list of directories
-# z - z <string> guess which directory you want to go to
-# colorize - uses pygmenter to ccat files in color
-# fzf - completions
 # brew - new command bubo brew update & brew outdated bubc brew update && brew
-# cleanup
-# command-not-found - suggest missing package
+# 		- btrestart - restart bluetooth
+# catimg - display an image from the commandline requires ImageMagick
+# colored-man-pages - make man pages look nice
+# colorize - uses pygmenter to ccat files in color
 # command aliases - l ls -lFh h history ff find . -type f -name hgrep
+# command-not-found - suggest missing package
+# copyfile - copyfile puts the contents of the file to your clipboard
+# copypath - copypath will copy the last path onto clipboard
+# dirhistory - ALT-Left goes to previous directory, ALT-right so like dirs (does not work with AnnePro2)
 # docker completions
+# doctl - digital ocean command completions
 # emoji-clock - emoji not characters for clock
-# gcloud - completions
-# git-lfs - completions
+# extract - general file extract command
+# fzf - completions
+# gcloud - google cloud completions
+# gh - add command completions for gh
+# git -  ga git add, gca git commit -av, gd - git diff, gfa - git fetch --all --prune
+# gitignore - gi list shows all the .gitignore templates
+# git-lfs - completions and alias like glfsi git lfs install glfsls
+# gnu-utils - use gnu without the g prefix
+# golang - alias like gob for go build
+#        gp - git push
+# helm - command completions
+# history - h for history and hs for history | grep but CTRL-R from fzf is
+# https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/vi-mode
+# kubectl - completions and k kubectl, kaf kubectl apply -f
+# macos - ofd - open in finder, pfd - print finder path, cdf - change to finder
+# mactl - tab is currect directory, pushdf the finder director music
+# microk8s adds aliases like ce for enable or mh for helm, mst for m start
+# multipass - adds mp for multipass and mps for multipass shell
+# pip - command completion
+# pipenv pcl is pipenv clean prun and psh and psy for sync
+# pip - pipir is pip include requirements pipupall
+# pushdf - push finder dir, showfiles - sho hidden in Finder
+# python py for python, pyfind for find *.py pygrep
+# quote - run quote to add to your .zshrc
+# rg - completions
+# rsync - adda rsync-copy for -avz
+# terraform - tfa for apply, tfv for validate...
+# thefuck - ESC twice to correct command (conflicts with sudo plugin)
+# ubuntu - acs apt-cache search
+# vi-mode - ESC to enter vi edit mode. vv edit command line
+# wd - warp directory do a wd add to add to a list of directories
+# web-search - type "google any-string"
+# z - z <string> guess which directory you want to go to
+
 log_verbose "Adding OMZ plugins"
 brew_install pygments
 log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 
 PLUGIN+=(
+	1password
+	aliases
 	asdf
 	aws
 	brew
+	catimg
+	colored-man-pages
 	colorize
 	command-not-found
 	common-aliases
-	copydir
 	copyfile
+	copypath
 	dirhistory
 	docker
+	doctl
 	dotenv
 	emoji-clock
-	vi-mode
-	fzf
+	extract
+	fig
 	gcloud
 	gh
 	git
+	gitignore
 	git-lfs
 	gnu-utils
+	golang
 	helm
 	history
 	ipfs
+	iterm2
 	kubectl
 	macos
 	microk8s
+	multipass
 	npm
-	npx
 	pip
 	pipenv
+	python
 	rand-quote
 	ripgrep
+	rsync
 	terraform
 	thefuck
 	themes
 	transfer
+	tmux
+	tmuxinator
+	ubuntu
 	wd
 	web-search
 	z
 	zsh-interactive-cd
-
+	vi-mode
+	fzf
 )
 
 # use -x so we don't replace if it is already there
@@ -178,10 +205,10 @@ if ! config_mark "$(config_profile_zsh)"; then
 	config_add "$(config_profile_zsh)" <<-'EOF'
 		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
 		command -v compaudit >/dev/null && [[ $(compaudit) ]] && compaudit | xargs chmod g-w,o-w
-		source $ZSH/oh-my-zsh.sh
+		# oh-my-zsh will utter it is in asdf so suppress the warning
+		source $ZSH/oh-my-zsh.sh &> /dev/null
 		source "$(brew --prefix)/opt/zinit/zinit.zsh"
 		# https://github.com/zdharma-continuum/zinit
-		# git clone depth
 		zinit depth"1" wait for \
 			zsh-users/zsh-autosuggestions \
 			zsh-users/zsh-syntax-highlighting \
@@ -192,4 +219,10 @@ if ! config_mark "$(config_profile_zsh)"; then
 		zinit light joel-porquet/zsh-dircolors-solarized
 		setupsolarized
 	EOF
+fi
+
+# https://github.com/zdharma-continuum/zinit/issues/418
+if [[ ! -r $(brew --prefix)/opt/zinit/doc/zinit.1 ]]; then 
+	log_verbose "Patch for brew formula problem with zinit #418"
+	ln -s "$(man --path zinit)" "$(brew --prefix)/opt/zinit/doc/zinit.1"
 fi

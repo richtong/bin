@@ -69,7 +69,7 @@ fi
 APP+=(
 
 	gimp
-    hugin
+	hugin
 
 )
 
@@ -81,7 +81,6 @@ CASK+=(
     blender
 	geotag
 	handbrake
-	hugin
 
 )
 

@@ -3,12 +3,13 @@
 # Install favorite fonts on the Mac
 # Then mac only
 #
-set -u && SCRIPTNAME="$(basename "$0")"
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 OPTIND=1
 NEW_HOSTNAME=${NEW_HOSTNAME:-"$HOSTNAME"}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 # These are the defaults
 # From the represent.us presentation set
 # alfa-slab-one: Decorative font for big questions
@@ -23,31 +24,44 @@ NEW_HOSTNAME=${NEW_HOSTNAME:-"$HOSTNAME"}
 # the second set are mono fonts for software
 # svn is reuired for ubuntu
 # note that FONTS is a string and assumes font names do not have white space
-FONTS="${FONTS:-"alfa-slab-one
-lato
-titillium
-ubuntu
-3270
-fira-code
-fira-code-nerd-font
-hack
-dejavusansmono-nerd-font"}"
+FONTS="${FONTS:-"
+
+    alfa-slab-one
+    lato
+    titillium
+    ubuntu
+    3270
+    fira-code
+    fira-code-nerd-font
+    hack
+    dejavusansmono-nerd-font
+
+"}"
+
 while getopts "hdv" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			$SCRIPTNAME: Install fonts
 			Usage: $SCRIPTNAME flags... fonts...
-			flags: -d debug, -h help -v verbose"
+			flags: -h help
+               -d $(! $DEBUGGING || echo "no ")debugging
+               -v $(! $VERBOSE || echo "not ")verbose
+
 			fonts (default: $FONTS)
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "No flag -$opt"
@@ -56,25 +70,33 @@ while getopts "hdv" opt; do
 done
 # shellcheck source=./include.sh
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-mac.sh lib-install.sh lib-util.sh
+source_lib lib-mac.sh lib-install.sh lib-util.sh lib-git.sh
 shift $((OPTIND - 1))
 
-if ! in_os mac; then
-	log_exit Mac only
-fi
-
-if [[ $# -gt 0 ]]; then
+if (( $# > 0  )); then
 	log_verbose "$# so replacing default $FONTS"
 	FONTS="$*"
 fi
 
-# required by ubuntu font
-package_install svn
+if in_os mac; then
 
-log_verbose install cask-fonts
-tap_install homebrew/cask-fonts
-log_verbose "installing $FONTS"
-for FONT in $FONTS; do
-	cask_install "font-$FONT"
-	log_verbose "font-$FONT installed"
-done
+    # required by ubuntu font
+    package_install svn
+    log_verbose "install cask-fonts"
+    tap_install homebrew/cask-fonts
+    log_verbose "installing $FONTS"
+    for FONT in $FONTS; do
+        cask_install "font-$FONT"
+        log_verbose "font-$FONT installed"
+    done
+elif in_os linux; then
+    # https://github.com/ryanoasis/nerd-fonts
+    git_install_or_update nerd-fonts ryanoasis
+    if ! pushd "$WS_DIR/git/nerd-fonts" >/dev/null; then
+        log_error 1 "nerd-fonts did not clone properly"
+    fi
+
+    for FONT in $FONTS; do
+        "$WS_DIR/git/nerd-fonts/install.sh" "$FONT"
+    done
+fi
