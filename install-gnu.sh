@@ -61,7 +61,7 @@ fi
 # Note that gettext is needed as well but not included in the list above
 log_verbose installing gnu base packages
 package_install coreutils binutils diffutils gawk gnutls gzip screen \
-	watch wget gnupg gnupg2 gettext
+	watch wget gnupg gnupg2 gettext man-db
 
 # https://stackoverflow.com/questions/30003570/how-to-use-gnu-sed-on-mac-os-x
 log_verbose since January 2019, fix --with-default-names by adding paths
@@ -130,6 +130,10 @@ if ! config_mark; then
 		            echo "$PATH" | grep -q "opt/$NAME/bin" ||
 		                PATH="$BREW_PREFIX/opt/$NAME/bin:$PATH"
 		        done
+				for NAME in man-db; do
+					echo "$PATH" | grep -q "opt/$NAME/libexec/bin" ||
+						PATH="$BREW_PREFIX/opt/$NAME/libexec/bin:$PATH"
+				done
 	EOF
 fi
 

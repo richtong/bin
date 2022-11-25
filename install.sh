@@ -302,7 +302,9 @@ fi
 # bfg - remove passwords and big files you didn't mean to commit this is snap only
 # gh
 # sudo - Linux only
+# mandoc - To get the version with man --path
 PACKAGES+=(
+	mandoc
 	mmv
 	curl
 	git
