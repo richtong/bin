@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 ## vim: set noet ts=4 sw=4:
 ##
 ## Install asdf and dotenv for language and tool management
@@ -85,7 +84,6 @@ declare -A ASDF+=(
 	[java]=$JAVA_VERSION
 )
 
-log_warning "use oh-my-zsh asdf plugin to install paths"
 
 PROFILE_TO_ADD="$(config_profile_shell_bash)"
 if in_os linux; then
@@ -97,35 +95,27 @@ if ! config_mark "$PROFILE_TO_ADD"; then
 	log_verbose "Adding to $PROFILE_TO_ADD"
 	config_add "$PROFILE_TO_ADD" <<-'EOF'
 		if command -v asdf >/dev/null; then
+			# need the /dev/null suppression as this can utter "in asdf"
 		    # shellcheck disable=SC1090,SC1091
-		    source "$(brew --prefix asdf)/libexec/asdf.sh"
+		    source "$(brew --prefix asdf)/libexec/asdf.sh" &>/dev/null
 		fi
 	EOF
 	# https://linuxhint.com/associative_array_bash/
 fi
 
+# we do not need to do specific asdf installf or zshrc as OMG does this
+log_warning "make sure .zshrc has Oh My Zsh plugin asdf"
+
+# no longer needed all setup is done automatically
 # not clear what this is so as login shell should go into .zprofile
 # for efficiency but leave in .zshrc as non-interactive
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	log_verbose "installing into .zshrc nonexportable"
-	# no longer need manual installation
-	asdf direnv setup --shell zsh --version "${ASDF[direnv]}"
-	#config_add "$(config_profile_zsh)" <<-'EOF'
-	#    # shellcheck disable=SC1090
-	#    source "$(brew --prefix asdf)/libexec/asdf.sh"
-	#EOF
-fi
-
-if [[ -n ${ASDF[direnv]} ]]; then
-	log_verbose "Found direnv installing config info"
-	for SHELL_VERSION in bash zsh; do
-		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
-	done
-	#config_add <<-'EOF'
-	#    eval "$(asdf exec direnv hook bash)"
-	#    direnv() { asdf exec direnv "$@"; }
-	#EOF
-fi
+#if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+#    log_verbose "installing into .zshrc nonexportable"
+#    #config_add "$(config_profile_zsh)" <<-'EOF'
+#    #    # shellcheck disable=SC1090
+#    #    source "$(brew --prefix asdf)/libexec/asdf.sh"
+#    #EOF
+#fi
 
 # https://github.com/asdf-vm/asdf-nodejs/issues/253
 log_verbose "must source otherwise reshim will fail"
@@ -180,8 +170,23 @@ if ! config_mark "$HOME/.asdfrc"; then
 		java_macos_integration_enable = yes
 	EOF
 fi
+
+
+# do not use this do this manually instead in lines below
+#if [[ -n ${ASDF[direnv]} ]]; then
+	#log_verbose "Found direnv installing config info"
+	#for SHELL_VERSION in bash zsh; do
+		#asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
+	#done
+	#config_add <<-'EOF'
+	#    eval "$(asdf exec direnv hook bash)"
+	#    direnv() { asdf exec direnv "$@"; }
+	#EOF
+#fi
+
 # .profile is only called from bash, also set .zshrc
 # https://github.com/halcyon/asdf-java#java_home
+log_verbose "Installing asdf plugin specific config into profiles"
 for SHELL_TYPE in bash zsh; do
 	if ! config_mark "$(config_profile_nonexportable_$SHELL_TYPE)"; then
 		log_verbose "Adding to $(config_profile_nonexportable_$SHELL_TYPE)"

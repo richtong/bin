@@ -17,7 +17,7 @@ exclude: (^archive/|^user/|deprecated/)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     # only language independent hooks
-    rev: v4.3.0
+    rev: v4.4.0
     hooks:
       # allow up to 2MB files for jupyter notebooks
       - id: check-added-large-files
@@ -135,7 +135,7 @@ repos:
     hooks:
       - id: mypy
   - repo: https://github.com/pycqa/flake8
-    rev: 5.0.4
+    rev: 6.0.0
     hooks:
       - id: flake8
   - repo: https://github.com/pycqa/pydocstyle
