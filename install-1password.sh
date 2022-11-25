@@ -78,7 +78,6 @@ if in_os linux; then
 	## https://www.npmjs.com/package/onepass-cli for npm package
 	# git_install_or_update 1pass georgebrock
 	log_verbose "Also install 1Password X for Chrome to use it"
-fi
 
 elif in_os mac; then
 

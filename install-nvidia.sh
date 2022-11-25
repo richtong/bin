@@ -49,15 +49,15 @@ while getopts "hdvn:r:sob" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-		$SCRIPTNAME: Install proprietary nvidia drivers but not cuda
-		flags: -d debug -v verbose -h help
-		       -n version (default: $DRIVER_VERSION)
-		          note must be version 352 or greater to run CuDNN 7.5
-               -o choose the recommended version (default: $RECOMMENDED)
-               -b use the beta drivers (default: $BETA)
-		       -r name of special repo for drivers (default: $DRIVER_REPO)
-		       -s use special NVIDIA new driver repo (currently: $NVIDIA_REPO)
-EOF
+			$SCRIPTNAME: Install proprietary nvidia drivers but not cuda
+			flags: -d debug -v verbose -h help
+			       -n version (default: $DRIVER_VERSION)
+			          note must be version 352 or greater to run CuDNN 7.5
+			               -o choose the recommended version (default: $RECOMMENDED)
+			               -b use the beta drivers (default: $BETA)
+			       -r name of special repo for drivers (default: $DRIVER_REPO)
+			       -s use special NVIDIA new driver repo (currently: $NVIDIA_REPO)
+		EOF
 		exit 0
 		;;
 	d)
@@ -71,9 +71,9 @@ EOF
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
-    o)
+	o)
 		RECOMMENDED="$($RECOMMENDED && echo false || echo true)"
-        ;;
+		;;
 	n)
 		DRIVER_VERSION="$OPTARG"
 		;;
@@ -117,17 +117,17 @@ if in_linux ubuntu; then
 		ubuntu-drivers devices
 	fi
 
-    if $BETA; then
-        log_verbose "Installing beta driver repo"
-        sudo add-apt-repository -y ppa:graphics-drivers/ppa
-    fi
-    
-    if $RECOMMENDED; then
-        sudo ubuntu-drivers devices autoinstall
-    else
-        sudo apt-get install "nvidia-driver-$DRIVER_VERSION"
-    fi
-    log_exit "drivers installed reboot maybe required"
+	if $BETA; then
+		log_verbose "Installing beta driver repo"
+		sudo add-apt-repository -y ppa:graphics-drivers/ppa
+	fi
+
+	if $RECOMMENDED; then
+		sudo ubuntu-drivers devices autoinstall
+	else
+		sudo apt-get install "nvidia-driver-$DRIVER_VERSION"
+	fi
+	log_exit "drivers installed reboot maybe required"
 fi
 
 log_verbose determine nVidia product type and best driver

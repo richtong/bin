@@ -41,32 +41,32 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
-if  in_os mac; then
+if in_os mac; then
 
-    package_install obs obs-ndi
-    NDI_VERSION="${NDI_VERSION:-4.5.1}"
-    NDI="${NDI:-"https://downloads.ndi.tv/Tools/NDIToolsInstaller.pkg"}"
-    log_verbose "open $NDI"
-    download_url_open "$NDI"
-    log_warning "Restart is required to get NDI and you should see a menu bar item"
-    log_verbose "Install NDI Virtual Input as a login item"
-    mac_login_item_add "/Applications/NDI Virtual Input.app"
+	package_install obs obs-ndi
+	NDI_VERSION="${NDI_VERSION:-4.5.1}"
+	NDI="${NDI:-"https://downloads.ndi.tv/Tools/NDIToolsInstaller.pkg"}"
+	log_verbose "open $NDI"
+	download_url_open "$NDI"
+	log_warning "Restart is required to get NDI and you should see a menu bar item"
+	log_verbose "Install NDI Virtual Input as a login item"
+	mac_login_item_add "/Applications/NDI Virtual Input.app"
 
-    log_verbose "Install plugins"
-    VERSION="${VERSION:-v0.4}"
-    URL+=("https://github.com/royshil/obs-backgroundremoval/releases/download/$VERSION/obs-backgroundremoval-macosx.zip")
-    APP="${APP:-/Applications/OBS.app/Contents}"
+	log_verbose "Install plugins"
+	VERSION="${VERSION:-v0.4}"
+	URL+=("https://github.com/royshil/obs-backgroundremoval/releases/download/$VERSION/obs-backgroundremoval-macosx.zip")
+	APP="${APP:-/Applications/OBS.app/Contents}"
 
-    for url in "${URL[@]}"; do
-        log_verbose download_url "$url" "${url##*/}" "$WS_DIR/cache" "$APP"
-        download_url_open "$url" "${url##*/}" "$WS_DIR/cache" "$APP"
-    done
+	for url in "${URL[@]}"; do
+		log_verbose download_url "$url" "${url##*/}" "$WS_DIR/cache" "$APP"
+		download_url_open "$url" "${url##*/}" "$WS_DIR/cache" "$APP"
+	done
 
 elif in_os linux; then
 
-    # >https://obsproject.com/wiki/install-instructions#supported-builds
-    
+	# >https://obsproject.com/wiki/install-instructions#supported-builds
+
 	apt_repository_install "ppa:obsproject/obs-studio"
-    apt_install "obs-studio"
+	apt_install "obs-studio"
 
 fi

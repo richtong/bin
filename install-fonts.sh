@@ -45,8 +45,8 @@ while getopts "hdv" opt; do
 			$SCRIPTNAME: Install fonts
 			Usage: $SCRIPTNAME flags... fonts...
 			flags: -h help
-               -d $(! $DEBUGGING || echo "no ")debugging
-               -v $(! $VERBOSE || echo "not ")verbose
+			               -d $(! $DEBUGGING || echo "no ")debugging
+			               -v $(! $VERBOSE || echo "not ")verbose
 
 			fonts (default: $FONTS)
 		EOF
@@ -73,30 +73,30 @@ if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-git.sh
 shift $((OPTIND - 1))
 
-if (( $# > 0  )); then
+if (($# > 0)); then
 	log_verbose "$# so replacing default $FONTS"
 	FONTS="$*"
 fi
 
 if in_os mac; then
 
-    # required by ubuntu font
-    package_install svn
-    log_verbose "install cask-fonts"
-    tap_install homebrew/cask-fonts
-    log_verbose "installing $FONTS"
-    for FONT in $FONTS; do
-        cask_install "font-$FONT"
-        log_verbose "font-$FONT installed"
-    done
+	# required by ubuntu font
+	package_install svn
+	log_verbose "install cask-fonts"
+	tap_install homebrew/cask-fonts
+	log_verbose "installing $FONTS"
+	for FONT in $FONTS; do
+		cask_install "font-$FONT"
+		log_verbose "font-$FONT installed"
+	done
 elif in_os linux; then
-    # https://github.com/ryanoasis/nerd-fonts
-    git_install_or_update nerd-fonts ryanoasis
-    if ! pushd "$WS_DIR/git/nerd-fonts" >/dev/null; then
-        log_error 1 "nerd-fonts did not clone properly"
-    fi
+	# https://github.com/ryanoasis/nerd-fonts
+	git_install_or_update nerd-fonts ryanoasis
+	if ! pushd "$WS_DIR/git/nerd-fonts" >/dev/null; then
+		log_error 1 "nerd-fonts did not clone properly"
+	fi
 
-    for FONT in $FONTS; do
-        "$WS_DIR/git/nerd-fonts/install.sh" "$FONT"
-    done
+	for FONT in $FONTS; do
+		"$WS_DIR/git/nerd-fonts/install.sh" "$FONT"
+	done
 fi

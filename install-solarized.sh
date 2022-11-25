@@ -89,7 +89,7 @@ if [[ $OSTYPE =~ darwin ]]; then
 			                fi
 		EOF
 	fi
-    # do not exit as we will install dircolors for everyone at the end
+	# do not exit as we will install dircolors for everyone at the end
 elif [[ $(desktop_environment) =~ xfce ]]; then
 	log_warning Note that in debian xfce implementation the
 	log_verbose Application/Terminal Emulator by default
@@ -134,7 +134,7 @@ elif [[ $(desktop_environment) =~ xfce ]]; then
 	log_verbose "to permanently change overwrite $dest/terminalrc"
 
 elif [[ $(desktop_environment) =~ (unity|gnome) ]]; then
-    log_verbose "Installing into Gnome or Unity"
+	log_verbose "Installing into Gnome or Unity"
 	# For the ubuntu local graphical Unity terminal which uses gnome-terminal
 	# Also for debian 9 xfce4 which uses gnome-terminal sometimes so also install
 	git_install_or_update "$GNOME_REPO" "$GNOME_GIT_ORG"

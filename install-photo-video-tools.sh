@@ -49,7 +49,7 @@ set -u
 log_verbose "handbrake needs libdvdcss from el capitan on"
 PACKAGE+=(
 
-    libdvdcss 
+	libdvdcss
 	exiftool
 	mkvtoolnix
 
@@ -62,7 +62,7 @@ package_install "${PACKAGE[@]}"
 # hugin not in snap or apt-get
 # https://ubuntuhandbook.org/index.php/2022/04/hugin-panorama-stitcher-ubuntu-22-04/
 if in_os linux; then
-    apt_repository_install "ppa:ubuntuhandbook1/apps"
+	apt_repository_install "ppa:ubuntuhandbook1/apps"
 fi
 
 # installs a cask on Mac or snap or apt-get on Ubuntu
@@ -78,38 +78,39 @@ package_install "${APP[@]}"
 
 CASK+=(
 
-    blender
+	blender
 	geotag
 	handbrake
 
 )
 
-
 SNAP+=(
 
-    handbrake-jz
+	handbrake-jz
 
 )
 SNAP_CANDIDATE+=(
 
-    kgeotag
-_
+	kgeotag
+	_
 )
 SNAP_CLASSIC+=(
 
-    blender
+	blender
 )
 
 if in_os mac; then
-    # shellcheck disable=SC2068
-    cask_install ${CASK[@]}
+	# shellcheck disable=SC2068
+	cask_install ${CASK[@]}
 
 elif in_os linux; then
-    # shellcheck disable=SC2068
-    snap_install ${SNAP[@]}
-    snap_install --classic ${SNAP_CLASSIC[@]}
-    snap_install --candidate ${SNAP_CANDIDATE[@]}
-    log_exit "Linux finished"
+	# shellcheck disable=SC2068
+	snap_install ${SNAP[@]}
+	# shellcheck disable=SC2068
+	snap_install --classic ${SNAP_CLASSIC[@]}
+	# shellcheck disable=SC2068
+	snap_install --candidate ${SNAP_CANDIDATE[@]}
+	log_exit "Linux finished"
 fi
 
 log_verbose "Install Mac specific downloads"

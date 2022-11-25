@@ -55,9 +55,9 @@ if in_os docker; then
 fi
 
 if in_os linux; then
-    # https://linuxize.com/post/how-to-install-slack-on-ubuntu-20-04/
-    snap_install --classic slack
-    log_exit "Snap classic install"
+	# https://linuxize.com/post/how-to-install-slack-on-ubuntu-20-04/
+	snap_install --classic slack
+	log_exit "Snap classic install"
 fi
 
 if app_install slack; then

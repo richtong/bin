@@ -222,7 +222,7 @@ if ! config_mark "$(config_profile_zsh)"; then
 fi
 
 # https://github.com/zdharma-continuum/zinit/issues/418
-if [[ ! -r $(brew --prefix)/opt/zinit/doc/zinit.1 ]]; then 
+if [[ ! -r $(brew --prefix)/opt/zinit/doc/zinit.1 ]]; then
 	log_verbose "Patch for brew formula problem with zinit #418"
 	ln -s "$(man --path zinit)" "$(brew --prefix)/opt/zinit/doc/zinit.1"
 fi
