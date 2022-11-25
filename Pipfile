@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+bandit = "*"
+beautysh = "*"
+black = ">=22.6"
+build = "*"
+flake8 = "*"
+isort = ">=5.10.1"
+mypy = "*"
+neovim = "*"
+pdoc3 = "*"
+pre-commit = "*"
+pydocstyle = "*"
+seed-isort-config = "*"
+setuptools = "*"
+twine = "*"
+wheel = "*"
+yamllint = "*"
+
+[requires]
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true
