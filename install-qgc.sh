@@ -49,14 +49,26 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
 if in_os mac; then
+
+	log_verbose "Download QGroundControl AppImage"
 	download_url_open "https://d176tv9ibo4jno.cloudfront.net/latest/QGroundControl.dmg"
+
 elif in_os linux; then
+	log_verbose "Install App Image launcher"
+	apt_install software-properties-common
+	apt_repository_install ppa:appimagelauncher-team/stable
+	apt_install appimagelauncher
+
 	log_verbose "Requires Ubuntu 20.04 or later"
 	sudo usermod -a -G dialout "$USER"
+	sudo apt-get remove modemmanager -y
 	package_install gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl
 	package_install libqt5gui5
 	# https://forum.qt.io/topic/116347/fresh-install-5-15-could-not-load-the-qt-platform-plugin-xcb/3
 	package_install libxcb-xinerama0
 	log_verbose "download AppImage"
-	download_url_open "https://d176tv9ibo4jno.cloudfront.net/latest/QGroundControl.AppImage"
+	mkdir -p "$HOME/Applications"
+	download_url "https://d176tv9ibo4jno.cloudfront.net/latest/QGroundControl.AppImage" QGroundControl.AppImage "$HOME/Applications"
+	chmod +x "$HOME/Applications/QGroundControl.AppImage"
+
 fi

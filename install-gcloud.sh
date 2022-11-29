@@ -81,7 +81,7 @@ if in_os mac; then
 elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then
 	# https://cloud.google.com/sdk/docs/downloads-interactive#linux-mac
 	log_verbose "enter the installation directory ~/.local/bin is a good choice"
-	download_url "https://sdk.cloud.google.com" "$WS_DIR/cache/install-google-cloud-sdk.sh"
+	download_url "https://sdk.cloud.google.com" "install-google-cloud-sdk.sh"
 	bash "$WS_DIR/cache/install-google-cloud-sdk.sh" --disable-prompts --install-dir="$INSTALL_DIR"
 	if ! config_mark "$(config_shell_profile)"; then
 		config_add "$(config_shell_profile)" <<-EOF

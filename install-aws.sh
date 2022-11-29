@@ -97,7 +97,7 @@ if $DOWNLOAD; then
 	# the only way in August 2020 to get AWS CLI v2 official way:w
 	log_verbose bundled install as the last try
 	download_url "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-		"$WS_DIR/cache/awscliv2.zip"
+		"awscliv2.zip"
 	pushd >/dev/null "$WS_DIR/cache"
 	log_verbose unpackaging awscli source
 	package_install unzip
