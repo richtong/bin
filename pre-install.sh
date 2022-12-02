@@ -11,10 +11,10 @@
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
-ORG_DOMAIN="${ORG_DOMAIN:-"richtong"}"
+REPO_ORG="${REPO_ORG:-"richtong"}"
 WS_DIR="${WS_DIR:-"$HOME/ws"}"
 OPTIND=1
-while getopts "hdvu:e:r:m:w:s:f:c:l:o:x:" opt; do
+while getopts "hdvg:" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
@@ -24,7 +24,9 @@ $SCRIPTNAME: Prebuild before install.sh can run requires no other files
 	Then links to the key one and copies in a temporary ssh config
 
 flags: -h help
-       -x ssh directory (default:$SSH_DIR)
+		-d debugging (default: $DEBUGGING)
+		-v verbose (default: $VERBOSE)
+		-g Github repo organization (default: $REPO_ORG)
 EOF
 
 		exit 0
@@ -34,6 +36,9 @@ EOF
 		;;
 	v)
 		export VERBOSE=true
+		;;
+	g)
+		export REPO_ORG="$OPTARG"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -126,10 +131,7 @@ if [[ $OSTYPE =~ darwin ]]; then
 	open -a "Google Drive"
 elif [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
 	echo "In VMWare assume we use 1Password and SS keys from the host"
-else
-	echo "In native operating system install 1Password, Google Drive and Veracrypt"
-	if ! command -v 1password >/dev/null && ! command -v snap >/dev/null && ! snap install 1password >&/dev/null; then
-		echo "snap install 1password failed do manually"
+elif ! command -v 1password >/dev/null; then
 		# https://support.1password.com/install-linux/
 		KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
 		if [[ ! -e $KEYRING ]]; then
@@ -137,6 +139,7 @@ else
 				sudo gpg --dearmor --output "$KEYRING"
 		fi
 		REPO="https://downloads.1password.com/linux/debian/amd64"
+		sudo touch /etc/apt/sources.list.d/1password.list	
 		if ! grep -q "$REPO" /etc/apt/sources.list.d/1password.list; then
 			echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] $REPO stable main" |
 				sudo tee /etc/apt/sources.list.d/1password.list
@@ -153,8 +156,12 @@ else
 			curl -sS https://downloads.1password.com/linux/keys/1password.asc |
 				sudo gpg --dearmor --output "$KEYRING_DIR/debsig.gpg"
 		fi
-		sudo apt-get update -y && sudo apt-get install -y 1password
-	fi
+		if sudo apt-get update -y && sudo apt-get install -y 1password 1password-cli; then 
+			echo "apt install 1password failed do snap install"
+		    if command -v snap >/dev/null && ! snap install 1password >&/dev/null; then
+				echo "1Password snap install failed"
+			fi
+		fi
 
 	echo "$SCRIPTNAME: install veracrypt"
 	if ! command -v veracrypt >/dev/null && ! command -v snap >/dev/null && ! snap install veracrypt &>/dev/null; then
@@ -174,6 +181,6 @@ fi
 
 if [[ ! -e "$WS_DIR/git/src" ]]; then
 	gh auth login
-	git clone --recurse-submodules "https://github.com/$ORG_DOMAIN/src" "$WS_DIR/git"
+	git clone --recurse-submodules "https://github.com/$REPO_ORG/src" "$WS_DIR/git"
 fi
 echo "$SCRIPTNAME: Restart the terminal to get new bash and profile"

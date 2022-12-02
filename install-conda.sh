@@ -25,11 +25,11 @@ while getopts "hdvacfp:r:u:" opt; do
 		cat <<-EOF
 			Installs Miniconda (you can install anaconda but more dependency issues)
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
-			                       -d $(! $DEBUGGING || echo "no ")debugging
-			                       -v $(! $VERBOSE || echo "not ")verbose
+			    flags: -h help"
+			           -d $(! $DEBUGGING || echo "no ")debugging
+			           -v $(! $VERBOSE || echo "not ")verbose
 			           -a install full Anaconda (default: not $ANACONDA)
-					   -c do not install conda-forge (defualt: $NOFORGE)
+					   -c do not install conda-forge (default: $NOFORGE)
 					   -p install python version (default: $PYTHON)
 					   -r install anaconda version (default: $VERSION)
 					   -u install miniconda version from (default: $URL)
@@ -72,6 +72,7 @@ shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
+log_warning "link $HOME/.local/bin/gcc to gcc-version but this break Ubuntu"
 
 if in_os mac; then
 	cask_install "$ANACONDA"
@@ -87,8 +88,8 @@ elif ! command -v conda &>/dev/null; then
 fi
 
 log_verbose "install conda into .zshrc"
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
+if ! config_mark "$(config_profile_interactive_zsh)"; then
+	config_add "$(config_profile_interactive_zsh)" <<-'EOF'
 		# >>> conda initialize >>>
 		# !! Contents within this block are managed by 'conda init' !!
 		__conda_setup="$('$HOME/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
@@ -106,8 +107,8 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 	EOF
 fi
 
-log_verbose "run .profile to make sure conda setup runs"
-source_profile "$(config_profile_nonexportable)"
+log_verbose "source $(config_profile_interactive_bash) to make sure conda setup runs"
+source_profile "$(config_profile_interactive_bash)"
 
 if ! $NOFORGE; then
 	conda config --env --add channels conda-forge
@@ -124,21 +125,21 @@ log_verbose get latest anaconda and packages
 conda update conda --all -y
 conda install "python=$PYTHON"
 
-log_warning "you should not install into base create your own environment"
-if [[ -v CONDA_SHLVL ]] && ((CONDA_SHLVL > 0)); then
-	log_warning "currently in conda so deactivate"
-	conda deactivate
-fi
-
 log_debug "do not conda on by default"
 if ! config_mark "$(config_profile_nonexportable)"; then
 	config_add "$(config_profile_nonexportable)" <<-'EOF'
-		if command -v conda >/dev/null && [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi"
+		if command -v conda >/dev/null && [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
 	EOF
 fi
 
 if ! config_mark "$(config_profile_zsh)"; then
 	config_add "$(config_profile_zsh)" <<-'EOF'
-		        if command -v conda >/dev/null; [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
+		if command -v conda >/dev/null; [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
 	EOF
 fi
+
+# log_warning "you should not install into base create your own environment"
+# if [[ -v CONDA_SHLVL ]] && ((CONDA_SHLVL > 0)); then
+# 	log_warning "currently in conda so deactivate"
+# 	conda deactivate
+# fi

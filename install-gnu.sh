@@ -13,6 +13,7 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
+FORCE="${FORCE:-false}"
 # This is for Brew
 # https://apple.stackexchange.com/questions/69223/how-to-replace-mac-os-x-utilities-with-gnu-core-utilities
 # for m1 macs it is /opt/homebrew and for intel macs it is /usr/local use brew --prefix to make portable
@@ -20,7 +21,7 @@ BREW_GNU="${BREW_GNU:-"$(brew --prefix)/opt/coreutils/libexec/gnubin"}"
 # https://superuser.com/questions/440288/where-does-macports-install-gnu-sed-when-i-install-coreutils-port
 PORT_GNU="${PORT_GNU:-"/opt/local/bin"}"
 OPTIND=1
-while getopts "hdv" opt; do
+while getopts "hdvf" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -28,6 +29,8 @@ while getopts "hdv" opt; do
 			usage: $SCRIPTNAME [ flags ]
 				   -d $(! $DEBUGGING || echo "no ")debugging
 				   -v $(! $VERBOSE || echo "not ")verbose
+				   -f $(! $FORCE || echo "not ")force gcc install over system
+				      On Ubuntu this can break many things
 		EOF
 		exit 0
 		;;
@@ -41,6 +44,9 @@ while getopts "hdv" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
+	f)
+		FORCE="$($FORCE && echo false || echo true)"
+		;;
 	*)
 		echo "no -$opt" >&2
 		;;
@@ -53,15 +59,20 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-config.sh lib-util.sh
 
 shift $((OPTIND - 1))
 
-if ! in_os mac; then
-	log_exit "Only needed by MacOS"
-fi
-
 # http://meng6.net/pages/computing/installing_and_configuring/installing_and_configuring_command-line_utilities/
 # Note that gettext is needed as well but not included in the list above
 log_verbose installing gnu base packages
 package_install coreutils binutils diffutils gawk gnutls gzip screen \
-	watch wget gnupg gnupg2 gettext man-db
+	watch wget gnupg gnupg2 gettext man-db gcc
+
+if $FORCE || [[ ! -e $HOME/.local/bin/gcc ]]; then
+	log_warning "link $HOME/.local/bin/gcc to gcc-version but this break Ubuntu"
+	mkdir -p "$HOME/.local/bin"
+	GCC_WITH_VERSION="$(find "$(brew --prefix)/bin" -name "gcc-[0-9]*" -print -quit)"
+	if [[ -v GCC_WITH_VERSION ]]; then
+		ln -s "$GCC_WITH_VERSION" "$HOME/.local/bin/gcc"
+	fi
+fi
 
 # https://stackoverflow.com/questions/30003570/how-to-use-gnu-sed-on-mac-os-x
 log_verbose since January 2019, fix --with-default-names by adding paths
@@ -70,12 +81,15 @@ log_verbose need to fix gnu-sed first because it is required by the lib-config.s
 
 # log_verbose installing gnu package needing --with-default-names
 # package_install --with-default-names findutils gnu-indent gnu-sed gnu-tar gnu-which grep
-package_install --with-gettext wdiff
+if in_os mac; then
+	package_install --with-gettext wdiff
+else
+	package_install wdiff
+fi
 
-log_verbose update utilities on macOS
 package_install bash guile gpatch m4 make nano
-log_verbose install MacOS Intel only
 if ! mac_is_arm; then
+	log_verbose "gdb only on Intel Linux or Mac"
 	package_install gdb
 fi
 

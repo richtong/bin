@@ -41,8 +41,19 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh
 
-if ! in_os mac; then
-	log_exit "Mac only"
+if in_os mac; then
+	package_install google-drive
+elif in_os linux; then
+	log_warning "Go to user interface and Settings > Online Accounts > Google Accounts"
+	log_verbose "Install OCAML Fuse driver"
+	# https://support.shells.net/hc/en-us/articles/1500008874361-How-to-connect-to-Google-Drive-using-FUSE-filesystem-in-Your-Ubuntu-Shell
+	apt_repository_install "ppa:allessandro-strada/ppa"
+	package_install google-drive-ocamlfuse
+	google-drive-coamlfuse
+	mkdir -p "$HOME/Google Drive"
+	google-drive-ocamfuse "$HOME/Google Drive"
 fi
 
-package_install google-drive
+fi
+
+

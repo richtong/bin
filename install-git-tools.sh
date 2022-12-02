@@ -11,45 +11,47 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
 GIT_USERNAME="${GIT_USERNAME:-"${USER^}"}"
-GIT_PRIVATE_EMAIL="${GIT_PRIVATE_EMAIL:-"1782087+richtong@users.noreply.github.com"}"
-GIT_EMAIL="${GIT_EMAIL:-"$USER@tongfamily.com"}"
+GIT_EMAIL="${GIT_EMAIL:-"1782087+richtong@users.noreply.github.com"}"
+# no longer use a public email
+# GIT_EMAIL="${GIT_EMAIL:-"$USER@tongfamily.com"}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvu:e:p:" opt; do
+while getopts "hdvu:e:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs Github Tools
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help
-				       -u pretty git user name for git log (default $GIT_USERNAME )
-				       -e git email extension (default $GIT_EMAIL)
-					   -p git private email (default $GIT_PRIVATE_EMAIL)
-			we use the private email by default
+			    flags: -h help
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
+				   -u pretty git user name for git log (default $GIT_USERNAME )
+				   -e git email (default $GIT_EMAIL)
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	u)
 		GIT_USERNAME="$OPTARG"
 		;;
 	e)
 		GIT_EMAIL="$OPTARG"
-		;;
-	p)
-		GIT_PRIVATE_EMAIL="$OPTARG"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -72,8 +74,8 @@ if [[ -z $(git config --global user.name) ]]; then
 fi
 
 if [[ -z $(git config --global user.email) ]]; then
-	log_verbose "no email set changing to $GIT_PRIVATE_EMAIL"
-	git config --global user.email "${GIT_PRIVATE_EMAIL,,}"
+	log_verbose "no email set changing to $GIT_EMAIL"
+	git config --global user.email "${GIT_EMAIL,,}"
 fi
 
 if [[ -z $(git config --global checkout.defaultRemote) ]]; then

@@ -12,7 +12,8 @@ DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 export REPO_USER="${REPO_USER:-"$USER"}"
 export REPO_DOMAIN="${REPO_DOMAIN:-"tongfamily.com"}"
-export GIT_REPO_NAME="${GIT_REPO_NAME:-"richtong"}"
+export REPO_ORG="${REPO_ORG:-"richtong"}"
+DOCKER_LOGIN="${DOCKER_LOGIN:-false}"
 export DOCKER_USER="${DOCKER_USER:-"$REPO_USER"}"
 export GIT_USERNAME="${GIT_USERNAME:-"${REPO_USER^}"}"
 
@@ -35,7 +36,7 @@ ACCOUNTS="${ACCOUNTS:-false}"
 # which user is the source of secrets
 
 OPTIND=1
-while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tz" opt; do
+while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -47,22 +48,22 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tz" opt; do
 			To bootstrap you should install the base operating system either Mac or Linux
 
 			1. Install git
-			2. mkdir ~/ws/git && cd ~/ws/git  && git clone https://github.com/GIT_REPO/src
+			2. mkdir ~/ws/git && cd ~/ws/git  && git clone https://github.com/$REPO_ORG/src
 			3. cd ~/ws/git/src/bin and Run $SCRIPTNAME -h to see what you need
 			4. Get a login to docker and set your docker user name
 			3. Now run $SCRIPTNAME with these available flags
 
 			Make sure these defaults are correct:
-			       -o The dOmain name (default: $REPO_DOMAIN)
+			       -o The Repo Domain name (default: $REPO_DOMAIN)
 			       -l Set the name for Logins (default: $REPO_USER)
-			       -e rEpo name for github (default: $GIT_REPO_NAME)
+			       -g repo name for github (default: $REPO_ORG)
+				   -u docker login (default: $DOCKER_LOGIN)
 			       -r dockeR user name (default: $DOCKER_USER)
 
 			Check these as well:
 			       -e Email for user (default: $GIT_EMAIL)
 			       -u User name for github (default: $GIT_USERNAME)
-			       -a Use dotfiles
-			$DOTFILES_STOW)
+			       -a Use dotfiles $DOTFILES_STOW)
 
 			You should not normally need these:
 			       -f force a git pull of the origin (default: $FORCE)
@@ -85,7 +86,7 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tz" opt; do
 			Debugging flags:
 				   -d $(! $DEBUGGING || echo "no ")debugging
 				   -v $(! $VERBOSE || echo "not ")verbose
-			        -h you are reading it now
+			       -h you are reading it now
 		EOF
 
 		exit 0
@@ -101,6 +102,11 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tz" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
+	u)
+		DOCKER_LOGIN="$($DOCKER_LOGIN && echo false || echo true)"
+		export DOCKER_LOGIN
+		;;
+
 	l)
 		REPO_USER="$OPTARG"
 		;;
@@ -120,7 +126,8 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tz" opt; do
 		SECRETS_DIR_ROOT="$OPTARG"
 		;;
 	a)
-		DOTFILES_STOW=true
+		DOTFILES_STOW="$($DOTFILES_STOW && echo false || echo true)"
+		export DOTFILES_STOW
 		;;
 	x)
 		NO_SUDO_PASSWORD=true
@@ -167,7 +174,7 @@ shift $((OPTIND - 1))
 
 log_verbose "Run pre-install.sh to get brew and 1Password installed."
 log_verbose "pre-install.sh can be run standalone to bootstrap everything"
-"$SCRIPT_DIR/pre-install.sh"
+"$SCRIPT_DIR/pre-install.sh" -g "$REPO_ORG"
 
 log_verbose "Add #! for zshrc"
 if [[ ! -e $HOME/.zshrc ]]; then
@@ -294,21 +301,34 @@ if $FORCE; then
 	FORCE_FLAG="-f"
 fi
 
-# these python packages do not always install command line argument stuff
 
 # common packages
-# mmv - multiple file move and rename
-# curl - not clear if needed but MacOS doesn't have the latest
+
 # bfg - remove passwords and big files you didn't mean to commit this is snap only
-# gh
-# sudo - Linux only
+# curl - not clear if needed but MacOS doesn't have the latest
+# fzf - fast search for directories etc.
+# gh - github cli
 # mandoc - To get the version with man --path
+# ripgrep - way better grepping
+# sudo - Linux only
+# thefuck - smart command completion
+
 PACKAGES+=(
+
+	bashdb
+	curl
+	font-alegreya-sc
+	font-source-serif-pro
+	fzf
+	git
+	golang
+	graphviz
 	mandoc
 	mmv
-	curl
-	git
 	pre-commit
+	ripgrep
+	thefuck
+
 )
 
 if ! in_os mac; then
@@ -413,7 +433,7 @@ if ! "$BIN_DIR/install-docker.sh"; then
 	exit 0
 fi
 
-if [[ ! -e $HOME/.docker/config.json ]] || ! grep -q auth "$HOME/.docker/config.json"; then
+if $DOCKER_LOGIN && [[ ! -e $HOME/.docker/config.json ]] || ! grep -q auth "$HOME/.docker/config.json"; then
 	"$BIN_DIR/docker-login.sh" -u "$DOCKER_USER"
 fi
 

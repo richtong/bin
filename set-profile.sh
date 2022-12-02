@@ -157,7 +157,7 @@ if ! config_mark "$profile"; then
 	log_verbose "source .profile from $profile"
 	config_add "$profile" <<-"EOF"
 		# run profile if you find it for an inbound ssh session on ubuntu
-		[[ -e $HOME/.profile ]] && . "$HOME/.profile"
+		[[ -r $HOME/.profile ]] && . "$HOME/.profile"
 	EOF
 	# never use profiles++ because (( )) fails if the value is a zero
 	# https://askubuntu.com/questions/385528/how-to-increment-a-variable-in-bash

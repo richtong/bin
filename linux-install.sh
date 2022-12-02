@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-## vim: se noet ai sw=4 :
+## vim: se noet ts=4 ai sw=4 :
 ##
 #
 ## install grub and moves to passwordless sudo
@@ -97,10 +97,17 @@ if $PASSWORDLESS_SUDO; then
 	fi
 fi
 
-# surround.io only
-# log_verbose check for vmware
-# "$SCRIPT_DIR/install-vmware-tools.sh"
-# the first number indicates priority, make account sudo-less
+log_verbose "Checking for hardware and installing specific Linux drivers"
+# https://www.2daygeek.com/linux-check-system-hardware-manufacturer-model-serial-number/
+# https://junocomputers.com/us/support/
+if [[ $(linux_model) =~ NV14J ]]; then
+	package_install software-properties-common ca-certificates
+	apt_install_repository ppa:junocomp/juno-apps
+	package_install juno-installer
+	juno-installer
+	log_verbose "turbo-on, turbo-off, turbo-stat"
+fi
+
 # "$SCRIPT_DIR/install-iam-key-daemon.sh"
 # Per http://unix.stackexchange.com/questions/9940/convince-apt-get-not-to-use-ipv6-method
 if ! sudo touch /etc/apt/apt.conf.d/99force-ipv4; then
@@ -108,6 +115,7 @@ if ! sudo touch /etc/apt/apt.conf.d/99force-ipv4; then
 elif ! grep "^Acquire::ForceIPv4" /etc/apt/apt.conf.d/99force-ipv4; then
 	sudo tee -a /etc/apt/apt.conf.d/99force-ipv4 <<<'Acquire::ForceIPv4 "true";'
 fi
+
 # Problems here include internet not up or the dreaded Hash Mismatch
 # This is usually due to bad ubuntu mirrors
 # See # http://askubuntu.com/questions/41605/trouble-downloading-packages-list-due-to-a-hash-sum-mismatch-error
@@ -117,6 +125,7 @@ if ! sudo apt-get -y update; then
 	echo "  retry or sudo rm -rf /var/list/apt/lists* might help"
 	exit 4
 fi
+
 sudo apt-get -y upgrade
 log_verbose "note that snap does not work on WSL2"
 # not this should no longer exist now that we are on docker

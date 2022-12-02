@@ -69,7 +69,7 @@ fi
 
 if in_os linux; then
 
-	log_verbose "Install Linux graphical 1Password"
+	log_verbose "Install Linux graphical 1Password not linked to browser"
 	snap_install 1password
 	log_verbose "Install linux 1Password cli"
 	apt_install 1password-cli

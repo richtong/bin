@@ -20,6 +20,8 @@ DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 NODE_VERSION="${NODE_VERSION:-18.12.1}"
 DIRENV_VERSION="${DIRENV_VERSION:-2.32.1}"
+# Note the 3.10.8 has to be build for Ubuntu so go lower as of Nov 2022
+# and that build fails
 PYTHON_VERSION="${PYTHON_VERSION:-3.10.8}"
 # openjdk18 is Java 8 for Unifi.app
 JAVA_VERSION="${JAVA_VERSION:-openjdk-18}"
@@ -75,7 +77,8 @@ source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 log_verbose "Install asdf core"
 package_install asdf
-package_install gpg gawk
+log_verbose "Install asdf support including gcc if it has to build from source"
+package_install gpg gawk gcc
 
 # https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
 declare -A ASDF+=(
@@ -116,21 +119,15 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 	#EOF
 fi
 
-if [[ -n ${ASDF[direnv]} ]]; then
-	log_verbose "Found direnv installing config info"
-	for SHELL_VERSION in bash zsh; do
-		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
-	done
-	#config_add <<-'EOF'
-	#    eval "$(asdf exec direnv hook bash)"
-	#    direnv() { asdf exec direnv "$@"; }
-	#EOF
+#  https://stackoverflow.com/questions/19816275/no-acceptable-c-compiler-found-in-path-when-installing-python
+if in_os linux; then
+	log_verbose "Install Linux prerequisites for asdf python"
+	package_install  build-essential libssl-dev zlib1g-dev \
+		libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+		libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
 fi
 
-# https://github.com/asdf-vm/asdf-nodejs/issues/253
-log_verbose "must source otherwise reshim will fail"
-source_profile
-
+log_verbose "Installing asdf plugins"
 for p in "${!ASDF[@]}"; do
 	log_verbose "install asdf plugin $p"
 	if ! asdf list "$p" >/dev/null; then
@@ -151,6 +148,21 @@ for p in "${!ASDF[@]}"; do
 	log_verbose "Set global for $p with ${ASDF[$p]}"
 	asdf global "$p" "${ASDF[$p]}"
 done
+
+log_verbose "Checking for asdf direnv"
+if [[ -n ${ASDF[direnv]} ]]; then
+	log_verbose "Found direnv installing config info"
+	for SHELL_VERSION in bash zsh; do
+		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
+	done
+	#config_add <<-'EOF'
+	#    eval "$(asdf exec direnv hook bash)"
+	#    direnv() { asdf exec direnv "$@"; }
+	#EOF
+fi
+# https://github.com/asdf-vm/asdf-nodejs/issues/253
+log_verbose "must source otherwise reshim will fail"
+source_profile
 
 # this is no longer needed run the asdf setup instead
 # https://github.com/asdf-community/asdf-direnv

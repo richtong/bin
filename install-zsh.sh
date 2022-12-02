@@ -190,9 +190,6 @@ PLUGIN+=(
 	fzf
 )
 
-# use -x so we don't replace if it is already there
-config_replace -x "$(config_profile_zsh)" plugins "plugins = (${PLUGIN[*]})"
-
 log_verbose "adding zinit plugins must be done early in installation"
 # https://gist.github.com/laggardkernel/4a4c4986ccdcaf47b91e8227f9868ded
 # powerlevel10k - status bar
@@ -201,8 +198,8 @@ log_verbose "adding zinit plugins must be done early in installation"
 # https://stackoverflow.com/questions/12137431/test-if-a-command-outputs-an-empty-string
 # note that compaudit does not always exist so check for it and then its output
 
-if ! config_mark "$(config_profile_zsh)"; then
-	config_add "$(config_profile_zsh)" <<-'EOF'
+if ! config_mark "$(config_profile_interactive_zsh)"; then
+	config_add "$(config_profile_interactive_zsh)" <<-'EOF'
 		[[ $PATH =~ $HOME/.local/bin ]] || PATH="$HOME/.local/bin:$PATH"
 		command -v compaudit >/dev/null && [[ $(compaudit) ]] && compaudit | xargs chmod g-w,o-w
 		# oh-my-zsh will utter it is in asdf so suppress the warning
@@ -220,6 +217,11 @@ if ! config_mark "$(config_profile_zsh)"; then
 		setupsolarized
 	EOF
 fi
+
+# use -x so we don't replace if it is already there
+# also run after the config_add above to get the mark
+log_warning "if plugins is already in .zshrc remove manually and rerun"
+config_replace -x "$(config_profile_interactive_zsh)" plugins "plugins=(${PLUGIN[*]})"
 
 # https://github.com/zdharma-continuum/zinit/issues/418
 if [[ ! -r $(brew --prefix)/opt/zinit/doc/zinit.1 ]]; then

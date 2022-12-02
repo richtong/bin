@@ -89,7 +89,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 DOWNLOADS=${DOWNLOADS:-"$WS_DIR/cache"}
 
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
-if [[ ! $OSTYPE =~ darwin ]]; then
+if ! in_os mac; then
 	log_exit Must be on OS X does nothing otherwise
 fi
 

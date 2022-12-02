@@ -1,5 +1,5 @@
 direnv 2.32.1
 # Stayed on 17 for Copilot can now move ahead
-nodejs 18.10.0
+nodejs 18.12.1
 python 3.10.8
 java openjdk-18

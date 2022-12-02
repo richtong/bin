@@ -148,15 +148,10 @@ if ! $INSTALL_POWERLINE; then
 		config_add "$(config_profile_nonexportable)" <<-EOF
 			function _update_ps1() {
 			    # shellcheck disable=SC2046
-			    PS1=\$(powerline-go \
-						-max-width 50 -cwd-max-dir-size 4 -cwd-max-depth 4 -condensed \
-						-theme solarized-dark16 \
-						-colorize-hostname -hostname-only-if-ssh \
-						-shorten-gke-names -shorten-eks-names \\
-						-modules \
-							"$MODULES" \
-						-priority \
-							"$PRIORITIES" \
+			    PS1=\$(powerline-go -max-width 50 -cwd-max-dir-size 4 -cwd-max-depth 4 -condensed \
+						-theme solarized-dark16 -colorize-hostname -hostname-only-if-ssh \
+						-shorten-gke-names -shorten-eks-names -modules "$MODULES" \
+						-priority "$PRIORITIES" \
 						-error \$? -jobs \$(jobs -p | wc -l))
 			}
 			if [[ \$TERM != linux ]] && command -v powerline-go >& /dev/null; then
