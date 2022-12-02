@@ -65,7 +65,7 @@ log_verbose installing gnu base packages
 package_install coreutils binutils diffutils gawk gnutls gzip screen \
 	watch wget gnupg gnupg2 gettext man-db gcc
 
-if $FORCE || [[ ! -e $HOME/.local/bin/gcc ]]; then
+if $FORCE && [[ ! -e $HOME/.local/bin/gcc ]]; then
 	log_warning "link $HOME/.local/bin/gcc to gcc-version but this break Ubuntu"
 	mkdir -p "$HOME/.local/bin"
 	GCC_WITH_VERSION="$(find "$(brew --prefix)/bin" -name "gcc-[0-9]*" -print -quit)"
