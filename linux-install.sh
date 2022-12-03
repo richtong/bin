@@ -75,9 +75,17 @@ if ! config_mark; then
 	EOF
 fi
 
-log_verbose "install sudo and lua"
+log_verbose "Specific packages"
+PACKAGES+=(
+	sudo
+	lua5.2
+	ppa-purge
+	net-tools
+)
+
 # lua used by lib-config
-package_install sudo lua5.2 ppa-purge
+package_install "${PACKAGES[@]}" 
+
 # no longer need keychain as of July 2022 Ubuntu has ed_25519 support
 # "$SCRIPT_DIR/install-keychain.sh"
 log_verbose Adding sudoers entry ignored if running under iam-key
