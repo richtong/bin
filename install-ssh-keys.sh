@@ -9,8 +9,10 @@
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -ue && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 
 OPTIND=1
 GROUP="${GROUP:-"$(id -gn)"}"
@@ -25,20 +27,29 @@ SOURCE="${SOURCE:-"$PRIVATE_KEY_SOURCE_DIR/ssh/$USER"}"
 while getopts "hdv" opt; do
 	case "$opt" in
 	h)
-		echo "$SCRIPTNAME: Install SSH Keys from encrypted source"
-		echo "flags: -d debug, -v verbose, -h help"
-		echo positionals [user [group [ source [ destination ]]]]
-		echo "       user (default: $USER)"
-		echo "       group (default: $GROUP)"
-		echo "       source (default: $SOURCE)"
-		echo "       destination (default: $DEST)"
+		cat <<-EOF
+			$SCRIPTNAME: Install SSH Keys from encrypted source
+			flags: -h help
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
+			positionals [user [group [ source [ destination ]]]]
+				user (default: $USER)
+				group (default: $GROUP)
+				source (default: $SOURCE)
+				destination (default: $DEST)
+		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "no -$opt" >&2

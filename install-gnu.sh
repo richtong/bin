@@ -142,12 +142,14 @@ if ! config_mark; then
 		        done
 		        for NAME in gnu-getopt gettext m4; do
 		            echo "$PATH" | grep -q "opt/$NAME/bin" ||
-		                PATH="$BREW_PREFIX/opt/$NAME/bin:$PATH"
+		                PATH="$HOMEBREW_PREFIX/opt/$NAME/bin:$PATH"
 		        done
 				for NAME in man-db; do
 					echo "$PATH" | grep -q "opt/$NAME/libexec/bin" ||
-						PATH="$BREW_PREFIX/opt/$NAME/libexec/bin:$PATH"
+						PATH="$HOMEBREW_PREFIX/opt/$NAME/libexec/bin:$PATH"
 				done
+				echo "$PATH" | grep -q "opt/coreutils/libexec/gnubin" ||
+					PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
 	EOF
 fi
 

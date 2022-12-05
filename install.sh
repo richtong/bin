@@ -176,22 +176,32 @@ log_verbose "Run pre-install.sh to get brew and 1Password installed."
 log_verbose "pre-install.sh can be run standalone to bootstrap everything"
 "$SCRIPT_DIR/pre-install.sh" -g "$REPO_ORG"
 
-log_verbose "Add #! for zshrc"
-if [[ ! -e $HOME/.zshrc ]]; then
-	echo "#!/usr/bin/env zsh" .."$HOME/.zshrc"
-fi
-
 log_verbose "setup up bash and zsh profiles basic sourcing and paths"
 config_setup
 
 log_verbose "source latest profiles with BASH=$BASH"
 source_profile
 
+log_verbose "install brew for linux and mac as common installer"
+"$SCRIPT_DIR/install-brew.sh"
+
 log_verbose "install gnu with BASH=$BASH"
 "$SCRIPT_DIR/install-gnu.sh"
 
+"$SCRIPT_DIR/install-asdf.sh"
+
 log_verbose "Install git and git tooling"
 package_install git
+# Install secrets before doing a git
+
+if $INSTALL_SECRETS; then
+	log_verbose "Bailing secrets from veracrypt"
+	"$SCRIPT_DIR/install-secrets.sh"
+fi
+
+log_verbose "Adding .ssh key passphrases to keychain or keyring"
+"$SCRIPT_DIR/install-ssh-config.sh"
+
 # the {-} means replace with null if FORCE_FLAG is not set
 "$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"
 log_verbose must be installed is git lfs is used before installing repos
@@ -202,11 +212,6 @@ if ! in_os docker &&
 	"$SCRIPT_DIR/install-repos.sh" "${FORCE_FLAG-}"; then
 	log_warning "install-repos.sh returned $?"
 fi
-
-log_verbose "need readlink on bootstrap from coreutils"
-package_install coreutils
-export PATH
-[[ $PATH =~ opt/coreutils/libexec/gnubin ]] || PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
 
 # run dotfiles-stow as soon as possible use the personal repo above
 # Otherwise the installation scripts below will cause conflicts
@@ -219,7 +224,7 @@ if $DOTFILES_STOW; then
 fi
 
 # install this after you stow
-log_verbose "Install Zsh opions"
+log_verbose "Install Zsh options"
 "$SCRIPT_DIR/install-zsh.sh"
 
 # https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
@@ -261,11 +266,6 @@ if ! config_mark; then
 		if echo "$BASH" | grep -q "bash" && [ -f "$HOME/.bashrc" ]; then source "$HOME/.bashrc"; fi
 	EOF
 fi
-
-log_verbose "install brew for linux and mac as common installer"
-"$SCRIPT_DIR/install-brew.sh"
-
-"$SCRIPT_DIR/install-asdf.sh"
 
 log_verbose "install python and go"
 "$SCRIPT_DIR/install-python.sh"
@@ -319,7 +319,6 @@ PACKAGES+=(
 	font-alegreya-sc
 	font-source-serif-pro
 	fzf
-	git
 	golang
 	graphviz
 	mandoc
