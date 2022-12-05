@@ -53,7 +53,3 @@ elif in_os linux; then
 	mkdir -p "$HOME/Google Drive"
 	google-drive-ocamfuse "$HOME/Google Drive"
 fi
-
-fi
-
-

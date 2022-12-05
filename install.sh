@@ -36,7 +36,7 @@ ACCOUNTS="${ACCOUNTS:-false}"
 # which user is the source of secrets
 
 OPTIND=1
-while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:" opt; do
+while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:k:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -54,10 +54,10 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:" opt; do
 			3. Now run $SCRIPTNAME with these available flags
 
 			Make sure these defaults are correct:
-			       -o The Repo Domain name (default: $REPO_DOMAIN)
+			       -o The Repo organization name (default: $REPO_DOMAIN)
 			       -l Set the name for Logins (default: $REPO_USER)
 			       -g repo name for github (default: $REPO_ORG)
-				   -u docker login (default: $DOCKER_LOGIN)
+				   -k docker login (default: $DOCKER_LOGIN)
 			       -r dockeR user name (default: $DOCKER_USER)
 
 			Check these as well:
@@ -102,7 +102,7 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
-	u)
+	o)
 		DOCKER_LOGIN="$($DOCKER_LOGIN && echo false || echo true)"
 		export DOCKER_LOGIN
 		;;
@@ -116,7 +116,7 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:" opt; do
 	e)
 		GIT_EMAIL="$OPTARG"
 		;;
-	r)
+	k)
 		DOCKER_USER="$OPTARG"
 		;;
 	w)
@@ -301,7 +301,6 @@ if $FORCE; then
 	FORCE_FLAG="-f"
 fi
 
-
 # common packages
 
 # bfg - remove passwords and big files you didn't mean to commit this is snap only
@@ -450,6 +449,8 @@ source_profile
 
 log_verbose "install QGroundControl"
 "$SCRIPT_DIR/install-qgc.sh"
+log_vrbose "install Android tools"
+"$SCRIPT_DIR/install-android-tools.sh"
 
 # Assumes that personal.git is at the same level as src
 log_verbose Chain to your personal installs

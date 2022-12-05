@@ -122,7 +122,7 @@ fi
 #  https://stackoverflow.com/questions/19816275/no-acceptable-c-compiler-found-in-path-when-installing-python
 if in_os linux; then
 	log_verbose "Install Linux prerequisites for asdf python"
-	package_install  build-essential libssl-dev zlib1g-dev \
+	package_install build-essential libssl-dev zlib1g-dev \
 		libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
 		libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
 fi

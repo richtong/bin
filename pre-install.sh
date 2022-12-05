@@ -132,36 +132,36 @@ if [[ $OSTYPE =~ darwin ]]; then
 elif [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
 	echo "In VMWare assume we use 1Password and SS keys from the host"
 elif ! command -v 1password >/dev/null; then
-		# https://support.1password.com/install-linux/
-		KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
-		if [[ ! -e $KEYRING ]]; then
-			curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-				sudo gpg --dearmor --output "$KEYRING"
+	# https://support.1password.com/install-linux/
+	KEYRING="/usr/share/keyrings/1password-archive-keyring.gpg"
+	if [[ ! -e $KEYRING ]]; then
+		curl -sS https://downloads.1password.com/linux/keys/1password.asc |
+			sudo gpg --dearmor --output "$KEYRING"
+	fi
+	REPO="https://downloads.1password.com/linux/debian/amd64"
+	sudo touch /etc/apt/sources.list.d/1password.list
+	if ! grep -q "$REPO" /etc/apt/sources.list.d/1password.list; then
+		echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] $REPO stable main" |
+			sudo tee /etc/apt/sources.list.d/1password.list
+	fi
+	DEBSIG="/etc/debsig/policies/AC2D62742012EA22/"
+	sudo mkdir -p "$DEBSIG"
+	if [[ ! -e $DEBSIG/1password.pol ]]; then
+		curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol |
+			sudo tee "$DEBSIG/1password.pol"
+	fi
+	KEYRING_DIR="/usr/share/debsig/keyrings/AC2D62742012EA22"
+	sudo mkdir -p "$KEYRING_DIR"
+	if [[ ! -e $KEYRING_DIR/debsig.gpg ]]; then
+		curl -sS https://downloads.1password.com/linux/keys/1password.asc |
+			sudo gpg --dearmor --output "$KEYRING_DIR/debsig.gpg"
+	fi
+	if sudo apt-get update -y && sudo apt-get install -y 1password 1password-cli; then
+		echo "apt install 1password failed do snap install"
+		if command -v snap >/dev/null && ! snap install 1password >&/dev/null; then
+			echo "1Password snap install failed"
 		fi
-		REPO="https://downloads.1password.com/linux/debian/amd64"
-		sudo touch /etc/apt/sources.list.d/1password.list	
-		if ! grep -q "$REPO" /etc/apt/sources.list.d/1password.list; then
-			echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] $REPO stable main" |
-				sudo tee /etc/apt/sources.list.d/1password.list
-		fi
-		DEBSIG="/etc/debsig/policies/AC2D62742012EA22/"
-		sudo mkdir -p "$DEBSIG"
-		if [[ ! -e $DEBSIG/1password.pol ]]; then
-			curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol |
-				sudo tee "$DEBSIG/1password.pol"
-		fi
-		KEYRING_DIR="/usr/share/debsig/keyrings/AC2D62742012EA22"
-		sudo mkdir -p "$KEYRING_DIR"
-		if [[ ! -e $KEYRING_DIR/debsig.gpg ]]; then
-			curl -sS https://downloads.1password.com/linux/keys/1password.asc |
-				sudo gpg --dearmor --output "$KEYRING_DIR/debsig.gpg"
-		fi
-		if sudo apt-get update -y && sudo apt-get install -y 1password 1password-cli; then 
-			echo "apt install 1password failed do snap install"
-		    if command -v snap >/dev/null && ! snap install 1password >&/dev/null; then
-				echo "1Password snap install failed"
-			fi
-		fi
+	fi
 
 	echo "$SCRIPTNAME: install veracrypt"
 	if ! command -v veracrypt >/dev/null && ! command -v snap >/dev/null && ! snap install veracrypt &>/dev/null; then

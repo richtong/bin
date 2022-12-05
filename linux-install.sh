@@ -84,7 +84,7 @@ PACKAGES+=(
 )
 
 # lua used by lib-config
-package_install "${PACKAGES[@]}" 
+package_install "${PACKAGES[@]}"
 
 # no longer need keychain as of July 2022 Ubuntu has ed_25519 support
 # "$SCRIPT_DIR/install-keychain.sh"
