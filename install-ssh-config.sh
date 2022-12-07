@@ -10,10 +10,11 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
+USE_KEYCHAIN="${USE_KEYCHAIN:-false}"
 
 OPTIND=1
 
-while getopts "hdv" opt; do
+while getopts "hdvk" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -23,6 +24,7 @@ while getopts "hdv" opt; do
 			flags: -h help
 				   -d $(! $DEBUGGING || echo "no ")debugging
 				   -v $(! $VERBOSE || echo "not ")verbose
+				   -k do $(! $USE_KEYCHAIN || echo "not ")use keychain, use key-ring
 
 		EOF
 		exit
@@ -30,14 +32,18 @@ while getopts "hdv" opt; do
 	d)
 		# invert the variable when flag is set
 		DEBUGGING="$($DEBUGGING && echo false || echo true)"
-		xport DEBUGGING
-		xport DEBUGGING=true
+		export DEBUGGING
 		;;
 	v)
 		VERBOSE="$($VERBOSE && echo false || echo true)"
 		export VERBOSE
 		# add the -v which works for many commands
 		if $VERBOSE; then export SSH_LOAD_FLAGS+=" -v "; fi
+		;;
+	k)
+		# invert the variable when flag is set
+		USE_KEYCHAIN="$($USE_KEYCHAIN && echo false || echo true)"
+		export USE_KEYCHAIN
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -82,6 +88,7 @@ if in_os mac; then
 			config_replace "$HOME/.ssh/config" "AddKeysToAgent" "AddKeysToAgent yes"
 			config_replace "$HOME/.ssh/config" "UseKeychain" "UseKeychain yes"
 		fi
+
 		log_warning "MacOS Sierra can stop here if you never need SSH Key forwarding but we use it so continue"
 	else
 		log_verbose "Older than MacOS Sierra just set old ssh flags -K and -A"
@@ -132,12 +139,27 @@ if in_os mac; then
 		fi
 	done
 
-elif in_os linux; then
+elif in_os linux && ! $USE_KEYCHAIN; then
 
-	log_verbose "on Ubuntu use openssh keychain instead of gnome keyring does not handle id_ed25519"
+    log_verbose "In Linux, using Gnome key-ring by default finds all keys in $HOME/.ssh"
+    if $VERBOSE; then
+        # https://wiki.gnome.org/Projects/GnomeKeyring/Ssh
+        ssh-add -l
+    fi
+
+    log_verbose "Make sure AddKeysToAgent so gnome will handle passphrases"
+    if [[ ! -L $HOME/.ssh/config ]]; then
+        log_verbose .ssh/config is a real file so make sure they are there
+        config_replace "$HOME/.ssh/config" "AddKeysToAgent" "AddKeysToAgent yes"
+    fi
+
+elif in_os linux && $USE_KEYCHAIN; then
+
+    # this is legacy code before Gnome Keyring worked with id_ed25519
 	log_verbose "make sure you run keychain to find the openssh keychain"
+    package_install keychain
 	if in_linux ubuntu; then
-		log_verbose Make sure we are using the correct keychain as gnome does not handle id_25519 keys
+		log_verbose "add .ssh keys to the keychain"
 		use_openssh_keychain
 	fi
 
