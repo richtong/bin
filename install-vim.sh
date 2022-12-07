@@ -915,7 +915,8 @@ nnoremap <silent> <leader>c{ V{:call NERDComment('x', 'toggle')<CR>
 
 " https://duseev.com/articles/vim-python-pipenv/
 " switch environments depending on pipenv
-let pipenv_venv = system('pipenv --venv')
+" https://github.com/pypa/pipenv/issues/2358
+let pipenv_venv = system('PIPENV_QUIET=1 pipenv --venv')
 if v:shell_error == 0
    let venv_path = substitute(pipenv_venv, '\n', '', '')
    let g:python3_host_prog = venv_path . '/bin/python'

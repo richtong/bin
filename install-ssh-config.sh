@@ -52,10 +52,13 @@ while getopts "hdvk" opt; do
 done
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-git.sh lib-mac.sh lib-util.sh lib-keychain.sh lib-version-compare.sh lib-config.sh lib-install.sh
+#source_lib lib-git.sh lib-mac.sh lib-util.sh lib-keychain.sh lib-version-compare.sh lib-config.sh lib-install.sh
+source_lib lib-util.sh lib-config.sh
+log_verbose "Loaded shell libraries"
 shift $((OPTIND - 1))
 
 if in_os mac; then
+	log_verbose "Installing for MacOS"
 
 	# https://github.com/jirsbek/SSH-keys-in-macOS-Sierra-keychain
 	# Note we could also create a LaunchAgent, but using bashrc
@@ -141,23 +144,23 @@ if in_os mac; then
 
 elif in_os linux && ! $USE_KEYCHAIN; then
 
-    log_verbose "In Linux, using Gnome key-ring by default finds all keys in $HOME/.ssh"
-    if $VERBOSE; then
-        # https://wiki.gnome.org/Projects/GnomeKeyring/Ssh
-        ssh-add -l
-    fi
+	log_verbose "In Linux, using Gnome key-ring by default finds all keys in $HOME/.ssh"
+	if $VERBOSE; then
+		# https://wiki.gnome.org/Projects/GnomeKeyring/Ssh
+		ssh-add -l
+	fi
 
-    log_verbose "Make sure AddKeysToAgent so gnome will handle passphrases"
-    if [[ ! -L $HOME/.ssh/config ]]; then
-        log_verbose .ssh/config is a real file so make sure they are there
-        config_replace "$HOME/.ssh/config" "AddKeysToAgent" "AddKeysToAgent yes"
-    fi
+	log_verbose "Make sure AddKeysToAgent so gnome will handle passphrases"
+	if [[ ! -L $HOME/.ssh/config ]]; then
+		log_verbose .ssh/config is a real file so make sure they are there
+		config_replace "$HOME/.ssh/config" "AddKeysToAgent" "AddKeysToAgent yes"
+	fi
 
 elif in_os linux && $USE_KEYCHAIN; then
 
-    # this is legacy code before Gnome Keyring worked with id_ed25519
+	# this is legacy code before Gnome Keyring worked with id_ed25519
 	log_verbose "make sure you run keychain to find the openssh keychain"
-    package_install keychain
+	package_install keychain
 	if in_linux ubuntu; then
 		log_verbose "add .ssh keys to the keychain"
 		use_openssh_keychain
