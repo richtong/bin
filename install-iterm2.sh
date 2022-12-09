@@ -49,9 +49,9 @@ EOF
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-config.sh lib-mac.sh lib-install.sh lib-util.sh
+source_lib lib-config.sh lib-mac.sh lib-install.sh lib-util.sh lib-git.sh
 
 # since this uses WS_DIR need to have it run after include
 ITERM2_PROFILE_SRC="${ITERM2_PROFILE_SRC:-"$WS_DIR/git/src/user/$USER/dotfiles/macos/$ITERM2_PATH/$ITERM2_FILE"}"
@@ -82,8 +82,10 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 	EOF
 fi
 
-log_verbose "install zsh integrations"
-curl -L https://iterm2.com/shell_integration/zsh -o ~/.iterm2_shell_integration.zsh
+if [[ ! -e "$HOME/.iterm2_shell_integration.zsh" ]]; then
+	log_verbose "install zsh integrations"
+	curl -L https://iterm2.com/shell_integration/zsh -o ~/.iterm2_shell_integration.zsh
+fi
 
 # not sure what is in the integration so run it always in .zshrc
 if ! config_mark "$(config_profile_nonexportable_zsh)"; then
@@ -92,7 +94,7 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 	EOF
 fi
 
-log_verbose "Install customer iterm2 colors with $SCRIPT_DIR/iterm2-color-schemes"
-"$SCRIPT_DIR/../iterm2-color-schemes/tools/import-scheme.sh" \
-	"Cyberdyne" \
-	"Nord"
+REPO_PATH="$(git_install_or_update "https://github.com/mbadolato/iTerm2-Color-Schemes")"
+log_verbose "Install customer iterm2 colors"
+log_verbose "REPO_PATH: $REPO_PATH"
+"$REPO_PATH/tools/import-scheme.sh" Cyberdyne Nord
