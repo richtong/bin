@@ -27,12 +27,13 @@ while getopts "hdvmuiofkcbsa" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
+
 			$SCRIPTNAME: Install Kubernetes command line and then a k8s implementation
 			flags: -h help
-			   -d $(! $DEBUGGING || echo "no ")debugging
-			   -v $(! $VERBOSE || echo "not ")verbose
+				-d $(! $DEBUGGING || echo "no ")debugging
+				-v $(! $VERBOSE || echo "not ")verbose
 				-f force installation (default: $FORCE)
-			   -d $(! $DEBUGGING || echo "no ")debugging
+				-d $(! $DEBUGGING || echo "no ")debugging
 				-c $(! $COLIMA || echo "No ")Install Colima with Kubernetes support
 				-o $(! $DOCKER || echo "No ")Install Docker with a single cluster version
 				-m $(! $MINIKUBE || echo "No ")Install minikube a single node Kubernetes
@@ -42,6 +43,7 @@ while getopts "hdvmuiofkcbsa" opt; do
 				-u $(! $MULTIPASS || echo "No ")Install Multipass enables Canonical Microk8s from inside VM
 				-i $(! $MICROK8S || echo "No ")Install microK8s using Multipass
 				-b $(! $KUBEFLOW || echo "No ")Install kubeflow
+
 		EOF
 		exit 0
 		;;
@@ -56,29 +58,29 @@ while getopts "hdvmuiofkcbsa" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
-	f)
-		FORCE="$($FORCE && echo false || echo true)"
+	b)
+		KUBEFLOW="$($KUBEFLOW && echo false || echo true)"
 		;;
 	c)
 		COLIMA="$($COLIMA && echo false || echo true)"
 		;;
-	m)
-		MINIKUBE="$($MINIKUBE && echo false || echo true)"
+	f)
+		FORCE="$($FORCE && echo false || echo true)"
 		;;
 	i)
 		MICROK8S="$($MICROK8S && echo false || echo true)"
 		;;
-	u)
-		MULTIPASS="$($MULTIPASS && echo false || echo true)"
-		;;
 	k)
 		KIND="$($KIND && echo false || echo true)"
+		;;
+	m)
+		MINIKUBE="$($MINIKUBE && echo false || echo true)"
 		;;
 	o)
 		DOCKER="$($DOCKER && echo false || echo true)"
 		;;
-	b)
-		KUBEFLOW="$($KUBEFLOW && echo false || echo true)"
+	u)
+		MULTIPASS="$($MULTIPASS && echo false || echo true)"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -343,7 +345,7 @@ if $MICROK8S; then
 	fi
 
 	# https://charmed-kubeflow.io/docs/quickstart as of July 2022
-	if $DEPRECATED_KUBEFLOW; then
+	if $KUBEFLOW; then
 		# https://github.com/canonical/microk8s/issues/1763#issuecomment-731999949
 		log_verbose "As of April 2021 this does not work"
 		# https://microk8s.io/docs/addon-kubeflow deprecated

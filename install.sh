@@ -55,38 +55,38 @@ while getopts "hdva:c:eg:f:i:k:l:mn:o:s:r:tu:w:xz" opt; do
 			Debugging flags:
 				   -d $(! $DEBUGGING || echo "no ")debugging
 				   -v $(! $VERBOSE || echo "not ")verbose
-			       -h you are reading it now
+				   -h you are reading it now
 
 			Make sure these defaults are correct for your organization:
-			       -g repo name for github (default: $REPO_ORG)
-			       -l Set the name for Logins (default: $REPO_USER)
+				   -e Email for user (default: $GIT_EMAIL)
+				   -u User name for github (default: $GIT_USERNAME)
+				   -g repo name for github (default: $REPO_ORG)
+				   -l Set the name for Logins (default: $REPO_USER)
 
 			Check these as well:
-			       -a Use dotfiles $DOTFILES_STOW)
-			       -e Email for user (default: $GIT_EMAIL)
-			       -u User name for github (default: $GIT_USERNAME)
+				   -a Use dotfiles $DOTFILES_STOW)
 
 			Connect to docker (deprecated)
 				   -k docker login (default: $DOCKER_LOGIN)
-			       -r dockeR user name (default: $DOCKER_USER)
+				   -r dockeR user name (default: $DOCKER_USER)
 
 			You should not normally need these:
-			       -f force a git pull of the origin (default: $FORCE)
-			       -m install the MacOS system updates as well (default: $MAC_SYSTEM_UPDATE)
-			       -n set the hostname of the system
-			       -w the current workspace (default: $WS_DIR)
-			       -x do not require a password when using sudo (default: $NO_SUDO_PASSWORD)
+				   -f force a git pull of the origin (default: $FORCE)
+				   -m install the MacOS system updates as well (default: $MAC_SYSTEM_UPDATE)
+				   -n set the hostname of the system
+				   -w the current workspace (default: $WS_DIR)
+				   -x do not require a password when using sudo (default: $NO_SUDO_PASSWORD)
 
 			Experimental. Setup of key storage only use if Dropbox has your keys and
 			are in a graphical installation does not work from ssh
 			and you do not have SSH key forwarding available (experimental)
-			       -i use @richtong opininated key storage (default: $INSTALL_SECRETS)
-			       -s directory of private keys (default: $SECRETS_DIR_ROOT/$REPO_USER.vc)
+				   -i use @richtong opininated key storage (default: $INSTALL_SECRETS)
+				   -s directory of private keys (default: $SECRETS_DIR_ROOT/$REPO_USER.vc)
 
 			Setup of automated build machines (deprecated)
-			       -c creates a deployment machine (default: $DEPLOY_MACHINE)
-			       -t creates a test machine with unit test and system test (default: $TESTING_MACHINE)
-			       -z create all the accounts deprecated (default: $ACCOUNTS)
+				   -c creates a deployment machine (default: $DEPLOY_MACHINE)
+				   -t creates a test machine with unit test and system test (default: $TESTING_MACHINE)
+				   -z create all the accounts deprecated (default: $ACCOUNTS)
 
 		EOF
 
@@ -234,10 +234,10 @@ log_verbose "Install Zsh options"
 # https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
 # https://stackoverflow.com/questions/9953005/should-the-bashrc-in-the-home-directory-load-automatically
 # macOS defaults: interactive login shell: /etc/profile ->
-#	 									   first[~/.bash_profsle, ~/.bash_login ~/.profile] ->
-#	 									   ~/.bashrc
-#			      interactive non-login shell: ~/.bashrc -> /etc/ashrc
-#			      logout shell: ~/.bash_logout
+#										   first[~/.bash_profsle, ~/.bash_login ~/.profile] ->
+#										   ~/.bashrc
+#				  interactive non-login shell: ~/.bashrc -> /etc/ashrc
+#				  logout shell: ~/.bash_logout
 #
 # https://www.stefaanlippens.net/bashrc_and_others/
 # login shell means you login directly like an ssh session
