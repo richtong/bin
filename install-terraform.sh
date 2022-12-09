@@ -64,4 +64,4 @@ if ! config_mark "$(config_profile_for_bash)"; then
 	EOF
 fi
 
-log_verbose "source ~/.bashrc to install autocomplete"
+log_verbose "source $(config_profile_for_bash) to install autocomplete"

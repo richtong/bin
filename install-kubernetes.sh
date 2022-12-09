@@ -142,8 +142,9 @@ if ! config_mark; then
 	EOF
 fi
 
-if ! config_mark "$(config_profile_nonexportable)"; then
-	config_add "$(config_profile_nonexportable)" <<-'EOF'
+# bash completions go to .bash_profile for macos, .bashrc for linux
+if ! config_mark "$(config_profile_for_bash)"; then
+	config_add "$(config_profile_for_bash)" <<-'EOF'
 		# shellcheck disable=SC1090
 		if command -v helm >/dev/null; then eval "$(helm completion bash)"; fi
 		# shellcheck disable=SC1090
