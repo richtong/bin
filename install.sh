@@ -452,7 +452,7 @@ source_profile
 
 log_verbose "install QGroundControl"
 "$SCRIPT_DIR/install-qgc.sh"
-log_vrbose "install Android tools"
+log_verbose "install Android tools"
 "$SCRIPT_DIR/install-android-tools.sh"
 
 # Assumes that personal.git is at the same level as src
