@@ -52,8 +52,7 @@ while getopts "hdvk" opt; do
 done
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-#source_lib lib-git.sh lib-mac.sh lib-util.sh lib-keychain.sh lib-version-compare.sh lib-config.sh lib-install.sh
-source_lib lib-util.sh lib-config.sh
+source_lib lib-git.sh lib-mac.sh lib-util.sh lib-keychain.sh lib-version-compare.sh lib-config.sh
 log_verbose "Loaded shell libraries"
 shift $((OPTIND - 1))
 

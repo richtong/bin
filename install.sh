@@ -36,7 +36,7 @@ ACCOUNTS="${ACCOUNTS:-false}"
 # which user is the source of secrets
 
 OPTIND=1
-while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:k:" opt; do
+while getopts "hdva:c:eg:f:i:k:l:mn:o:s:r:tu:w:xz" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -47,30 +47,35 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:k:" opt; do
 
 			To bootstrap you should install the base operating system either Mac or Linux
 
-			1. Install git
-			2. mkdir ~/ws/git && cd ~/ws/git  && git clone https://github.com/$REPO_ORG/src
-			3. cd ~/ws/git/src/bin and Run $SCRIPTNAME -h to see what you need
-			4. Get a login to docker and set your docker user name
-			3. Now run $SCRIPTNAME with these available flags
+			1. Install brew install git and git-lfs
+			2. mkdir ~/ws/git && cd ~/ws/git
+			3. git clone https://github.com/$REPO_ORG/src && cd ~/ws/git/src/bin
+			4. Run $SCRIPTNAME -h to see what you need
 
-			Make sure these defaults are correct:
-			       -o The Repo organization name (default: $REPO_DOMAIN)
-			       -l Set the name for Logins (default: $REPO_USER)
+			Debugging flags:
+				   -d $(! $DEBUGGING || echo "no ")debugging
+				   -v $(! $VERBOSE || echo "not ")verbose
+			       -h you are reading it now
+
+			Make sure these defaults are correct for your organization:
 			       -g repo name for github (default: $REPO_ORG)
+			       -l Set the name for Logins (default: $REPO_USER)
+
+			Check these as well:
+			       -a Use dotfiles $DOTFILES_STOW)
+			       -e Email for user (default: $GIT_EMAIL)
+			       -u User name for github (default: $GIT_USERNAME)
+
+			Connect to docker (deprecated)
 				   -k docker login (default: $DOCKER_LOGIN)
 			       -r dockeR user name (default: $DOCKER_USER)
 
-			Check these as well:
-			       -e Email for user (default: $GIT_EMAIL)
-			       -u User name for github (default: $GIT_USERNAME)
-			       -a Use dotfiles $DOTFILES_STOW)
-
 			You should not normally need these:
 			       -f force a git pull of the origin (default: $FORCE)
-			       -w the current workspace (default: $WS_DIR)
-			       -n set the hostname of the system
-			       -x do not require a password when using sudo (default: $NO_SUDO_PASSWORD)
 			       -m install the MacOS system updates as well (default: $MAC_SYSTEM_UPDATE)
+			       -n set the hostname of the system
+			       -w the current workspace (default: $WS_DIR)
+			       -x do not require a password when using sudo (default: $NO_SUDO_PASSWORD)
 
 			Experimental. Setup of key storage only use if Dropbox has your keys and
 			are in a graphical installation does not work from ssh
@@ -83,10 +88,6 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:k:" opt; do
 			       -t creates a test machine with unit test and system test (default: $TESTING_MACHINE)
 			       -z create all the accounts deprecated (default: $ACCOUNTS)
 
-			Debugging flags:
-				   -d $(! $DEBUGGING || echo "no ")debugging
-				   -v $(! $VERBOSE || echo "not ")verbose
-			       -h you are reading it now
 		EOF
 
 		exit 0
@@ -102,56 +103,59 @@ while getopts "hdvu:e:r:a:fw:n:xmi:s:l:c:tzuo:g:k:" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
-	o)
-		DOCKER_LOGIN="$($DOCKER_LOGIN && echo false || echo true)"
-		export DOCKER_LOGIN
-		;;
 
-	l)
-		REPO_USER="$OPTARG"
-		;;
-	u)
-		GIT_USERNAME="$OPTARG"
-		;;
-	e)
-		GIT_EMAIL="$OPTARG"
-		;;
-	k)
-		DOCKER_USER="$OPTARG"
-		;;
-	w)
-		WS_DIR="$OPTARG"
-		;;
-	s)
-		SECRETS_DIR_ROOT="$OPTARG"
-		;;
 	a)
 		DOTFILES_STOW="$($DOTFILES_STOW && echo false || echo true)"
 		export DOTFILES_STOW
-		;;
-	x)
-		NO_SUDO_PASSWORD=true
 		;;
 	c)
 		DEPLOY_MACHINE=true
 		ACCOUNTS=true
 		;;
-	t)
-		TESTING_MACHINE=true
-		ACCOUNTS=true
+	e)
+		GIT_EMAIL="$OPTARG"
 		;;
-	n)
-		NEW_HOSTNAME="$OPTARG"
+	f)
+		FORCE=true
 		;;
 	i)
 		INSTALL_SECRETS=true
+		;;
+	l)
+		REPO_USER="$OPTARG"
+		;;
+	k)
+		DOCKER_USER="$OPTARG"
 		;;
 	m)
 		MAC_SYSTEM_UPDATE=true
 		MAC_FLAGS=" -m "
 		;;
-	f)
-		FORCE=true
+	n)
+		NEW_HOSTNAME="$OPTARG"
+		;;
+	o)
+		DOCKER_LOGIN="$($DOCKER_LOGIN && echo false || echo true)"
+		export DOCKER_LOGIN
+		;;
+	r)
+		DOCKER_USER="$OPTARG"
+		;;
+	s)
+		SECRETS_DIR_ROOT="$OPTARG"
+		;;
+	t)
+		TESTING_MACHINE=true
+		ACCOUNTS=true
+		;;
+	u)
+		GIT_USERNAME="$OPTARG"
+		;;
+	w)
+		WS_DIR="$OPTARG"
+		;;
+	x)
+		NO_SUDO_PASSWORD=true
 		;;
 	z)
 		ACCOUNTS=true
