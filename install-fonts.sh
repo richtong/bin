@@ -91,8 +91,8 @@ if in_os mac; then
 	done
 elif in_os linux; then
 	# https://github.com/ryanoasis/nerd-fonts
-	git_install_or_update nerd-fonts ryanoasis
-	if ! pushd "$WS_DIR/git/nerd-fonts" >/dev/null; then
+	REPO_PATH="$(git_install_or_update nerd-fonts ryanoasis)"
+	if ! pushd "$REPO_PATH" >/dev/null; then
 		log_error 1 "nerd-fonts did not clone properly"
 	fi
 

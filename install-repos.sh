@@ -74,7 +74,7 @@ fi
 # shellcheck disable=SC2043
 for repo in src; do
 	log_verbose "working on $repo"
-	if ! git_install_or_update ${FORCE_FLAG-} "$repo"; then
+	if ! git_install_or_update ${FORCE_FLAG-} "$repo" >/dev/null; then
 		log_warning "could not update $repo"
 	fi
 	log_verbose "not installing master push check for $repo"

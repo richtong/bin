@@ -60,7 +60,7 @@ while getopts "hdvg:u:k:fx:" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh
 
@@ -80,7 +80,9 @@ if ! command -v docker >/dev/null; then
 	"$BIN_DIR/install-docker.sh"
 fi
 
-git_install_or_update "$KEY_REPO"
+REPO_PATH="$(git_install_or_update "$KEY_REPO")"
+
+pushd "$REPO_PATH"
 
 "$SCRIPT_DIR/add-groups.sh"
 

@@ -48,7 +48,7 @@ while getopts "hdvw:u:" opt; do
 done
 CLOUD_EMAIL=${CLOUD_EMAIL:-"$CLOUD_USER@surround.io"}
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh
 
@@ -70,7 +70,8 @@ mkdir -p "${PRIVATE:="$HOME/Private/ssh"}"
 
 PEM=${PEM:-"$PRIVATE/$CLOUD_EMAIL.key.pem"}
 
-git_install_or_update public-keys
+REPO_PATH="$(git_install_or_update public-keys)"
+pushd "$REPO_PATH"
 
 "$SSL_BIN/gen-server-ssl-key" "$PEM" | xsel --clipboard
 

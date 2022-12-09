@@ -42,7 +42,7 @@ while getopts "hdvw:" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-util.sh lib-install.sh lib-config.sh
 
@@ -61,9 +61,9 @@ if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose Make directory listings the right color and vi too
 	# Note we need the quotes in the search string
 	if ! defaults read com.apple.Terminal "Window Settings" | grep -q 'name = "Solarized Dark"'; then
-		git_install_or_update "$MAC_REPO" "$MAC_GIT_ORG"
+		REPO_PATH="$(git_install_or_update "$MAC_REPO" "$MAC_GIT_ORG")"
 		log_warning will open Terminal windows to when adding solarized layouts
-		for terminal in "$WS_DIR/git/$MAC_REPO"/*.terminal; do
+		for terminal in "$REPO_PATH/"*.terminal; do
 			open "$terminal"
 		done
 	fi
@@ -106,13 +106,13 @@ elif [[ $(desktop_environment) =~ xfce ]]; then
 	# themes as they are entries in the terminal.rc
 	# although you can fool with the system with a wrapper that dynamically
 	# changes terminal based on the command line.
-	git_install_or_update "$XFCE_REPO" "$XFCE_GIT_ORG"
+	REPO_PATH="$(git_install_or_update "$XFCE_REPO" "$XFCE_GIT_ORG")"
 	# do not use install command because we do not want to overwrite
 	# use the cp -n so as not to overwrite
 	# https://stackoverflow.com/questions/9392735/linux-how-to-copy-but-not-overwrite
 	# note quoting so the asterisk wild cards correctly
 	# Each terminalrc needs to be in its own config
-	for color_terminalrc in "$WS_DIR/git/$XFCE_REPO/"*/terminalrc; do
+	for color_terminalrc in "$REPO_PATH"/*/terminalrc; do
 		color="$(basename "$(dirname "$color_terminalrc")")"
 		color_dir="$HOME/.config-$color"
 		log_verbose "$color_dir is the name of the directory $color terminal scheme"
@@ -137,7 +137,7 @@ elif [[ $(desktop_environment) =~ (unity|gnome) ]]; then
 	log_verbose "Installing into Gnome or Unity"
 	# For the ubuntu local graphical Unity terminal which uses gnome-terminal
 	# Also for debian 9 xfce4 which uses gnome-terminal sometimes so also install
-	git_install_or_update "$GNOME_REPO" "$GNOME_GIT_ORG"
+	REPO_PATH"$(git_install_or_update "$GNOME_REPO" "$GNOME_GIT_ORG")"
 	# Installs the dark vs light scheme into the Default terminal profile
 	# This only works if Default is defined, for new installs it is Undefined,
 	# so do not set dark, just install
@@ -147,7 +147,7 @@ elif [[ $(desktop_environment) =~ (unity|gnome) ]]; then
 	log_verbose "for gnome terminal need dconf-cli setup"
 	package_install dconf-cli
 	log_verbose install into gnome terminal but we cannot tell a profile name
-	"$WS_DIR/git/$GNOME_REPO/install.sh" --scheme dark --skip-dircolors
+	"$REPO_PATH/install.sh" --scheme dark --skip-dircolors
 
 	for theme in light dark; do
 		log_warning "to switch to $theme scheme run $WS_DIR/git/$GNOME_REPO/set-$theme.sh"
@@ -157,10 +157,10 @@ fi
 
 log_verbose for all systems install solarized directory colors
 # Make directory listings the right color
-git_install_or_update "$DIRCOLORS_REPO" "$DIRCOLORS_GIT_ORG"
+REPO_PATH="$(git_install_or_update "$DIRCOLORS_REPO" "$DIRCOLORS_GIT_ORG")"
 log_verbose checking for ~/.dircolors
 if [[ ! -e "$HOME/.dircolors" ]]; then
-	ln -rs "$WS_DIR/git/$DIRCOLORS_REPO/dircolors.ansi-universal" "$HOME/.dircolors"
+	ln -rs "$REPO_PATH/dircolors.ansi-universal" "$HOME/.dircolors"
 	log_verbose "source $HOME/.bashrc to enable dircolors for ls or"
 	log_verbose "restart the shell"
 fi

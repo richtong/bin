@@ -42,9 +42,9 @@ while getopts "hdvf" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-util.sh lib-install.sh lib-version-compare.sh
+source_lib lib-util.sh lib-install.sh lib-version-compare.sh lib-git.sh
 
 if ! in_os linux; then
 	log_exit only runs on Linux
@@ -72,14 +72,13 @@ if ! pushd "$WS_DIR/git" >/dev/null; then
 	log_error 2 "no $WS_DIR/git"
 fi
 
-if [ ! -e rtl8812AU_8821AU_linux ]; then
-	# use https so works even if github ssh not installed
-	git clone https://github.com/abperiasamy/rtl8812AU_8821AU_linux.git
-fi
+# use https so works even if github ssh not installed
+REPO_PATH="$(git_install_or_update "https://github.com/abperiasamy/rtl8812AU_8821AU_linux")"
 
-if ! pushd rtl8812AU_8821AU_linux >/dev/null; then
+if ! pushd "$REPO_PATH" >/dev/null; then
 	log_error 3 "could not create repo"
 fi
+
 make
 sudo make install
 sudo modprobe 8812au

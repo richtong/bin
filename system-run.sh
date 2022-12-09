@@ -101,7 +101,11 @@ if ! use_openssh_keychain "$GIT_KEY"; then
 fi
 
 # make sure we have the latest support repos
-git_install_or_update -f personal
+REPO_PATH="$(git_install_or_update -f personal)"
+
+if ! pushd "$REPO_PATH"; then
+	log_error 1 "personal clone failed"
+fi
 
 if ! pushd "$WS_DIR/git/src" >/dev/null; then
 	log_error 4 "no $WS_DIR/git/src"

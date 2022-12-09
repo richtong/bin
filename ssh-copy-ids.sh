@@ -39,13 +39,13 @@ while getopts "hdvk:" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh
 shift $((OPTIND - 1))
 set -u
 
-git_install_or_update "$PUBLIC_KEYS"
+REPO_PATH="$(git_install_or_update "$PUBLIC_KEYS")"
 
 log_verbose install my personal key
 if [[ ! -e $KEY ]]; then
@@ -53,7 +53,7 @@ if [[ ! -e $KEY ]]; then
 	exit 1
 fi
 
-authorized="$WS_DIR/git/$PUBLIC_KEYS/$AUTHORIZED/ssh/authorized_keys"
+authorized="$REPO_PATH/$AUTHORIZED/ssh/authorized_keys"
 if [[ ! -e $authorized ]]; then
 	log_warning "no authorized_keys found at $authorized"
 fi

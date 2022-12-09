@@ -32,7 +32,7 @@ while getopts "hdvf" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-git.sh lib-install.sh
 
@@ -48,9 +48,9 @@ fi
 
 package_install python python-gtk2 python-xlib python-dbus python-wnck
 
-git_install_or_update "https://github.com/ssokolow/quicktile"
+REPO_PATH="$(git_install_or_update "https://github.com/ssokolow/quicktile")"
 
-pushd "$WS_DIR/git/quicktile" >/dev/null
+pushd "$REPO_PATH" >/dev/null
 
 if [[ ! -e $HOME/.config/quicktile.cfg ]]; then
 	log_verbose creating configuration file

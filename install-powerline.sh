@@ -84,41 +84,41 @@ if in_os mac; then
 	log_verbose "installing powerline ${FONT[*]}"
 	package_install "${FONT[@]}"
 
-else
+elif in_os linux; then
+
+	# https://github.com/powerline/fonts
+	# https://linuxconfig.org/how-to-install-and-manage-fonts-on-linux
+	package_install fontconfig fonts-powerline
+	log_verbose "Installed fonts are:"
+	if $VERBOSE; then
+		fc-list
+	fi
+
+elif in_wsl; then
 	log_verbose "In linux have to install fonts from repo"
 	if [[ ! -e $SOURCE_DIR/extern/fonts ]]; then
+		log_warning "Clone certain fonts"
 		log_warning "no powerline-fonts repo cloned $SOURCE_DIR/extern/fonts"
 	else
 		pushd "$SOURCE_DIR/extern/fonts" &>/dev/null || true
-		if in_wsl; then
-			# https://stackoverflow.com/questions/16107381/how-to-complete-the-runas-command-in-one-line
-			# https://answers.microsoft.com/en-us/windows/forum/windows_10-security/windows-10-run-as-administrator-using-microsoft/f2b75044-ef0d-4acd-86d9-c6c7998664ab
-			#log_warning "It does not work To use a Microsoft Account as admin switch to local"
-			#log_warning "so create a service-account instead with local password"
-			#runas.exe /savecred /user:"$WINDOWS_ADMIN" "./install.ps1"
-			# https://www.raymondcamden.com/2017/09/25/calling-a-powershell-script-from-wsl
-			log_verbose "will install fonts"
-			if $VERBOSE; then
-				powershell.exe -File '.\install.ps1' -WhatIf
-			fi
-			if $FORCE; then
-				powershell.exe -File '.\install.ps1'
-			fi
-			log_warning "change the Terminal font to use a Powerline one and"
-			log_warning "restart the terminal session"
-		else
-			sudo apt-get install fontconfig
-			log_verbose "Installed fonts are:"
-			if $VERBOSE; then
-				fc-list
-			fi
-			popd &>/dev/null || true
+		# https://stackoverflow.com/questions/16107381/how-to-complete-the-runas-command-in-one-line
+		# https://answers.microsoft.com/en-us/windows/forum/windows_10-security/windows-10-run-as-administrator-using-microsoft/f2b75044-ef0d-4acd-86d9-c6c7998664ab
+		#log_warning "It does not work To use a Microsoft Account as admin switch to local"
+		#log_warning "so create a service-account instead with local password"
+		#runas.exe /savecred /user:"$WINDOWS_ADMIN" "./install.ps1"
+		# https://www.raymondcamden.com/2017/09/25/calling-a-powershell-script-from-wsl
+		log_verbose "will install fonts"
+		if $VERBOSE; then
+			powershell.exe -File '.\install.ps1' -WhatIf
 		fi
+		if $FORCE; then
+			powershell.exe -File '.\install.ps1'
+		fi
+		log_warning "change the Terminal font to use a Powerline one and"
+		log_warning "restart the terminal session"
 	fi
 fi
 
-# gcp - unusable do not use 10 seconds at least
-# kube - very slow 1-2 seconds
 # docker - uses ~/.docker to detect if running in a container not needed much
 # venv-name-size-limit does not work
 MODULES="${MODULES:-"venv,node,goenv,user,host,ssh,cwd,perms,git,jobs,exit,root"}"
@@ -172,7 +172,7 @@ if ! $INSTALL_POWERLINE; then
 	log_exit "success installing vim-airline and powerline-go"
 fi
 
-log_warning "powerline-status doe not work with python 3.9"
+log_warning "powerline-status does not work with python 3.9"
 log_verbose "Installing Powerline and Vim addon"
 
 log_verbose "installing powerline control scripts"

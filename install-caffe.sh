@@ -55,10 +55,9 @@ sudo apt-get -y install \
 
 sudo apt-get -y install cmake
 
-git_install_or_update caffe bvlc
+REPO_PATH="$(git_install_or_update caffe bvlc)"
 
-mkdir -p "$WS_DIR/var/caffe"
-pushd "$WS_DIR/var/caffe" >/dev/null
+pushd "$REPO_PATH" >/dev/null
 cmake "$GIT_DIR/caffe"
 make all
 make install

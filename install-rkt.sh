@@ -31,7 +31,7 @@ while getopts "hdv" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-util.sh
 set -u
@@ -43,11 +43,8 @@ fi
 
 if in_os mac; then
 	log_verbose Installing for Mac
-	pushd "$WS_DIR/git" >/dev/null
-	git_install_or_update "https://github.com/coreos/rkt" rkt
-	pushd rkt >/dev/null
-	popd
-	popd
+	REPO_PATH="$(git_install_or_update "https://github.com/coreos/rkt")"
+	pushd "$REPO_PATH" >/dev/null
 else
 	# note that to make gpg work on Mac http://blog.ghostinthemachines.com/2015/03/01/how-to-use-gpg-command-line/
 	# you run `brew install gnupg2`
