@@ -137,7 +137,7 @@ elif [[ $(desktop_environment) =~ (unity|gnome) ]]; then
 	log_verbose "Installing into Gnome or Unity"
 	# For the ubuntu local graphical Unity terminal which uses gnome-terminal
 	# Also for debian 9 xfce4 which uses gnome-terminal sometimes so also install
-	REPO_PATH"$(git_install_or_update "$GNOME_REPO" "$GNOME_GIT_ORG")"
+	REPO_PATH="$(git_install_or_update "$GNOME_REPO" "$GNOME_GIT_ORG")"
 	# Installs the dark vs light scheme into the Default terminal profile
 	# This only works if Default is defined, for new installs it is Undefined,
 	# so do not set dark, just install
