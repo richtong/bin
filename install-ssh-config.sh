@@ -155,8 +155,9 @@ elif in_os linux && ! $USE_KEYCHAIN; then
 		config_replace "$HOME/.ssh/config" "AddKeysToAgent" "AddKeysToAgent yes"
 	fi
 
-
-elif in_os linux && $USE_KEYCHAIN; then
+elif
+	in_os linux && $USE_KEYCHAIN
+then
 
 	# this is legacy code before Gnome Keyring worked with id_ed25519
 	log_verbose "make sure you run keychain to find the openssh keychain"
