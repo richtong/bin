@@ -71,9 +71,15 @@ elif in_os linux && ! in_os docker; then
 		package_install chrome-gnome-shell gnome-tweaks
 		#package_install gnome-browser-connector gnome-tweaks
 
-		log_verbose "Must manually install Gnoe Tweaks"
+        # https://www.omgubuntu.co.uk/best-gnome-shell-extensions
+		log_warning "Must manually install Gnoe Tweaks"
         log_verbose "Click on for gtile"
         util_web_open "https://extensions.gnome.org/extension/28/gtile/"
+        util_web_open "https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for-gnome/"
+        util_web_open "https://extensions.gnome.org/extension/517/caffeine/"
+        util_web_open "https://extensions.gnome.org/extension/3968/improved-workspace-indicator/"
+        util_web_open "https://extensions.gnome.org/extension/1162/emoji-selector/"
+        util_web_open "https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for-gnome/"
 
 	elif [[ $(desktop_environment) =~ unity ]]; then
 		log_verbose "install Compiz Grid allows keyboard shortcuts to move windows around"
