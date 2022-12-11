@@ -108,9 +108,9 @@ fi
 log_verbose "Checking for hardware and installing specific Linux drivers"
 # https://www.2daygeek.com/linux-check-system-hardware-manufacturer-model-serial-number/
 # https://junocomputers.com/us/support/
-if [[ $(linux_model) =~ NV14J ]]; then
+if [[ $(linux_model) =~ NV4XM ]]; then
 	package_install software-properties-common ca-certificates
-	apt_install_repository ppa:junocomp/juno-apps
+	apt_repository_install ppa:junocomp/juno-apps
 	package_install juno-installer
 	juno-installer
 	log_verbose "turbo-on, turbo-off, turbo-stat"
