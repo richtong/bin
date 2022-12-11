@@ -61,20 +61,26 @@ elif in_os linux && ! in_os docker; then
 	log_verbose "checking and adding tiling window managers"
 	if [[ $(desktop_environment) =~ gnome ]]; then
 		# https://addons.mozilla.org/en-US/firefox/addon/gnome-shell-integration/
-		log_warning "Must install go to extensions.gnome.org and load gtile"
-		log_warning "set parameters with Gnome Tweaks"
+
 		# https://github.com/gTile/gTile
 		# https://wiki.gnome.org/Projects/GnomeShellIntegration
-		# chrome-gnome-shell is now but not for Ubuntu 20.04
 		# https://bugs.launchpad.net/ubuntu/+source/chrome-gnome-shell/+bug/1983851
+		# chrome-gnome-shell is in Ubuntu 20.04 as version 10
+        # gnome-browser-connector is in Ubuntu 22.04 and higher as version 42,
+        # 43....
 		package_install chrome-gnome-shell gnome-tweaks
 		#package_install gnome-browser-connector gnome-tweaks
+
+		log_verbose "Must manually install Gnoe Tweaks"
+        log_verbose "Click on for gtile"
+        util_web_open "https://extensions.gnome.org/extension/28/gtile/"
+
 	elif [[ $(desktop_environment) =~ unity ]]; then
 		log_verbose "install Compiz Grid allows keyboard shortcuts to move windows around"
 		package_install compizconfig-settings-manager
 	elif [[ $(desktop_environment) =~ xfce ]]; then
 		log_verbose if in debian assume running xfce so need quicktile
-		"$BIN_DIR/install-quicktile.sh"
+		"$BIN_DIR/install_quicktile.sh"
 	fi
 	log_verbose "finish window manager install"
 fi
