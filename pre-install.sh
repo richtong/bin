@@ -181,6 +181,7 @@ fi
 
 if [[ ! -e "$WS_DIR/git/src" ]]; then
 	gh auth login
+	echo "$SCRIPTNAME: gh auth login creates a key ~/.ssh/id_ed25519 do not delete from .ssh/config"
 	git clone --recurse-submodules "https://github.com/$REPO_ORG/src" "$WS_DIR/git"
 fi
 echo "$SCRIPTNAME: Restart the terminal to get new bash and profile"
