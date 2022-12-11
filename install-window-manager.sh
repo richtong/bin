@@ -80,7 +80,7 @@ elif in_os linux && ! in_os docker; then
 		package_install compizconfig-settings-manager
 	elif [[ $(desktop_environment) =~ xfce ]]; then
 		log_verbose if in debian assume running xfce so need quicktile
-		"$BIN_DIR/install_quicktile.sh"
+		"$BIN_DIR/install-quicktile.sh"
 	fi
 	log_verbose "finish window manager install"
 fi
