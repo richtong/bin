@@ -125,7 +125,7 @@ if in_os mac; then
 	log_warning "to do with ssh-keygen -c -f _key_ -C _key_"
 
 	# Just get the commands assume these are the name of the files
-	if [[ $OSTYPE =~ darwin ]]; then
+	if in_os mac; then
 		log_verbose "before checking keys add all from the Mac Keychain"
 		ssh-add "$SSH_LOAD_FLAG"
 	fi
@@ -154,6 +154,7 @@ elif in_os linux && ! $USE_KEYCHAIN; then
 		log_verbose .ssh/config is a real file so make sure they are there
 		config_replace "$HOME/.ssh/config" "AddKeysToAgent" "AddKeysToAgent yes"
 	fi
+
 
 elif in_os linux && $USE_KEYCHAIN; then
 

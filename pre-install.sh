@@ -180,6 +180,7 @@ if ! mkdir -p "$WS_DIR/git"; then
 fi
 
 if [[ ! -e "$WS_DIR/git/src" ]]; then
+	echo "$SCRIPTNAME: when calling gh auth login make sure to name the key so it appears properly in gnome-keyring"
 	gh auth login
 	echo "$SCRIPTNAME: gh auth login creates a key ~/.ssh/id_ed25519 do not delete from .ssh/config"
 	git clone --recurse-submodules "https://github.com/$REPO_ORG/src" "$WS_DIR/git"
