@@ -55,6 +55,7 @@ log_verbose "installing Linux benchmarks Phoronix"
 if in_linux ubuntu; then
 	package_install phoronix-test-suite
 else
-	deb_install phoronix-test-suite
-	"http://phoronix-test-suite.com/releases/repo/pts.debian/files/phoronix-test-suite_${RELEASE}_all.deb"
+	deb_install \
+		phoronix-test-suite \
+		"http://phoronix-test-suite.com/releases/repo/pts.debian/files/phoronix-test-suite_${RELEASE}_all.deb"
 fi

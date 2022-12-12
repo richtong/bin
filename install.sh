@@ -382,14 +382,9 @@ log_verbose "complete argcomplete parse"
 log_verbose "installing development and devops systems"
 "$SCRIPT_DIR/install-node.sh"
 "$SCRIPT_DIR/install-gcloud.sh"
-"$SCRIPT_DIR/install-netlify.sh"
-"$SCRIPT_DIR/install-terraform.sh"
 "$SCRIPT_DIR/install-jupyter.sh"
-"$SCRIPT_DIR/install-ruby.sh"
 "$SCRIPT_DIR/install-1password.sh"
-
-log_verbose "skipping install-flutter but somehow"
-#"$SCRIPT_DIR/install-flutter.sh"
+"$SCRIPT_DIR/install-google-chrome.sh"
 
 log_verbose Also allow ssh into this machine so you can switch to using consoler
 if [[ $OSTYPE =~ darwin ]]; then
