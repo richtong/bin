@@ -8,7 +8,7 @@ name = "pypi"
 [dev-packages]
 bandit = "*"
 beautysh = "*"
-black = ">=22.6"
+black = ">=22.12"
 build = "*"
 flake8 = "*"
 isort = ">=5.10.1"
