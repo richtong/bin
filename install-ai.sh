@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 ## vim: set noet ts=4 sw=4:
 ##
-## install QGround Control
-## https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.html
+## install desktop AI tools like ChatGPT and Stability Diffusion
+##
+## https://www.digitaltrends.com/computing/how-to-run-stable-diffusion-on-your-mac/
+#
 ## ##@author Rich Tong
 ##@returns 0 on success
 #
@@ -17,7 +19,7 @@ while getopts "hdvr:e:s:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs QGround Control QGC
+			Installs AI Tools including Stability Diffusion and ChatGPT
 			usage: $SCRIPTNAME [ flags ]
 			flags:
 				   -h help
@@ -50,6 +52,8 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
 if in_os mac; then
 
+	log_verbose "Install Stabiliity Diffusion with DiffusionBee"
+	package_install diffusionbee
 	log_verbose "Download Chat GPT"
 	ARCH=x86
 	if mac_is_arm; then
