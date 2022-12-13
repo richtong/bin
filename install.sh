@@ -272,7 +272,7 @@ if ! config_mark; then
 		# this runs everytime on login and for each interactive shell Mac Terminal
 		# creates. Chains to ~/.bashrc for aliases what needs to run on each subshell
 		# shellcheck disable=SC1091
-		if echo "$BASH" | grep -q "bash" && [ -f "$HOME/.bashrc" ]; then source "$HOME/.bashrc"; fi
+		if echo "$BASH" | grep -q "bash" && [ -f "$HOME/.bashrc" ]; then . "$HOME/.bashrc"; fi
 	EOF
 fi
 
