@@ -51,7 +51,7 @@ done
 
 set -u
 
-echo "install homebrew and bash" >&2
+echo "$SCRIPTNAME: install homebrew and bash" >&2
 if [[ $(uname) =~ Linux ]]; then
 	sudo apt install -y -qq curl git git-lfs
 fi
@@ -60,8 +60,8 @@ if ! command -v brew >/dev/null; then
 fi
 
 for file in .profile .bash_profile .bashrc; do
-	echo "$SCRIPTNAME: no $file create a shebang" >&2
 	if [[ ! -e $HOME/$file ]]; then
+		echo "$SCRIPTNAME: no $file create a shebang" >&2
 		echo "#!/usr/bin/env bash" >"$HOME/$file"
 	fi
 done
