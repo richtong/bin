@@ -16,6 +16,7 @@ export REPO_ORG="${REPO_ORG:-"richtong"}"
 DOCKER_LOGIN="${DOCKER_LOGIN:-false}"
 export DOCKER_USER="${DOCKER_USER:-"$REPO_USER"}"
 export GIT_USERNAME="${GIT_USERNAME:-"${REPO_USER^}"}"
+export ORGANIZATION="${ORGANIZATION:-netdrones}"
 
 # Note do not use GIT_DIR, this is a defined variable for git
 export GIT_EMAIL="${GIT_EMAIL:-"$REPO_USER@$REPO_DOMAIN"}"
@@ -36,7 +37,7 @@ ACCOUNTS="${ACCOUNTS:-false}"
 # which user is the source of secrets
 
 OPTIND=1
-while getopts "hdva:c:eg:f:i:k:l:mn:o:s:r:tu:w:xz" opt; do
+while getopts "a:c:deg:f:hi:k:l:mn:o:p:r:s:tu:vw:xz" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -59,9 +60,10 @@ while getopts "hdva:c:eg:f:i:k:l:mn:o:s:r:tu:w:xz" opt; do
 
 			Make sure these defaults are correct for your organization:
 				   -e Email for user (default: $GIT_EMAIL)
-				   -u User name for github (default: $GIT_USERNAME)
 				   -g repo name for github (default: $REPO_ORG)
 				   -l Set the name for Logins (default: $REPO_USER)
+				   -p Organization path for install (default: $ORGANIZATION-install.sh)
+				   -u User name for github (default: $GIT_USERNAME)
 
 			Check these as well:
 				   -a Use dotfiles $DOTFILES_STOW)
@@ -137,6 +139,9 @@ while getopts "hdva:c:eg:f:i:k:l:mn:o:s:r:tu:w:xz" opt; do
 	o)
 		DOCKER_LOGIN="$($DOCKER_LOGIN && echo false || echo true)"
 		export DOCKER_LOGIN
+		;;
+	p)
+		ORGANIZATION="$OPTARG"
 		;;
 	r)
 		DOCKER_USER="$OPTARG"
@@ -445,10 +450,8 @@ source_profile
 # "$SCRIPT_DIR/install-sphinx.sh"
 "$SCRIPT_DIR/install-markdown.sh"
 
-log_verbose "install QGroundControl"
-"$SCRIPT_DIR/install-qgc.sh"
-log_verbose "install Android tools"
-"$SCRIPT_DIR/install-android-tools.sh"
+log_verbose "Install organization specific componenets for $ORGANIZATION if any"
+run_if "$SCRIPT_DIR/$ORGANIZATION-install.sh"
 
 # Assumes that personal.git is at the same level as src
 log_verbose Chain to your personal installs
