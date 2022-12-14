@@ -66,8 +66,8 @@ for file in .profile .bash_profile .bashrc; do
 	fi
 done
 
-# no lib-config.sh so assume you are only doing path addition which go
-# into .profile
+# no lib-config.sh/brew_profile_install so assume you are only doing path addition which gofi
+# into .profile so this hack is just copied from there
 PROFILE="${PROFILE:-"$HOME/.profile"}"
 if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
 	echo "$SCRIPTNAME: update $PROFILE" >&2
