@@ -73,7 +73,8 @@ if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
 	echo "$SCRIPTNAME: update $PROFILE" >&2
 	cat >>"$PROFILE" <<-EOF
 		# Added by $SCRIPTNAME on $(date)
-		if [ -z "$HOMEBREW_PREFIX" ]; then
+		# add the check because asdf and pipenv override homebrew
+		if [ -z "\$HOMEBREW_PREFIX" ] || ! command -v brew >/dev/null; then
 			HOMEBREW_PREFIX="/opt/homebrew"
 			if  uname | grep -q Linux; then
 				HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
