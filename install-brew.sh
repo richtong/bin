@@ -47,10 +47,9 @@ source_lib lib-mac.sh lib-util.sh lib-config.sh lib-install.sh
 
 if command -v brew >/dev/null; then
 	log_exit "brew already installed"
-fi
 
 # https://apple.stackexchange.com/questions/175069/how-to-accept-xcode-license
-if in_os linux || in_os wsl-linux; then
+elif in_os linux || in_os wsl-linux; then
 	log_verbose "installing linuxbrew"
 	package_install build-essential curl file git
 
@@ -161,3 +160,8 @@ else
 fi
 
 log_assert "command -v brew > /dev/null" "brew installed"
+
+log_verbose "make sure brew is up to date"
+brew update
+log_verbose "make sure brew takes over all packages it owns with --greedy"
+brew upgrade --greedy
