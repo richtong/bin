@@ -90,15 +90,20 @@ echo "$SCRIPTNAME: make brew available in this script source $PROFILE" >&2
 # need to turn off set -u as undefined variables as the profile may have these
 set +u
 echo "source $PROFILE" >&2
+# Some installs may have missing files so ignore them
 # shellcheck disable=SC1091,SC1090
-source "$PROFILE"
+if ! source "$PROFILE"; then
+	echo "SCRIPTNAME: warning $PROFILE failure"
+fi
 set -u
 if ! command -v brew >/dev/null; then
 	echo "$SCRIPTNAME: Brew installation failed" >&2
 	exit 1
 fi
 
-brew update
+# In case apps have self-updated over the brew install use --greedy
+# to prevent brew install errors as brew will not install over a non-brew install
+brew update --greedy
 # coreutils gets us readlink
 for package in bash coreutils git gh; do
 	if ! brew list "$package" &>/dev/null; then
