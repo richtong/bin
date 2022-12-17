@@ -145,6 +145,8 @@ if ! $INSTALL_POWERLINE; then
 	# note max-width seems buggy will sometimes just truncate
 	#-max-width 30 \
 	if ! config_mark "$(config_profile_nonexportable)"; then
+		# -jobs should not use quoted jobs -p because wc -l emits some extra
+		# spaces
 		config_add "$(config_profile_nonexportable)" <<-EOF
 			function _update_ps1() {
 			    # shellcheck disable=SC2046

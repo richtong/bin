@@ -75,7 +75,9 @@ source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 log_warning "link $HOME/.local/bin/gcc to gcc-version but this break Ubuntu"
 
 if in_os mac; then
+	log_verbose "In Mac install trying to install $ANACONDA"
 	cask_install "$ANACONDA"
+	log_verbose "$ANACONDA installed"
 elif ! command -v conda &>/dev/null; then
 	log_verbose "downloading $URL and running it"
 	# https://docs.continuum.io/anaconda/install/linux/
@@ -109,6 +111,7 @@ fi
 
 log_verbose "source $(config_profile_interactive_bash) to make sure conda setup runs"
 source_profile "$(config_profile_interactive_bash)"
+log_verbose "source successful"
 
 if ! $NOFORGE; then
 	conda config --env --add channels conda-forge
