@@ -71,6 +71,7 @@ while getopts "hdvn:e:p:j:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
@@ -107,18 +108,6 @@ if ! config_mark "$PROFILE_TO_ADD"; then
 	# https://linuxhint.com/associative_array_bash/
 fi
 
-# not clear what this is so as login shell should go into .zprofile
-# for efficiency but leave in .zshrc as non-interactive
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	log_verbose "installing into .zshrc nonexportable"
-	# no longer need manual installation
-	asdf direnv setup --shell zsh --version "${ASDF[direnv]}"
-	#config_add "$(config_profile_zsh)" <<-'EOF'
-	#    # shellcheck disable=SC1090
-	#    source "$(brew --prefix asdf)/libexec/asdf.sh"
-	#EOF
-fi
-
 #  https://stackoverflow.com/questions/19816275/no-acceptable-c-compiler-found-in-path-when-installing-python
 if in_os linux; then
 	log_verbose "Install Linux prerequisites for asdf python"
@@ -133,6 +122,9 @@ for p in "${!ASDF[@]}"; do
 	if ! asdf list "$p" >/dev/null; then
 		log_verbose "Install asdf plugin $p"
 		asdf plugin-add "$p"
+	else
+		log_verbose "asdf plugin $p already installed so update it"
+		asdf plugin update "$p"
 	fi
 	log_verbose "Is version installed for $p"
 	version="$(asdf list "$p" 2>&1)"
@@ -149,12 +141,27 @@ for p in "${!ASDF[@]}"; do
 	asdf global "$p" "${ASDF[$p]}"
 done
 
+# not clear what this is so as login shell should go into .zprofile
+# for efficiency but leave in .zshrc as non-interactive
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	log_verbose "installing into .zshrc nonexportable"
+	# no longer need manual installation
+	asdf direnv setup --shell zsh --version "${ASDF[direnv]}"
+	# the direnv setup now does this instead so comment out the manual
+	# installation
+	#config_add "$(config_profile_zsh)" <<-'EOF'
+	#    # shellcheck disable=SC1090
+	#    source "$(brew --prefix asdf)/libexec/asdf.sh"
+	#EOF
+fi
 log_verbose "Checking for asdf direnv"
 if [[ -n ${ASDF[direnv]} ]]; then
 	log_verbose "Found direnv installing config info"
 	for SHELL_VERSION in bash zsh; do
 		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
 	done
+	# the direnv setup now does this instead so comment out the manual
+	# installation https://direnv.net/docs/hook.html
 	#config_add <<-'EOF'
 	#    eval "$(asdf exec direnv hook bash)"
 	#    direnv() { asdf exec direnv "$@"; }
