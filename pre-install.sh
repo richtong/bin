@@ -102,6 +102,13 @@ if ! command -v brew >/dev/null; then
 fi
 
 # coreutils gets us readlink
+# since this forces a brew update and upgrade need to
+# run this first and this require xcode
+brew update
+if [[ $OSTYPE =~ darwin ]]; then
+	xcode-select --install
+fi
+brew upgrade --greedy
 for package in bash coreutils git gh; do
 	if ! brew list "$package" &>/dev/null; then
 		brew install "$package"
