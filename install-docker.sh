@@ -170,7 +170,7 @@ if in_os mac; then
 	open -a Docker.app
 	util_press_key
 
-	if ! command -v docker || ! vergte "$(version_extract "$(docker -v)")" "$version_needed"; then
+	if ! command -v docker >/dev/null || ! vergte "$(version_extract "$(docker -v)")" "$version_needed"; then
 		log_verbose the installation failed using brew so try the curl
 		# Note this no longer uninstalls from macports as we do not use it
 		# log_verbose uninstall MacPorts versions if they are present
