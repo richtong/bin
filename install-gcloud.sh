@@ -125,8 +125,15 @@ elif in_os linux; then
 fi
 
 hash -r
-log_verbose install additional packages "$PACKAGES" "$@"
 
+log_verbose "source profile to get gcloud cli"
+source_profile
+
+if ! command -v gcloud >/dev/null; then
+	log_error 1 "gcloud nor properly installed"
+fi
+
+log_verbose install additional packages "$PACKAGES" "$@"
 # Ubuntu has beta already
 if in_os mac; then
 	PACKAGES+=" beta "
