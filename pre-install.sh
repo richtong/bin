@@ -101,9 +101,6 @@ if ! command -v brew >/dev/null; then
 	exit 1
 fi
 
-# In case apps have self-updated over the brew install use --greedy
-# to prevent brew install errors as brew will not install over a non-brew install
-brew update --greedy
 # coreutils gets us readlink
 for package in bash coreutils git gh; do
 	if ! brew list "$package" &>/dev/null; then
