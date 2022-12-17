@@ -105,7 +105,7 @@ fi
 # since this forces a brew update and upgrade need to
 # run this first and this require xcode
 brew update
-if [[ $OSTYPE =~ darwin ]]; then
+if [[ $OSTYPE =~ darwin ]] && ! xcode-select -p; then
 	xcode-select --install
 fi
 brew upgrade --greedy
