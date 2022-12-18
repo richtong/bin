@@ -44,7 +44,7 @@ while getopts "hdvm" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 set -u
@@ -66,8 +66,8 @@ if ! docker-machine status "$MACHINE" | grep Running >/dev/null; then
 	docker-machine start "$MACHINE"
 fi
 
-echo "to access the machine \'$MACHINE\' run"
-echo "    \`docker-machine env $MACHINE\`"
+echo "to access the machine '$MACHINE' run"
+echo "    docker-machine env $MACHINE"
 echo Note that the docker machine does not appear in the vmware fusion app
 echo To access it you should run
 echo "     docker-machine ssh $MACHINE"

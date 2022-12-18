@@ -67,7 +67,7 @@ while getopts "hdvfu:k:t" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-system.sh lib-git.sh lib-keychain.sh
 
@@ -198,6 +198,7 @@ if [[ ! -e $WS_DIR/var/shared/local/app-host.config ]]; then
 			;;
 		esac
 	fi
+	# shellcheck disable=SC2086
 	add_config $cameras
 fi
 echo configured cameras

@@ -38,12 +38,11 @@ while getopts "hdv" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-version-compare.sh
 
-log_message this is deprecated use add dist: trusty to .travis.yml
-exit 0
+log_exit "this is deprecated use add dist: trusty to .travis.yml"
 
 ##install
 ##@param $1 package name

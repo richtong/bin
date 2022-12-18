@@ -60,7 +60,7 @@ while getopts "hdvfu:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
@@ -72,4 +72,5 @@ if (($# < 2)); then
 	log_error 1 "Need source and destination"
 fi
 
+# shellcheck disable=SC2086
 rsync $FLAGS "$1/" "$2"

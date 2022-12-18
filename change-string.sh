@@ -21,7 +21,7 @@ while getopts "hdvo:n:" opt; do
 		echo
 		echo "flags: -d debug, -v verbose, -h help"
 		echo "       -o replace this line (default: $OLD)"
-		echo "       -n with this text (defualt: $NEW)"
+		echo "       -n with this text (default: $NEW)"
 		echo
 		exit 0
 		;;
@@ -44,7 +44,7 @@ while getopts "hdvo:n:" opt; do
 done
 
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-config.sh lib-util.sh
 shift $((OPTIND - 1))
@@ -73,5 +73,6 @@ for file in "$@"; do
 	if in_os mac && [[ $(command -v sed) =~ /usr/bin/sed ]]; then
 		FLAGS="bak"
 	fi
+	# shellcheck disable=SC2086
 	sed -i ${FLAGS-} "s/$ESCAPED_OLD/$ESCAPED_NEW/g" "$file"
 done

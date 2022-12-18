@@ -32,7 +32,7 @@ while getopts "hdvr:" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh
 
@@ -107,7 +107,7 @@ log_verbose installing keys
 # gpg -a --export E084DAB9 | sudo apt-key add .
 sudo apt-key adv --recv-key --keyserver keyserver.ubuntu.com E084DAB9
 
-log_verbose adding $release_name repo
+log_verbose "adding $release_name repo"
 # note there is a space in the repo name between distribution and release
 repo="deb http://cran.rstudio.com/bin/linux/$distribution $release_name/"
 if ! grep -q "^$repo" /etc/apt/sources.list; then

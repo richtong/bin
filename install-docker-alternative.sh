@@ -92,7 +92,7 @@ while getopts "hdvqpmclsrk" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh lib-config.sh
@@ -143,6 +143,7 @@ if $COLIMA; then
 	if ! $COLIMA_STABLE; then
 		PACKAGE_FLAGS="--head"
 	fi
+	# shellcheck disable=SC2086
 	package_install $PACKAGE_FLAGS colima lima
 
 	# the default

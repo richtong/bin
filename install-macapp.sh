@@ -48,7 +48,7 @@ if [[ ! -e /Applications/$APP.app ]]; then
 	fi
 fi
 
-if [[ ! -e /Applications/$APP.app && -n ${URL:-} ]]; then
+if [[ ! -e /Applications/$APP.app && -n ${URL-} ]]; then
 	log_verbose trhing github download
 	download_url_open "$URL"
 fi

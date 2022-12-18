@@ -89,7 +89,7 @@ while getopts "hdvm:p:k:r:z:sxi:c:" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 set -u
@@ -156,7 +156,7 @@ fi
 # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/docker/docker_run_gpu.sh
 log_warning "Note tensorflow requires hacks to work properly on EC2 G2"
 
-echo "to access the machine \'$MACHINE\' run"
+echo "to access the machine '$MACHINE' run"
 echo "    \`docker-machine env $MACHINE\`"
 echo Note that the docker machine does not appear in the vmware fusion app
 echo To access it you should run

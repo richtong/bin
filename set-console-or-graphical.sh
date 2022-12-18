@@ -37,7 +37,7 @@ while getopts "hdv" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh
 shift $((OPTIND - 1))
@@ -72,8 +72,8 @@ f*)
 	;;
 esac
 
-sudo systemctl set-default $MODE.target
-log_verbose set-default currently set to $MODE
+sudo systemctl set-default "$MODE.target"
+log_verbose "set-default currently set to $MODE"
 
 # https://www.howtoforge.com/tutorial/grub-2-boot-loader-menu-and-splash-screen-image/
 set_config_var GRUB_CMDLINE_LINUX_DEFAULT '"quiet"' /etc/default/grub

@@ -42,7 +42,7 @@ while getopts "hdvr:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-mac.sh lib-install.sh lib-util.sh
@@ -53,8 +53,6 @@ GPG_ID=("$(gpg --list-secret-keys | sed -n "/^sec/{n;p}")")
 log_verbose "found ids ${GPG_ID[*]}"
 GPG_NAME=("$(gpg --list-secret-keys | grep -o "<.*>" | tr -d '<>')")
 log_verbose "found ids ${GPG_NAME[*]}"
-
-exit
 
 # https://stackoverflow.com/questions/17403498/iterate-over-two-arrays-simultaneously-in-bash
 for i in "${!GPG_ID[@]}"; do

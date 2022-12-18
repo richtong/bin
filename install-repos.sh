@@ -48,7 +48,7 @@ while getopts "hdvw:f" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-version-compare.sh lib-install.sh lib-util.sh
 
@@ -74,6 +74,7 @@ fi
 # shellcheck disable=SC2043
 for repo in src; do
 	log_verbose "working on $repo"
+	# shellcheck disable=SC2086
 	if ! git_install_or_update ${FORCE_FLAG-} "$repo" >/dev/null; then
 		log_warning "could not update $repo"
 	fi

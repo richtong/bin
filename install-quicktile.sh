@@ -95,7 +95,7 @@ if $FORCE; then
 	for mode in custom default; do
 		for key in "/xfwm4/$mode/<Primary><Alt>KP_"{1..9}; do
 			if xfconf-query -c xfce4-keyboard-shortcuts -p "$key"; then
-				log_verbose $key was set so clearing for quicktile
+				log_verbose "$key was set so clearing for quicktile"
 				xfconf-query -c xfce4-keyboard-shortcuts -p "$key" -s ""
 			fi
 		done

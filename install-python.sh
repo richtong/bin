@@ -20,7 +20,7 @@ DEBUGGING="${DEBUGGING:-false}"
 ANACONDA="${ANACONDA:-true}"
 PIPENV="${PIPENV:-true}"
 # If version is set to null then the default python version is used
-PYTHON_VERSION="${PYTHON_VERSION:-}"
+PYTHON_VERSION="${PYTHON_VERSION-}"
 NEW_PYTHON="${NEW_PYTHON:-@3.10}"
 # we normally don't need the oldest version
 OLD_PYTHON="${OLD_PYTHON:-@3.8}"

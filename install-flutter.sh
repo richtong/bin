@@ -48,7 +48,7 @@ while getopts "hdvnf:" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 shift $((OPTIND - 1))
 source_lib lib-install.sh lib-util.sh lib-config.sh
@@ -135,7 +135,6 @@ sudo xcodebuild -license accept
 #           intel-haxm \
 #           adoptopenjdk8 \
 #
-exit
 flutter doctor --android-licenses
 
 # https://flutter.dev/docs/get-started/web

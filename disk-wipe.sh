@@ -54,7 +54,7 @@ while getopts "hdvfs" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-fs.sh lib-util.sh
 shift $((OPTIND - 1))
@@ -123,7 +123,7 @@ for disk in "$@"; do
 	log_verbose "$length is $blocks of $block_size blocks"
 	log_warning "now erase front of $disk $blocks blocks of $block_size block size"
 	if $FORCE; then
-		log_warning FORCE=$FORCE so really erasing front of drive
+		log_warning "FORCE=$FORCE so really erasing front of drive"
 		front="sudo dd if=/dev/zero of=$disk bs=$block_size count=$blocks"
 		log_verbose "$front"
 		eval "$front"
@@ -132,7 +132,7 @@ for disk in "$@"; do
 	seek=$((disk_in_blocks - blocks))
 	log_warning "now end of $disk at $seek with $blocks blocks of $block_size block size"
 	if $FORCE; then
-		log_warning FORCE=$FORCE so really erasing back of drive
+		log_warning "FORCE=$FORCE so really erasing back of drive"
 		back="sudo dd if=/dev/zero of=$disk bs=$block_size count=$blocks seek=$seek"
 		log_verbose "$back"
 		eval "$back"

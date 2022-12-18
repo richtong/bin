@@ -34,7 +34,7 @@ while getopts "hdvi:" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 INSTALL_DIR=${INSTALL_DIR:="WS_INSTALL_DIR"}
@@ -56,10 +56,10 @@ popd || true
 
 # validate the installation
 
-if [ ! -e $INSTALL_DIR/include/boost ]; then
+if [[ ! -e $INSTALL_DIR/include/boost ]]; then
 	log_verbose "$INSTALL_DIR/include/boost installed"
 fi
 
-if [ ! -e $INSTALL_DIR/lib/boost ]; then
+if [[ ! -e $INSTALL_DIR/lib/boost ]]; then
 	echo Boost librariesinstalled
 fi
