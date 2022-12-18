@@ -26,8 +26,8 @@ while getopts "hdvr:e:s:" opt; do
 			usage: $SCRIPTNAME [ flags ]
 			flags:
 				   -h help
-				   -d $(! $DEBUGGING || echo "no ")debugging
-				   -v $(! $VERBOSE || echo "not ")verbose
+				   -d $($DEBUGGING && echo "no ")debugging
+				   -v $($VERBOSE && echo "not ")verbose
 				   -r version number (default: $VERSION)
 				   -e email for login (default: $EMAIL)
 				   -s signin subdomain add to .1password.com (default: $SIGNIN)

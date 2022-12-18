@@ -1,39 +1,65 @@
 #!/usr/bin/env bash
 ##
 ## Flux changes screen color on a mac
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-PHOTOMATIX_URL="${PHOTOMATIX_URL:-https://www.hdrsoft.com/download/photomatix-pro.html}"
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 
+PHOTOMATIX_URL="${PHOTOMATIX_URL:-https://www.hdrsoft.com/download/photomatix-pro.html}"
 DXO_VERSION="${DXO_VERSION:-4}"
 CAPTUREONE_VERSION="${CAPTUREONE_VERSION:-"15.1.2"}"
 PTGUI_VERSION="${PTGUI_VERSION:-"12.10"}"
 # insert your GUID here but do not check in
+FORCE="${FORCE:-false}"
 OPTIND=1
-while getopts "hdvp:c:" opt; do
+while getopts "hdvp:c:t:a:f" opt; do
 	case "$opt" in
 	h)
-		echo "$SCRIPTNAME flags: -d debug"
+		cat <<-EOF
+			         $SCRIPTNAME flags: -d debug
+							-d $($DEBUGGING && echo "no ")debugging
+							-v $($VERBOSE && echo "not ")verbose
+			                -p PTGUI need GUID to download
+			                -t PTGUI version number (default: $PTGUI_VERSION)
+			                -c Capture One needs GUID to download
+			                -a Capture One Version (default: $CAPTUREONE_VERSION)
+			                -f Force install Photomatix (default: $FORCE)
+		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	p)
-		export PTGUI_GUID="$OPTARG"
+		PTGUI_GUID="$OPTARG"
+		;;
+	t)
+		PTGUI_VERSION="$OPTARG"
 		;;
 	c)
-		export CAPTUREONE_GUID="$OPTARG"
+		CAPTUREONE_GUID="$OPTARG"
+		;;
+	a)
+		CAPTUREONE_VERSION="$OPTARG"
+		;;
+	f)
+		FORCE="$(FORCE && echo false || echo true)"
 		;;
 	*)
 		echo "no -$opt" >&2
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh
 set -u
@@ -138,8 +164,10 @@ if [[ -v PTGUI_GUID ]]; then
 	log_verbose "Drag PTGUI and eject the Volume"
 fi
 
-log_verbose install Photomatix for HDR photos
-url="$(curl "$PHOTOMATIX_URL" 2>/dev/null |
-	grep -o -m 1 "https://.*mac/Photomatix_Pro.*zip")"
-log_verbose "photomatix url is $url"
-download_url_open "$url"
+if $FORCE || [[ ! -e "/Applications/Photomatix Pro 6.app" ]]; then
+	log_verbose "install Photomatix for HDR photos"
+	url="$(curl "$PHOTOMATIX_URL" 2>/dev/null |
+		grep -o -m 1 "https://.*mac/Photomatix_Pro.*zip")"
+	log_verbose "photomatix url is $url"
+	download_url_open "$url"
+fi

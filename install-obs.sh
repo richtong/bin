@@ -7,29 +7,45 @@
 #
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# do not need To enable compatibility with bashdb instead of set -e
-# https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
-# trap 'exit $?' ERR
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
+
+NDI_VERSION="${NDI_VERSION:-4.5.1}"
+REMOVAL_VERSION="${REMOVAL_VERSION:-v0.4.0}"
+OBS_CONTENT="${OBS_CONTENT:-/Applications/OBS.app/Contents}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt; do
+while getopts "hdvn:r:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs 1Password
+			Installs Open Broadcast Studio, NDI and Background Removal
 			    usage: $SCRIPTNAME [ flags ]
-				flags: -d debug (not functional use bashdb), -v verbose, -h help"
+				flags: -h help"
+				   -d $($DEBUGGING && echo "no ")debugging
+				   -v $($VERBOSE && echo "not ")verbose
+			                   -n NDI Version number (default: $NDI_VERSION)
+			                   -r OBS Background Removal (default: $REMOVAL_VERSION)
 		EOF
 		exit 0
 		;;
 	d)
-
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
+		export VERBOSE=true
+		;;
+	n)
+		NDI_VERSION="$OPTARG"
+		;;
+	r)
+		REMOVAL_VERSION="$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt"
@@ -37,14 +53,14 @@ while getopts "hdv" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
 if in_os mac; then
 
 	package_install obs obs-ndi
-	NDI_VERSION="${NDI_VERSION:-4.5.1}"
+
 	NDI="${NDI:-"https://downloads.ndi.tv/Tools/NDIToolsInstaller.pkg"}"
 	log_verbose "open $NDI"
 	download_url_open "$NDI"
@@ -53,13 +69,15 @@ if in_os mac; then
 	mac_login_item_add "/Applications/NDI Virtual Input.app"
 
 	log_verbose "Install plugins"
-	VERSION="${VERSION:-v0.4}"
-	URL+=("https://github.com/royshil/obs-backgroundremoval/releases/download/$VERSION/obs-backgroundremoval-macosx.zip")
-	APP="${APP:-/Applications/OBS.app/Contents}"
+	URL+=(
+
+		"https://github.com/royshil/obs-backgroundremoval/releases/download/$REMOVAL_VERSION/obs-backgroundremoval-macosx.zip"
+
+	)
 
 	for url in "${URL[@]}"; do
-		log_verbose download_url "$url" "${url##*/}" "$WS_DIR/cache" "$APP"
-		download_url_open "$url" "${url##*/}" "$WS_DIR/cache" "$APP"
+		log_verbose download_url_open "$url" "${url##*/}" "$WS_DIR/cache" "$OBS_CONTENT"
+		download_url_open "$url" "${url##*/}" "$WS_DIR/cache" "$OBS_CONTENT"
 	done
 
 elif in_os linux; then
