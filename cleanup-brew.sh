@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ## vim: set noet ts=4 sw=4:
 ##
-## Does cleanup of obsolete software. That is hard to install
+## Does cleanup of obsolete software when brew uninstall fails
 ##
 ##@author Rich Tong
 ##@returns 0 on success
@@ -9,21 +9,21 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
-OPTIND=1
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 VERSION="${VERSION:-7}"
+OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvr:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Cleanup environment
-			    usage: $SCRIPTNAME [ flags ]
+			Cleanup brew packages
+			    usage: $SCRIPTNAME [ flags ] [ packages... ]
 			    flags: -h help"
 			           -r version number (default: $VERSION)
 					-d debug $($DEBUGGING && echo "off" || echo "on")
@@ -61,9 +61,20 @@ if ! in_os mac; then
 	exit
 fi
 
-log_verbose python 2.x is obsolete so make sure to remove it
+log_verbose "python 2.x is obsolete so make sure to remove it"
 brew uninstall python@2
 
-log_verbose force remove Google Chrome as updates will throw off Homebrew
-sudo rm -rf "/Applications/Google Chrome"
-brew_install google-chrome
+# https://stackoverflow.com/questions/56011009/how-do-i-uninstall-a-homebrew-cask-manually
+brew update
+brew cleanup
+brew doctor
+
+log_verbose "Remove all the casks (if any)"
+for PACKAGE in "$@"; do
+	for LOCATION in Caskroom Cellar; do
+		# use the conditional to make sure this doesn't become just root
+		if rm -rf "${HOMEBREW_PREFIX:?}/$LOCATION/$PACKAGE"; then
+			log_verbose "Found and removed $HOMEBREW_PREFIX/$LOCATION/$PACKAGE"
+		fi
+	done
+done
