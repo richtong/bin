@@ -104,11 +104,14 @@ fi
 # coreutils gets us readlink
 # since this forces a brew update and upgrade need to
 # run this first and this require xcode
+echo "$SCRIPTNAME: brew update and greedy upgrade"
 brew update
 if [[ $OSTYPE =~ darwin ]] && ! xcode-select -p; then
 	xcode-select --install
 fi
 brew upgrade --greedy
+
+echo "$SCRIPTNAME: install latest bash and git"
 for package in bash coreutils git gh; do
 	if ! brew list "$package" &>/dev/null; then
 		brew install "$package"
@@ -131,10 +134,10 @@ echo "$SCRIPTNAME: make sure we can see brew and coreutils on reboot"
 
 # fail the next command if no 1Password.app
 if [[ $OSTYPE =~ darwin ]]; then
-	# using google drive now for rich.vc
+	echo "$SCRIPTNAME: force install 1password, google drive and veracrypt"
 	for package in 1password google-drive veracrypt; do
 		if ! brew list "$package" &>/dev/null; then
-			brew install "$package"
+			brew install --force "$package"
 		fi
 	done
 	read -rp "$SCRIPTNAME: Login with Google Drive with Veracrypt vault, press enter when done"
