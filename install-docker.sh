@@ -103,14 +103,14 @@ EOF
 		;;
 	esac
 done
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-docker.sh lib-install.sh lib-mac.sh lib-version-compare.sh lib-config.sh
 DEBUGGING=${DEBUGGING:=false}
 DOCKER_MACHINE=${DOCKER_MACHINE:="https://github.com/docker/machine/releases/download/v$DOCKER_MACHINE_VERSION/docker-machine-$(uname -s)-$(uname -m)"}
 DOCKER_COMPOSE=${DOCKER_COMPOSE:="https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)"}
 
-log_verbose checking if we are already in docker
+log_verbose "checking if we are already in docker"
 if in_os docker; then
 	log_exit "already in docker"
 fi
@@ -164,7 +164,7 @@ if in_os mac; then
 	#    log_verbose install docker and uninstall docker-edge if needed
 	#    cask_swap docker docker-edge
 	fi
-	cask_install docker
+	cask_install --force docker
 	log_warning "docker now installed by homebrew open it up and fill it in before continuing"
 	log_warning "it is best to login from the Docker.app"
 	open -a Docker.app
