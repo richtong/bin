@@ -60,7 +60,8 @@ if ! in_os mac; then
 	log_exit "mac only"
 fi
 
-brew_install iterm2
+log_verbose "Force install with brew"
+brew_install --force iterm2
 
 log_verbose "making $ITERM2_PATH"
 mkdir -p "$HOME/$ITERM2_PATH"
