@@ -389,11 +389,10 @@ log_verbose "installing development and devops systems"
 "$SCRIPT_DIR/install-1password.sh"
 "$SCRIPT_DIR/install-google-chrome.sh"
 
+"$SCRIPT_DIR/install-ssh.sh"
 log_verbose Also allow ssh into this machine so you can switch to using consoler
 if [[ $OSTYPE =~ darwin ]]; then
 	systemsetup -setremotelogin on
-else
-	"$SCRIPT_DIR/install-openssh-server.sh"
 fi
 log_verbose ssh has now been installed and iam-key server as well
 log_verbose you can now quit this and run the rest via ssh

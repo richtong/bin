@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##
-## install openssh server
+## install openssh  iuncluding the server
 ##
 ##@author Rich Tong
 ##@returns 0 on success
@@ -8,10 +8,11 @@
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
 # use the trap on ERR
-set -u && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
-SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
+
 OPTIND=1
 export FLAGS=${FLAGS:-" -v "}
 VERSION="${VERSION:-"7.5p1"}"
@@ -23,10 +24,12 @@ while getopts "hdvm:r:u:c:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Install Openssh Server
+			Install Openssh and the Server too
 			usage: $SCRIPTNAME [ flags ]
 
-			flags: -d debug, -v verbose, -h help
+			flags: -h help
+				   -d $($DEBUGGING && echo "no ")debugging
+				   -v $($VERBOSE && echo "not ")verbose
 			       -r desired version number (default: $VERSION)
 			       -u download if necessary from this Url (default: $(eval echo "$URL"))
 			       -c PGP_URL checksum for url (default from : $(eval echo "$PGP_URL"))
@@ -37,12 +40,15 @@ while getopts "hdvm:r:u:c:" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	r)
 		VERSION="$OPTARG"
@@ -58,24 +64,35 @@ while getopts "hdvm:r:u:c:" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-install.sh lib-version-compare.sh lib-util.sh
+source_lib lib-util.sh lib-install.sh lib-version-compare.sh lib-avahi.sh
 
-package_install openssh-server
+package_install openssh
+
+log_verbose "openssh installed now rehash to add to script path"
+hash -r
 
 current_version=$(ssh -V 2>&1 | cut -d ' ' -f 1 | cut -d '_' -f 2)
 # https://gist.github.com/techgaun/df66d37379df37838482c4c3470bc48e
 if vergte "$current_version" "$VERSION"; then
-	log_exit "Package install version $current_version is greater or equal to desired $VERSION"
+	if in_os linux; then
+		log_verbose "For linux install manually avahi services"
+		# %h means substitute the current hostname
+		log_verbose "advertise an ssh avahi service"
+		avahi_publish ssh "%h" "_ssh._tcp" 22 "SSH Server"
+		log_verbose "advertise an sftp over ssh service"
+		avahi_publish sftp-ssh "%h" "_ssh-ssh._tcp" 22 "SFTP over SSH Server"
+	fi
+	log_exit "Succes $current_version is greater or equal to desired $VERSION"
 fi
 
 if in_os mac; then
 	log_exit "Could not get desired version on Mac"
 fi
 
-log_warning the repo version is too old, doing a manual install but you will not
-log_warning get updates from this version
+log_warning "the repo version is too old, doing a manual install but you will not"
+log_warning "get updates from this version"
 
 package_install build-essential libssl-dev zlib1g-dev
 
