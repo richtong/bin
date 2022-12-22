@@ -327,15 +327,15 @@ if sudo zfs share "$POOL" 2>&1 | grep "already started"; then
 fi
 
 if ! in_linux ubuntu; then
-	log_verbose not in ubuntu assume we need to publish samba
-	avahi_publish smb "$HOSTNAME Samba" _smb._tcp 445
+	log_verbose "not in ubuntu assume we need to publish samba with icon"
+	avahi_publish -d smb "$HOSTNAME Samba" _smb._tcp 445
 fi
-log_verbose publish nfs shares on avahi
-avahi_publish nfs "$HOSTNAME NFS" _nfs._tcp 2049 "path=/$POOL"
+log_verbose "publish nfs shares on avahi with icon"
+avahi_publish -d nfs "$HOSTNAME NFS" _nfs._tcp 2049 "path=/$POOL"
 # In ubuntu we do not automount
 # https://www.princeton.edu/~unix/Solaris/troubleshoot/zfs.html
 if $VERBOSE; then
-	log_verbose shares created
+	log_verbose "shares created"
 	sudo zfs list
 	sudo zfs get sharesmb,sharenfs
 	sudo zpool status
