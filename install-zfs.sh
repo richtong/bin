@@ -328,10 +328,10 @@ fi
 
 if ! in_linux ubuntu; then
 	log_verbose "not in ubuntu assume we need to publish samba with icon"
-	avahi_publish -d smb "$HOSTNAME Samba" _smb._tcp 445
+	avahi_publish -f smb "$HOSTNAME Samba" _smb._tcp 445
 fi
 log_verbose "publish nfs shares on avahi with icon"
-avahi_publish -d nfs "$HOSTNAME NFS" _nfs._tcp 2049 "path=/$POOL"
+avahi_publish -f nfs "$HOSTNAME NFS" _nfs._tcp 2049 "path=/$POOL"
 # In ubuntu we do not automount
 # https://www.princeton.edu/~unix/Solaris/troubleshoot/zfs.html
 if $VERBOSE; then
