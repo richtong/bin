@@ -57,7 +57,7 @@ shift $((OPTIND - 1))
 # shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
-source_lib lib-install.sh lib-util.sh
+source_lib lib-util.sh lib-install.sh lib-config.sh
 
 if in_os linux; then
 
@@ -70,5 +70,11 @@ elif in_os mac; then
 
 	brew_install fig
 	open -a fig
+	if ! config_mark; then
+		config_add <<-'EOF'
+			PATH="$HOME/.fig/bin:$PATH"
+		EOF
+	fi
+	log_warning "This improperly puts bash script into .profile so delete manually"
 
 fi

@@ -50,7 +50,7 @@ while getopts "hdvk" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-util.sh lib-keychain.sh lib-version-compare.sh lib-config.sh
 log_verbose "Loaded shell libraries"
@@ -108,9 +108,10 @@ if in_os mac; then
 		# https://keith.github.io/xcode-man-pages/ssh-add.1.html
 		# for MacOS earlier than Sierra, need ssh-add -A to load all passphrases from MacOS keychain"
 		config_add <<-EOF
-			if [ -z \$SSH_AUTH_SOCK ]; then . "$WS_DIR/git/src/bin/set-ssh-agent.sh"; fi
-			# ssh-add is slow so only run if no keys in the agent
-			if [ \$(ssh-add -l | wc -l) -le 1 ] ; then ssh-add $SSH_LOAD_FLAG; fi
+			            # shellcheck disable=1091
+						if [ -z "\$SSH_AUTH_SOCK" ]; then . "$WS_DIR/git/src/bin/set-ssh-agent.sh"; fi
+						# ssh-add is slow so only run if no keys in the agent
+						if [ "\$(ssh-add -l | wc -l)" -le 1 ] ; then ssh-add $SSH_LOAD_FLAG; fi
 		EOF
 	fi
 
