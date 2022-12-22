@@ -68,10 +68,13 @@ done
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-install.sh lib-version-compare.sh lib-avahi.sh
 
-package_install openssh
-
-log_verbose "openssh installed now rehash to add to script path"
-hash -r
+# do not use the homebrew openssh because it does understand Apple Keychain
+if ! in_os mac; then
+	log_verbose "Install homebrew openssh"
+	package_install openssh
+	log_verbose "openssh installed now rehash to add to script path"
+	hash -r
+fi
 
 current_version=$(ssh -V 2>&1 | cut -d ' ' -f 1 | cut -d '_' -f 2)
 # https://gist.github.com/techgaun/df66d37379df37838482c4c3470bc48e
