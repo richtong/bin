@@ -319,7 +319,6 @@ fi
 # mandoc - To get the version with man --path
 # ripgrep - way better grepping
 # sudo - Linux only
-# thefuck - smart command completion
 
 PACKAGES+=(
 
@@ -334,7 +333,6 @@ PACKAGES+=(
 	mmv
 	pre-commit
 	ripgrep
-	thefuck
 
 )
 
