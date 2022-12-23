@@ -52,6 +52,7 @@ if in_os mac; then
 	log_verbose "install Mac RDP"
 	# https://apps.apple.com/us/app/microsoft-remote-desktop
 	mas_install 1295203466
+
 elif in_os linux; then
 	# https://linuxize.com/post/how-to-install-xrdp-on-ubuntu-20-04/
 	package_install xrdp
