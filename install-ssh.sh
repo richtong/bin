@@ -85,7 +85,7 @@ if vergte "$current_version" "$VERSION"; then
 		log_verbose "advertise an ssh avahi service"
 		avahi_publish ssh "%h" "_ssh._tcp" 22 "SSH Server"
 		log_verbose "advertise an sftp over ssh service"
-		avahi_publish sftp-ssh "%h" "_ssh-ssh._tcp" 22 "SFTP over SSH Server"
+		avahi_publish sftp-ssh "%h" "_sftp-ssh._tcp" 22 "SFTP over SSH Server"
 	fi
 	log_exit "Succes $current_version is greater or equal to desired $VERSION"
 fi
