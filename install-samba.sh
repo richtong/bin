@@ -10,7 +10,11 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
+DEFAULT_SHARE_USER=("$USER")
+if ((${#DEFAULT_SHARE_USER[@]} > 0)); then SHARE_USER=("${SHARE_USER[@]:-${DEFAULT_SHARE_USER[@]}}"); fi
+
 SHARE_ROOT="${SHARE_ROOT:-/home}"
+
 if [[ ! -v DEFAULT_SHARE ]]; then
 	find /home -maxdepth 1 | cut -d '/' -f 3 | mapfile -t DEFAULT_SHARE
 fi
@@ -19,7 +23,7 @@ if ((${#DEFAULT_SHARE[@]} > 0)); then SHARE=("${SHARE[@]}:-${DEFAULT_SHARE[@]}")
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvr:" opt; do
+while getopts "hdvr:u:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -31,6 +35,7 @@ while getopts "hdvr:" opt; do
 				   -d $($DEBUGGING && echo "no ")debugging
 				   -v $($VERBOSE && echo "not ")verbose
 				   -r Parent directory of shares (default: $SHARE_ROOT)
+				   -u add a Samba user add this flag for each user you will be prompted for a password
 		EOF
 		exit 0
 		;;
@@ -47,6 +52,9 @@ while getopts "hdvr:" opt; do
 		;;
 	r)
 		SHARE_ROOT="$OPTARG"
+		;;
+	u)
+		SHARE_USER+=("$OPTARG")
 		;;
 	*)
 		echo "no flag -$opt"
@@ -93,4 +101,11 @@ log_verbose "Populated smb.conf now resetart service"
 sudo service smdb restart
 sudo restart nmbd
 
-log_warning "You must also setup smb share passwords"
+log_verbose "Setting SMB Users"
+for user in "${DEFAULT_USER[@]}"; do
+	log_verbose "Adding smb user $user"
+	sudo smbpasswd -a "$user"
+	sudo smbpasswd -e "$user"
+done
+
+log_message "Each user should run ssh $HOSTNAME smbpasswd to set samba password"
