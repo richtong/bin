@@ -14,7 +14,7 @@ SHARE_ROOT="${SHARE_ROOT:-/home}"
 if [[ ! -v DEFAULT_SHARE ]]; then
 	find /home -maxdepth 1 | cut -d '/' -f 3 | mapfile -t DEFAULT_SHARE
 fi
-SHARE=("${SHARE[@]}:-${DEFAULT_SHARE[@]}")
+if ((${#DEFAULT_SHARE[@]} > 0)); then SHARE=("${SHARE[@]}:-${DEFAULT_SHARE[@]}"); fi
 
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
