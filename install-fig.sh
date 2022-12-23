@@ -72,7 +72,7 @@ elif in_os mac; then
 	open -a fig
 	if ! config_mark; then
 		config_add <<-'EOF'
-			PATH="$HOME/.fig/bin:$PATH"
+			echo "$PATH" | grep -q ".fig/bin" || PATH="$HOME/.fig/bin:$PATH"
 		EOF
 	fi
 	log_warning "This improperly puts bash script into .profile so delete manually"

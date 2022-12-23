@@ -144,6 +144,7 @@ if ! config_mark; then
 		            echo "$PATH" | grep -q "opt/$NAME/bin" ||
 		                PATH="$HOMEBREW_PREFIX/opt/$NAME/bin:$PATH"
 		        done
+				# shellcheck disable=SC2043
 				for NAME in man-db; do
 					echo "$PATH" | grep -q "opt/$NAME/libexec/bin" ||
 						PATH="$HOMEBREW_PREFIX/opt/$NAME/libexec/bin:$PATH"
