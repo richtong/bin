@@ -59,6 +59,6 @@ elif in_os linux; then
 	sudo adduser xrdp ssl-cert
 	log_verbose "restart xrdp to add ssl-cert"
 	log_verbose "if ufw is active enable port 3389"
-	sudo systemctl resetart xrdp
+	sudo systemctl restart xrdp
 
 fi
