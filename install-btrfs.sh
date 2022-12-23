@@ -17,7 +17,11 @@ OPTIND=1
 DISKS=${DISKS:-""}
 CACHE=${CACHE:-""}
 POOL=${POOL:-"btrfs-pool"}
-SHARES=${SHARES:-"data user"}
+# make the default an array needs a hack
+# https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
+# https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
+DEFAULT_SHARE=(data user)
+SHARE=("${SHARE[@]}:-${DEFAULT_SHARE[@]}")
 ORG_NAME="${ORG_NAME:-"tongfamily"}"
 FORCE=${FORCE-}
 QUOTA=${QUOTA:-2T}
@@ -28,7 +32,7 @@ while getopts "hdvs:f" opt; do
 	h)
 		echo "$SCRIPTNAME: Install btrfs and configure this as a server"
 		echo "flags: -d debug, -h help"
-		echo "       -s quoted list of shares (default: $SHARES)"
+		echo "       -s quoted list of shares (default: ${SHARE[*]})"
 		echo "	     -f force the change so overwrite existing disks (default: $FORCE)"
 		echo "positionals: /dev/sdb /dev/sdc ...."
 		exit 0
@@ -40,7 +44,8 @@ while getopts "hdvs:f" opt; do
 		export VERBOSE=true
 		;;
 	s)
-		SHARES="$OPTARG"
+		# https://www.shellcheck.net/wiki/SC2206
+		mapfile -t SHARE <<<"$OPTARG"
 		;;
 	f)
 		if [[ ! $flags =~ -f ]]; then
@@ -131,41 +136,20 @@ sudo mount -a
 log_verbose installing nfs servers and shares
 package_install nfs-kernel-server
 sudo touch /etc/exports
-for share in $SHARES; do
+for share in "${SHARE[@]}"; do
 	sudo mkdir -p "/$POOL/$share"
 	# http://nfs.sourceforge.net/nfs-howto/ar01s03.html
 	config_replace /etc/exports "/$POOL/$share" "/$POOL/$share *(rw,sync,no_root_squash)"
 done
 sudo service nfs-kernel-server start
 
-log_verbose install samba
-package_install samba
-
-# https://help.ubuntu.com/lts/serverguide/samba-fileserver.html
-if ! config_mark /etc/samba/smb.conf; then
-
-	for share in $SHARES; do
-		config_add /etc/samba.conf <<-EOF
-			[$share]
-			    comment = $HOSTNAME Samba Share
-			    path = /$POOL/$share
-			    browsable = yes
-			    guest = ok
-			    writable = yes
-			    create mask = 0755
-
-		EOF
-	done
-fi
-
-sudo service smdb restart
-sudo restart nmbd
+"$SCRIPT_DIR/install-samba.sh" -p "$POOL" "${SHARE[@]}"
 
 log_message "Each user should run ssh $HOSTNAME smbpasswd to set samba password"
 
 # https://btrfs.wiki.kernel.org/index.php/UseCases#How_do_we_implement_quota_in_BTRFS.3F
 log_verbose enable quota
-for share in $SHARES; do
+for share in "${SHARE[@]}"; do
 	if ! sudo btrfs subvolume "/$POOL/$share" >/dev/null; then
 		sudo btrfs subvolume create "/$POOL/$share"
 		sudo btrfs quota enable "/$POOL/$share"
