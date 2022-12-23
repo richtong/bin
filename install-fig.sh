@@ -69,7 +69,7 @@ if in_os linux; then
 elif in_os mac; then
 
 	brew_install fig
-	open -a fig
+	open -a fig.app
 	if ! config_mark; then
 		config_add <<-'EOF'
 			echo "$PATH" | grep -q ".fig/bin" || PATH="$HOME/.fig/bin:$PATH"
