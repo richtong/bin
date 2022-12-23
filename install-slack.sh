@@ -1,24 +1,33 @@
 #!/usr/bin/env bash
+## vim: set noet ts=4 sw=4:
 ##
 ## install slack
 ##
 ##@author Rich Tong
 ##@returns 0 on success
 #
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 
 OPTIND=1
 VERSION=${VERSION:-2.8.2}
 MAC_URL=${MAC_URL:-"https://slack.com/ssb/download-osx"}
-while getopts "hdvu:r:" opt; do
+LINUX_URL=${LINUX_URL:-"https://downloads.slack-edge.com/linux_releases/slack-desktop-$VERSION-amd64.deb"}
+TOKEN="${TOKEN:-12345}"
+while getopts "hdvm:r:t:l:" opt; do
 	case "$opt" in
 	h)
-		echo "$SCRIPTNAME: Install slack"
-		echo "flags: -d debug, -h help"
-		echo "       -u url for program (default: $MAC_URL for MacOS"
-		echo "       -r linux downloads specific version number $VERSION or later"
-		exit 0
+		cat <<-EOF
+			        $SCRIPTNAME: Install slack
+											flags: -d debug, -h help
+			               -m url for mac program (default: $MAC_URL)
+			               -l url for linux down (default $LINUX_URL)
+																		-r linux downloads specific version number $VERSION or later
+			               -t Slack access token (default: $TOKEN)
+		EOF
+		exit
 		;;
 	d)
 		export DEBUGGING=true
@@ -26,8 +35,10 @@ while getopts "hdvu:r:" opt; do
 	v)
 		export VERBOSE=true
 		;;
-	u)
+	m)
 		MAC_URL="$OPTARG"
+		;;
+	l)
 		LINUX_URL="$OPTARG"
 		;;
 	r)
@@ -46,7 +57,7 @@ source_lib lib-install.sh lib-mac.sh lib-util.sh lib-version-compare.sh
 set -u
 shift $((OPTIND - 1))
 
-if command -v slack; then
+if command -v slack >/dev/null; then
 	log_exit "Slack installed"
 fi
 
@@ -74,7 +85,7 @@ if [[ $OSTYPE =~ darwin ]]; then
 		sudo mv "$DOWNLOAD_DIR/Slack.app" /Applications
 	fi
 
-	log_verbose "slack channel export installed need a slackchannel2pdf --tokern $TOKEN"
+	log_verbose "slack channel export installed need a slackchannel2pdf --token $TOKEN"
 	pip install slackchannel2pdf
 	exit
 fi
@@ -101,6 +112,5 @@ if [[ $online =~ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
 		VERSION="${BASH_REMATCH[0]}"
 	fi
 fi
-LINUX_URL=${LINUX_URL:-"https://downloads.slack-edge.com/linux_releases/slack-desktop-$VERSION-amd64.deb"}
 log_verbose "downloading from  $LINUX_URL"
 deb_install slack-desktop "$LINUX_URL"
