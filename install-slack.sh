@@ -16,16 +16,18 @@ VERSION=${VERSION:-2.8.2}
 MAC_URL=${MAC_URL:-"https://slack.com/ssb/download-osx"}
 LINUX_URL=${LINUX_URL:-"https://downloads.slack-edge.com/linux_releases/slack-desktop-$VERSION-amd64.deb"}
 TOKEN="${TOKEN:-12345}"
-while getopts "hdvm:r:t:l:" opt; do
+FORCE="${FORCE:-false}"
+while getopts "hdvfm:r:t:l:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			        $SCRIPTNAME: Install slack
-											flags: -d debug, -h help
-			               -m url for mac program (default: $MAC_URL)
-			               -l url for linux down (default $LINUX_URL)
-																		-r linux downloads specific version number $VERSION or later
-			               -t Slack access token (default: $TOKEN)
+			$SCRIPTNAME: Install slack
+				flags: -d debug, -h help
+					-f $($FORCE && echo "no")force Homebrew install
+					-m url for mac program (default: $MAC_URL)
+					-l url for linux down (default $LINUX_URL)
+					-r linux downloads specific version number $VERSION or later
+					-t Slack access token (default: $TOKEN)
 		EOF
 		exit
 		;;
@@ -43,6 +45,9 @@ while getopts "hdvm:r:t:l:" opt; do
 		;;
 	r)
 		VERSION="$OPTARG"
+		;;
+	f)
+		FORCE="$($FORCE && echo false || echo true)"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -71,7 +76,12 @@ if in_os linux; then
 	log_exit "Snap classic install"
 fi
 
-if app_install slack; then
+if $FORCE; then
+	FLAG=(--force)
+fi
+
+# shellcheck disable=SC2068
+if app_install ${FLAG[@]} slack; then
 	log_exit "Slack installed"
 fi
 log_verbose "App Install failed try alternative ways"
