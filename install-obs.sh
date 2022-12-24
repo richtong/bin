@@ -13,9 +13,11 @@ VERBOSE="${VERBOSE:-false}"
 NDI_VERSION="${NDI_VERSION:-4.5.1}"
 REMOVAL_VERSION="${REMOVAL_VERSION:-v0.4.0}"
 OBS_CONTENT="${OBS_CONTENT:-/Applications/OBS.app/Contents}"
+
+FORCE="${FORCE:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvn:r:" opt; do
+while getopts "hdvfn:r:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -24,6 +26,7 @@ while getopts "hdvn:r:" opt; do
 				flags: -h help"
 				   -d $($DEBUGGING && echo "no ")debugging
 				   -v $($VERBOSE && echo "not ")verbose
+			                   -f $($FORCE && echo "no")force Homebrew install
 			                   -n NDI Version number (default: $NDI_VERSION)
 			                   -r OBS Background Removal (default: $REMOVAL_VERSION)
 		EOF
@@ -47,6 +50,9 @@ while getopts "hdvn:r:" opt; do
 	r)
 		REMOVAL_VERSION="$OPTARG"
 		;;
+	f)
+		FORCE="$($FORCE && echo false || echo true)"
+		;;
 	*)
 		echo "not flag -$opt"
 		;;
@@ -57,9 +63,14 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
+if $FORCE; then
+	FLAG=(--force)
+fi
+
 if in_os mac; then
 
-	package_install obs obs-ndi
+	# shellcheck disable=SC2068
+	package_install ${FLAG[@]} obs obs-ndi
 
 	NDI="${NDI:-"https://downloads.ndi.tv/Tools/NDIToolsInstaller.pkg"}"
 	log_verbose "open $NDI"

@@ -121,10 +121,10 @@ fi
 
 # docker - uses ~/.docker to detect if running in a container not needed much
 # venv-name-size-limit does not work
-MODULES="${MODULES:-"venv,node,goenv,user,host,ssh,cwd,perms,git,jobs,exit,root"}"
+MODULES="${MODULES:-"aws,gcp,kube,direnv,docker,docker-context,goenv,venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root"}"
 # priorities if the prompt exceeds % max-width of screen
 # deprioritieze user we know who we are usually
-PRIORITIES="${PRIORITIES:-"root,cwd,venv,host,ssh,perms,git-branch,git-status,hg,user,jobs,exit,cwd-path"}"
+PRIORITIES="${PRIORITIES:-"aws,gcp,kube,direnv,docker,docker-context,kube,goenv,root,cwd,user,host,ssh,perms,git-branch,git-status,hg,jobs,load,exit,cwd-path"}"
 
 if in_wsl; then
 	log_verbose "In WSL git is very expensive in Windows file systems so do not use"
