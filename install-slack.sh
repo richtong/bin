@@ -62,10 +62,6 @@ source_lib lib-install.sh lib-mac.sh lib-util.sh lib-version-compare.sh
 set -u
 shift $((OPTIND - 1))
 
-if command -v slack >/dev/null; then
-	log_exit "Slack installed"
-fi
-
 if in_os docker; then
 	log_exit no need for slack in docker
 fi
@@ -84,7 +80,8 @@ fi
 if app_install ${FLAG[@]} slack; then
 	log_exit "Slack installed"
 fi
-log_verbose "App Install failed try alternative ways"
+
+log_verbose "Snap and App Install failed try alternative ways"
 
 if [[ $OSTYPE =~ darwin ]]; then
 	log_verbose installing on Mac
