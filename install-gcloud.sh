@@ -18,7 +18,8 @@ VERSION="${VERSION:-7}"
 DEBUGGING="${DEBUGGING:-false}"
 # beta now installed by default at least on Ubuntu
 #PACKAGES="${PACKAGES:-" beta "}"
-PACKAGES="${PACKAGES:-""}"
+# Needed the gcloud kubeflow
+PACKAGES="${PACKAGES:-"gkgcloud-auth-plugin"}"
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 INSTALL_DIR="${INSTALL_DIR:-"$HOME/.local/bin"}"
