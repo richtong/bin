@@ -6,10 +6,12 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
-PHOTOMATIX_URL="${PHOTOMATIX_URL:-https://www.hdrsoft.com/download/photomatix-pro.html}"
-DXO_VERSION="${DXO_VERSION:-4}"
-CAPTUREONE_VERSION="${CAPTUREONE_VERSION:-"15.1.2"}"
-PTGUI_VERSION="${PTGUI_VERSION:-"12.10"}"
+PHOTOMATIX_URL="${PHOTOMATIX_URL:-https://www.hdrsoft.com/download/mac}"
+PHOTOMATIX_VERSION="${PHOTOMATIX_VERSION:-6.3.2}"
+DXO_VERSION="${DXO_VERSION:-6}"
+DXO_URL="${DXO_URL:-"https://download-center.dxo.com/PhotoLab/v$DXO_VERSION/Mac/DxO_PhotoLab$DXO_VERSION.dmg"}"
+CAPTUREONE_VERSION="${CAPTUREONE_VERSION:-"23"}"
+PTGUI_VERSION="${PTGUI_VERSION:-"12.18"}"
 # insert your GUID here but do not check in
 FORCE="${FORCE:-false}"
 OPTIND=1
@@ -20,7 +22,7 @@ while getopts "hdvp:c:t:a:f" opt; do
 			         $SCRIPTNAME flags: -d debug
 							-d $($DEBUGGING && echo "no ")debugging
 							-v $($VERBOSE && echo "not ")verbose
-			                -p PTGUI need GUID to download
+			                -p PTGUI need GUID to download get from login
 			                -t PTGUI version number (default: $PTGUI_VERSION)
 			                -c Capture One needs GUID to download
 			                -a Capture One Version (default: $CAPTUREONE_VERSION)
@@ -102,11 +104,18 @@ APP+=(
 log_verbose "Install common apps on MacOS and Linux"
 package_install "${APP[@]}"
 
+# rawtherapee: DxO open source version
+# darktable: Lightroom competitor open source
+# luminance-hdr: HDR open source
+
 CASK+=(
 
 	blender
+	darktable
 	geotag
 	handbrake
+	luminance-hdr
+	rawtherapee
 
 )
 
@@ -142,7 +151,6 @@ fi
 log_verbose "Install Mac specific downloads"
 
 if [[ -v DXO_VERSION ]]; then
-	DXO_URL="${DXO_URL:-"https://download-center.dxo.com/PhotoLab/v$DXO_VERSION/Mac/DxO_PhotoLab$DXO_VERSION.dmg"}"
 	log_verbose "install DXO from $DXO_URL"
 	download_url_open "$DXO_URL"
 	log_verbose "Drag DXO App from Volume to Application Folder"
@@ -159,15 +167,12 @@ fi
 log_warning "Cannot automatically install PTGui for Panaramas"
 log_warning "goto https://www.ptgui.com and type in registration to and set PTGUI_GUID"
 if [[ -v PTGUI_GUID ]]; then
-	PTGUI_URL="${PTGUI_URL:-"https://www.ptgui.com/downloads/120000/reg/mac105/standard/112205/$PTGUI_GUID/PTGui_$PTGUI_VERSION.dmg"}"
+	PTGUI_URL="${PTGUI_URL:-"https://www.ptgui.com/downloads/1218000/reg/mac105/standard/116185/$PTGUI_GUID/PTGui_$PTGUI_VERSION.dmg"}"
 	download_url_open "$PTGUI_URL"
 	log_verbose "Drag PTGUI and eject the Volume"
 fi
 
 if $FORCE || [[ ! -e "/Applications/Photomatix Pro 6.app" ]]; then
 	log_verbose "install Photomatix for HDR photos"
-	url="$(curl "$PHOTOMATIX_URL" 2>/dev/null |
-		grep -o -m 1 "https://.*mac/Photomatix_Pro.*zip")"
-	log_verbose "photomatix url is $url"
-	download_url_open "$url"
+	download_url_open "$PHOTOMATIX_URL/Photomatix_Pro_$PHOTOMATIX_VERSION.pkg.zip"
 fi
