@@ -88,7 +88,7 @@ while getopts "hdvmuiofkcbsa" opt; do
 	esac
 done
 
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 set -u
@@ -106,16 +106,23 @@ if ! in_os mac; then
 fi
 
 # krew - kubectl plugin manager
-PACKAGES+=(
+PACKAGE+=(
 	kubernetes-cli
 	helm
 	krew
 )
 
-log_verbose "Base installation of tools ${PACKAGES[*]}"
-# also need sponge in moreutils to prevent redirect problems
+# kfp - Kubeflow Pipelines SDK cli https://www.kubeflow.org/docs/components/pipelines/v1/sdk/install-sdk/
+PIP_PACKAGE+=(
+	kfp
+)
 
-package_install "${PACKAGES[@]}"
+log_verbose "Base installation of tools ${PACKAGE[*]}"
+# also need sponge in moreutils to prevent redirect problems
+package_install "${PACKAGE[@]}"
+
+log_verbose "Base installation of tools ${PIP_PACKAGE[*]}"
+pip_install "${PIP_PACKAGE[@]}"
 
 log_verbose "closing up secrets in .kube/config"
 mkdir -p "$HOME/.kube"

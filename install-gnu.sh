@@ -136,7 +136,7 @@ if ! config_mark; then
 	# single quote except where we have the $NAME entry
 	config_add <<-"EOF"
 		        echo "$PATH" | grep -q "$BREW_GNU" || PATH="$BREW_GNU:\$PATH"
-		        for NAME in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils; do
+		        for NAME in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils gawk; do
 		            echo "$PATH" | grep -q "opt/$NAME/libexec/gnubin" ||
 		                PATH="$HOMEBREW_PREFIX/opt/$NAME/libexec/gnubin:$PATH"
 		        done
