@@ -384,7 +384,7 @@ log_verbose "complete argcomplete parse"
 
 log_verbose "installing development and devops systems"
 "$SCRIPT_DIR/install-node.sh"
-"$SCRIPT_DIR/install-gcloud.sh"
+"$SCRIPT_DIR/install-google-cloud-sdk.sh"
 "$SCRIPT_DIR/install-jupyter.sh"
 "$SCRIPT_DIR/install-1password.sh"
 "$SCRIPT_DIR/install-google-chrome.sh"

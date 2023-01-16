@@ -18,7 +18,7 @@ K3AI="${K3AI:-false}"
 K3S="${K3S:-false}"
 KIND="${KIND:-false}"
 KUBEFLOW="${KUBEFLOW:-false}"
-MICROK8S="${MICROK8S:-true}"
+MICROK8S="${MICROK8S:-false}"
 MINIKUBE="${MINIKUBE:-false}"
 MULTIPASS="${MULTIPASS:-false}"
 

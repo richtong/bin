@@ -135,12 +135,14 @@ git config --global push.followTags true
 # gitlint - linting git commits
 # should use https://www.conventionalcommits.org/ format
 # feat(install-1password)!: add feature or breaking change vs. fix:
+# mkdocs: static site generator to create readmes that go to github pages
 log_verbose "do not installed hub the completions interfer with git and it is deprecated"
 PACKAGES+=(
 
 	act
 	gh
 	gitlint
+	mkdocs
 	nbdime
 	pre-commit
 

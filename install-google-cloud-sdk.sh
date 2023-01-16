@@ -134,14 +134,15 @@ if ! command -v gcloud >/dev/null; then
 	log_error 1 "gcloud nor properly installed"
 fi
 
-log_verbose install additional packages "$PACKAGES" "$@"
+PACKAGE+=(kubectl)
 # Ubuntu has beta already
 if in_os mac; then
-	PACKAGES+=" beta "
+	PACKAGE+=(beta)
 fi
+log_verbose install additional packages "$PACKAGES" "$@"
 if [[ -n $PACKAGES ]]; then
 	# shellcheck disable=SC2086
-	gcloud components install --quiet $PACKAGES "$@"
+	gcloud components install --quiet "${PACKAGE[@]}" "$@"
 fi
 
 # https://stackoverflow.com/questions/42379685/can-i-automate-google-cloud-sdk-gcloud-init-interactive-command
