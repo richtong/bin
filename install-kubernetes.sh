@@ -28,7 +28,7 @@ while getopts "hdvmuiofkcbsa" opt; do
 	h)
 		cat <<-EOF
 
-			$SCRIPTNAME: Install Kubernetes command line and then a k8s implementation
+			$SCRIPTNAME: Install Kubernetes command line and then a k8s implementation and kubeflow is available
 			flags: -h help
 				-d $(! $DEBUGGING || echo "no ")debugging
 				-v $(! $VERBOSE || echo "not ")verbose
@@ -98,13 +98,6 @@ KUBE_VERSION="${KUBE_RELEASE:-"$(curl -s https://storage.googleapis.com/kubernet
 KUBE_DEST="${KUBE_DEST:-"/usr/local/bin/kubectl"}"
 KUBE_URL="${KUBE_URL:-https://storage.googleapis.com/kubernetes-release/release/$KUBE_VERSION/bin/linux/amd64/kubectl}"
 
-#if ! $FORCE && command -v kubectl; then
-#log_exit "already installed"
-#fi
-if ! in_os mac; then
-	log_exit "Mac Only"
-fi
-
 # krew - kubectl plugin manager
 PACKAGE+=(
 	kubernetes-cli
@@ -113,7 +106,8 @@ PACKAGE+=(
 )
 
 # kfp - Kubeflow Pipelines SDK cli https://www.kubeflow.org/docs/components/pipelines/v1/sdk/install-sdk/
-PIP_PACKAGE+=(
+# needs --pre
+PIP_PRE_PACKAGE+=(
 	kfp
 )
 
@@ -122,7 +116,14 @@ log_verbose "Base installation of tools ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
 
 log_verbose "Base installation of tools ${PIP_PACKAGE[*]}"
-pip_install "${PIP_PACKAGE[@]}"
+pip_install --pre "${PIP_PRE_PACKAGE[@]}"
+
+log_verbose "Installing completions for kfp into non-exportable profile"
+for SHELL_TYPE in bash zsh; do
+	if ! config_mark "$(config_profile_nonexportable_$SHELL_TYPE)"; then
+		kfp --install-completion "$SHELL_TYPE"
+	fi
+done
 
 log_verbose "closing up secrets in .kube/config"
 mkdir -p "$HOME/.kube"
@@ -145,7 +146,7 @@ if ! config_mark; then
 	log_verbose "adding completions"
 	config_add <<-'EOF'
 		# shellcheck disable=SC1090
-				echo "$PATH" | grep ".krew/bin" || export PATH="$HOME/.krew/bin:$PATH"
+		echo "$PATH" | grep ".krew/bin" || export PATH="$HOME/.krew/bin:$PATH"
 	EOF
 fi
 
@@ -166,14 +167,13 @@ source_profile
 # https://github.com/corneliusweig/konfig
 # used by microk8s to merge its config file
 kubectl krew install konfig
-log_warning "docker has a single note kubernetes"
+log_warning "docker has a single node kubernetes"
 # https://ubuntu.com/blog/kubernetes-on-mac-how-to-set-up
 
 log_verbose "Installing virtual environments"
-
 if $COLIMA; then
 	log_verbose "Install Colima warning this installs a colima.yaml in $CWD"
-	"$BIN_DIR/install-docker-alternative.sh" -k
+	"$BIN_DIR/install-docker-alternative.sh" -ck
 fi
 
 # https://www.kubeflow.org/docs/components/pipelines/installation/localcluster-deployment/
@@ -192,18 +192,20 @@ if $KIND; then
 fi
 if $K3S; then
 	log_verbose "Install Redhat Rancher K3S"
-	sudo k3 server
 	if command -v nvidia-smi &>/dev/null; then
 		curl -sFL https://get.k3ai.in | bash -s -- --gpu --plugin_kfpipelines
 	else
 		curl -sFL https://get.k3ai.in | bash -s -- --cpu --plugin_kfpipelines
 	fi
+	sudo k3 server
 fi
 if $K3AI; then
 	log_verbose "Install K3AI using Rancher K3S"
 	curl -sFL "https://get.k3ai.in" | sh -
 	log_verbose "start with k3ai up"
+	k3ai up
 fi
+
 if $KUBEFLOW && ($KIND || $K3S || $K3AI); then
 	log_verbose "Running Argo against KIND, K3S or K3AI"
 	export PIPELINE_VERSION=1.8.3

@@ -150,25 +150,34 @@ git config --global push.followTags true
 # gitlint - linting git commits
 # should use https://www.conventionalcommits.org/ format
 # feat(install-1password)!: add feature or breaking change vs. fix:
-# mkdocs: static site generator to create readmes that go to github pages
 log_verbose "do not installed hub the completions interfer with git and it is deprecated"
-PACKAGES+=(
+PACKAGE+=(
 
 	act
 	gh
 	gitlint
-	mkdocs
 	nbdime
 	pre-commit
 
 )
 
+# we use the pip install version becasue brew install mkdocs has no easy way
+# to add themes
+# material design layout for mkdocs
+# mkdocs: static site generator to create readmes that go to github pages
+PIP_PACKAGE+=(
+	mkdocs
+	mkdocs-material
+)
+
 # meld is ugly compared with the default
 # https://stackoverflow.com/questions/43317697/setting-up-and-using-meld-as-your-git-difftool-and-mergetool-on-a-mac
-# PACKAGES+=" meld "
+# PACKAGE+=" meld "
 
 # shellcheck disable=SC2086
-package_install "${PACKAGES[@]}"
+package_install "${PACKAGE[@]}"
+
+pip_install "${PIPELINE_VERSION[@]}"
 
 gh config set git_protocol ssh
 # https://dev.to/softprops/digitally-unmastered-the-github-cli-edition-1cc4

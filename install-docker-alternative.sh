@@ -151,7 +151,7 @@ if $COLIMA; then
 	# --runtime docker is the default
 	COLIMA_FLAGS=(--cpu 4 --memory 16 --disk 100)
 	if $KUBERNETES; then
-		COLIMA_FLAGS+=(--with-kubernetes)
+		COLIMA_FLAGS+=(--kubernetes)
 	fi
 	log_verbose "Starting colima with ${COLIMA_FLAGS[*]}"
 	colima start "${COLIMA_FLAGS[@]}"
