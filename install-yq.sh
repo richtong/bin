@@ -58,11 +58,12 @@ log_verbose "installing yq"
 package_install yq
 hash -r
 
-# needs goes to .bash_profile if macos, .bashrc otherwise
-if ! config_mark "$(config_profile_for_bash)"; then
-	log_verbose "installing command completion"
-	config_add "$(config_profile_for_bash)" <<-'EOF'
-		# shellcheck disable=SC1090
-		if command -v yq >/dev/null; then source <(yq shell-completion bash); fi
-	EOF
-fi
+# needs goes to .bash_profile if macos, .bashrc otherwise do not need with brew
+# install
+#if ! config_mark "$(config_profile_for_bash)"; then
+#    log_verbose "installing command completion"
+#    config_add "$(config_profile_for_bash)" <<-'EOF'
+#        # shellcheck disable=SC1090
+#        if command -v yq >/dev/null; then source <(yq shell-completion bash); fi
+#    EOF
+#fi

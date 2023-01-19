@@ -66,11 +66,14 @@ if in_os mac; then
 
 	if ! config_mark "$(config_profile_for_bash)"; then
 		log_verbose "installing into $(config_profile_for_bash)"
+		# completions are installed by brew automatically so we do not need to
+		# add thiese list
+		#
+		#if [ -r "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc" ]; then
+		#    source \
+		#    "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc";
+		#fi
 		config_add <<-'EOF'
-			if [ -r "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc" ]; then
-				source \
-			    "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc";
-			fi
 			# shellcheck disable=SC1091
 			if [ -r "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc" ]; then
 				source \

@@ -150,14 +150,15 @@ if ! config_mark; then
 fi
 
 # bash completions go to .bash_profile for macos, .bashrc for linux
-if ! config_mark "$(config_profile_for_bash)"; then
-	config_add "$(config_profile_for_bash)" <<-'EOF'
-		# shellcheck disable=SC1090
-		if command -v helm >/dev/null; then eval "$(helm completion bash)"; fi
-		# shellcheck disable=SC1090
-		if command -v kubectl > /dev/null; then eval "$(kubectl completion bash)"; fi
-	EOF
-fi
+# these are automatically added into bash_completion.d for brew
+#if ! config_mark "$(config_profile_for_bash)"; then
+#    config_add "$(config_profile_for_bash)" <<-'EOF'
+#        # shellcheck disable=SC1090
+#        if command -v helm >/dev/null; then eval "$(helm completion bash)"; fi
+#        # shellcheck disable=SC1090
+#        if command -v kubectl > /dev/null; then eval "$(kubectl completion bash)"; fi
+#    EOF
+#fi
 
 log_verbose "Pick up profile changes"
 source_profile
