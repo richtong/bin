@@ -110,7 +110,24 @@ if [[ ! $(git config --global ff.only) =~ only ]]; then
 fi
 
 log_verbose "in the newest version of git specify fast forward only so you do not get accidental merges"
-git config pull.ff only
+if [[ ! $(git config --global pull.ff) =~ only ]]; then
+    git config pull.ff only
+fi
+
+
+# https://stackoverflow.com/questions/74486167/git-clone-recurse-submodules-throws-error-on-macos-transmission-type-file-n 
+# git submodules now failing with transmission type 'file' not allowed
+# https://git-scm.com/book/en/v2/Git-Internals-Transfer-Protocols
+# https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
+# https://bugs.launchpad.net/ubuntu/+source/git/+bug/1993586
+# https://github.blog/2022-10-18-git-security-vulnerabilities-announcead/#cve-2022-39253
+# this closes a security hole where a symlink in .git/objects causes a clone to
+# copy that data
+log_verbose "Allowing --recurse-submodules so make sure that all modules are trusted"
+if [[ ! $(config config --global protocol.file.allow) =~ always ]]; then
+    git config --glocal protocol.file.allow always
+fi
+
 
 # https://stackoverflow.com/questions/11514075/what-is-the-difference-between-an-annotated-and-unannotated-tag
 # https://stackoverflow.com/questions/5195859/how-do-you-push-a-tag-to-a-remote-repository-using-git
