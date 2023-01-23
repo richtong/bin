@@ -108,8 +108,11 @@ echo "$SCRIPTNAME: brew update and greedy upgrade"
 brew update
 if [[ $OSTYPE =~ darwin ]] && ! xcode-select -p; then
 	xcode-select --install
+	# greedy is only for casks
+	brew upgrade --greedy
+else
+	brew upgrade
 fi
-brew upgrade --greedy
 
 echo "$SCRIPTNAME: install latest bash and git"
 for package in bash coreutils git gh; do
