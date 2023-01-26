@@ -111,11 +111,10 @@ fi
 
 log_verbose "in the newest version of git specify fast forward only so you do not get accidental merges"
 if [[ ! $(git config --global pull.ff) =~ only ]]; then
-    git config pull.ff only
+	git config pull.ff only
 fi
 
-
-# https://stackoverflow.com/questions/74486167/git-clone-recurse-submodules-throws-error-on-macos-transmission-type-file-n 
+# https://stackoverflow.com/questions/74486167/git-clone-recurse-submodules-throws-error-on-macos-transmission-type-file-n
 # git submodules now failing with transmission type 'file' not allowed
 # https://git-scm.com/book/en/v2/Git-Internals-Transfer-Protocols
 # https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
@@ -125,9 +124,8 @@ fi
 # copy that data
 log_verbose "Allowing --recurse-submodules so make sure that all modules are trusted"
 if [[ ! $(config config --global protocol.file.allow) =~ always ]]; then
-    git config --glocal protocol.file.allow always
+	git config --glocal protocol.file.allow always
 fi
-
 
 # https://stackoverflow.com/questions/11514075/what-is-the-difference-between-an-annotated-and-unannotated-tag
 # https://stackoverflow.com/questions/5195859/how-do-you-push-a-tag-to-a-remote-repository-using-git
