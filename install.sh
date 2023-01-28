@@ -13,9 +13,15 @@ VERBOSE="${VERBOSE:-false}"
 export REPO_USER="${REPO_USER:-"$USER"}"
 export REPO_DOMAIN="${REPO_DOMAIN:-"tongfamily.com"}"
 export REPO_ORG="${REPO_ORG:-"richtong"}"
-DOCKER_LOGIN="${DOCKER_LOGIN:-false}"
+
+DOCKER_LOGIN="${DOCKER_LOGIN:-true}"
 export DOCKER_USER="${DOCKER_USER:-"$REPO_USER"}"
+export DOCKER_TOKEN="${DOCKER_TOKEN:-"op://Private/Docker Container Registry - $DOCKER_USER/token"}"
+
 export GIT_USERNAME="${GIT_USERNAME:-"${REPO_USER^}"}"
+OTHER_DOCKER_USER="${OTHER_DOCKER_USER:-"$GIT_USERNAME"}"
+export OTHER_DOCKER_REGISTRY="${OTHER_DOCKER_REGISTRY:-ghcr.io}"
+export OTHER_DOCKER_TOKEN="${OTHER_DOCKER_TOKEN:-"op://Private/GitHub Container Registry - $OTHER_USERNAME/token"}"
 export ORGANIZATION="${ORGANIZATION:-netdrones}"
 
 # Note do not use GIT_DIR, this is a defined variable for git
@@ -37,7 +43,7 @@ ACCOUNTS="${ACCOUNTS:-false}"
 # which user is the source of secrets
 
 OPTIND=1
-while getopts "a:c:deg:f:hi:k:l:mn:o:p:r:s:tu:vw:xz" opt; do
+while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xz" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -68,9 +74,12 @@ while getopts "a:c:deg:f:hi:k:l:mn:o:p:r:s:tu:vw:xz" opt; do
 			Check these as well:
 				   -a Use dotfiles $DOTFILES_STOW)
 
-			Connect to docker (deprecated)
-				   -k docker login (default: $DOCKER_LOGIN)
-				   -r dockeR user name (default: $DOCKER_USER)
+			Login to a container registries docker.io and another registry
+				   -k login to all docker container registries (default: $DOCKER_LOGIN)
+				   -r dockeR.io user name (default: $DOCKER_USER)
+				   -b other container registry url address (default: $OTHER_DOCKER_REGISTRY)
+				   -j other container registry user name (default: $OTHER_DOCKER_USER)
+				   -q other container registry token (default: $OTHER_DOCKER_TOKEN)
 
 			You should not normally need these:
 				   -f force a git pull of the origin (default: $FORCE)
@@ -110,6 +119,9 @@ while getopts "a:c:deg:f:hi:k:l:mn:o:p:r:s:tu:vw:xz" opt; do
 		DOTFILES_STOW="$($DOTFILES_STOW && echo false || echo true)"
 		export DOTFILES_STOW
 		;;
+	b)
+		OTHER_DOCKER_REGISTRY="$OPTARG"
+		;;
 	c)
 		DEPLOY_MACHINE=true
 		ACCOUNTS=true
@@ -122,6 +134,9 @@ while getopts "a:c:deg:f:hi:k:l:mn:o:p:r:s:tu:vw:xz" opt; do
 		;;
 	i)
 		INSTALL_SECRETS=true
+		;;
+	j)
+		OTHER_DOCKER_USER="$OPTARG"
 		;;
 	l)
 		REPO_USER="$OPTARG"
@@ -142,6 +157,9 @@ while getopts "a:c:deg:f:hi:k:l:mn:o:p:r:s:tu:vw:xz" opt; do
 		;;
 	p)
 		ORGANIZATION="$OPTARG"
+		;;
+	q)
+		OTHER_DOCKER_TOKEN="$OPTARG"
 		;;
 	r)
 		DOCKER_USER="$OPTARG"
@@ -432,15 +450,18 @@ if ! "$BIN_DIR/install-docker.sh"; then
 	exit 0
 fi
 
-if $DOCKER_LOGIN && [[ ! -e $HOME/.docker/config.json ]] || ! grep -q auth "$HOME/.docker/config.json"; then
-	"$BIN_DIR/docker-login.sh" -u "$DOCKER_USER"
+if $DOCKER_LOGIN; then
+	log_verbose "login to hub.docker.com and ghcr.io with 1Password tokens"
+	"$BIN_DIR/docker-login.sh" -u "$DOCKER_USER" -t "$DOCKER_TOKEN"
+	"$BIN_DIR/docker-login.sh" -u "$GIT_USERNAME" -r "$OTHER_DOCKER_REGISTRY" -t "$OTHER_DOCKER_TOKEN"
+
 fi
 
 # deprecated now use config_setup to do the same thing
 # if ! "$SCRIPT_DIR/set-profile.sh"; then
 # log_warning
 # fi
-log_verbose source profiles in case we did not reboot
+log_verbose "source profiles in case we did not reboot"
 source_profile
 
 # install sphinx for documentation swap to markdown

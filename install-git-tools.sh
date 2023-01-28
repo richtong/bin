@@ -144,7 +144,7 @@ git config --global push.followTags true
 # Git hub
 # act : run github actions locally
 # gh : official github cli
-#	hub : deprecated and break git completions
+# hub : deprecated and breaks git completions so do not use
 # nbdime: jupyter notebook diff and merge with git integration to git diff
 # https://scottbanwart.com/blog/2021/03/weekly-journal-10-asdf-pre-commit-gitlint/
 # gitlint - linting git commits
@@ -178,6 +178,8 @@ gh config set git_protocol ssh
 gh alias set default-branch \
 	'api -X PATCH repos:/:owner/:repo --raw-field default_branch=$1'
 
+log_verbose "login with Personal Access Token set in GH_TOKEN"
+log_verbose "Or gh auth login for interactive web workflow"
 # gh completion now handled by homebrew
 # https://cli.github.com/manual/gh_completion
 # eval "$(gh completion -s bash)"

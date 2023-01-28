@@ -72,13 +72,11 @@ if in_os linux; then
 
 	log_verbose "Install Linux graphical 1Password not linked to browser"
 	snap_install 1password
-	log_verbose "Install linux 1Password cli"
-	apt_install 1password-cli
-	# obsoleted by official 1passworld cli
+	# obsoleted by official 1passworld-cli
 	# https://app-updates.agilebits.com/product_history/CLI
 	## https://www.npmjs.com/package/onepass-cli for npm package
 	# git_install_or_update 1pass georgebrock
-	log_verbose "Also install 1Password X for Chrome to use it"
+	log_verbose "Also install the browser extensions manually"
 
 elif in_os mac; then
 
@@ -88,7 +86,7 @@ elif in_os mac; then
 	fi
 
 	log_verbose using brew to install on Mac 1Password and the CLI
-	if package_install 1password 1password-cli; then
+	if package_install 1password; then
 		for PROFILE in "" "$(config_zsh_profile)"; do
 			# shellcheck disable=SC2086
 			if ! config_mark $PROFILE; then
@@ -112,4 +110,43 @@ elif in_os mac; then
 	log_verbose "installed 1Password Version $VERSION"
 	download_url_open "https://app-updates.agilebits.com/download/OPM$VERSION" "1Password.pkg"
 
+fi
+
+PACKAGE+=(
+	1password-cli
+)
+
+log_verbose "Install ${PACKAGE[*]}"
+package_install "${PACKAGE[@]}"
+
+# https://developer.1password.com/docs/cli/shell-plugins/github/
+log_verbose "Enable command line integrations to store credentials in 1Password"
+
+# you only need brew if you are hitting the github api rate limit when
+# searching
+# brew
+PLUGIN+=(
+	aws
+	doctl
+	gh
+)
+
+# this creates a ./.op directory in the CWD so make sure we are at HOME
+WORKING_DIR="$PWD"
+if ! pushd "$HOME" >/dev/null; then
+	log_warning "Could not go to HOME $HOME will create .op in $CWD"
+	PUSHED=true
+fi
+for PLUG in "${PLUGIN[@]}"; do
+	log_verbose "Installing $PLUG"
+	op plugin "$PLUG"
+done
+if $PUSHED && ! popd >/dev/null; then
+	log_warning "Could not return to execution directory $WORKING_DIR"
+fi
+
+if ! config_mark "$(config_profile_nonexportable)"; then
+	config_add "$(config_profile_nonexportable)" <<-EOF
+		if [[ -e $HOME/.config/op/plugins.sh ]]; then . "$HOME/.config/op/plugins.sh"; fi
+	EOF
 fi
