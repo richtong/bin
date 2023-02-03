@@ -19,6 +19,7 @@ VERBOSE="${VERBOSE:-false}"
 DEBUGGING="${DEBUGGING:-false}"
 ANACONDA="${ANACONDA:-true}"
 PIPENV="${PIPENV:-true}"
+POETRY="${POETRY:-true}"
 # If version is set to null then the default python version is used
 PYTHON_VERSION="${PYTHON_VERSION-}"
 NEW_PYTHON="${NEW_PYTHON:-@3.10}"
@@ -27,7 +28,7 @@ OLD_PYTHON="${OLD_PYTHON:-@3.8}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
-while getopts "hdvaeyp:" opt; do
+while getopts "hdvaeoyp:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -37,8 +38,9 @@ while getopts "hdvaeyp:" opt; do
 			  -d $(! $DEBUGGING || echo "no ")debugging
 			  -v $(! $VERBOSE || echo "not ")verbose
 			  -a $(! $ANACONDA || echo "no ")anaconda install
+			  -o $(! $POETRY || echo "no ")poetry install
 			  -e $(! $PIPENV || echo "no ")pipenv install
-			  -e $(! $PYENV || echo "no ")pyenv install
+			  -y $(! $PYENV || echo "no ")pyenv install
 			  -p install python version (default: ${PYTHON_VERSION:-stable})
 		EOF
 		exit 0
@@ -57,6 +59,9 @@ while getopts "hdvaeyp:" opt; do
 	a)
 		ANACONDA="$($ANACONDA && echo false || echo true)"
 		;;
+	o)
+		POETRY="$($POETRY && echo false || echo true)"
+		;;
 	e)
 		PIPENV="$($PIPENV && echo false || echo true)"
 		;;
@@ -68,7 +73,7 @@ while getopts "hdvaeyp:" opt; do
 		;;
 	esac
 done
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
@@ -77,14 +82,14 @@ shift $((OPTIND - 1))
 # Kite is Python code completer not used instead use Github copilot
 # https://github.com/kiteco/jupyterlab-kite
 #kite
-PACKAGES+=(
+PACKAGE+=(
 	black
 	pydocstyle
 )
 
 if [[ -v PYTHON_VERSION ]]; then
 	log_verbose "will install $PYTHON_VERSION"
-	PACKAGES+=("python$PYTHON_VERSION")
+	PACKAGE+=("python$PYTHON_VERSION")
 fi
 
 if [[ $PYTHON_VERSION =~ @ ]]; then
@@ -113,13 +118,17 @@ hash -r
 export PATH
 #log_verbose "PATH=$PATH"
 
+if $POETRY; then
+	log_verbose "Poetry for per project directory installed"
+	PACKAGE+=(poetry)
+fi
 if $PIPENV; then
-	PACKAGES+=(pipenv)
-	log_verbose "use pipenv per directory pipenv install"
+	PACKAGE+=(pipenv)
+	log_verbose "use pipenv per project directory pipenv install"
 fi
 
 if $PYENV; then
-	log_verbose using pyenv
+	log_verbose "using pyenv"
 	"$SCRIPT_DIR/install-pyenv.sh"
 fi
 
@@ -129,10 +138,10 @@ if $ANACONDA; then
 fi
 
 # Note do not quote, want to process each as separate arguments
-log_verbose "installing ${PACKAGES[*]}"
+log_verbose "installing ${PACKAGE[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
-package_install "${PACKAGES[@]}"
+package_install "${PACKAGE[@]}"
 #log_verbose "PATH=$PATH"
 
 # autoimport - add and remove imports
@@ -146,8 +155,12 @@ package_install "${PACKAGES[@]}"
 # pytest - python test runner
 # pyyaml - python yaml parser
 # tox - python test runner for different versions of python
+# mkdocs - documents made easy
+# mkdocs-material - Add material design to documentation
+# pymdown-extensions - Markdown helpers
+# fontaweseom-markdown - emojis
 log_verbose "development shell/python packages normally use pipenv but use anaconda instead"
-PYTHON_PACKAGES+=(
+PYTHON_PACKAGE+=(
 
 	argcomplete
 	autocomplete
@@ -155,6 +168,10 @@ PYTHON_PACKAGES+=(
 	bandit
 	black
 	flake8
+	mkdocs
+	mkdocs-material
+	pymdown-extensions
+	fontawesome-markdown
 	mypy
 	nptyping
 	pdoc3
@@ -168,11 +185,9 @@ PYTHON_PACKAGES+=(
 
 )
 
-# currently no python packages are needed
-
-if [[ -n ${PYTHON_PACKAGES[*]} ]]; then
-	log_verbose "installing python packages ${PYTHON_PACKAGES[*]} in user mode and upgrade dependencies"
-	pip_install --upgrade "${PYTHON_PACKAGES[@]}"
+if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
+	log_verbose "installing python packages ${PYTHON_PACKAGE[*]} in the base system and upgrade dependencies"
+	pip_install --upgrade "${PYTHON_PACKAGE[@]}"
 fi
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
