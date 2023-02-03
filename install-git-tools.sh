@@ -165,9 +165,15 @@ PACKAGE+=(
 # to add themes
 # material design layout for mkdocs
 # mkdocs: static site generator to create readmes that go to github pages
+# mkdocs-material: Material Design theme to create
+# pymdown-extensions: utilities
+# fontawesome-markdown: font-awesome symbols for markdown
+# https://medium.com/swlh/publish-a-static-website-in-a-day-with-mkdocs-and-netlify-3cc076d0efaf
 PIP_PACKAGE+=(
 	mkdocs
 	mkdocs-material
+	pymdown-extensions
+	fontawesome-markdown
 )
 
 # meld is ugly compared with the default

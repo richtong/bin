@@ -134,6 +134,34 @@ if ! sudo apt-get -y update; then
 	exit 4
 fi
 
+# http://c-nergy.be/blog/?p=16310
+if in_linux ubuntu; then
+	log_verbose "Change Ubuntu Polkit issues"
+	WIFI_PKLA="/etc/polkit-1/localauthority/50-local.d/47-allow-wifi-scan.pkla"
+	if ! config_mark "$WIFI_PKLA"; then
+		config_add "$WIFI_PKLA" <<-EOF
+			[Allow Wifi Scan]
+			Identity=unix-user:*
+			Action=org.freedesktop.NetworkManager.wifi.scan;org.freedesktop.NetworkManager.enable-disable-wifi;org.freedesktop.NetworkManager.settings.modify.own;org.freedesktop.NetworkManager.settings.modify.system;org.freedesktop.NetworkManager.network-control
+			ResultAny=yes
+			ResultInactive=yes
+			ResultActive=yes
+		EOF
+	fi
+	# https://devanswer.co/how-to-fix-authention-is-required-to-create-a-color-profile
+	COLOR_PKLA="/etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla"
+	if ! config_mark "$COLOR_PKLA"; then
+		config_add "$COLOR_PKLA" <<-EOF
+			[Allow Colord all Users]
+			Identity=unix-user:*
+			Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
+			ResultAny=no
+			ResultInactive=no
+			ResultActive=yes
+		EOF
+	fi
+fi
+
 sudo apt-get -y upgrade
 log_verbose "note that snap does not work on WSL2"
 # not this should no longer exist now that we are on docker
@@ -150,7 +178,7 @@ log_verbose configure grub for next reboot with dev flags
 "$SCRIPT_DIR/install-grub.sh"
 log_verbose "check for sudo"
 
-# https://askubuntu.com/questions/155278/how-do-i-set-the-root-password-so-i-can-use-su-instead-of-sudo
+# https://devanswers.co/how-to-fix-authentication-is-required-to-create-a-color-profile-managed-device-on-ubuntu-20-04-20-10/
 if [[ $(sudo passwd -S root | awk '{print $2}') == P ]] && ! $FORCE; then
 	log_exit root password already set choose -f if you want to overwrite
 fi
