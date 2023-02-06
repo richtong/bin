@@ -19,7 +19,7 @@ while getopts "hdv" opt; do
 	h)
 		cat <<-EOF
 			Installs Photogrammetry tools to convert photos to 3D models
-			including  WebODM, qgix, cloudcompare, meshlab, epic-games unreal
+			including  WebODM, qgix, cloudcompare, meshlab, epic-games unreal, unity
 			    usage: $SCRIPTNAME [ flags ]
 			    flags: -d debug, -v verbose, -h help"
 		EOF
@@ -39,7 +39,7 @@ while getopts "hdv" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh
 
@@ -47,15 +47,21 @@ if ! in_os mac; then
 	log_exit "Mac Only"
 fi
 
+# epic-games - unreal deprecated for unity
 if [[ ! -v TOOLS ]]; then
 	TOOLS=(
-		qgis
+
 		cloudcompare
 		meshlab
-		epic-games
+		plastiscam
+		qgis
+		unity
+
 	)
 fi
 
+log_warning "Unity installation requires a license file, you can manually download first"
+log_warning "to get ht escreen "
 package_install "${TOOLS[@]}"
 
 # https://github.com/alicevision/AliceVision/issues/1071

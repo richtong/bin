@@ -100,6 +100,9 @@ PACKAGES+=(
 log_verbose "install ${PACKAGES[*]}"
 package_install "${PACKAGES[@]}"
 
+log_verbose "yapf needs to be keg linked"
+brew link yapf
+
 # now installed by main install.sh
 #"$SCRIPT_DIR/install-markdown.sh"
 

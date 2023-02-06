@@ -183,6 +183,10 @@ PIP_PACKAGE+=(
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
 
+log_verbose "brew link nbdime and pyyaml as they are keg-only"
+# virtualenv used by pre-commit
+brew link nbdime pyyaml virtualenv
+
 pip_install "${PIPELINE_VERSION[@]}"
 
 gh config set git_protocol ssh

@@ -142,6 +142,8 @@ log_verbose "installing ${PACKAGE[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
+log_verbose "pydocstyle and black needs keg link"
+brew link pydocstyle black
 #log_verbose "PATH=$PATH"
 
 # autoimport - add and remove imports

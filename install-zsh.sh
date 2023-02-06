@@ -131,6 +131,8 @@ fi
 
 log_verbose "Adding OMZ plugins"
 brew_install pygments
+log_verbose "Pygment syntax highlighter must be linked"
+brew link pygments
 log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 
 PLUGIN+=(

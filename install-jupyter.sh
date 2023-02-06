@@ -48,7 +48,7 @@ while getopts "hdv" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh lib-mac.sh lib-config.sh
@@ -59,44 +59,47 @@ if ! in_os mac; then
 fi
 
 brew_install jupyterlab
+# ipython is installed but needs to be linked
+log_verbose "brew keg link jupyterlab and ipython"
+brew link ipython jupyterlab
 log_verbose "Installing into the bare environment use pipenv, conda or venv normally"
 hash -r
 
 # nbdime - Notebook diff and merge cli and jupyterlab command line interface
 PIP_PACKAGE=(
-	notebook
-	jupyterlab
-	jupyterhub
-	nodejs
-	jupyterlab-git
-	jupyterlab-github
+
 	aquirdturtle_collapsible_headings
-	jupyterlab-system-monitor
-	nbdime
-	jupyterlab_vim
-	'python-language-server[all]'
 	black
-	yapf
-	isort
-	jupyterlab-hide-code
-	jupyterlab-spellchecker
-	"python-lsp-server[all]"
-	ipywidgets
-	jupyterlab_widgets
-	jupyter_bokeh
-	jupyter-dash
-	pillow
-	graphviz
+	black
 	blockdiagmagic
+	graphviz
 	"ipydrawio[all]"
 	ipydrawio-export
-	nb-js-diagrammers
-	pivottablejs
-	jupyterlab_code_formatter
-	black
+	ipywidgets
 	isort
-	yapf
+	jupyter-dash
+	jupyter_bokeh
+	jupyterhub
+	jupyterlab
+	jupyterlab-git
+	jupyterlab-github
+	jupyterlab-hide-code
+	jupyterlab-spellchecker
+	jupyterlab-system-monitor
+	jupyterlab_code_formatter
+	jupyterlab_vim
+	jupyterlab_widgets
 	jupytext
+	nb-js-diagrammers
+	nbdime
+	nodejs
+	notebook
+	pillow
+	pivottablejs
+	"python-lsp-server[all]"
+	'python-language-server[all]'
+	yapf
+
 )
 log_verbose "Installing python extensions ${PIP_PACKAGE[*]}"
 pip_install "${PIP_PACKAGE[@]}"
@@ -118,6 +121,7 @@ fi
 # http://tug.org/mactex/
 # this library is huge takes 5GB so do not install typically
 # https://pandoc.org/installing.html
+# mermaid-cli - install chromium in the background so beware
 log_verbose "Run mermaid to generate JPGs from .mermaid files"
 log_verbose "Warning mactex is huge at 5GB so only basictex and load modules as"
 log_verbose "needed install if needed for pdfs"

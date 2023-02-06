@@ -6,11 +6,10 @@
 #
 # To enable compatibility with bashdb instead of set -e
 # https://marketplace.visualstudio.com/items?itemName=rogalmic.bash-debug
-# use the trap on ERR
-set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 VERSION="${VERSION:-11}"
 export FLAGS="${FLAGS:-""}"
@@ -20,18 +19,23 @@ while getopts "hdvr:" opt; do
 		cat <<-EOF
 			Installs Gazebo and OpenDroneMap
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
-			           -r version number (default: $VERSION)
+			    flags: -h help"
+				   -d $($DEBUGGING && echo "no ")debugging
+				   -v $($VERBOSE && echo "not ")verbose
+			                   -r version number (default: $VERSION)
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	r)
 		VERSION="$OPTARG"
@@ -42,7 +46,7 @@ while getopts "hdvr:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
@@ -51,6 +55,7 @@ tap_install dartsim/dart
 brew_install dartsim
 tap_install osrf/simulation
 brew_install --build-from-source "gazebo$VERSION"
+brew link "gazebo$VERSION"
 # http://gazebosim.org/tutorials?tut=quick_start&cat=get_started
 log_verbose "available worlds"
 if $VERBOSE; then
