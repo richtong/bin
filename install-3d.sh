@@ -60,9 +60,14 @@ if [[ ! -v TOOLS ]]; then
 	)
 fi
 
+# https://forum.unity.com/threads/unity-hub-fails-to-find-license.835423/
 log_warning "Unity installation requires a license file, you can manually download first"
-log_warning "to get ht escreen "
+log_warning "to get the correct ULF files"
+log_warning "Copy license into /Library/Application Support/Unity/Unity_lic.ulf before starting"
 package_install "${TOOLS[@]}"
+
+log_verbose "Install "
+sudo installer -package Unity.pkg -target /
 
 # https://github.com/alicevision/AliceVision/issues/1071
 log_verbose "Installing AliceVision currently needs CUDA to run"

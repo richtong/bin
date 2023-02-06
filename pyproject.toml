@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "bin"
+version = "0.1.0"
+description = "Rich's Fine Binary Command Library"
+authors = ["Rich Tong <1782087+richtong@users.noreply.github.com>"]
+readme = "README.md"
+
+# python 3.8.1 is now needed due to bugs
+[tool.poetry.dependencies]
+python = "^3.8.1"
+black = ">=22.12"
+bandit = "^1.7.4"
+beautysh = "^6.2.1"
+build = "^0.10.0"
+flake8 = "^6.0.0"
+fontawesome-markdown = "^0.2.6"
+isort = ">=5.10.1"
+mkdocs = "^1.4.2"
+mkdocs-material = "^9.0.11"
+mypy = "^1.0.0"
+neovim = "^0.3.1"
+pdoc3 = "^0.10.0"
+pre-commit = "^3.0.4"
+pydocstyle = "^6.3.0"
+pymdown-extensions = "^9.9.2"
+seed-isort-config = "^2.2.0"
+setuptools = "^67.1.0"
+twine = "^4.0.2"
+wheel = "^0.38.4"
+yamllint = "^1.29.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
