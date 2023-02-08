@@ -62,8 +62,26 @@ shift $((OPTIND - 1))
 # http://meng6.net/pages/computing/installing_and_configuring/installing_and_configuring_command-line_utilities/
 # Note that gettext is needed as well but not included in the list above
 log_verbose installing gnu base packages
-package_install coreutils binutils diffutils gawk gnutls gzip screen \
-	watch wget gnupg gnupg2 gettext man-db gcc
+PACKAGE+=(
+
+	binutils
+	coreutils
+	diffutils
+	gawk
+	gcc
+	gettext
+	gnupg
+	gnupg2
+	gnutls
+	gzip
+	man-db
+	pgrep
+	screen
+	watch
+	wget
+
+)
+package_install "${PACKAGE[@]}"
 
 if $FORCE && [[ ! -e $HOME/.local/bin/gcc ]]; then
 	log_warning "link $HOME/.local/bin/gcc to gcc-version but this break Ubuntu"
