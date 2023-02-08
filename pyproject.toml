@@ -1,7 +1,8 @@
 [tool.poetry]
+# note that the name must *not* be an existing pip package
 name = "bin"
 version = "0.1.0"
-description = "Rich's Fine Binary Command Library"
+description = "Rich's Fine Script Library"
 authors = ["Rich Tong <1782087+richtong@users.noreply.github.com>"]
 readme = "README.md"
 

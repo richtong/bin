@@ -1,0 +1,15 @@
+# Netlify build to private site
+# https://www.nileshdalvi.com/blog/deploy-static-web-mkdocs-netlify/
+# https://servidorandycode.medium.com/python-poetry-how-to-generate-a-requirements-txt-a4fdcee26fe3
+[build]
+publish = "site"
+command = "mkdocs build"
+
+# https://dev.to/ajeetraina/how-to-deploy-a-static-site-using-mkdocs-and-netlify-43f8
+# this from ajeetraina does not work
+#command = """
+#    pip3 install -q poetry &&
+#    poetry config virtualenvs.in-project ture &&
+#    poetry install -v &&
+#    mkdocs build -d site
+#"""
