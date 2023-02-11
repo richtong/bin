@@ -55,15 +55,15 @@ if [[ ! -v TOOLS ]]; then
 		meshlab
 		plastiscam
 		qgis
+		unity-hub
 		unity
 
 	)
 fi
 
 # https://forum.unity.com/threads/unity-hub-fails-to-find-license.835423/
-log_warning "Unity installation requires a license file, you can manually download first"
-log_warning "to get the correct ULF files"
-log_warning "Copy license into /Library/Application Support/Unity/Unity_lic.ulf before starting"
+log_warning "Run Unity Hub to get the Unity License File before runnning Unity"
+log_warning "or Copy license into /Library/Application Support/Unity/Unity_lic.ulf before starting"
 package_install "${TOOLS[@]}"
 
 log_verbose "Install "
