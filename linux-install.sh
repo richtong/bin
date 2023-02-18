@@ -185,3 +185,9 @@ fi
 
 log_warning set the root password which is needed if the machine borks and you are running in debug mode
 sudo passwd
+
+# https://github.com/TheAssassin/AppImageLauncher
+log_verbose "Install App Image launcher which finds apps in $HOME/AppImage"
+apt_install software-properties-common
+apt_repository_install ppa:appimagelauncher-team/stable
+apt_install appimagelauncher
