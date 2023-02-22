@@ -51,6 +51,7 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
 if in_os mac; then
+	log_verbose "Rectange shortcuts are CTRL-OPTION-{uijk} for quadrants"
 	package_install rectangle
 	log_warning "If using dotfiles, then symlink ~/Library/Preferences/com.knollsoft.Rectangle.plist"
 elif in_os linux && ! in_os docker; then
@@ -71,15 +72,14 @@ elif in_os linux && ! in_os docker; then
 		package_install chrome-gnome-shell gnome-tweaks
 		#package_install gnome-browser-connector gnome-tweaks
 
+		log_verbose "gtile with SUPER-ENTER {hjkl}"
 		# https://www.omgubuntu.co.uk/best-gnome-shell-extensions
-		log_warning "Must manually install Gnoe Tweaks"
-		log_verbose "Click on for gtile"
+		log_warning "Must manually install Gnome Tweaks"
 		util_web_open "https://extensions.gnome.org/extension/28/gtile/"
 		util_web_open "https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for-gnome/"
 		util_web_open "https://extensions.gnome.org/extension/517/caffeine/"
 		util_web_open "https://extensions.gnome.org/extension/3968/improved-workspace-indicator/"
 		util_web_open "https://extensions.gnome.org/extension/1162/emoji-selector/"
-		util_web_open "https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for-gnome/"
 
 	elif [[ $(desktop_environment) =~ unity ]]; then
 		log_verbose "install Compiz Grid allows keyboard shortcuts to move windows around"

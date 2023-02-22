@@ -191,3 +191,7 @@ log_verbose "Install App Image launcher which finds apps in $HOME/AppImage"
 apt_install software-properties-common
 apt_repository_install ppa:appimagelauncher-team/stable
 apt_install appimagelauncher
+
+# https://manpages.ubuntu.com/manpages/bionic/man1/xdg-settings.1.html
+log_verbose "Make Chrome the default not Firefox"
+xdg-settings set default-web-browser google-chrome.desktop
