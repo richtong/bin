@@ -424,8 +424,8 @@ fi
 
 # Now installed by bootstrap-dev but no harm to run again
 log_verbose install nvidia
+# install nvidia and cuda
 "$SCRIPT_DIR/install-nvidia.sh"
-log_verbose to install cuda run "$SCRIPT_DIR/install-cuda.sh"
 
 log_verbose check for various wifi adapters
 "$SCRIPT_DIR/install-dwa182.sh"

@@ -195,3 +195,8 @@ apt_install appimagelauncher
 # https://manpages.ubuntu.com/manpages/bionic/man1/xdg-settings.1.html
 log_verbose "Make Chrome the default not Firefox"
 xdg-settings set default-web-browser google-chrome.desktop
+
+log_verbose "Install policy kit for Ubuntu for ../lib/polkit"
+sudo cp "$WS_DIR/lib/polkit-1"* "/etc/polkit-1/localauthority.d/50-local.d"
+sudo systemctl restart polkit.service
+sudo systemctl restart network-manager

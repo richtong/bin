@@ -79,6 +79,10 @@ if in_wsl; then
 	log_verbose "Downloading Reality Capture"
 	download_url_open "$RC_URL"
 
+elif in_os linux; then
+	# https://installati.one/install-colmap-ubuntu-20-04/
+	package_install colmap
+
 elif in_os mac; then
 
 	log_verbose "Downloading $COLMAP_NAME"
