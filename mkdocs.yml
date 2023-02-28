@@ -2,17 +2,21 @@
 # https://www.mkdocs.org/getting-started/
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
-site_name: Rich's Binary Utilities
+site_name: RT's Binary Utilities
 site_url: https://bin.docs.tongfamily.com
+features:
+  - header.autohide
 theme:
   name: material
   palette:
     primary: blue
+    scheme: slate
+    accent: indigo
 nav:
-  - Home: index.md
-  - Install: install.md
-  - Setup: setup.md
-  - Files: files.md
-  - Dev: dev.md
-  - Test: test.md
-  - Special: special.md
+  - index.md
+  - install.md
+  - setup.md
+  - files.md
+  - dev.md
+  - test.md
+  - special.md
