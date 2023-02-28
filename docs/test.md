@@ -1,4 +1,4 @@
-# Pre-commit and CD/CI Pipeline
+# Testing
 
 This uses a pre-commit pipeline that checks for markdown, shellscript and other
 errors. It also checks for properly formatted git commit rules. You should use

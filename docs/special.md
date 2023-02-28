@@ -1,4 +1,4 @@
-# Special modes
+# Special
 
 Here are some special things you can do to create a ZFS server or a Raspberry
 Pi setup.

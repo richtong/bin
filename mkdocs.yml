@@ -9,11 +9,11 @@ features:
 theme:
   name: material
   palette:
-    primary: blue
+    primary: deep purple
     scheme: slate
     accent: indigo
 nav:
-  - index.md
+  - Home: index.md
   - install.md
   - setup.md
   - files.md

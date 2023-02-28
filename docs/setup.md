@@ -1,4 +1,4 @@
-# Security and keys
+# Security
 
 This is the hardest part of getting things right. Most of this is not necessary
 if you use 1Password and enable their ssh-agent.

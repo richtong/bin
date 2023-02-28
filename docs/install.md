@@ -1,4 +1,4 @@
-# Installation and Configuration Notes
+# Installation
 
 Installation and configuration depend on a few key variables like WS_DIR and
 having a bootstrap that depends on the environment variables.
@@ -50,7 +50,7 @@ cd src/bin
 
 ```
 
-## Installation
+## Installation Details
 
 This assumes that there is a next door directory `../lib` which has library
 functions. Normally, this is a submodule based on @richtong's library.

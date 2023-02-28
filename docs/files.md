@@ -1,4 +1,4 @@
-# List of files and what they do
+# Files
 
 This is not a complete list as it is manually generated. The next step is to
 use a shell extract to get it.

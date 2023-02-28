@@ -1,4 +1,4 @@
-# Developing new Scripts and Utilities
+# Developing
 
 The rest of the programs are various scripts that are helpers after you create
 things. Rich is constantly adding to them. They use a common `include.sh` which
