@@ -81,6 +81,7 @@ if in_wsl; then
 
 elif in_os linux; then
 	# https://installati.one/install-colmap-ubuntu-20-04/
+	log_verbose "Install prepackaged colmap which is 3.6 on Ubuntu 20.04"
 	package_install colmap
 
 elif in_os mac; then

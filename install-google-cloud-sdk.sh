@@ -101,12 +101,12 @@ elif in_wsl && [[ ! -e $INSTALL_DIR/google-cloud-sdk ]]; then
 			. "$INSTALL_DIR/google-cloud-sdk/path.bash.inc"
 		fi
 	fi
-
-elif in_os linux; then
+elif in_os linux && linux_version ubuntu; then
 	# https://snapcraft.io/install/google-cloud-sdk/ubuntu
 	# installs but cannot access components
-	# snap_install --classic google-cloud-sdk
-	# must install from repo instead
+	snap_install --classic google-cloud-sdk
+
+elif in_os linux; then
 	log_verbose "Linux GCloud install"
 	package_install apt-transport-https ca-certificates gnupg
 	APT="/etc/apt/sources.list.d/google-cloud-sdk.list"
