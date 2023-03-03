@@ -137,10 +137,15 @@ if ! command -v gcloud >/dev/null; then
 	log_error 1 "gcloud nor properly installed"
 fi
 
-PACKAGE+=(kubectl)
+PACKAGE+=(
+	kubectl
+	gke-gcloud-auth-plugin
+)
 # Ubuntu has beta already
 if in_os mac; then
-	PACKAGE+=(beta)
+	PACKAGE+=(
+		beta
+	)
 fi
 log_verbose install additional packages "$PACKAGES" "$@"
 if [[ -n $PACKAGES ]]; then
