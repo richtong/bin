@@ -147,12 +147,13 @@ elif in_os linux && ! $USE_KEYCHAIN; then
 	log_verbose "In Linux, using Gnome key-ring by default finds all keys in $HOME/.ssh"
 	if $VERBOSE; then
 		# https://wiki.gnome.org/Projects/GnomeKeyring/Ssh
-		ssh-add -l
+		# ignore the error if none are set
+		ssh-add -l || true
 	fi
 
 	log_verbose "Make sure AddKeysToAgent so gnome will handle passphrases"
 	if [[ ! -L $HOME/.ssh/config ]]; then
-		log_verbose .ssh/config is a real file so make sure they are there
+		log_verbose ".ssh/config is a real file so make sure AddKeystoAgent is set"
 		config_replace "$HOME/.ssh/config" "AddKeysToAgent" "AddKeysToAgent yes"
 	fi
 

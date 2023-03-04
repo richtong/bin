@@ -229,6 +229,9 @@ fi
 log_verbose "Adding .ssh key passphrases to keychain or keyring"
 "$SCRIPT_DIR/install-ssh-config.sh"
 
+# install-git-tools needs python
+"$SCRIPT_DIR/install-python.sh"
+
 # the {-} means replace with null if FORCE_FLAG is not set
 "$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"
 log_verbose must be installed is git lfs is used before installing repos
@@ -294,8 +297,6 @@ if ! config_mark; then
 	EOF
 fi
 
-log_verbose "install python and go"
-"$SCRIPT_DIR/install-python.sh"
 "$SCRIPT_DIR/install-go.sh"
 
 if [[ $OSTYPE =~ darwin ]]; then

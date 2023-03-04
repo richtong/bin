@@ -123,8 +123,8 @@ fi
 # this closes a security hole where a symlink in .git/objects causes a clone to
 # copy that data
 log_verbose "Allowing --recurse-submodules so make sure that all modules are trusted"
-if [[ ! $(config config --global protocol.file.allow) =~ always ]]; then
-	git config --glocal protocol.file.allow always
+if [[ ! $(git config --global protocol.file.allow) =~ always ]]; then
+	git config --global protocol.file.allow always
 fi
 
 # https://stackoverflow.com/questions/11514075/what-is-the-difference-between-an-annotated-and-unannotated-tag
@@ -183,11 +183,14 @@ PIP_PACKAGE+=(
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
 
-log_verbose "brew link nbdime and pyyaml as they are keg-only"
-# virtualenv used by pre-commit
-brew link nbdime pyyaml virtualenv
+# nbdime pyyaml virtualenv no long key only on ubuntu anyway
+if ! in_os mac; then
+	log_verbose "brew link virtualenv, pyyaml as they are keg-only"
+	# virtualenv used by pre-commit
+	brew link nbdime pyyaml virtualenv
+fi
 
-pip_install "${PIPELINE_VERSION[@]}"
+pip_install "${PIP_PACKAGE[@]}"
 
 gh config set git_protocol ssh
 # https://dev.to/softprops/digitally-unmastered-the-github-cli-edition-1cc4
