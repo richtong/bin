@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 ## vim: set noet ts=4 sw=4:
 ##
 ## Install asdf and dotenv for language and tool management
@@ -77,9 +76,34 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 log_verbose "Install asdf core"
-package_install asdf
 log_verbose "Install asdf support including gcc if it has to build from source"
-package_install gpg gawk gcc
+
+PACKAGE+=(
+	asdf
+	direnv
+	gawk
+	gcc
+	gpg
+)
+package_install "${PACKAGE[@]}"
+
+#  this linking does not work to fix asdf install python issues
+# https://github.com/pyenv/pyenv/issues/950
+# but retaining the code in case it's needed
+# if [[ ! -e $HOMEBREW_PREFIX/bin/gcc ]]; then
+# 	log_verbose "link gcc keg only"
+# 	if ! pushd "$HOMEBREW_PREFIX/bin" >/dev/null; then
+# 		log_exit 1 "no $HOMEBREW_PREFIX/bin"
+# 	fi
+# 	log_verbose "In $HOMEBREW_PREFIX/bin"
+# 	GCC_WITH_VERSION="$(brew info gcc | grep -o "gcc/[0-9]*" | tr / -)"
+# 	if [[ ! -e $GCC_WITH_VERSION ]]; then
+# 		log_exit 2 "no $GCC_WITH_VERSION"
+# 	fi
+# 	log_verbose "linking $GCC_WITH_VERSION to gcc"
+# 	ln -s "$GCC_WITH_VERSION" gcc
+# 	popd >/dev/null
+# fi
 
 # https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
 declare -A ASDF+=(
@@ -87,6 +111,15 @@ declare -A ASDF+=(
 	[nodejs]=$NODE_VERSION
 	[python]=$PYTHON_VERSION
 	[java]=$JAVA_VERSION
+)
+
+
+# https://github.com/pyenv/pyenv/issues/950
+# asdf install python uses pyenv underneath and brew install open-ssl does not put the 
+# headers in the right place, so set it manually as shell variables
+# uses the return of null if there is no key value assigned so only using it for python rn.
+declare -A ASDF_ENV+=(
+	[python]='CFLAGS="-I$(brew --prefix openssl)/include" LDFLAGS="-L$(brew --prefix openssl)/lib"'
 )
 
 log_warning "use oh-my-zsh asdf plugin to install paths"
@@ -126,16 +159,17 @@ for p in "${!ASDF[@]}"; do
 		log_verbose "asdf plugin $p already installed so update it"
 		asdf plugin update "$p"
 	fi
-	log_verbose "Is version installed for $p"
-	version="$(asdf list "$p" 2>&1)"
+	log_verbose "Is version installed for $p?"
+	version="$(asdf list $p 2>&1)"
 	if [[ $version =~ "No versions" || ! $version =~ ${ASDF[$p]} ]]; then
-		log_verbose asdf install "$p" "${ASDF[$p]}"
-		# broken as of feb 2021
+		# note we use {:-} since not all ASDF_ENVs are set
+		log_verbose "run ${ASDF_ENV[$p]:-} asdf install $p ${ASDF[$p]}"
+		# broken as of feb 2021 now fixed
 		#if in_os mac && ! mac_is_arm && [[ $p =~ python ]]; then
 		#    log_verbose "Current bug in asdf python install skipping"
 		#    continue
 		#fi
-		asdf install "$p" "${ASDF[$p]}"
+		${ASDF_ENV[$p]:-} asdf install "$p" "${ASDF[$p]}"
 	fi
 	log_verbose "Set global for $p with ${ASDF[$p]}"
 	asdf global "$p" "${ASDF[$p]}"
@@ -186,7 +220,10 @@ source_profile
 ENVRC="${ENVRC:-"$HOME/.envrc"}"
 if ! config_mark "$ENVRC"; then
 	log_verbose "Adding $ENVRC"
-	direnv allow "$ENVRC"
+	# allow if direnv exists
+	if command -v direnv >/dev/null; then
+		direnv allow "$ENVRC"
+	fi
 	log_verbose "Adding to $ENVRC"
 	config_add "$ENVRC" <<-'EOF'
 		use asdf

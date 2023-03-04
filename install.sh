@@ -21,7 +21,7 @@ export DOCKER_TOKEN="${DOCKER_TOKEN:-"op://Private/Docker Container Registry - $
 export GIT_USERNAME="${GIT_USERNAME:-"${REPO_USER^}"}"
 OTHER_DOCKER_USER="${OTHER_DOCKER_USER:-"$GIT_USERNAME"}"
 export OTHER_DOCKER_REGISTRY="${OTHER_DOCKER_REGISTRY:-ghcr.io}"
-export OTHER_DOCKER_TOKEN="${OTHER_DOCKER_TOKEN:-"op://Private/GitHub Container Registry - $OTHER_USERNAME/token"}"
+export OTHER_DOCKER_TOKEN="${OTHER_DOCKER_TOKEN:-"op://Private/GitHub Container Registry - $OTHER_DOCKER_USER/token"}"
 export ORGANIZATION="${ORGANIZATION:-netdrones}"
 
 # Note do not use GIT_DIR, this is a defined variable for git
