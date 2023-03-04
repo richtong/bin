@@ -72,8 +72,8 @@ shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
-log_warning "link $HOME/.local/bin/gcc to gcc-version but this break Ubuntu"
 
+log_warning "link $HOME/.local/bin/gcc to gcc-version but this break Ubuntu"
 if in_os mac; then
 	log_verbose "In Mac install trying to install $ANACONDA"
 	cask_install "$ANACONDA"
@@ -82,7 +82,7 @@ elif ! command -v conda &>/dev/null; then
 	log_verbose "downloading $URL and running it"
 	# https://docs.continuum.io/anaconda/install/linux/
 	download_url "$URL"
-	log_verbose "run script"
+	log_verbose "run script make sure to run conda init"
 	if [[ ! -e $CONDA_BIN ]]; then
 		log_verbose "install $CONDA_BIN"
 		bash "$WS_DIR/cache/$(basename "$URL")"
