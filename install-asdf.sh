@@ -159,8 +159,9 @@ for p in "${!ASDF[@]}"; do
 		log_verbose "asdf plugin $p already installed so update it"
 		asdf plugin update "$p"
 	fi
-	log_verbose "Is version installed for $p?"
-	version="$(asdf list $p 2>&1)"
+	# remove the asterisk which means current selected
+	version="$(asdf list $p 2>&1 | sed 's/*//')"
+	log_verbose "Is $version installed for $p?"
 	if [[ $version =~ "No versions" || ! $version =~ ${ASDF[$p]} ]]; then
 		# note we use {:-} since not all ASDF_ENVs are set
 		log_verbose "run ${ASDF_ENV[$p]:-} asdf install $p ${ASDF[$p]}"
@@ -169,7 +170,7 @@ for p in "${!ASDF[@]}"; do
 		#    log_verbose "Current bug in asdf python install skipping"
 		#    continue
 		#fi
-		${ASDF_ENV[$p]:-} asdf install "$p" "${ASDF[$p]}"
+		eval ${ASDF_ENV[$p]:-} asdf install "$p" "${ASDF[$p]}"
 	fi
 	log_verbose "Set global for $p with ${ASDF[$p]}"
 	asdf global "$p" "${ASDF[$p]}"
