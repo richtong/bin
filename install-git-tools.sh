@@ -193,12 +193,17 @@ fi
 pip_install "${PIP_PACKAGE[@]}"
 
 gh config set git_protocol ssh
+
 # https://dev.to/softprops/digitally-unmastered-the-github-cli-edition-1cc4
 # make it easy to set default-branch disable check as gh will interpret later
 # shellcheck disable=SC2016
-# this does not appear to work anymore
-gh alias set default-branch \
-	'api -X PATCH repos:/:owner/:repo --raw-field default_branch=$1'
+# deprecated
+#gh alias set default-branch \
+#	'api -X PATCH repos:/:owner/:repo --raw-field default_branch=$1'
+#	deprecated
+#gh default-branch main
+# https://stackoverflow.com/questions/74960450/change-default-branch-via-cli
+gh repo edit --default-branch main
 
 log_verbose "login with Personal Access Token set in GH_TOKEN"
 log_verbose "Or gh auth login for interactive web workflow"
