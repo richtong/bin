@@ -72,7 +72,7 @@ if in_os mac; then
 	# shellcheck disable=SC2068
 	package_install ${FLAG[@]} obs obs-ndi
 
-	NDI="${NDI:-"https://downloads.ndi.tv/Tools/NDIToolsInstaller.pkg"}"
+	NDI="${NDI:-https://go.ndi.tv/tools-for-mac}"
 	log_verbose "open $NDI"
 	download_url_open "$NDI"
 	log_warning "Restart is required to get NDI and you should see a menu bar item"
