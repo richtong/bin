@@ -45,9 +45,15 @@ source_lib lib-install.sh lib-util.sh
 #if command -v aws >/dev/null; then
 #log_exit "installed already $(aws --version)"
 #fi
+PACKAGE+=(
+	awscli
+	aws-cdk
+	s3cmd
+)
 
-if package_install awscli aws-cdk; then
-	log_exit "install awscli aws-cdk"
+log_verbose "Installing ${PACKAGE[*]}"
+if package_install "${PACKAGE[@]}"; then
+	log_exit "Installed ${PACKAGE[*]}"
 fi
 
 if in_os mac; then
