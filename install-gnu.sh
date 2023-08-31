@@ -169,6 +169,20 @@ if ! config_mark; then
 				done
 				echo "$PATH" | grep -q "opt/coreutils/libexec/gnubin" ||
 					PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
+				for NAME in bin, sbin; do
+					echo "$PATH" | grep -q "opt/util-linux/$NAME" ||
+						PATH="$HOMEBREW_PREFIX/opt/util-linux/$NAME:$PATH"
+				done
+	EOF
+fi
+
+log_verbose "install completions"
+if ! config_mark "$(config_profile_shell)"; then
+	config_add "$(config_profile_shell)" <<-"EOF"
+		if [ -r "$HOMEBREW_PREFIX/opt/gnu-getopt/etc/bash/completion.bash.d" ]; then
+			for FILE in "$HOMEBREW_PREFIX/opt/gnu-getopt/etc/bash/completion.bash.d/"*.inc; do
+				# shellcheck disable=SC1090
+				source "$FILE"; done; fi
 	EOF
 fi
 

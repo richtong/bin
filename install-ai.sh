@@ -50,14 +50,37 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
+# poe - a chatbot aggregator by Quora, allows multiple chats to different bots
+# lm-studio -  run different LLMs from Hugging Face locally
+# fig - command completion and dotfile manager (still trying it)
+# diffusionbee - Stability diffusion on Mac
+# shell-gpt - Runs chats from cli including running shell commands
+# vincelwt-chatgpt - ChatGPT in menubar
 if in_os mac; then
+	PACKAGE+=(
 
-	log_verbose "Install Stabiliity Diffusion with DiffusionBee"
-	package_install diffusionbee
-	log_verbose "Download Chat GPT"
-	ARCH=x86
-	if mac_is_arm; then
-		ARCH=arm64
-	fi
-	download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
+		diffusionbee
+		vincelwt-chatgpt
+		lm-studio
+		poe
+
+	)
+
+	PIP_PACKAGE+=(
+
+		shell-gpt
+
+	)
+
+	# Install Stabiliity Diffusion with DiffusionBee"
+	# Download Chat GPT in menubar
+	# Use brew install instead of
+	#ARCH=x86
+	#if mac_is_arm; then
+	#ARCH=arm64
+	#fi
+	#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
+	package_install "${PACKAGE[@]}"
+	log_verbose "Pip install only in current environment rerun in other venvs"
+	pip_install --upgrade "${PIP_PACKAGE[@]}"
 fi
