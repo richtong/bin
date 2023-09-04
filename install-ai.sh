@@ -56,6 +56,7 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 # diffusionbee - Stability diffusion on Mac
 # shell-gpt - Runs chats from cli including running shell commands
 # vincelwt-chatgpt - ChatGPT in menubar
+# gpt4all - lm-studio local runner
 if in_os mac; then
 	PACKAGE+=(
 
@@ -83,4 +84,8 @@ if in_os mac; then
 	package_install "${PACKAGE[@]}"
 	log_verbose "Pip install only in current environment rerun in other venvs"
 	pip_install --upgrade "${PIP_PACKAGE[@]}"
+	log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
+
+	download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
+
 fi
