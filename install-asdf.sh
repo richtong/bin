@@ -113,11 +113,11 @@ declare -A ASDF+=(
 	[java]=$JAVA_VERSION
 )
 
-
 # https://github.com/pyenv/pyenv/issues/950
-# asdf install python uses pyenv underneath and brew install open-ssl does not put the 
+# asdf install python uses pyenv underneath and brew install open-ssl does not put the
 # headers in the right place, so set it manually as shell variables
 # uses the return of null if there is no key value assigned so only using it for python rn.
+# shellcheck disable=SC2016
 declare -A ASDF_ENV+=(
 	[python]='CFLAGS="-I$(brew --prefix openssl)/include" LDFLAGS="-L$(brew --prefix openssl)/lib"'
 )
@@ -160,6 +160,7 @@ for p in "${!ASDF[@]}"; do
 		asdf plugin update "$p"
 	fi
 	# remove the asterisk which means current selected
+	# shellcheck disable=SC2086
 	version="$(asdf list $p 2>&1 | sed 's/*//')"
 	log_verbose "Is $version installed for $p?"
 	if [[ $version =~ "No versions" || ! $version =~ ${ASDF[$p]} ]]; then
@@ -170,6 +171,7 @@ for p in "${!ASDF[@]}"; do
 		#    log_verbose "Current bug in asdf python install skipping"
 		#    continue
 		#fi
+		# shellcheck disable=SC2086
 		eval ${ASDF_ENV[$p]:-} asdf install "$p" "${ASDF[$p]}"
 	fi
 	log_verbose "Set global for $p with ${ASDF[$p]}"

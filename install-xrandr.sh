@@ -68,7 +68,7 @@ if [[ ! $(xrandr --listactivemonitors | awk '{print $4}') =~ $MONITOR ]]; then
 fi
 
 log_verbose "Make sure the mode is in xrandr"
-if [[ ! $(xrandr | grep "^ " | awk '{print $1}' | sort -u) =~ $RESOLUTION ]]; then 
+if [[ ! $(xrandr | grep "^ " | awk '{print $1}' | sort -u) =~ $RESOLUTION ]]; then
 	log_error 2 "$RESOLUTION resolution not available"
 fi
 
