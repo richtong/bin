@@ -57,6 +57,7 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 # shell-gpt - Runs chats from cli including running shell commands
 # vincelwt-chatgpt - ChatGPT in menubar
 # gpt4all - lm-studio local runner
+# open-interpreter - local llm can run local code
 if in_os mac; then
 	PACKAGE+=(
 
@@ -70,6 +71,7 @@ if in_os mac; then
 	PIP_PACKAGE+=(
 
 		shell-gpt
+		open-interpreter
 
 	)
 

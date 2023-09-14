@@ -149,6 +149,19 @@ if in_os linux; then
 		libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
 fi
 
+log_warning "asdf python version installed, you need to make sure that the default is loaded"
+log_verbose "pip packages are installed in $HOME with .default-python-packages"
+PIP_PACKAGE+=(
+	"neovim"
+)
+if ! config_mark "$HOME/.default-python-packages"; then
+	log_verbose "Adding to $HOME/.default-python-packages"
+	# https://superuser.com/questions/461981/how-do-i-convert-a-bash-array-variable-to-a-string-delimited-with-newlines
+	config_add "$HOME/.default-python-packages" <<-EOF
+		$(printf "%s\n" "${PIP_PACKAGE[@]}")
+	EOF
+fi
+
 log_verbose "Installing asdf plugins"
 for p in "${!ASDF[@]}"; do
 	log_verbose "install asdf plugin $p"
