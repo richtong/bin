@@ -72,14 +72,12 @@ set -u
 # gimp - 2D editor
 # handbrake - transcoding
 # hugin - panaramas
-# mkvtoolnix - MKV Matrovska edit tools
 
 log_verbose "handbrake needs libdvdcss from el capitan on"
 PACKAGE+=(
 
 	libdvdcss
 	exiftool
-	mkvtoolnix
 
 )
 
@@ -104,9 +102,10 @@ APP+=(
 log_verbose "Install common apps on MacOS and Linux"
 package_install "${APP[@]}"
 
-# rawtherapee: DxO open source version
-# darktable: Lightroom competitor open source
+# rawtherapee: DxO open source version (deprecated no fresh Mac versions)
+# darktable: Lightroom competitor open source use instead of rawtherapee
 # luminance-hdr: HDR open source
+# mkvtoolnix: Matrovska video file merge and info
 
 CASK+=(
 
@@ -115,7 +114,7 @@ CASK+=(
 	geotag
 	handbrake
 	luminance-hdr
-	rawtherapee
+	mkvtoolnix
 
 )
 
