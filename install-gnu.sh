@@ -66,6 +66,7 @@ PACKAGE+=(
 
 	binutils
 	coreutils
+	curl
 	diffutils
 	gawk
 	gcc
@@ -158,7 +159,7 @@ if ! config_mark; then
 		            echo "$PATH" | grep -q "opt/$NAME/libexec/gnubin" ||
 		                PATH="$HOMEBREW_PREFIX/opt/$NAME/libexec/gnubin:$PATH"
 		        done
-		        for NAME in gnu-getopt gettext m4; do
+		        for NAME in gnu-getopt gettext m4 curl; do
 		            echo "$PATH" | grep -q "opt/$NAME/bin" ||
 		                PATH="$HOMEBREW_PREFIX/opt/$NAME/bin:$PATH"
 		        done
