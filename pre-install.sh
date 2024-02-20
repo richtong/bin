@@ -137,14 +137,18 @@ echo "$SCRIPTNAME: make sure we can see brew and coreutils on reboot"
 
 # fail the next command if no 1Password.app
 if [[ $OSTYPE =~ darwin ]]; then
-	echo "$SCRIPTNAME: force install 1password, google drive and veracrypt"
-	for package in 1password google-drive veracrypt; do
+	echo "$SCRIPTNAME: Use 1password for all credentials enable developer settings"
+	# veracrypt and google drive deprecated
+	# echo "$SCRIPTNAME: force install 1password, google drive and veracrypt"
+	# for package in 1password google-drive veracrypt; do
+	for package in 1password; do
 		if ! brew list "$package" &>/dev/null; then
 			brew install --force "$package"
 		fi
 	done
-	read -rp "$SCRIPTNAME: Login with Google Drive with Veracrypt vault, press enter when done"
-	open -a "Google Drive"
+	# deprecated use 1Password mode
+	# read -rp "$SCRIPTNAME: Login with Google Drive with Veracrypt vault, press enter when done"
+	# open -a "Google Drive"
 elif [[ $OSTYPE =~ linux ]] && lspci | grep -q VMware; then
 	echo "In VMWare assume we use 1Password and SS keys from the host"
 elif ! command -v 1password >/dev/null; then
