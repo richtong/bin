@@ -163,7 +163,7 @@ repos:
   # #rev: 20.8b1
 
   - repo: https://github.com/psf/black
-    rev: 22.10.0
+    rev: 23.3.0
     hooks:
       - id: black
         language_version: python3.9
@@ -173,12 +173,12 @@ repos:
   # sync all notebooks with their corresponding markdown files
   # use black to format the python code
   - repo: https://github.com/mwouts/jupytext
-    rev: v1.14.1
+    rev: v1.14.7
     hooks:
       - id: jupytext
         args: [--sync, --pipe, black]
         additional_dependencies:
-          - black==22.1.0
+          - black==23.3.0
 
   # strips everything out so use pre-commit-jupyter instead
   # - repo: https://github.com/kynan/nbstripout

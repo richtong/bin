@@ -50,21 +50,23 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
-# poe - a chatbot aggregator by Quora, allows multiple chats to different bots
+# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
 # lm-studio -  run different LLMs from Hugging Face locally
-# fig - command completion and dotfile manager (still trying it)
+# fig - command completion and dotfile manager (still trying it obsolete)
 # diffusionbee - Stability diffusion on Mac
 # shell-gpt - Runs chats from cli including running shell commands
-# vincelwt-chatgpt - ChatGPT in menubar
-# gpt4all - lm-studio local runner
+# vincelwt-chatgpt - ChatGPT in menubar (not using)
+# macgpt - ChatGPT in menubar
+# gpt4all - lm-studio local runner (lm-studio now does this)
 # open-interpreter - local llm can run local code
 if in_os mac; then
 	PACKAGE+=(
 
 		diffusionbee
-		vincelwt-chatgpt
+		mochi-diffusion
+		macgpt
 		lm-studio
-		poe
+		appflowy
 
 	)
 
@@ -88,6 +90,7 @@ if in_os mac; then
 	pip_install --upgrade "${PIP_PACKAGE[@]}"
 	log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
 
-	download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
+	# no need for gp4all
+	#download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
 
 fi
