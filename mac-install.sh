@@ -155,8 +155,9 @@ PACKAGES+=(parallel)
 # And this is part of moreutils
 # PACKAGES+=(moreutils)
 
-# rename files quickly
-PACKAGES+=(rename)
+# rename files quickly is not this, it is installed as part of GNU, this is a
+# perl script
+#PACKAGES+=(rename)
 
 # http://blog.hypriot.com/post/introducing-hypriot-cluster-lab-docker-clustering-as-easy-as-it-gets/
 # For hypriot RPI cluster searching
