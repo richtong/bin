@@ -191,7 +191,7 @@ if ! in_os mac; then
 fi
 
 pip_install "${PIP_PACKAGE[@]}"
-
+gh auth login
 gh config set git_protocol ssh
 
 # https://dev.to/softprops/digitally-unmastered-the-github-cli-edition-1cc4
