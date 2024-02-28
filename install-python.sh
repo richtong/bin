@@ -144,8 +144,13 @@ log_verbose "installing ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
 log_verbose "black needs keg link"
 # brew link pydocstyle
-brew link black
+brew unlink black && brew link black
 #log_verbose "PATH=$PATH"
+
+for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
+	log_verbose "Install other python $version"
+	package_install "python$version"
+done
 
 # autoimport - add and remove imports
 # argparse complete
@@ -194,11 +199,6 @@ if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
 fi
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
-
-for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
-	log_verbose "Install other python $version"
-	package_install "python$version"
-done
 
 # now put the completions in bashrc so subshells can find them like pipenv uses
 # the --completion is removed as of Nov 2021 so there is a new way
