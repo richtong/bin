@@ -52,6 +52,8 @@ while getopts "hdvn:e:p:j:" opt; do
 				flags: -h help
 				-d $($DEBUGGING || echo "no ")debugging
 				-v $($VERBOSE || echo "not ")verbose
+				You can use a quote string to install more than one version
+				So -p "3.10.1 3.11.4" works
 				-p Python version (default: ${PYTHON_VERSION[*]})
 				-e Direnv version (default: ${DIRENV_VERSION[*]})
 				-n Node.js version (default: ${NODE_VERSION[*]})
@@ -71,16 +73,18 @@ while getopts "hdvn:e:p:j:" opt; do
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	p)
-		PYTHON_VERSION=("$OPTARG")
+		# https://ioflood.com/blog/bash-split-string-into-array/
+		# https://unix.stackexchange.com/questions/763312/how-to-ignore-control-characters-when-execute-read-in-bash
+		read -ra PYTHON_VERSION <<<"$OPTARG"
 		;;
 	e)
-		DIRENV_VERSION=("$OPTARG")
+		read -ra DIRENV_VERSION <<<"$OPTARG"
 		;;
 	n)
-		NODE_VERSION=("$OPTARG")
+		read -ra NODE_VERSION <<<"$OPTARG"
 		;;
 	j)
-		JAVA_VERSION=("$OPTARG")
+		read -ra JAVA_VERSION <<<"$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt"
