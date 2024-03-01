@@ -180,36 +180,47 @@ if ! config_mark "$HOME/.default-python-packages"; then
 	EOF
 fi
 
+# the ! means all keys of an array
+# https://unix.stackexchange.com/questions/91943/is-there-a-way-to-list-all-indexes-ids-keys-on-a-bash-associative-array-vari
 log_verbose "Installing asdf plugins from ${ASDF[*]}"
 for LANG in "${!ASDF[@]}"; do
-	log_verbose "Install versions for $LANG"
-	for p in "${LANG[@]}"; do
-		log_verbose "install asdf plugin $p"
-		if ! asdf list "$p" >/dev/null; then
-			log_verbose "Install asdf plugin $p"
-			asdf plugin-add "$p"
-		else
-			log_verbose "asdf plugin $p already installed so update it"
-			asdf plugin update "$p"
-		fi
+	log_verbose "Install for language $LANG" 
+	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
+	log_verbose "install asdf for language $LANG"
+	if ! asdf list "$LANG" >/dev/null; then
+		log_verbose "Install asdf plugin $LANG"
+		asdf plugin-add "$LANG"
+	else
+		log_verbose "asdf plugin $LANG already installed so update it"
+		asdf plugin update "$LANG"
+	fi
+	INSTALLED="$(asdf list "$LANG" 2>&1 | sed 's/*//')"
+	log_verbose "Is $LANG has versions $INSTALLED installed already"
+
+	# note this word splits so versions cannot have spaces
+	for VERSION in ${ASDF[$LANG]}; do
 		# remove the asterisk which means current selected
 		# shellcheck disable=SC2086
-		version="$(asdf list $p 2>&1 | sed 's/*//')"
-		log_verbose "Is $version installed for $p?"
-		if [[ $version =~ "No versions" || ! $version =~ ${ASDF[$p]} ]]; then
-			# note we use {:-} since not all ASDF_ENVs are set
-			log_verbose "run ${ASDF_ENV[$p]:-} asdf install $p ${ASDF[$p]}"
+
+		if [[ $INSTALLED =~ "No versions" || ! $VERSION =~ $INSTALLED ]]; then
 			# broken as of feb 2021 now fixed
 			#if in_os mac && ! mac_is_arm && [[ $p =~ python ]]; then
 			#    log_verbose "Current bug in asdf python install skipping"
 			#    continue
 			#fi
+
+			log_verbose running eval ${ASDF_ENV[$LANG]:-} asdf install "$LANG" "$VERSION"
+
+			# python needs an environment set so add it as needed with eval
+			# note we use {:-} since not all ASDF_ENVs are set
 			# shellcheck disable=SC2086
-			eval ${ASDF_ENV[$p]:-} asdf install "$p" "${ASDF[$p]}"
+			eval ${ASDF_ENV[$LANG]:-} asdf install "$LANG" "$VERSION"
+			# does the global multiple times because there is no way to do double index
+			# so in effect the last version is the global
+			log_verbose running asdf global "$LANG" "$VERSION"
+			asdf global "$LANG" "$VERSION"
 		fi
 	done
-	log_verbose "Set global for $p to last version listed ${ASDF[${p[-1]}}"
-	asdf global "$p" "${ASDF[${p[-1]}}"
 done
 
 # not clear what this is so as login shell should go into .zprofile
