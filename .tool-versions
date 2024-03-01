@@ -1,5 +1,4 @@
-direnv 2.32.3
-# Stayed on 17 for Copilot can now move ahead
-nodejs 18.17.1
-python 3.10.11
+direnv 2.33.0
+nodejs 20.11.1
+python 3.11.8
 java openjdk-18

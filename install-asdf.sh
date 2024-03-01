@@ -17,13 +17,30 @@ OPTIND=1
 VERSION="${VERSION:-7}"
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
-NODE_VERSION="${NODE_VERSION:-18.12.1}"
-DIRENV_VERSION="${DIRENV_VERSION:-2.32.1}"
-# Note the 3.10.8 has to be build for Ubuntu so go lower as of Nov 2022
-# and that build fails
-PYTHON_VERSION="${PYTHON_VERSION:-3.10.8}"
+
+# make the default an array needs a hack
+# https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
+# https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
+DEFAULT_SHARE=(data user)
+if ((${#DEFAULT_SHARE[@]} > 0)); then SHARE=("${SHARE[@]}:-${DEFAULT_SHARE[@]}"); fi
+
+# These versions should be kept in sync with .tool_versions in ./src, ./bin, ./lib and ./user/rich
+# Picking the latest two releases
+
+DEFAULT_NODE=(18.19.1 20.11.1)
+if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]}:-${DEFAULT_NODE[@]}"); fi
+
+DEFAULT_DIRENV=(2.33.0)
+if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]}:-${DEFAULT_DIRENV[@]}"); fi
+
+# Python 3.11.8 has to be built so use a lower version as of Mar 2024
+DEFAULT_PYTHON=(3.10.10 3.11.8)
+if ((${#DEFAULT_PYTHON[@]} > 0);; then PYTHON_VERSION="${PYTHON_VERSION[@]}:-${DEFAULT_PYTHON[@]}"; fi
+
 # openjdk18 is Java 8 for Unifi.app
-JAVA_VERSION="${JAVA_VERSION:-openjdk-18}"
+DEFAULT_JAVA=(openjdk18)
+if ((${#DEFAULT_JAVA[@]} > 0)); then JAVA_VERSION="${JAVA_VERSION[@]:-${DEFAULT_JAVA[@]}"; fi
+
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvn:e:p:j:" opt; do
 	case "$opt" in
@@ -34,10 +51,10 @@ while getopts "hdvn:e:p:j:" opt; do
 				flags: -h help
 				-d $($DEBUGGING || echo "no ")debugging
 				-v $($VERBOSE || echo "not ")verbose
-				-p Python version (default: $PYTHON_VERSION)
-				-e Direnv version (default: $DIRENV_VERSION)
-				-n Node.js version (default: $NODE_VERSION)
-				-j Java version (default: $JAVA_VERSION)
+				-p Python version (default: ${PYTHON_VERSION[*]})
+				-e Direnv version (default: ${DIRENV_VERSION[*]})
+				-n Node.js version (default: ${NODE_VERSION[*]})
+				-j Java version (default: ${JAVA_VERSION[*]})
 		EOF
 		exit 0
 		;;
@@ -107,10 +124,10 @@ package_install "${PACKAGE[@]}"
 
 # https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
 declare -A ASDF+=(
-	[direnv]=$DIRENV_VERSION
-	[nodejs]=$NODE_VERSION
-	[python]=$PYTHON_VERSION
-	[java]=$JAVA_VERSION
+	[direnv]=${DIRENV_VERSION[@]}
+	[nodejs]=${NODE_VERSION[@]}
+	[python]=${PYTHON_VERSION[@]}
+	[java]=${JAVA_VERSION[@]}
 )
 
 # https://github.com/pyenv/pyenv/issues/950
@@ -163,32 +180,35 @@ if ! config_mark "$HOME/.default-python-packages"; then
 fi
 
 log_verbose "Installing asdf plugins"
-for p in "${!ASDF[@]}"; do
-	log_verbose "install asdf plugin $p"
-	if ! asdf list "$p" >/dev/null; then
-		log_verbose "Install asdf plugin $p"
-		asdf plugin-add "$p"
-	else
-		log_verbose "asdf plugin $p already installed so update it"
-		asdf plugin update "$p"
-	fi
-	# remove the asterisk which means current selected
-	# shellcheck disable=SC2086
-	version="$(asdf list $p 2>&1 | sed 's/*//')"
-	log_verbose "Is $version installed for $p?"
-	if [[ $version =~ "No versions" || ! $version =~ ${ASDF[$p]} ]]; then
-		# note we use {:-} since not all ASDF_ENVs are set
-		log_verbose "run ${ASDF_ENV[$p]:-} asdf install $p ${ASDF[$p]}"
-		# broken as of feb 2021 now fixed
-		#if in_os mac && ! mac_is_arm && [[ $p =~ python ]]; then
-		#    log_verbose "Current bug in asdf python install skipping"
-		#    continue
-		#fi
+for LANG in "${!ASDF[@]}"; do
+	log_verbose "Install all versions $LANG[*]"
+	for p in "${LANG[@]}"; do
+		log_verbose "install asdf plugin $p"
+		if ! asdf list "$p" >/dev/null; then
+			log_verbose "Install asdf plugin $p"
+			asdf plugin-add "$p"
+		else
+			log_verbose "asdf plugin $p already installed so update it"
+			asdf plugin update "$p"
+		fi
+		# remove the asterisk which means current selected
 		# shellcheck disable=SC2086
-		eval ${ASDF_ENV[$p]:-} asdf install "$p" "${ASDF[$p]}"
-	fi
-	log_verbose "Set global for $p with ${ASDF[$p]}"
-	asdf global "$p" "${ASDF[$p]}"
+		version="$(asdf list $p 2>&1 | sed 's/*//')"
+		log_verbose "Is $version installed for $p?"
+		if [[ $version =~ "No versions" || ! $version =~ ${ASDF[$p]} ]]; then
+			# note we use {:-} since not all ASDF_ENVs are set
+			log_verbose "run ${ASDF_ENV[$p]:-} asdf install $p ${ASDF[$p]}"
+			# broken as of feb 2021 now fixed
+			#if in_os mac && ! mac_is_arm && [[ $p =~ python ]]; then
+			#    log_verbose "Current bug in asdf python install skipping"
+			#    continue
+			#fi
+			# shellcheck disable=SC2086
+			eval ${ASDF_ENV[$p]:-} asdf install "$p" "${ASDF[$p]}"
+		fi
+		log_verbose "Set global for $p with ${ASDF[$p]}"
+		asdf global "$p" "${ASDF[$p]}"
+	done
 done
 
 # not clear what this is so as login shell should go into .zprofile
