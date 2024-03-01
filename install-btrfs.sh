@@ -21,7 +21,7 @@ POOL=${POOL:-"btrfs-pool"}
 # https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
 # https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
 DEFAULT_SHARE=(data user)
-if ((${#DEFAULT_SHARE[@]} > 0)); then SHARE=("${SHARE[@]}:-${DEFAULT_SHARE[@]}"); fi
+if ((${#DEFAULT_SHARE[@]} > 0)); then SHARE=("${SHARE[@]:-${DEFAULT_SHARE[@]}}"); fi
 
 ORG_NAME="${ORG_NAME:-"tongfamily"}"
 FORCE=${FORCE-}

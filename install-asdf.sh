@@ -22,24 +22,25 @@ VERBOSE="${VERBOSE:-false}"
 # https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
 # https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
 DEFAULT_SHARE=(data user)
-if ((${#DEFAULT_SHARE[@]} > 0)); then SHARE=("${SHARE[@]}:-${DEFAULT_SHARE[@]}"); fi
+if ((${#DEFAULT_SHARE[@]} > 0)); then SHARE=("${SHARE[@]:-${DEFAULT_SHARE[@]}}"); fi
 
 # These versions should be kept in sync with .tool_versions in ./src, ./bin, ./lib and ./user/rich
-# Picking the latest two releases
+# Picking the latest two releases. Assumes the last item is the one to be set for global
 
-DEFAULT_NODE=(18.19.1 20.11.1)
-if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]}:-${DEFAULT_NODE[@]}"); fi
+DEFAULT_NODE=( 18.19.1 20.11.1 )
+if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]:-${DEFAULT_NODE[@]}}"); fi
 
-DEFAULT_DIRENV=(2.33.0)
-if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]}:-${DEFAULT_DIRENV[@]}"); fi
+DEFAULT_DIRENV=(2.33.0 )
+if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
+echo "DEFAULT_DIRENV=${DEFAULT_DIRENV[*]} DIRENV_VERSION=${DIRENV_VERSION[*]}"
 
 # Python 3.11.8 has to be built so use a lower version as of Mar 2024
 DEFAULT_PYTHON=(3.10.10 3.11.8)
-if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]}:-${DEFAULT_PYTHON[@]}"); fi
+if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]:-${DEFAULT_PYTHON[@]}}"); fi
 
 # openjdk18 is Java 8 for Unifi.app
-DEFAULT_JAVA=(openjdk18)
-if ((${#DEFAULT_JAVA[@]} > 0)); then JAVA_VERSION=("${JAVA_VERSION[@]}:-${DEFAULT_JAVA[@]}"); fi
+DEFAULT_JAVA=(openjdk-18)
+if ((${#DEFAULT_JAVA[@]} > 0)); then JAVA_VERSION=("${JAVA_VERSION[@]:-${DEFAULT_JAVA[@]}}"); fi
 
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvn:e:p:j:" opt; do
@@ -179,9 +180,9 @@ if ! config_mark "$HOME/.default-python-packages"; then
 	EOF
 fi
 
-log_verbose "Installing asdf plugins"
+log_verbose "Installing asdf plugins from ${ASDF[*]}"
 for LANG in "${!ASDF[@]}"; do
-	log_verbose "Install all versions ${LANG[*]}"
+	log_verbose "Install versions for $LANG"
 	for p in "${LANG[@]}"; do
 		log_verbose "install asdf plugin $p"
 		if ! asdf list "$p" >/dev/null; then
@@ -206,9 +207,9 @@ for LANG in "${!ASDF[@]}"; do
 			# shellcheck disable=SC2086
 			eval ${ASDF_ENV[$p]:-} asdf install "$p" "${ASDF[$p]}"
 		fi
-		log_verbose "Set global for $p with ${ASDF[$p]}"
-		asdf global "$p" "${ASDF[$p]}"
 	done
+	log_verbose "Set global for $p to last version listed ${ASDF[${p[-1]}}"
+	asdf global "$p" "${ASDF[${p[-1]}}"
 done
 
 # not clear what this is so as login shell should go into .zprofile
