@@ -35,11 +35,11 @@ if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]}:-${
 
 # Python 3.11.8 has to be built so use a lower version as of Mar 2024
 DEFAULT_PYTHON=(3.10.10 3.11.8)
-if ((${#DEFAULT_PYTHON[@]} > 0);; then PYTHON_VERSION="${PYTHON_VERSION[@]}:-${DEFAULT_PYTHON[@]}"; fi
+if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]}:-${DEFAULT_PYTHON[@]}"); fi
 
 # openjdk18 is Java 8 for Unifi.app
 DEFAULT_JAVA=(openjdk18)
-if ((${#DEFAULT_JAVA[@]} > 0)); then JAVA_VERSION="${JAVA_VERSION[@]:-${DEFAULT_JAVA[@]}"; fi
+if ((${#DEFAULT_JAVA[@]} > 0)); then JAVA_VERSION=("${JAVA_VERSION[@]}:-${DEFAULT_JAVA[@]}"); fi
 
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvn:e:p:j:" opt; do
@@ -70,16 +70,16 @@ while getopts "hdvn:e:p:j:" opt; do
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	p)
-		PYTHON_VERSION="$OPTARG"
+		PYTHON_VERSION=("$OPTARG")
 		;;
 	e)
-		DIRENV_VERSION="$OPTARG"
+		DIRENV_VERSION=("$OPTARG")
 		;;
 	n)
-		NODE_VERSION="$OPTARG"
+		NODE_VERSION=("$OPTARG")
 		;;
 	j)
-		JAVA_VERSION="$OPTARG"
+		JAVA_VERSION=("$OPTARG")
 		;;
 	*)
 		echo "not flag -$opt"
@@ -181,7 +181,7 @@ fi
 
 log_verbose "Installing asdf plugins"
 for LANG in "${!ASDF[@]}"; do
-	log_verbose "Install all versions $LANG[*]"
+	log_verbose "Install all versions ${LANG[*]}"
 	for p in "${LANG[@]}"; do
 		log_verbose "install asdf plugin $p"
 		if ! asdf list "$p" >/dev/null; then
