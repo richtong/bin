@@ -21,21 +21,17 @@ VERBOSE="${VERBOSE:-false}"
 # make the default an array needs a hack
 # https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
 # https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
-DEFAULT_SHARE=(data user)
-if ((${#DEFAULT_SHARE[@]} > 0)); then SHARE=("${SHARE[@]:-${DEFAULT_SHARE[@]}}"); fi
-
 # These versions should be kept in sync with .tool_versions in ./src, ./bin, ./lib and ./user/rich
-# Picking the latest two releases. Assumes the last item is the one to be set for global
-
+# Assumes the last item is the one to be set for global
 DEFAULT_NODE=( 18.19.1 20.11.1 )
 if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]:-${DEFAULT_NODE[@]}}"); fi
 
-DEFAULT_DIRENV=(2.33.0 )
+DEFAULT_DIRENV=(2.32.3 2.33.0 )
 if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
 echo "DEFAULT_DIRENV=${DEFAULT_DIRENV[*]} DIRENV_VERSION=${DIRENV_VERSION[*]}"
 
 # Python 3.11.8 has to be built so use a lower version as of Mar 2024
-DEFAULT_PYTHON=(3.10.10 3.11.8)
+DEFAULT_PYTHON=(3.10.11 3.11.8)
 if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]:-${DEFAULT_PYTHON[@]}}"); fi
 
 # openjdk18 is Java 8 for Unifi.app
@@ -189,7 +185,6 @@ fi
 log_verbose "Installing asdf plugins from ${ASDF[*]}"
 for LANG in "${!ASDF[@]}"; do
 	log_verbose "Install for language $LANG" 
-	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
 	log_verbose "install asdf for language $LANG"
 	if ! asdf list "$LANG" >/dev/null; then
 		log_verbose "Install asdf plugin $LANG"
@@ -201,7 +196,9 @@ for LANG in "${!ASDF[@]}"; do
 	INSTALLED="$(asdf list "$LANG" 2>&1 | sed 's/*//')"
 	log_verbose "Is $LANG has versions $INSTALLED installed already"
 
-	# note this word splits so versions cannot have spaces
+	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
+	# note this word splits so versions cannot have spaces there seems to be no
+    # way to generate an array here
 	for VERSION in ${ASDF[$LANG]}; do
 		# remove the asterisk which means current selected
 		# shellcheck disable=SC2086
@@ -242,9 +239,14 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 fi
 log_verbose "Checking for asdf direnv"
 if [[ -n ${ASDF[direnv]} ]]; then
-	log_verbose "Found direnv installing config info"
+
+    # need this hack because can't index into an array inside an array
+    # ${ASDF[direnv][-1]} is what we want but there is no way to 
+    # make ${ASDF[direnv]} into an array again so rely ont he fact that
+    # we know it was originally assigned from DIRENV_VERSIONS 
 	for SHELL_VERSION in bash zsh; do
-		asdf direnv setup --shell "$SHELL_VERSION" --version "${ASDF[direnv]}"
+        log_verbose "Found direnv install ${DIRENV_VERSION[-1]} for $SHELL"
+		asdf direnv setup --shell "$SHELL_VERSION" --version "${DIRENV_VERSION[-1]}"
 	done
 	# the direnv setup now does this instead so comment out the manual
 	# installation https://direnv.net/docs/hook.html
