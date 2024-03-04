@@ -191,8 +191,12 @@ if ! in_os mac; then
 fi
 
 pip_install "${PIP_PACKAGE[@]}"
-gh auth login
-gh config set git_protocol ssh
+
+log_verbose "check if authenticated"
+if ! gh auth status | grep -q "Logged in"; then
+    gh auth login
+    gh config set git_protocol ssh
+fi
 
 # https://dev.to/softprops/digitally-unmastered-the-github-cli-edition-1cc4
 # make it easy to set default-branch disable check as gh will interpret later
