@@ -59,55 +59,45 @@ while getopts "hdvu:e:" opt; do
 	esac
 done
 shift $((OPTIND - 1))
-# shellcheck source=./include.sh
+# shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh \
 	lib-version-compare.sh lib-config.sh
 
-# Put title case on the user name
-if [[ -z $(git config --global user.name) ]]; then
-	# https://jeffbailey.us/blog/2020/01/20/push-declined-due-to-email-privacy-restrictions-on-github/
-	log_verbose "no user name set changing to $GIT_USERNAME"
-	# the caret converts to title case
-	# https://stackoverflow.com/questions/11392189/converting-string-from-uppercase-to-lowercase-in-bash
-	git config --global user.name "${GIT_USERNAME^}"
-fi
-
-if [[ -z $(git config --global user.email) ]]; then
-	log_verbose "no email set changing to $GIT_EMAIL"
-	git config --global user.email "${GIT_EMAIL,,}"
-fi
-
-if [[ -z $(git config --global checkout.defaultRemote) ]]; then
-	log_verbose "no checkout.defaultRemote changing to origin"
-	git config --global checkout.defaultRemote origin
-fi
-
-if [[ -z $(git config --global pull.ff) ]]; then
-	log_verbose "no pull.ff set turn fast forward only"
-	git config --global pull.ff only
-fi
-
+# the caret converts to title case
+# https://stackoverflow.com/questions/11392189/converting-string-from-uppercase-to-lowercase-in-bash
+# needs special handling for windows
 # https://stackoverflow.com/questions/10418975/how-to-change-line-ending-settings
-if [[ -z $(git config --global core.autocrlf input) ]]; then
-	autocrlf=input
-	if in_os windows; then
-		autocrlf=true
-	fi
-	git config --global core.autocrlf "$autocrlf"
-fi
+# https://stackoverflow.com/questions/11514075/what-is-the-difference-between-an-annotated-and-unannotated-tag
+# https://stackoverflow.com/questions/5195859/how-do-you-push-a-tag-to-a-remote-repository-using-git
+declare -A VAR+=(
+    [push.followTags]="true"
+    [user.email]="${GIT_EMAIL,,}"
+    [user.name]="${GIT_USERNAME^}"
+    [core.autocrlf]="$(in_os windows && echo true || echo input)"
+    [init.defaultBranch]="main"
+    [push.followTags]="true"
+    [commit.verbose]="true"
+    [ff.only]="only"
+    [rebase.autoStash]="true"
+    [checkout.defaultRemote]="origin"
+)
+
 
 # Git is changing its default and this gets rid of warning messages
 # There is no simple in git 1.7
 if vergte "$(git version | cut -f3 -d' ')" 1.8; then
-	if ! git config --global push.default | grep ^simple; then
-		git config --global push.default simple
-	fi
+    FLAG+=([push.default]="simple")
 fi
 
-if [[ ! $(git config --global ff.only) =~ only ]]; then
-	git config --global ff.only only
-fi
+for FLAG in "${!VAR[@]}"; do
+    log_verbose "checking $FLAG exists and set to ${VAR[$FLAG]} if not"
+    if [[ -z $(git config --global "$FLAG") ]]; then
+        log_verbose "no $FLAG set turn on ${FLAG[$FLAG]}"
+        git config --global "$FLAG" "${FLAG[$FLAG]}"
+    fi
+done
+
 
 log_verbose "in the newest version of git specify fast forward only so you do not get accidental merges"
 if [[ ! $(git config --global pull.ff) =~ only ]]; then
@@ -127,11 +117,6 @@ if [[ ! $(git config --global protocol.file.allow) =~ always ]]; then
 	git config --global protocol.file.allow always
 fi
 
-# https://stackoverflow.com/questions/11514075/what-is-the-difference-between-an-annotated-and-unannotated-tag
-# https://stackoverflow.com/questions/5195859/how-do-you-push-a-tag-to-a-remote-repository-using-git
-log_verbose "Only push followable tags that are annotated"
-git config --global push.followTags true
-
 # https://git-scm.com/docs/git-config show summary of submodules
 # the number of commits to show -1 means all of them
 # this is very slow so remove for now particularly for WSL to Windows
@@ -150,7 +135,7 @@ git config --global push.followTags true
 # gitlint - linting git commits
 # should use https://www.conventionalcommits.org/ format
 # feat(install-1password)!: add feature or breaking change vs. fix:
-log_verbose "do not installed hub the completions interfer with git and it is deprecated"
+log_verbose "do not installed hub the completions inferior with git and it is deprecated"
 PACKAGE+=(
 
 	act

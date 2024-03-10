@@ -122,15 +122,24 @@ fi
 # rg - completions
 # rsync - adda rsync-copy for -avz
 # terraform - tfa for apply, tfv for validate...
-# thefuck - ESC twice to correct command (conflicts with sudo plugin)
+# thefuck - ESC twice to correct command (conflicts with sudo plugin do not use
+# together)
 # ubuntu - acs apt-cache search
 # vi-mode - ESC to enter vi edit mode. vv edit command line
 # wd - warp directory do a wd add to add to a list of directories
 # web-search - type "google any-string"
 # z - z <string> guess which directory you want to go to
 
+PACKAGE+=(
+	pygments
+)
+log_verbose "Install Package ${PACKAGE[*]}"
+package_install "${PACKAGE[@]}"
+
+log_verbose "The F*ck requires special install"
+./install-thefuck.sh
+
 log_verbose "Adding OMZ plugins"
-brew_install pygments
 log_verbose "Pygment syntax highlighter must be linked"
 brew link pygments
 log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"

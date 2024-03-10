@@ -104,6 +104,8 @@ defaults write com.apple.finder ShowStatusBar -bool true
 # Finder: show path bar
 defaults write com.apple.finder ShowPathbar -bool true
 
+package_install mas
+
 # Install Mac App Store
 #	497799835
 MAS+=(
