@@ -194,8 +194,30 @@ fi
 # https://stackoverflow.com/questions/74960450/change-default-branch-via-cli
 gh repo edit --default-branch main
 
+# https://github.com/topics/gh-extension
+# gh-dash - dashboard
+# gh-poi - safely delete local branches
+# gh-markdown-preview - markdown preview of README.md
+# gh-f - fuzzy finder inside repos
+# gh-cp - copy files from remote repo without cloning
+GH_EXTENSION+=(
+	dlvhdr/gh-dash
+	seachicken/gh-poi
+	yusukebe/gh-markdown-preview
+	gennaro-tedesco/gh-f
+	mislav/gh-cp
+)
+
 log_verbose "login with Personal Access Token set in GH_TOKEN"
-log_verbose "Or gh auth login for interactive web workflow"
+log_verbose "default is gh auth login for interactive web workflow"
+if ! gh auth status | grep -q "Logged in"; then
+	gh auth login
+fi
+
+for extension in "${GH_EXTENSION[@]}"; do
+	log_verbose "Install gh extension $extension"
+	gh extension install "$extension"
+done
 # gh completion now handled by homebrew
 # https://cli.github.com/manual/gh_completion
 # eval "$(gh completion -s bash)"

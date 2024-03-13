@@ -23,12 +23,13 @@ jobs:
         # 3.7 will not run with the current requirements.txt pinning
         # we do not need matrix that is in python version
         # https://github.com/actions/setup-python/issues/249
-        # Need to quote 3.10 as this gets shortend to "3.10"
-        python-version: [3.8, 3.9]
+        # Need to quote "3.10" as this gets converted otherwise to 3.1
+        python-version: ["3.10" , "3.11"]
     # checkout repo under $GITHUB_WORKSPACE
     steps:
       - name: Checkout action
-        uses: actions/checkout@v3
+        # bump from v3 to v4 to move from node 16 to node 20
+        uses: actions/checkout@v4
         with:
 
           lfs: true
@@ -41,13 +42,13 @@ jobs:
           # submodules: recursive
       # install latest python version
       - name: Setup python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
         run: python --version
       - name: Cache pip
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           # Ubuntu specific path
           path: ~/.cache/pip
