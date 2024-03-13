@@ -71,33 +71,31 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh \
 # https://stackoverflow.com/questions/11514075/what-is-the-difference-between-an-annotated-and-unannotated-tag
 # https://stackoverflow.com/questions/5195859/how-do-you-push-a-tag-to-a-remote-repository-using-git
 declare -A VAR+=(
-    [push.followTags]="true"
-    [user.email]="${GIT_EMAIL,,}"
-    [user.name]="${GIT_USERNAME^}"
-    [core.autocrlf]="$(in_os windows && echo true || echo input)"
-    [init.defaultBranch]="main"
-    [push.followTags]="true"
-    [commit.verbose]="true"
-    [ff.only]="only"
-    [rebase.autoStash]="true"
-    [checkout.defaultRemote]="origin"
+	[push.followTags]="true"
+	[user.email]="${GIT_EMAIL,,}"
+	[user.name]="${GIT_USERNAME^}"
+	[core.autocrlf]="$(in_os windows && echo true || echo input)"
+	[init.defaultBranch]="main"
+	[push.followTags]="true"
+	[commit.verbose]="true"
+	[ff.only]="only"
+	[rebase.autoStash]="true"
+	[checkout.defaultRemote]="origin"
 )
-
 
 # Git is changing its default and this gets rid of warning messages
 # There is no simple in git 1.7
 if vergte "$(git version | cut -f3 -d' ')" 1.8; then
-    FLAG+=([push.default]="simple")
+	FLAG+=([push.default]="simple")
 fi
 
 for FLAG in "${!VAR[@]}"; do
-    log_verbose "checking $FLAG exists and set to ${VAR[$FLAG]} if not"
-    if [[ -z $(git config --global "$FLAG") ]]; then
-        log_verbose "no $FLAG set turn on ${FLAG[$FLAG]}"
-        git config --global "$FLAG" "${FLAG[$FLAG]}"
-    fi
+	log_verbose "checking $FLAG exists and set to ${VAR[$FLAG]} if not"
+	if [[ -z $(git config --global "$FLAG") ]]; then
+		log_verbose "no $FLAG set turn on ${FLAG[$FLAG]}"
+		git config --global "$FLAG" "${FLAG[$FLAG]}"
+	fi
 done
-
 
 log_verbose "in the newest version of git specify fast forward only so you do not get accidental merges"
 if [[ ! $(git config --global pull.ff) =~ only ]]; then
@@ -179,8 +177,9 @@ pip_install "${PIP_PACKAGE[@]}"
 
 log_verbose "check if authenticated"
 if ! gh auth status | grep -q "Logged in"; then
-    gh auth login
-    gh config set git_protocol ssh
+	# need the workflow scope to allow edits of github actions
+	gh auth login --scope workflow
+	gh config set git_protocol ssh
 fi
 
 # https://dev.to/softprops/digitally-unmastered-the-github-cli-edition-1cc4
@@ -207,12 +206,6 @@ GH_EXTENSION+=(
 	gennaro-tedesco/gh-f
 	mislav/gh-cp
 )
-
-log_verbose "login with Personal Access Token set in GH_TOKEN"
-log_verbose "default is gh auth login for interactive web workflow"
-if ! gh auth status | grep -q "Logged in"; then
-	gh auth login
-fi
 
 for extension in "${GH_EXTENSION[@]}"; do
 	log_verbose "Install gh extension $extension"
