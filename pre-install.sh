@@ -141,7 +141,9 @@ if [[ $OSTYPE =~ darwin ]]; then
 	# veracrypt and google drive deprecated
 	# echo "$SCRIPTNAME: force install 1password, google drive and veracrypt"
 	# for package in 1password google-drive veracrypt; do
-	for package in 1password; do
+	PACKAGES="1password"
+	# shellcheck disable=SC2086
+	for package in $PACKAGES; do
 		if ! brew list "$package" &>/dev/null; then
 			brew install --force "$package"
 		fi
