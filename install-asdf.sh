@@ -35,7 +35,7 @@ DEFAULT_PYTHON=(3.10.11 3.11.8)
 if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]:-${DEFAULT_PYTHON[@]}}"); fi
 
 # openjdk18 is Java 8 for Unifi.app
-DEFAULT_JAVA=(openjdk-18)
+DEFAULT_JAVA=(openjdk-18 openjdk-21)
 if ((${#DEFAULT_JAVA[@]} > 0)); then JAVA_VERSION=("${JAVA_VERSION[@]:-${DEFAULT_JAVA[@]}}"); fi
 
 export FLAGS="${FLAGS:-""}"

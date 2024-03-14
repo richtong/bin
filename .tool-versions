@@ -1,4 +1,4 @@
 direnv 2.33.0
 nodejs 20.11.1
 python 3.11.8
-java openjdk-18
+java openjdk-21
