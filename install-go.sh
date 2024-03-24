@@ -61,11 +61,12 @@ PACKAGE+=(
 	go
 )
 
-if in_os mac; then
-	OPTION+=(
-		--cross-compile-common
-	)
-fi
+# this is no longer accepted with go, not sure why it is needed anymore
+#if in_os mac; then
+	#OPTION+=(
+		#--cross-compile-common
+	#)
+#fi
 
 log_verbose "go installation"
 # do not quote options in case there are none and you should ignore it.
