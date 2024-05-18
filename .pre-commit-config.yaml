@@ -138,11 +138,23 @@ repos:
     rev: 5.0.4
     hooks:
       - id: flake8
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.1.1
+  # pydocstyle deprecated use ruff
+  # - repo: https://github.com/pycqa/pydocstyle
+  #   rev: 6.1.1
+  #   hooks:
+  #     - id: pydocstyle
+  #       exclude: thefuck/settings\.py$
+
+  # long term replace black, flake8
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.4.4
     hooks:
-      - id: pydocstyle
-        exclude: thefuck/settings\.py$
+      # Run the linter.
+      - id: ruff
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
 
   # puts the isort.cfg at the root we do not want that
   # https://pypi.org/project/seed-isort-config/
@@ -166,7 +178,7 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-        language_version: python3.9
+        language_version: python3.11
         args: [-l 79]
 
   # https://jupytext.readthedocs.io/en/latest/using-pre-commit.html

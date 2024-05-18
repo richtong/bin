@@ -79,10 +79,11 @@ source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
 # log_verbose "PATH=$PATH"
 
-# Kite is Python code completer not used instead use Github copilot
+# Kite is Python code completer not used use Codeium
 # https://github.com/kiteco/jupyterlab-kite
 # kite
-# pydocstyle - no longer
+# https://github.com/PyCQA/pydocstyle
+# pydocstyle - no longer maintained use ruff
 PACKAGE+=(
 	black
 )
@@ -159,9 +160,10 @@ done
 # mypy - python type checking
 # nptyping - types fo rnumpy
 # pdoc3 - python documentation extraction from comments
-# pydocstyle - python docstring style checker
+# pydocstyle - python docstring style checker (deprecated for ruff)
 # pytest - python test runner
 # pyyaml - python yaml parser
+# ruff - replaces flake8, black, isort, pydoctstyle, pyupgrade and is very fast
 # tox - python test runner for different versions of python
 # mkdocs - documents made easy
 # mkdocs-material - Add material design to documentation
@@ -183,12 +185,12 @@ PYTHON_PACKAGE+=(
 	mypy
 	nptyping
 	pdoc3
-	pydocstyle
 	pytest
 	pytest-cov
 	pytest-timeout
 	pytest-xdist
 	pyyaml
+	ruff
 	tox
 
 )

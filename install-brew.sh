@@ -165,3 +165,6 @@ log_verbose "make sure brew is up to date"
 brew update
 log_verbose "make sure brew takes over all packages it owns with --greedy"
 brew upgrade --greedy
+
+log_verbose "bash completion added to profile"
+"$SCRIPT_DIR/install-bash-completion.sh"

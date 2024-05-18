@@ -366,7 +366,3 @@ fi
 #"$SCRIPT_DIR/install-kubernetes.sh"
 # Needed for docker for kubernetes minikube
 # "$SCRIPT_DIR/install-xhyve.sh"
-
-# this is now installed by homebrew
-#log_verbose "bash completion used by kubernetes"
-#"$SCRIPT_DIR/install-bash-completion.sh"
