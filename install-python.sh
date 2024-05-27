@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+	nptyping
 ## vi: se noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
@@ -18,13 +19,13 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 VERBOSE="${VERBOSE:-false}"
 DEBUGGING="${DEBUGGING:-false}"
 ANACONDA="${ANACONDA:-true}"
-PIPENV="${PIPENV:-true}"
+PIPENV="${PIPENV:-false}"
 POETRY="${POETRY:-true}"
 # If version is set to null then the default python version is used
 PYTHON_VERSION="${PYTHON_VERSION-}"
-NEW_PYTHON="${NEW_PYTHON:-@3.10}"
+NEW_PYTHON="${NEW_PYTHON:-@3.11}"
 # we normally don't need the oldest version
-OLD_PYTHON="${OLD_PYTHON:-@3.8}"
+OLD_PYTHON="${OLD_PYTHON:-@3.10}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
@@ -84,8 +85,20 @@ shift $((OPTIND - 1))
 # kite
 # https://github.com/PyCQA/pydocstyle
 # pydocstyle - no longer maintained use ruff
+# mypy - python type checking
+# pyyaml - python yaml parser
+# favor the brew packages vs pip
+# autocomplete will not install in brew so must be in an environment remove it as not used much
 PACKAGE+=(
+	python-argcomplete
 	black
+	bandit
+        flake8
+        mkdocs
+        mypy
+        pyyaml
+	ruff
+	tox
 )
 
 if [[ -v PYTHON_VERSION ]]; then
@@ -153,51 +166,53 @@ for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	package_install "python$version"
 done
 
-# autoimport - add and remove imports
+
+# Only install pip packages if not in homebrew as
+# raw pip in homebrew does not allow it
+
 # argparse complete
 # bandit - check for security problems
 # black - a very strick python formatter
-# mypy - python type checking
-# nptyping - types fo rnumpy
 # pdoc3 - python documentation extraction from comments
-# pydocstyle - python docstring style checker (deprecated for ruff)
 # pytest - python test runner
-# pyyaml - python yaml parser
 # ruff - replaces flake8, black, isort, pydoctstyle, pyupgrade and is very fast
 # tox - python test runner for different versions of python
 # mkdocs - documents made easy
-# mkdocs-material - Add material design to documentation
 # pymdown-extensions - Markdown helpers
+# autoimport - add and remove imports
 # fontaweseom-markdown - emojis
-log_verbose "development shell/python packages normally use pipenv but use anaconda instead"
-PYTHON_PACKAGE+=(
+# mkdocs-material - Add material design to documentation
+# nptyping - types fo rnumpy
 
-	argcomplete
-	autocomplete
-	autoimport
-	bandit
-	black
-	flake8
-	mkdocs
-	mkdocs-material
-	pymdown-extensions
-	fontawesome-markdown
-	mypy
-	nptyping
-	pdoc3
-	pytest
-	pytest-cov
-	pytest-timeout
-	pytest-xdist
-	pyyaml
-	ruff
-	tox
+if ! command -v brew; then
+	log_verbose "no homebrew so can install these packages"
+	PYTHON_PACKAGE+=(
 
-)
+		autocomplete
+		fontawesome-markdown
+		mkdocs-material
+		nptyping
+		pdoc3
+		pymdown-extensions
+		pytest
+		pytest-cov
+		pytest-timeout
+		pytest-xdist
+
+	)
+fi
 
 if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
-	log_verbose "installing python packages ${PYTHON_PACKAGE[*]} in the base system and upgrade dependencies"
-	pip_install --upgrade "${PYTHON_PACKAGE[@]}"
+	# this is no longer needed
+	# if in_os mac; then
+		# https://stackoverflow.com/questions/12744031/how-to-change-values-of-bash-array-elements-without-loop
+	#	log_verbose "In MacOS, use brew not raw pip install into system, use  brew install ${@/#/python-}"
+		# note # means ^ and % means $ because these are already special to bash
+#		brew_install "${PYTHON_PACKAGE[@]/#/python-}"
+	#else
+		log_verbose "installing python packages ${PYTHON_PACKAGE[*]} in the base system and upgrade dependencies"
+		pip_install --upgrade "${PYTHON_PACKAGE[@]}"
+	# fi
 fi
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"

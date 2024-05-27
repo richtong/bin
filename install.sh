@@ -230,9 +230,11 @@ log_verbose "Adding .ssh key passphrases to keychain or keyring"
 "$SCRIPT_DIR/install-ssh-config.sh"
 
 # install-git-tools needs python
+log_verbose "installing python"
 "$SCRIPT_DIR/install-python.sh"
 
 # the {-} means replace with null if FORCE_FLAG is not set
+log_verbose "Installing git tools"
 "$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"
 log_verbose must be installed is git lfs is used before installing repos
 "$BIN_DIR/install-git-lfs.sh"

@@ -15,6 +15,7 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
+FORCE="${FORCE:-false}"
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
@@ -23,7 +24,7 @@ GIT_EMAIL="${GIT_EMAIL:-"1782087+richtong@users.noreply.github.com"}"
 # no longer use a public email
 # GIT_EMAIL="${GIT_EMAIL:-"$USER@tongfamily.com"}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvu:e:" opt; do
+while getopts "hdvu:e:f" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -34,6 +35,7 @@ while getopts "hdvu:e:" opt; do
 				   -v $(! $VERBOSE || echo "not ")verbose
 				   -u pretty git user name for git log (default $GIT_USERNAME )
 				   -e git email (default $GIT_EMAIL)
+				   -f blow away the .git defaults with these (default: $FORCE)
 		EOF
 		exit 0
 		;;
@@ -52,6 +54,9 @@ while getopts "hdvu:e:" opt; do
 		;;
 	e)
 		GIT_EMAIL="$OPTARG"
+		;;
+	f)
+		FORCE="$($FORCE && echo false || echo true)"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -82,20 +87,23 @@ declare -A VAR+=(
 	[rebase.autoStash]="true"
 	[checkout.defaultRemote]="origin"
 )
-
 # Git is changing its default and this gets rid of warning messages
 # There is no simple in git 1.7
 if vergte "$(git version | cut -f3 -d' ')" 1.8; then
-	FLAG+=([push.default]="simple")
+	log_verbose "git > 1.8 do simple push default"
+	VAR+=(
+		[push.default]="simple"
+	)
 fi
 
 for FLAG in "${!VAR[@]}"; do
-	log_verbose "checking $FLAG exists and set to ${VAR[$FLAG]} if not"
-	if [[ -z $(git config --global "$FLAG") ]]; then
-		log_verbose "no $FLAG set turn on ${FLAG[$FLAG]}"
-		git config --global "$FLAG" "${FLAG[$FLAG]}"
+	log_verbose "checking if $FORCE or gitconfig --global $FLAG exists if not"
+	if $FORCE || ! git config --global "$FLAG" >/dev/null; then
+		log_verbose "git config --global $FLAG ${VAR[$FLAG]}"
+		git config --global "$FLAG" "${VAR[$FLAG]}"
 	fi
 done
+exit
 
 log_verbose "in the newest version of git specify fast forward only so you do not get accidental merges"
 if [[ ! $(git config --global pull.ff) =~ only ]]; then
@@ -178,7 +186,7 @@ pip_install "${PIP_PACKAGE[@]}"
 log_verbose "check if authenticated"
 if ! gh auth status | grep -q "Logged in"; then
 	# need the workflow scope to allow edits of github actions
-	gh auth login --scope workflow
+	gh auth login -s workflow
 	gh config set git_protocol ssh
 fi
 
