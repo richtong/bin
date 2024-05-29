@@ -264,12 +264,12 @@ log_verbose install complete Mac apps via brew
 # VLC - video viewer
 # google-drive - super set of gdrive and also does photo uploads used
 # for veracrypt
-# microsoft-remote-desktop - to remote into graphical windows desktops
+# microsoft-remote-desktop - to remote into graphical windows desktops (not
+# used)
 #
 CASKS+=(
 	vlc
 	google-drive
-	microsoft-remote-desktop
 )
 
 log_verbose "cask install ${CASKS[*]}"
@@ -325,11 +325,12 @@ fi
 # https://johndjameson.com/blog/updating-your-shell-with-homebrew/
 # This works for both macports bash and homebrew bash, they install into the same place
 # The BASH_PATH check no longer works, so always chsh
-config_add_shell "$(command -v "$DESIRED_SHELL")"
-if ! $NO_CHSH; then
-	log_verbose "Change default shell to $DESIRED_SHELL"
-	config_change_default_shell "$(command -v "$DESIRED_SHELL")"
-fi
+# now done by pre-install.sh
+#config_add_shell "$(command -v "$DESIRED_SHELL")"
+#if ! $NO_CHSH; then
+	#log_verbose "Change default shell to $DESIRED_SHELL"
+	#config_change_default_shell "$(command -v "$DESIRED_SHELL")"
+#fi
 
 log_verbose Enable ssh so you can get into this machine
 if ! sudo launchctl list | grep -q sshd; then

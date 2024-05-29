@@ -100,11 +100,12 @@ log_verbose need to fix gnu-sed first because it is required by the lib-config.s
 
 # log_verbose installing gnu package needing --with-default-names
 # package_install --with-default-names findutils gnu-indent gnu-sed gnu-tar gnu-which grep
-if in_os mac; then
-	package_install --with-gettext wdiff
-else
+# --wight-gettext deprecated
+#if in_os mac; then
+	#package_install --with-gettext wdiff
+#else
 	package_install wdiff
-fi
+#fi
 
 package_install bash guile gpatch m4 make nano
 if ! mac_is_arm; then

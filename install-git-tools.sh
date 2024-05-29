@@ -103,7 +103,6 @@ for FLAG in "${!VAR[@]}"; do
 		git config --global "$FLAG" "${VAR[$FLAG]}"
 	fi
 done
-exit
 
 log_verbose "in the newest version of git specify fast forward only so you do not get accidental merges"
 if [[ ! $(git config --global pull.ff) =~ only ]]; then
