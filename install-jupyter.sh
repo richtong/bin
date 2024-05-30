@@ -60,8 +60,9 @@ fi
 
 brew_install jupyterlab
 # ipython is installed but needs to be linked
-log_verbose "brew keg link jupyterlab and ipython"
-brew link ipython jupyterlab
+# key link no longer needed
+#log_verbose "brew keg link jupyterlab and ipython"
+#brew link ipython jupyterlab
 log_verbose "Installing into the bare environment use pipenv, conda or venv normally"
 hash -r
 
