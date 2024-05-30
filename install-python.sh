@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-	nptyping
+nptyping
 ## vi: se noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
@@ -93,10 +93,10 @@ PACKAGE+=(
 	python-argcomplete
 	black
 	bandit
-        flake8
-        mkdocs
-        mypy
-        pyyaml
+	flake8
+	mkdocs
+	mypy
+	pyyaml
 	ruff
 	tox
 )
@@ -166,7 +166,6 @@ for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	package_install "python$version"
 done
 
-
 # Only install pip packages if not in homebrew as
 # raw pip in homebrew does not allow it
 
@@ -205,13 +204,13 @@ fi
 if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
 	# this is no longer needed
 	# if in_os mac; then
-		# https://stackoverflow.com/questions/12744031/how-to-change-values-of-bash-array-elements-without-loop
+	# https://stackoverflow.com/questions/12744031/how-to-change-values-of-bash-array-elements-without-loop
 	#	log_verbose "In MacOS, use brew not raw pip install into system, use  brew install ${@/#/python-}"
-		# note # means ^ and % means $ because these are already special to bash
-#		brew_install "${PYTHON_PACKAGE[@]/#/python-}"
+	# note # means ^ and % means $ because these are already special to bash
+	#		brew_install "${PYTHON_PACKAGE[@]/#/python-}"
 	#else
-		log_verbose "installing python packages ${PYTHON_PACKAGE[*]} in the base system and upgrade dependencies"
-		pip_install --upgrade "${PYTHON_PACKAGE[@]}"
+	log_verbose "installing python packages ${PYTHON_PACKAGE[*]} in the base system and upgrade dependencies"
+	pip_install --upgrade "${PYTHON_PACKAGE[@]}"
 	# fi
 fi
 

@@ -63,9 +63,9 @@ PACKAGE+=(
 
 # this is no longer accepted with go, not sure why it is needed anymore
 #if in_os mac; then
-	#OPTION+=(
-		#--cross-compile-common
-	#)
+#OPTION+=(
+#--cross-compile-common
+#)
 #fi
 
 log_verbose "go installation"

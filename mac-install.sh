@@ -328,8 +328,8 @@ fi
 # now done by pre-install.sh
 #config_add_shell "$(command -v "$DESIRED_SHELL")"
 #if ! $NO_CHSH; then
-	#log_verbose "Change default shell to $DESIRED_SHELL"
-	#config_change_default_shell "$(command -v "$DESIRED_SHELL")"
+#log_verbose "Change default shell to $DESIRED_SHELL"
+#config_change_default_shell "$(command -v "$DESIRED_SHELL")"
 #fi
 
 log_verbose Enable ssh so you can get into this machine

@@ -102,9 +102,9 @@ log_verbose need to fix gnu-sed first because it is required by the lib-config.s
 # package_install --with-default-names findutils gnu-indent gnu-sed gnu-tar gnu-which grep
 # --wight-gettext deprecated
 #if in_os mac; then
-	#package_install --with-gettext wdiff
+#package_install --with-gettext wdiff
 #else
-	package_install wdiff
+package_install wdiff
 #fi
 
 package_install bash guile gpatch m4 make nano
