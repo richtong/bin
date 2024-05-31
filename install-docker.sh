@@ -317,9 +317,13 @@ else
 	fi
 fi
 
-# if there is buildx set it
+# if there is buildx set it make sure logs do not get truncated
+# https://github.com/docker/buildx/issues/484
 if docker buildx &>/dev/null && ! docker buildx ls | grep -q docker-buildx; then
 	log_verbose "Find and create dedicated docker buildx with large log size"
-	docker buildx create --name docker-buildx --use --driver-opt \
-		env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-10000000}"
+	docker buildx create --name docker-buildx --use \
+		--driver-opt \
+		env.BUILDKIT_STEP_LOG_MAX_SIZE="${BUILDKIT_STEP_LOG_MAX_SIZE:-1}" \
+		--driver-opt \
+		env.BUILDKIT_STEP_LOG_MAX_SPEED="${BUILDKIT_STEP_LOG_MAX_SPEED:-1}"
 fi
