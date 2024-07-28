@@ -70,7 +70,7 @@ fi
 if in_os mac; then
 
 	# shellcheck disable=SC2068
-	package_install ${FLAG[@]} obs obs-ndi
+	package_install ${FLAG[@]} obs obs-ndi obs-backgroundremoval
 
 	NDI="${NDI:-https://go.ndi.tv/tools-for-mac}"
 	log_verbose "open $NDI"

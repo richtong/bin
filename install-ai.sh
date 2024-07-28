@@ -46,33 +46,43 @@ while getopts "hdvr:e:s:" opt; do
 done
 shift $((OPTIND - 1))
 # shellcheck disable=SC1091
+# l
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
 
-# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
 # lm-studio -  run different LLMs from Hugging Face locally
-# fig - command completion and dotfile manager (still trying it obsolete)
+# ollama - ollama local runner
+# ollamac - ollama graphical interface
 # diffusionbee - Stability diffusion on Mac
-# shell-gpt - Runs chats from cli including running shell commands
-# vincelwt-chatgpt - ChatGPT in menubar (not using)
-# macgpt - ChatGPT in menubar
-# gpt4all - lm-studio local runner (lm-studio now does this)
+#
+# Need to try more:
+# mochi-diffusion - Stability diffusion on Mac (hanvent' used
+# jan - yet another ollama close
 # open-interpreter - local llm can run local code
+#
+# vincelwt-chatgpt - ChatGPT in menubar (not using)
+# macgpt - ChatGPT in menubar (pretty useless, deprecated)
+# shell-gpt - cli including running shell commands (never use deprecated)
+# gpt4all - lm-studio local runner (lm-studio now does this as well nicer us)
+# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
+# fig - command completion and dotfile manager (bought by Amazon and closed)
+#
 if in_os mac; then
 	PACKAGE+=(
 
-		diffusionbee
-		mochi-diffusion
-		macgpt
-		lm-studio
 		appflowy
+		diffusionbee
+		jan
+		lm-studio
+		mochi-diffusion
+		ollama
+		ollamac
 
 	)
 
 	PIP_PACKAGE+=(
 
-		shell-gpt
 		open-interpreter
 
 	)
