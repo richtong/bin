@@ -128,12 +128,20 @@ PACKAGE+=(
 log_verbose "Install ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
 
-# https://developer.1password.com/docs/cli/shell-plugins/github/
 log_verbose "Enable command line integrations to store credentials in 1Password"
 
+# https://developer.1password.com/docs/cli/get-started/#step-2-turn-on-the-1password-desktop-app-integration
+log_warning "In 1Password App go to Settings > Developers"
+log_warning "And enable Use the SSH Agents, Integrate with 1Password CLI"
+log_warning "and Check for devleoper credentials on disk"
+log_warning "Enable Settings > Browser > Get 1Password for your Browser"
+if in_os mac; then
+	open -a "1Password.app"
+fi
+
+# https://developer.1password.com/docs/cli/shell-plugins/github/
 # you only need brew if you are hitting the github api rate limit when
-# searching
-# brew
+# searching brew
 PLUGIN+=(
 	aws
 	doctl
@@ -154,8 +162,26 @@ if $PUSHED && ! popd >/dev/null; then
 	log_warning "Could not return to execution directory $WORKING_DIR"
 fi
 
+log_verbose "Add bash and zsh completions"
 if ! config_mark "$(config_profile_nonexportable)"; then
 	config_add "$(config_profile_nonexportable)" <<-EOF
+		source <(op completion bash)e
 		if [[ -e $HOME/.config/op/plugins.sh ]]; then . "$HOME/.config/op/plugins.sh"; fi
 	EOF
 fi
+
+# assuming oh-my-zsh is installed
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+		if [[ -e $HOME/.config/op/plugins.sh ]]; then . "$HOME/.config/op/plugins.sh"; fi
+	EOF
+	if ! grep -q "$(config_profile_nonexportable_zsh)" 1password; then
+		config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+			plugins+=(1password)
+		EOF
+	fi
+fi
+
+# https://developer.1password.com/docs/cli/get-started/#step-2-turn-on-the-1password-desktop-app-integration
+log_verbose "Force 1Password login"
+op vault list
