@@ -18,13 +18,15 @@ while getopts "hdvk" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
+			            Installs ssh keys and AWS credentials into .ssh
+			            Note this is deprecated you should use 1Password ssh key storage
+			            and AWS SSO to pull keys instead.
 
-			Install ssh config in .ssh/config
-			usage: $SCRIPTNAME [flags]
-			flags: -h help
-				   -d $(! $DEBUGGING || echo "no ")debugging
-				   -v $(! $VERBOSE || echo "not ")verbose
-				   -k do $(! $USE_KEYCHAIN || echo "not ")use keychain, use key-ring
+						usage: $SCRIPTNAME [flags]
+						flags: -h help
+							   -d $(! $DEBUGGING || echo "no ")debugging
+							   -v $(! $VERBOSE || echo "not ")verbose
+							   -k do $(! $USE_KEYCHAIN || echo "not ")use keychain, use key-ring
 
 		EOF
 		exit

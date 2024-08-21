@@ -11,6 +11,8 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 OPTIND=1
 DOWNLOAD="${DOWNLOAD:-false}"
 APT_INSTALL=${APT_INSTALL:-false}
+VERBOSE="${VERBOSE:-false}"
+DEBUGGING="${DEBUGGING:-false}"
 while getopts "hdvbf" opt; do
 	case "$opt" in
 	h)

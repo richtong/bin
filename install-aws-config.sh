@@ -14,6 +14,7 @@ OPTIND=1
 FLAGS="${FLAGS:-""}"
 FORCE=${FORCE:-false}
 VERBOSE=${VERBOSE:-false}
+
 AWS_KEY_DIR="${AWS_KEY_DIR:-"$HOME/.ssh/"}"
 AWS_KEY_ID_FILE="${AWS_KEY_ID:-"aws-access-key-id"}"
 AWS_KEY_FILE="${AWS_KEY:-"aws-access-key"}"
@@ -22,24 +23,26 @@ AWS_OUTPUT_TYPE="${AWS_OUTPUT_TYPE:-"json"}"
 AWS_ACCESS_TYPE="${AWS_ACCESS_TYPE:-"sso"}"
 AWS_PROFILE="${AWS_PROFILE:-"default"}"
 AWS_ORG_NAME="${AWS_ORG_NAME:-"tne"}"
-AWS_SSO_ENDPOINT_URL="${AWS_SSO_ENDPOINT_URL:-"https://nedra.awsapps.com/startamazonaws.com"}"
-AWS_SSO_REGION="${AWS_SSO_REGION:-"us-east-1"}"
 
-while getopts "hdvi:k:fp:r:o:a:t" opt; do
+AWS_SSO_REGION="${AWS_SSO_REGION:-"us-east-1"}"
+AWS_SSO_ENDPOINT_URL="${AWS_SSO_ENDPOINT_URL:-"https://nedra.awsapps.com/start"}"
+
+while getopts "hdvi:k:fp:r:o:a:t:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Install the aws configuration parameters
+
 			        usage: $SCRIPTNAME [flags]
-			            -d : debug -h : help
-			                        -t type of key storage: 1password | sso | veracrypt (default: $AWS_ACCESS_TYPE)
-			            -a if SET_AWS_ID and SET_AWS_KEY are not set look in this directory for files (default: $AWS_KEY_DIR)
-			            -i the name of the access key identifier (default: $AWS_KEY_ID_FILE.$AWS_PROFILE)
-			            -k the name of the access key (default: $AWS_KEY_FILE.$AWS_PROFILE))
-			            -f force the installation of credentials and config (default: $FORCE)
-			            -p set for a specific profile (default: $AWS_PROFILE)
-			            -r aws region for services (default: $AWS_REGION)
-			            -o aws output type (default: $AWS_OUTPUT_TYPE)
+			                -d : debug -h : help
+			                -t type of key storage: 1password | sso | veracrypt (default: $AWS_ACCESS_TYPE)
+			                -a if SET_AWS_ID and SET_AWS_KEY are not set look in this directory for files (default: $AWS_KEY_DIR)
+			                -i the name of the access key identifier (default: $AWS_KEY_ID_FILE.$AWS_PROFILE)
+			                -k the name of the access key (default: $AWS_KEY_FILE.$AWS_PROFILE))
+			                -f force the installation of credentials and config (default: $FORCE)
+			                -p set for a specific profile (default: $AWS_PROFILE)
+			                -r aws region for services (default: $AWS_REGION)
+			                -o aws output type (default: $AWS_OUTPUT_TYPE)
 		EOF
 
 		exit 0
@@ -88,7 +91,7 @@ while getopts "hdvi:k:fp:r:o:a:t" opt; do
 done
 # shellcheck disable=SC1091
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-config.sh
+source_lib lib-config.sh lib-util.sh
 
 if ! command -v aws >/dev/null; then
 	"$SCRIPT_DIR/install-aws.sh"
@@ -103,7 +106,7 @@ fi
 
 # https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
 # can now use the aws configure command instead
-log_verbose setting region to us-west2 and output to json
+log_verbose "setting region to $AWS_REGION and output to $AWS_OUTPUT_TYPE"
 aws configure set region "$AWS_REGION" --profile "$AWS_PROFILE"
 aws configure set output "$AWS_OUTPUT_TYPE" --profile "$AWS_PROFILE"
 
@@ -128,41 +131,37 @@ if [[ $AWS_ACCESS_TYPE =~ "1password" ]]; then
 		open -a Safari "https://console.aws.amazon.com/iam/home?region=$AWS_REGION#/security_credentials"
 		op signin
 		op plugin init aws
-
-	elif
-		[[ $AWS_ACCESS_TYPE =~ "veracrypt" ]]
-	then
-		log_warning "Do not backup ~/.aws/credentials into git"
-		log_warning "you can use a soft link to a Veracrypt file"
-		log_verbose set AWS_KEY from the directory if it does not exist
-		AWS_KEY_ID="${AWS_KEY_ID:-"$(cat "$AWS_KEY_DIR/$AWS_KEY_ID_FILE.$AWS_PROFILE")"}"
-		AWS_KEY="${AWS_KEY:-"$(cat "$AWS_KEY_DIR/$AWS_KEY_FILE.$AWS_PROFILE")"}"
-		if [[ -n $AWS_KEY_ID ]]; then
-			log_verbose "setting aws_access_key_id to $AWS_KEY_ID for profile $AWS_PROFILE"
-			aws configure set aws_access_key_id "$AWS_KEY_ID" --profile "$AWS_PROFILE"
-		fi
-		if [[ -n $AWS_KEY ]]; then
-			log_verbose "setting aws_secret_access_key to $AWS_KEY for profile $AWS_PROFILE"
-			aws configure set aws_access_key_id "$AWS_KEY" --profile "$AWS_PROFILE"
-		fi
-		log_verbose "if the above fails then get input interactively"
-		if [[ ! -e $HOME/.aws/config || ! -e $HOME/.aws/credentials ]]; then
-			log_warning you will now enter your AWS credentials
-			log_warning "You need to create them at the AWS console then enter the secrets here"
-			aws configure
-		fi
-
-	else
-
-		# https://awscli.amazonaws.com/v2/documentation/api/latest/reference/configure/sso.html
-		log_verbose" Using Amazon sso for keys which are temporary and default"
-		aws configure sso --profile "$AWS_PROFILE" \
-			--sso-start-url "$AWS_SSO_START_URL" \
-			--region "$AWS_SSO_REGION" \
-			--endpoint-url "$AWS_SSO_ENDPOINT_URL"
-
 	fi
 
+elif [[ $AWS_ACCESS_TYPE =~ "sso" ]]; then
+	# https://awscli.amazonaws.com/v2/documentation/api/latest/reference/configure/sso.html
+	log_verbose "Using Amazon sso for keys which are temporary and default"
+	log_warning "Session name can be anything you like start URL is $AWS_SSO_ENDPOINT_URL"
+	log_warning "Must set region to $AWS_SSO_REGION and cli region to $AWS_REGION"
+	aws configure sso --profile "$AWS_PROFILE" \
+		--endpoint-url "$AWS_SSO_ENDPOINT_URL" \
+		--region "$AWS_SSO_REGION"
+
+elif [[ $AWS_ACCESS_TYPE =~ "veracrypt" ]]; then
+	log_warning "Do not backup ~/.aws/credentials into git"
+	log_warning "you can use a soft link to a Veracrypt file"
+	log_verbose set AWS_KEY from the directory if it does not exist
+	AWS_KEY_ID="${AWS_KEY_ID:-"$(cat "$AWS_KEY_DIR/$AWS_KEY_ID_FILE.$AWS_PROFILE")"}"
+	AWS_KEY="${AWS_KEY:-"$(cat "$AWS_KEY_DIR/$AWS_KEY_FILE.$AWS_PROFILE")"}"
+	if [[ -n $AWS_KEY_ID ]]; then
+		log_verbose "setting aws_access_key_id to $AWS_KEY_ID for profile $AWS_PROFILE"
+		aws configure set aws_access_key_id "$AWS_KEY_ID" --profile "$AWS_PROFILE"
+	fi
+	if [[ -n $AWS_KEY ]]; then
+		log_verbose "setting aws_secret_access_key to $AWS_KEY for profile $AWS_PROFILE"
+		aws configure set aws_access_key_id "$AWS_KEY" --profile "$AWS_PROFILE"
+	fi
+	log_verbose "if the above fails then get input interactively"
+	if [[ ! -e $HOME/.aws/config || ! -e $HOME/.aws/credentials ]]; then
+		log_warning you will now enter your AWS credentials
+		log_warning "You need to create them at the AWS console then enter the secrets here"
+		aws configure
+	fi
 	# obsolete, the new aws configure does all this work
 	# if ! config_mark "$HOME/.aws/credentials" || $FORCE
 	# then
@@ -173,10 +172,11 @@ if [[ $AWS_ACCESS_TYPE =~ "1password" ]]; then
 	# aws_secret_access_key = $(cat "$AWS_FILES/aws-access-key")
 	# EOF
 	# fi
-
 	log_verbose 600 is needed so credentials/restore-keys.py works
 	chmod 600 "$HOME/.aws/config" "$HOME/.aws/credentials"
 
+else
+	log_warning "unknown access type: $AWS_ACCESS_TYPE"
 fi
 
 # Sam's way of doing this same configuration using a deployment key kept in AWS
