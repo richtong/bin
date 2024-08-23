@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-nptyping
 ## vi: se noet ts=4 sw=4:
 ## The above gets the latest bash on Mac or Ubuntu
 ##
@@ -21,6 +20,7 @@ DEBUGGING="${DEBUGGING:-false}"
 ANACONDA="${ANACONDA:-true}"
 PIPENV="${PIPENV:-false}"
 POETRY="${POETRY:-true}"
+
 # If version is set to null then the default python version is used
 PYTHON_VERSION="${PYTHON_VERSION-}"
 NEW_PYTHON="${NEW_PYTHON:-@3.12}"
@@ -33,7 +33,17 @@ while getopts "hdvaeoyp:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Install python components
+			Install python and related commands and pip packages
+
+			Also installs other virtual environments optionally. By default will install packages into
+			the current python environment.
+
+			If you are using asdf this will be into the execution, then depending on where the script is running
+			it will install the specific shared shim.
+
+			Note that if you install Anaconda, then that python version will mask the Homebrew version
+			even if conda is not activated. So you need to manage the conda version at all times.
+
 			usage: $SCRIPTNAME [flags...]
 			  -h help
 			  -d $(! $DEBUGGING || echo "no ")debugging
@@ -89,11 +99,12 @@ shift $((OPTIND - 1))
 # pyyaml - python yaml parser
 # favor the brew packages vs pip
 # autocomplete will not install in brew so must be in an environment remove it as not used much
+# flake8 and black are replaced by ruff
+#black
+#flake8
 PACKAGE+=(
 	python-argcomplete
-	black
 	bandit
-	flake8
 	mkdocs
 	mypy
 	pyyaml
@@ -177,28 +188,44 @@ done
 # ruff - replaces flake8, black, isort, pydoctstyle, pyupgrade and is very fast
 # tox - python test runner for different versions of python
 # mkdocs - documents made easy
+# pydantic - data validation and type checking integrates with mypy
 # pymdown-extensions - Markdown helpers
 # autoimport - add and remove imports
 # fontaweseom-markdown - emojis
 # mkdocs-material - Add material design to documentation
 # nptyping - types fo rnumpy
 
-if ! command -v brew; then
-	log_verbose "no homebrew so can install these packages"
-	PYTHON_PACKAGE+=(
+# install into user's python default installation
+# these are onlyi available only as pip packages, we favor homebrew
+#if ! command -v brew; then
+#log_verbose "no homebrew so can install these packages"
+PYTHON_PACKAGE+=(
 
-		autocomplete
-		fontawesome-markdown
-		mkdocs-material
-		nptyping
-		pdoc3
-		pymdown-extensions
-		pytest
-		pytest-cov
-		pytest-timeout
-		pytest-xdist
+	autocomplete
+	fontawesome-markdown
+	mkdocs-material
+	nptyping
+	pdoc3
+	pydantic
+	pymdown-extensions
+	pytest
+	pytest-cov
+	pytest-timeout
+	pytest-xdist
 
-	)
+)
+#fi
+
+if [[ $(command -v python) =~ "conda" ]]; then
+	log_warning "Anaconda is installed so pip packages will go into conda environment"
+	log_warning "And not into the system base environment, usually homebrew"
+	log_warning "you must comment out the conda activation lines in .bash_profile and .zshrc"
+	log_warning "to change the system or homebrew python environments"
+elif [[ $(command -v python) =~ "asdf" ]]; then
+	log_warning "Running in an asdf environment for the script directory"
+	log_warning "pip packages will go into the asdf python environment"
+	log_warning "to install the in the system or homebrew python environment you"
+	log_warning "should installation outside of an asdf environment where an .tool-versions file exists"
 fi
 
 if [[ -n ${PYTHON_PACKAGE[*]} ]]; then

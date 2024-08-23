@@ -128,33 +128,9 @@ repos:
   # This means exclude directories ./typescript
   # exclude: "typescript|golang"
 
-  # https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/
-  # https://github.com/pre-commit/mirrors-mypy
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v0.991'
-    hooks:
-      - id: mypy
-  - repo: https://github.com/pycqa/flake8
-    rev: 5.0.4
-    hooks:
-      - id: flake8
-  # pydocstyle deprecated use ruff
-  # - repo: https://github.com/pycqa/pydocstyle
-  #   rev: 6.1.1
-  #   hooks:
-  #     - id: pydocstyle
-  #       exclude: thefuck/settings\.py$
-
-  # long term replace black, flake8
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
-    rev: v0.4.4
-    hooks:
-      # Run the linter.
-      - id: ruff
-        args: [ --fix ]
-      # Run the formatter.
-      - id: ruff-format
+  # https://dev.to/devasservice/a-modern-python-toolkit-pydantic-ruff-mypy-and-uv-4b2f
+  # https://docs.astral.sh/ruff/formatter/black/
+  # replacing pydocstyle, flake8, black with ruff, still need mypy, adding pydantic and may use uv
 
   # puts the isort.cfg at the root we do not want that
   # https://pypi.org/project/seed-isort-config/
@@ -170,27 +146,56 @@ repos:
   #   hooks:
   #     - id: isort
   #       args: [--profile=black, -w 79]
+  #
   # https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/
-  # switch to released black
+  # switch to released black and ruff replaces it
   # #rev: 20.8b1
+  #- repo: https://github.com/psf/black
+    #rev: 23.3.0
+    #hooks:
+      #- id: black
+        #language_version: python3.11
+        #args: [-l 79]
+  #- repo: https://github.com/pycqa/flake8
+    #rev: 5.0.4
+    #hooks:
+      #- id: flake8
+  # pydocstyle deprecated use ruff
+  # - repo: https://github.com/pycqa/pydocstyle
+  #   rev: 6.1.1
+  #   hooks:
+  #     - id: pydocstyle
+  #       exclude: thefuck/settings\.py$
 
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
+  # https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/
+  # https://github.com/pre-commit/mirrors-mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v0.991'
     hooks:
-      - id: black
-        language_version: python3.11
-        args: [-l 79]
+      - id: mypy
+
+  # black, flake8, and pydocstyle
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.6.2
+    hooks:
+      # Run the linter.
+      - id: ruff
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
 
   # https://jupytext.readthedocs.io/en/latest/using-pre-commit.html
   # sync all notebooks with their corresponding markdown files
-  # use black to format the python code
+  # use ruff to format the python code and the version must match
   - repo: https://github.com/mwouts/jupytext
     rev: v1.14.7
     hooks:
       - id: jupytext
-        args: [--sync, --pipe, black]
+        args: [--sync, --pipe, ruff]
         additional_dependencies:
-          - black==23.3.0
+          - ruff==0.6.2
+          #- black==23.3.0
 
   # strips everything out so use pre-commit-jupyter instead
   # - repo: https://github.com/kynan/nbstripout
@@ -198,7 +203,7 @@ repos:
   #  hooks:
   #    - id: nbstripout
 
-  # https://github.com/roy-ht/pre-commit-jupyter
+  # https://github.com/roy-ht/pre-commit-jupyte
   - repo: https://github.com/aflc/pre-commit-jupyter
     rev: v1.2.1
     hooks:
@@ -209,12 +214,6 @@ repos:
           - "[pin];[donotremove]"
         files: \.ipynb$
         types: ["file"]
-
-  # strips everything out so use pre-commit-jupyter instead
-  # - repo: https://github.com/kynan/nbstripout
-  #   rev: 0.4.0
-  #   hooks:
-  #     - id: nbstripout
 
   # lint Dockerfiles with hadolint
   - repo: https://github.com/hadolint/hadolint
