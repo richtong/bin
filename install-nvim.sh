@@ -64,7 +64,7 @@ all environments"
 log_warning "if you get python3 not found error in neovim the pip install
 neovim"
 # pynvim for deoplete is a dependency of neovim so just need one installations
-pip_install neovim
+pip_install neovim ruff-lsp
 
 log_verbose "install IDE tools done by install.sh"
 #"$SCRIPT_DIR/install-lint.sh"

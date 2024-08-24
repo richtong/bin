@@ -193,6 +193,7 @@ done
 # autoimport - add and remove imports
 # fontaweseom-markdown - emojis
 # mkdocs-material - Add material design to documentation
+# mkdocstrings - Add docstrings from python code into mkdocs
 # nptyping - types fo rnumpy
 
 # install into user's python default installation
@@ -203,6 +204,7 @@ PYTHON_PACKAGE+=(
 
 	autocomplete
 	fontawesome-markdown
+	mkdocstrings
 	mkdocs-material
 	nptyping
 	pdoc3
