@@ -99,7 +99,8 @@ shift $((OPTIND - 1))
 # pyyaml - python yaml parser
 # favor the brew packages vs pip
 # autocomplete will not install in brew so must be in an environment remove it as not used much
-# flake8 and black are replaced by ruff
+# flake8 and black are replaced by ruff and ruff also does markdownlint so move
+# to install-lint
 #black
 #flake8
 PACKAGE+=(
@@ -108,7 +109,6 @@ PACKAGE+=(
 	mkdocs
 	mypy
 	pyyaml
-	ruff
 	tox
 )
 
@@ -182,10 +182,8 @@ done
 
 # argparse complete
 # bandit - check for security problems
-# black - a very strick python formatter
-# pdoc3 - python documentation extraction from comments
+# black - a very strick python formatter (repalced by ruff)
 # pytest - python test runner
-# ruff - replaces flake8, black, isort, pydoctstyle, pyupgrade and is very fast
 # tox - python test runner for different versions of python
 # mkdocs - documents made easy
 # pydantic - data validation and type checking integrates with mypy
@@ -194,6 +192,7 @@ done
 # fontaweseom-markdown - emojis
 # mkdocs-material - Add material design to documentation
 # mkdocstrings - Add docstrings from python code into mkdocs
+# pdoc3 - python documentation extraction from comments
 # nptyping - types fo rnumpy
 
 # install into user's python default installation

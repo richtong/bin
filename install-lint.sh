@@ -67,11 +67,15 @@ NODE_PACKAGES+=(
 log_verbose "install ${NODE_PACKAGES[*]}"
 npm_install -g "${NODE_PACKAGES[@]}"
 
+# ruff - replaces flake8, black, isort, pydoctstyle, pyupgrade and is very fast
+# mdformat-ruff - ruff formatter that is like markdownlint
 PYTHON_PACKAGES+=(
 	jedi
 	vim-vint
 	beautysh
 	yamlfix
+	ruff
+	mdformat-ruff
 )
 log_verbose "install ${PYTHON_PACKAGES[*]}"
 pip_install "${PYTHON_PACKAGES[@]}"

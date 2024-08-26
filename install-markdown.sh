@@ -49,11 +49,17 @@ done
 shift $((OPTIND - 1))
 # shellcheck source=./include.sh
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-
 source_lib lib-install.sh lib-util.sh
 
+# doctoc - https://github.com/thlorenz/doctoc summarize all markdown files and
+# creates a table of contents which is useful for standalone README.md
+# but use mkdocs for bigger README is recommented
+log_verbose "Note: install-lint.sh installed mdformat-ruff and can use as mdformat"
 log_verbose "installing doctoc and the api for markdownlint"
-NPM+=(doctoc markdownlint-cli2)
+NPM+=(
+	doctoc
+	markdownlint-cli2
+)
 
 # We want to allow splitting by white space for packages
 #shellcheck disable=SC2086
