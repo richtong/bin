@@ -17,8 +17,12 @@ trap 'exit $?' ERR
 OPTIND=1
 JAVA_VERSION="${JAVA_VERSION:-8}"
 ASDF_JAVA="${ASDF_JAVA:-openjdk}"
-HOMEBREW_JAVA="${HOMEBREW_JAVA:-adoptopenjdk}"
-TAP="${TAP:-"adoptopenjdk/openjdk"}"
+# adoptopenjdk deprecated move to temurin
+# https://github.com/AdoptOpenJDK/homebrew-openjdk
+# HOMEBREW_JAVA="${HOMEBREW_JAVA:-adoptopenjdk}"
+# TAP="${TAP:-"adoptopenjdk/openjdk"}"
+HOMEBREW_JAVA="${HOMEBREW_JAVA:-temurin@}"
+
 JENV="${JENV:-false}"
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvr:j" opt; do
@@ -36,12 +40,15 @@ while getopts "hdvr:j" opt; do
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	j)
 		JENV=true
@@ -94,8 +101,9 @@ log_verbose "as of June 2019 can no longer install from Oracle"
 #log_verbose and there is a conflict version 8 in homebrew
 #log_verbose conflicts with the same version in adoptopenjdk
 ##if [[ $HOMEBREW_JAVA != 8 ]]; then
-log_verbose "tapping $TAP"
-tap_install "$TAP"
+if [[ -v TAP ]]; then
+	tap_install "$TAP"
+fi
 #if brew tap | grep -q "$TAP"; then
 #    log_verbose "version 8 is is duplicated in $TAP so remove"
 #    brew untap "$TAP"

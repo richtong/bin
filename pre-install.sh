@@ -15,6 +15,8 @@ OPTIND=1
 REPO_ORG="${REPO_ORG:-"richtong"}"
 WS_DIR="${WS_DIR:-"$HOME/ws"}"
 VERACRYPT="${VERACRYPT:-false}"
+VERBOSE="${VERBOSE:-false}"
+DEBUGGING="${DEBUGGING:-false}"
 
 while getopts "hdvg:c" opt; do
 	case "$opt" in
