@@ -3,42 +3,51 @@
 ## The above gets the latest bash on Mac or Ubuntu
 ##
 ## bootstrap to install.sh copy this down and you will have enough to get the
-## src repo
+## src repo note this must run on factory version of bash in MasOS so no bash 4.x isms
 ##
 ##@author Rich Tong
 ##@returns 0 on success
 #
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+OPTIND=1
 
 REPO_ORG="${REPO_ORG:-"richtong"}"
 WS_DIR="${WS_DIR:-"$HOME/ws"}"
-OPTIND=1
-while getopts "hdvg:" opt; do
+VERACRYPT="${VERACRYPT:-false}"
+
+while getopts "hdvg:c" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
 $SCRIPTNAME: Prebuild before install.sh can run requires no other files
-	It installs assuming Bash 3.x and add 1Password and a shared Drive
-	This looks for the veracrypt volume with the the keys
+	It installs assuming Bash 3.x and add 1Password
 	Then links to the key one and copies in a temporary ssh config
 
 flags: -h help
 		-d debugging (default: $DEBUGGING)
 		-v verbose (default: $VERBOSE)
-		-g Github repo organization (default: $REPO_ORG)
+		-g Github Organization (default: $REPO_ORG)
+		-c Veracrypt install (deprecated) (default: $VERACRYPT)
 EOF
 
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	g)
 		export REPO_ORG="$OPTARG"
+		;;
+	c)
+		VERACRYPT="$($VERACRYPT && echo false || echo true)"
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -138,10 +147,13 @@ echo "$SCRIPTNAME: make sure we can see brew and coreutils on reboot"
 # fail the next command if no 1Password.app
 if [[ $OSTYPE =~ darwin ]]; then
 	echo "$SCRIPTNAME: Use 1password for all credentials enable developer settings"
-	# veracrypt and google drive deprecated
-	# echo "$SCRIPTNAME: force install 1password, google drive and veracrypt"
-	# for package in 1password google-drive veracrypt; do
 	PACKAGES="1password"
+
+	if $VERACRYPT; then
+		echo "$SCRIPTNAME: veracrypt and backing google drive installed"
+		PACKAGES+=" veracrypt google-drive"
+	fi
+
 	# shellcheck disable=SC2086
 	for package in $PACKAGES; do
 		if ! brew list "$package" &>/dev/null; then
@@ -185,15 +197,17 @@ elif ! command -v 1password >/dev/null; then
 		fi
 	fi
 
-	echo "$SCRIPTNAME: install veracrypt"
-	if ! command -v veracrypt >/dev/null && ! command -v snap >/dev/null && ! snap install veracrypt &>/dev/null; then
-		# https://linuxhint.com/install-use-veracrypt-ubuntu-22-04/
-		sudo add-apt-repository -y ppa:unit193/encryption
-		sudo apt-get update -y && sudo apt-get install -y veracrypt
-	fi
-
 	# https://linuxhint.com/google_drive_installation_ubuntu/
 	echo "On Ubuntu go to Settings > Online Accounts > Google and sign on"
+
+	if $VERACRYPT; then
+		echo "$SCRIPTNAME: install veracrypt"
+		if ! command -v veracrypt >/dev/null && ! command -v snap >/dev/null && ! snap install veracrypt &>/dev/null; then
+			# https://linuxhint.com/install-use-veracrypt-ubuntu-22-04/
+			sudo add-apt-repository -y ppa:unit193/encryption
+			sudo apt-get update -y && sudo apt-get install -y veracrypt
+		fi
+	fi
 fi
 
 if ! mkdir -p "$WS_DIR/git"; then
