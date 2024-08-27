@@ -106,7 +106,6 @@ shift $((OPTIND - 1))
 PACKAGE+=(
 	python-argcomplete
 	bandit
-	mkdocs
 	mypy
 	pyyaml
 	tox
@@ -185,14 +184,10 @@ done
 # black - a very strick python formatter (repalced by ruff)
 # pytest - python test runner
 # tox - python test runner for different versions of python
-# mkdocs - documents made easy
 # pydantic - data validation and type checking integrates with mypy
 # pymdown-extensions - Markdown helpers
 # autoimport - add and remove imports
-# fontaweseom-markdown - emojis
-# mkdocs-material - Add material design to documentation
-# mkdocstrings - Add docstrings from python code into mkdocs
-# pdoc3 - python documentation extraction from comments
+# pdoc3 - python documentation extraction from comments (deprecated use ruff)
 # nptyping - types fo rnumpy
 
 # install into user's python default installation
@@ -202,11 +197,7 @@ done
 PYTHON_PACKAGE+=(
 
 	autocomplete
-	fontawesome-markdown
-	mkdocstrings
-	mkdocs-material
 	nptyping
-	pdoc3
 	pydantic
 	pymdown-extensions
 	pytest

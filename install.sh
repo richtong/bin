@@ -233,6 +233,12 @@ log_verbose "Adding .ssh key passphrases to keychain or keyring"
 log_verbose "installing python"
 "$SCRIPT_DIR/install-python.sh"
 
+log_verbose "Install markdown and mkdocs tools"
+"$BIN_DIR/install-mkdocs.sh"
+# deprecated Sphinx use Markdown
+# "$SCRIPT_DIR/install-sphinx.sh"
+"$SCRIPT_DIR/install-markdown.sh"
+
 # the {-} means replace with null if FORCE_FLAG is not set
 log_verbose "Installing git tools"
 "$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"
@@ -466,10 +472,6 @@ fi
 # fi
 log_verbose "source profiles in case we did not reboot"
 source_profile
-
-# install sphinx for documentation swap to markdown
-# "$SCRIPT_DIR/install-sphinx.sh"
-"$SCRIPT_DIR/install-markdown.sh"
 
 log_verbose "Install organization specific componenets for $ORGANIZATION if any"
 run_if "$SCRIPT_DIR/$ORGANIZATION-install.sh"
