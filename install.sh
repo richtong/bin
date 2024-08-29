@@ -472,6 +472,9 @@ if $DOCKER_LOGIN; then
 
 fi
 
+log_verbose "Installing fonts"
+"$BIN_DIR/install-fonts.sh"
+
 # deprecated now use config_setup to do the same thing
 # if ! "$SCRIPT_DIR/set-profile.sh"; then
 # log_warning
