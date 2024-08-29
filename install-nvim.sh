@@ -112,7 +112,7 @@ mkdir -p "$NVIM_CONFIG"
 # we actually just source .vimrc and expect install-vim.sh to be nvim
 # compatible
 NVIM_INIT="${NVIM_INIT:-"$NVIM_CONFIG/init.vim"}"
-log_verbose "creating $NVIM_INIT"
+log_verbose "creating $NVIM_INIT to point to .vimrc"
 if ! config_mark "$NVIM_INIT" '"'; then
 	log_verbose "creating $NVIM_INIT"
 	config_add "$NVIM_INIT" <<-'EOF'
@@ -126,3 +126,6 @@ if ! config_mark "$NVIM_INIT" '"'; then
 
 	EOF
 fi
+
+log_verbose "Install LunarVim, the full IDE variant"
+LV_BRANCH='release-1.4/neovim-0.9' bash <(curl -s https://raw.githubusercontent.com/LunarVim/LunarVim/release-1.4/neovim-0.9/utils/installer/install.sh)

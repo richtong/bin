@@ -346,6 +346,9 @@ fi
 # mandoc - To get the version with man --path
 # ripgrep - way better grepping
 # sudo - Linux only
+# lua - for lib-config.sh and neovim
+# luarocks - lua package manager
+# stylua - style checker for lua
 
 PACKAGES+=(
 
@@ -355,6 +358,9 @@ PACKAGES+=(
 	font-source-serif-pro
 	fzf
 	golang
+	lua
+	luarocks
+	stylua
 	graphviz
 	mandoc
 	mmv

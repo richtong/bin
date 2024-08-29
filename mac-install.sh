@@ -137,9 +137,6 @@ PACKAGES+=(bfg)
 # For lib-debug.sh gettext is in install-gnu.sh
 # PACKAGES+=" gettext "
 
-# For lib-config.sh
-PACKAGES+=(lua)
-
 # These are gnu utilities so installed by install-gnu.sh
 # Updated basic as Mac OS X does not like GPL 3, need -i for sed
 # PACKAGES+=" grep "

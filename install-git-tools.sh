@@ -140,12 +140,14 @@ fi
 # gitlint - linting git commits
 # should use https://www.conventionalcommits.org/ format
 # feat(install-1password)!: add feature or breaking change vs. fix:
+# lazygit - git character full screen interface
 log_verbose "do not installed hub the completions inferior with git and it is deprecated"
 PACKAGE+=(
 
 	act
 	gh
 	gitlint
+	lazygit
 	nbdime
 	pre-commit
 

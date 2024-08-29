@@ -78,7 +78,6 @@ fi
 log_verbose "Specific packages"
 PACKAGES+=(
 	sudo
-	lua5.2
 	ppa-purge
 	net-tools
 )
