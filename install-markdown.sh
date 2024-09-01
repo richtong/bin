@@ -54,11 +54,11 @@ source_lib lib-install.sh lib-util.sh
 # doctoc - https://github.com/thlorenz/doctoc summarize all markdown files and
 # creates a table of contents which is useful for standalone README.md
 # but use mkdocs for bigger README is recommented
+# markdownling-cli2 now has brew package so use that
 log_verbose "Note: install-lint.sh installed mdformat-ruff and can use as mdformat"
 log_verbose "installing doctoc and the api for markdownlint"
 NPM+=(
 	doctoc
-	markdownlint-cli2
 )
 
 # We want to allow splitting by white space for packages
@@ -70,7 +70,13 @@ npm_install -g "${NPM[@]}"
 log_verbose "Installing markdownlint-cli the nodejs version as markdownlint"
 log_verbose "Use with repo: pointed to https://github.com/igorshubovych/markdownlint-cli"
 log_verbose "Install markdown which is basic markdown processor"
-PACKAGE+=(markdown markdownlint-cli)
+# https://github.com/DavidAnson/markdownlint-cli2/issues/6
+# cli2 is supposed to be faster used by nvim
+PACKAGE+=(
+	markdown
+	markdownlint-cli
+	markdownlint-cli2
+)
 
 package_install "${PACKAGE[@]}"
 
