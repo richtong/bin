@@ -51,20 +51,20 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh
 
+# doctoc replaced by markdown-toc which hides the toc unless needed
 # doctoc - https://github.com/thlorenz/doctoc summarize all markdown files and
 # creates a table of contents which is useful for standalone README.md
 # but use mkdocs for bigger README is recommented
 # markdownling-cli2 now has brew package so use that
-log_verbose "Note: install-lint.sh installed mdformat-ruff and can use as mdformat"
-log_verbose "installing doctoc and the api for markdownlint"
-NPM+=(
-	doctoc
-)
-
+# log_verbose "installing doctoc"
+# doctoc
+# NPM+=(
+# )
 # We want to allow splitting by white space for packages
 #shellcheck disable=SC2086
-log_verbose "Installing markdownlint-cli2 which has a different interface for VSCode"
-npm_install -g "${NPM[@]}"
+# npm_install -g "${NPM[@]}"
+
+log_verbose "Note: install-lint.sh installed mdformat-ruff and can use as mdformat"
 
 # https://github.com/igorshubovych/markdownlint-cli
 log_verbose "Installing markdownlint-cli the nodejs version as markdownlint"
@@ -72,17 +72,23 @@ log_verbose "Use with repo: pointed to https://github.com/igorshubovych/markdown
 log_verbose "Install markdown which is basic markdown processor"
 # https://github.com/DavidAnson/markdownlint-cli2/issues/6
 # cli2 is supposed to be faster used by nvim
+# markdown-toc generates a toc like doctotoc for lazyvim
+# injects the toc at the comment
+# <!-- toc -->
+# Will replace the toc if it sees <!-- tocstop -->
 PACKAGE+=(
 	markdown
 	markdownlint-cli
 	markdownlint-cli2
+	markdown-toc
 )
 
 package_install "${PACKAGE[@]}"
 
+# only using markdownllint-cli2 now
 # https://dev.to/jonasbn/blog-post-markdownlint-24ig
-log_verbose "Installing markdownlint the ruby version as mdl for compatibility"
+# log_verbose "Installing markdownlint the ruby version as mdl for compatibility"
 # https://github.com/markdownlint/markdownlint/blob/master/.pre-commit-hooks.yaml
-log_verbose "compatible with pre-commit with entrypoint mdl"
-"$SCRIPT_DIR/install-ruby.sh"
-gem_install mdl
+# log_verbose "compatible with pre-commit with entrypoint mdl"
+# "$SCRIPT_DIR/install-ruby.sh"
+# gem_install mdl
