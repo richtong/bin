@@ -111,8 +111,8 @@ package_install mas
 MAS+=(
 	497799835
 )
-log_verbose "mas install ${MAS[*]}"
-mas install "${MAS[@]}"
+log_verbose "mas_install ${MAS[*]}"
+mas_install "${MAS[@]}"
 log_verbose "complete Xcode installation in GUI"
 open -a Xcode
 xcode_license_accept

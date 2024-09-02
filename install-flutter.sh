@@ -115,7 +115,7 @@ flutter precache
 
 # https://flutter.dev/docs/get-started/install/macos
 log_verbose install Xcode
-mas install 497799835
+mas_install 497799835
 sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 # https://apple.stackexchange.com/questions/175069/how-to-accept-xcode-license
 sudo xcodebuild -license accept

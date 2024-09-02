@@ -38,7 +38,7 @@ if in_os mac; then
 
 	if ! brew cask install enpass; then
 		log_verbose Install from Enpass from Mac Apps store as that version includes iCloud Sync
-		mas install 732710998
+		mas_install 732710998
 		log_exit Enpass installed from Mac Apps store
 	fi
 	log_exit Enpass installed with brew

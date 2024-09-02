@@ -28,7 +28,6 @@ if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]:-${DEFAULT
 
 DEFAULT_DIRENV=(2.32.3 2.33.0)
 if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
-echo "DEFAULT_DIRENV=${DEFAULT_DIRENV[*]} DIRENV_VERSION=${DIRENV_VERSION[*]}"
 
 # Python 3.11.8 has to be built so use a lower version as of Mar 2024
 DEFAULT_PYTHON=(3.10.11 3.11.8)
@@ -138,7 +137,7 @@ declare -A ASDF+=(
 	[nodejs]=${NODE_VERSION[@]}
 	[python]=${PYTHON_VERSION[@]}
 	[java]=${JAVA_VERSION[@]}
-	[ruby]=${RUBY_VERSION[@]}
+	[ruby]=${RUBY[@]}
 )
 
 # https://github.com/pyenv/pyenv/issues/950
@@ -198,7 +197,7 @@ for LANG in "${!ASDF[@]}"; do
 	log_verbose "install asdf for language $LANG"
 	if ! asdf list "$LANG" >/dev/null; then
 		log_verbose "Install asdf plugin $LANG"
-		asdf plugin-add "$LANG"
+		asdf plugin add "$LANG"
 	else
 		log_verbose "asdf plugin $LANG already installed so update it"
 		asdf plugin update "$LANG"
@@ -233,7 +232,6 @@ for LANG in "${!ASDF[@]}"; do
 		fi
 	done
 done
-
 # not clear what this is so as login shell should go into .zprofile
 # for efficiency but leave in .zshrc as non-interactive
 if ! config_mark "$(config_profile_nonexportable_zsh)"; then
