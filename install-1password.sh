@@ -13,9 +13,10 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
+FORCE="${FORCE:-false}"
+
 OP_INIT="${OP_INIT:-false}"
 VERSION="${VERSION:-8}"
-FORCE="${FORCE:-false}"
 DIRENV="${DIRENV:-$HOME/.envrc}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
@@ -237,6 +238,8 @@ PLUGIN_ITEM=(
 # aws does not quite work because it needs two keys
 # but normally we do not use this and use sso and
 # apply special fixup later to add the ID
+# note that Local stack is moving to auth tokens
+# so auth token should be changed to when the plugin changes in 1password
 declare -A PLUGIN_TOKEN
 PLUGIN_TOKEN=(
 	[aws]="access key id"

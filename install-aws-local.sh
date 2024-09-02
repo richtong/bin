@@ -11,8 +11,9 @@
 # use the trap on ERR
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
-# this replace set -e by running exit on any error use for bashdb
-trap 'exit $?' ERR
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
+FORCE="${FORCE:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 while getopts "hdv" opt; do
@@ -22,18 +23,23 @@ while getopts "hdv" opt; do
 			Installs AWS SAM Local and Local Stack for AWS testing on your
 			machine
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
-			           -r version number (default: $VERSION)
+			    flags:
+				   -h help
+				   -d $($DEBUGGING && echo "no ")debugging
+				   -v $($VERBOSE && echo "not ")verbose
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "no -$opt" >&2
@@ -66,3 +72,9 @@ NODE_PACKAGE=(
 
 log_verbose "Installing ${NODE_PACKAGE[*]}"
 npm_install -g "${NODE_PACKAGE[@]}"
+
+# https://docs.localstack.cloud/getting-started/quickstart/
+log_verbose "start localstack without paying otherwise you need "
+log_berbose "LOCALSTACK_AUTH_TOKEN or soon be deprecated LOCALSTACK_API_KEY"
+log_verbose with "ACTIVATE_PRO=0 localstack start"
+log_verbose "see https://docs.localstack.cloud/getting-started/quickstart/"
