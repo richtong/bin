@@ -16,12 +16,16 @@ VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 
 OP_INIT="${OP_INIT:-false}"
+# if Private you do not need to set
+OP_VAULT="{OP_VAULT:-DevOps}"
+# make this a null string normally
+OP_KEYTYPE="{OP_KEYTYPE:- Dev}"
 VERSION="${VERSION:-8}"
 DIRENV="${DIRENV:-$HOME/.envrc}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvfr:e:o" opt; do
+while getopts "hdvfr:e:ot:k:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -31,10 +35,14 @@ while getopts "hdvfr:e:o" opt; do
 				   -h help
 				   -d $($DEBUGGING && echo "no ")debugging
 				   -v $($VERBOSE && echo "not ")verbose
-				   -r version number (default: $VERSION)
-				   -o $($OP_INIT && echo "No ")init for 1Password op plugins
 				   -f $($FORCE && echo "do not ")force install even is 1Password exists
+
+				   -r 1Pssword version number (default: $VERSION)
+
+				   -t .envrc to use this vault (default: "$OP_VAULT")
 				   -e install into .envrc for direnv if DIRENV is set (default: $DIRENV)
+				   -o $($OP_INIT && echo "No ")init for 1Password op plugins
+				   -k 1Password Item Suffix (default: "$OP_KEYTYPE")
 
 
 			For plugins, you should set y our 1Password to use special names
@@ -126,6 +134,12 @@ while getopts "hdvfr:e:o" opt; do
 	e)
 		DIRENV="$OPTARG"
 		;;
+	t)
+		OP_VAULT="$OPTARG"
+		;;
+	k)
+		OP_KEYTYPE="$OPTARG"
+		;;
 	*)
 		echo "no flag -$opt"
 		;;
@@ -188,7 +202,7 @@ log_verbose "Install ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
 
 log_verbose "Enable command line integrations to store credentials in 1Password"
-
+a
 # https://developer.1password.com/docs/cli/get-started/#step-2-turn-on-the-1password-desktop-app-integration
 log_warning "In 1Password App go to Settings > Developers"
 log_warning "And enable Use the SSH Agents, Integrate with 1Password CLI"
@@ -218,10 +232,18 @@ PLUGIN+=(
 	oaievalset
 )
 
+# 1Password API keys, tokens without secrets but which should go into DIRENV
+ENTRY+=(
+	openrouter
+	replicate
+	groq
+	anthropic
+)
+
 # the list of 1Password names for each of these API keys
 # need quotes for huggingface-cli because shfmt will
-declare -A PLUGIN_ITEM
-PLUGIN_ITEM=(
+declare -A OP_ITEM
+OP_ITEM=(
 	[aws]="AWS Access Key"
 	[cdk]="AWS Access Key"
 	[doctl]="DigitalOcean Personal Access Token"
@@ -231,6 +253,11 @@ PLUGIN_ITEM=(
 	[openai]="OpenAI API Key"
 	[oaieval]="OpenAI API Key"
 	[oaievalset]="OpenAI API Key"
+	[anthropic]="Anthropic API Key"
+	[openrouter]="OpenRouter API Key"
+	[groq]="Groq API Key"
+	[replicate]="Replicate API Token"
+	["google-gemini"]="Google Gemini API Key"
 )
 
 # the field where the token lives in the item
@@ -240,8 +267,8 @@ PLUGIN_ITEM=(
 # apply special fixup later to add the ID
 # note that Local stack is moving to auth tokens
 # so auth token should be changed to when the plugin changes in 1password
-declare -A PLUGIN_TOKEN
-PLUGIN_TOKEN=(
+declare -A OP_FIELD
+OP_FIELD=(
 	[aws]="access key id"
 	[cdk]="secret access key"
 	[doctl]=token
@@ -251,10 +278,15 @@ PLUGIN_TOKEN=(
 	[openai]="api key"
 	[oaieval]="api key"
 	[oaievalset]="api key"
+	[anthropic]="api key"
+	[openrouter]="key"
+	[groq]="api key"
+	[replicate]="api token"
+	["google-gemini"]="api key"
 )
 
-declare -A PLUGIN_ENV
-PLUGIN_ENV=(
+declare -A DIRENV_ENV
+DIRENV_ENV=(
 	[aws]=AWS_ACCESS_KEY_ID
 	[cdk]=AWS_SECRET_ACCESS_KEY
 	[doctl]=DIGITALOCEAN_TOKEN
@@ -264,6 +296,11 @@ PLUGIN_ENV=(
 	[openai]=OPENAI_API_KEY
 	[oaieval]=OPENAI_API_KEY
 	[oaievalset]=OPENAI_API_KEY
+	[anthropic]=ANTHROPIC_API_KEY
+	[openrouter]=OPENROUTER_API_KEY
+	[groq]=GROQ_API_KEY
+	[replicate]=REPLICATE_API_TOKEN
+	["google-gemini"]=GOOGLE_GEMINI_API_KEY
 )
 
 # this creates a ./.op directory in the CWD so make sure we are at HOME
@@ -283,14 +320,14 @@ fi
 
 log_verbose "installing into $DIRENV note that this does slow direnv"
 if [[ -n $DIRENV ]] && ! config_mark "$DIRENV"; then
-	for PLUG in "${PLUGIN[@]}"; do
-		log_verbose "Installing $PLUG into $DIRENV"
-		log_verbose "expert ${PLUGIN_ENV[$PLUG]} = "
-		log_verbose "op item get ${PLUGIN_ITEM[$PLUG]}"
-		log_verbose "fields ${PLUGIN_TOKEN[$PLUG]}"
+	for ENTRY in "${PLUGIN[@]}"; do
+		log_verbose "Installing $ENTRY into $DIRENV"
+		log_verbose "expert ${DIRENV_ENV[$ENTRY]} = "
+		log_verbose "op item get ${OP_ITEM[$ENTRY]}"
+		log_verbose "fields ${OP_FIELD[$ENTRY]}"
 		config_add "$DIRENV" <<-EOF
-			export "${PLUGIN_ENV[$PLUG]}"="\$(op item get "${PLUGIN_ITEM[$PLUG]}" \
-				--fields "${PLUGIN_TOKEN[$PLUG]}" --reveal)"
+			export "${DIRENV_ENV[$ENTRY]}"="\$(op item get "${OP_ITEM[$PLUG]}${OP_KEYTYPE}" \\
+				--fields "${OP_FIELD[$ENTRY]}" --vault "${OP_VAULT}" --reveal)"
 		EOF
 	done
 fi
