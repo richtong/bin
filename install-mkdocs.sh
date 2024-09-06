@@ -82,6 +82,7 @@ PYTHON_PACKAGE+=(
 	"mkdocs-material[imaging]"
 	mkdocs-minify-plugin
 	mkdocs-redirects
+	mkdocs-monorepo-plugin
 	pymdown-extensions
 
 )
