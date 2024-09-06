@@ -320,15 +320,16 @@ if $FORCE || $OP_INIT; then
 fi
 
 log_verbose "installing into $DIRENV note that this does slow direnv"
-if [[ -n $DIRENV ]] && ! config_mark "$DIRENV"; then
+log_verbose "Only install into the main monorepo $SRC_DIR"
+if [[ -n $DIRENV ]] && ! config_mark "$SRC_DIR/$DIRENV"; then
 	for ENTRY in "${PLUGIN[@]}"; do
 		log_verbose "Installing $ENTRY into $DIRENV"
 		log_verbose "expert ${DIRENV_ENV[$ENTRY]} = "
 		log_verbose "op item get ${OP_ITEM[$ENTRY]}"
 		log_verbose "fields ${OP_FIELD[$ENTRY]}"
-		config_add "$DIRENV" <<-EOF
-			export "${DIRENV_ENV[$ENTRY]}"="\$(op item get "${OP_ITEM[$PLUG]} ${OP_KEYTYPE}" \\
-				--fields "${OP_FIELD[$ENTRY]} $ENV" --vault "${OP_VAULT}" --reveal)"
+		config_add "$SRC_DIR/$DIRENV" <<-EOF
+			export "${DIRENV_ENV[$ENTRY]}"="\$(op item get "${OP_ITEM[$PLUG]}${OP_KEYTYPE}" \\
+				--fields "${OP_FIELD[$ENTRY]}" --vault "${OP_VAULT}" --reveal)"
 		EOF
 	done
 fi
