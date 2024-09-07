@@ -3,8 +3,9 @@
 # Note that SchemaStore with LazyVim does not appear to work
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 #
-site_name: RT's Binary Utilities
-site_url: https://bin.docs.tongfamily.com
+# this is used by monorepo as in the url so make it short
+site_name: bin
+site_url: https://docs.tongfamily.com/bin
 nav:
   - Home: index.md
   - install.md
@@ -31,9 +32,18 @@ theme:
     # the address bar changes to nearest tag
     - navigation.tracking
     - navigation.sections
-    - navigation.expand
     - navigation.indexes
     - navigation.top
+    - navigation.instant.prefetch
+    # tabs eliminates the side nav bar only use for big sites
+    # - navigation.tabs
+    # - navigation.tags.sticky
+    - navigation.path
+    - navigation.expand
+    # prune reverse the expand
+    # - navigation.prune
+    - toc.follow
+    - toc.integrate
 
 # https://squidfunk.github.io/mkdocs-material/setup/extensions/
 plugins:
