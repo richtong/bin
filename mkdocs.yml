@@ -52,6 +52,7 @@ plugins:
   # allows the use of !include for mono repos
   - monorepo
   - search
+  - awesome-pages
   - minify:
       minify_css: true
       minify_js: true

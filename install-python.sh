@@ -198,6 +198,7 @@ PYTHON_PACKAGE+=(
 
 	autocomplete
 	nptyping
+	pdoc3
 	pydantic
 	pymdown-extensions
 	pytest

@@ -83,6 +83,7 @@ PYTHON_PACKAGE+=(
 	mkdocs-minify-plugin
 	mkdocs-redirects
 	mkdocs-monorepo-plugin
+	mkdocs-awesome-pages-plugin
 	pymdown-extensions
 
 )
