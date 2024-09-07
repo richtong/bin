@@ -74,7 +74,11 @@ package_install "${PACKAGE[@]}"
 # mkdocstrings - Add docstrings from python code into mkdocs
 # mkdocs-minify-plugin - Minify HTML output
 # pymdown-extensions - Add markdown extensions
-
+# mkdocs-charts-plugin - Add vega-lite chart support
+# mkdocs-jupyter - Add jupyter notebooks to mkdocs
+# mkdocs-git-revision-date-localized-plugin - Add date using material
+# mkdocs-enumerate-headings-plugin - automatically add heading numbers
+# markdown-exec[ansi] -  can run the code blocks in the doc site!@#!
 PYTHON_PACKAGE+=(
 
 	mkdocstrings
@@ -85,6 +89,11 @@ PYTHON_PACKAGE+=(
 	mkdocs-monorepo-plugin
 	mkdocs-awesome-pages-plugin
 	pymdown-extensions
+	mkdocs-charts-plugin
+	mkdocs-jupyter
+	mkdocs-git-revision-date-localized-plugin
+	mkdocs-enumerate-headings-plugin
+	"markdown-exec[ansi]"
 
 )
 
