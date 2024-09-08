@@ -14,6 +14,27 @@ nav:
   - test.md
   - special.md
 
+theme:
+  name: material
+  # make sure you have logo's loaded here
+  logo: media/logo_big.png
+  favicon: media/logo_small.png
+  palette:
+    primary: deep purple
+    scheme: slate
+    accent: indigo
+  features:
+    - header.autohide
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/
+    # no more round trips to the server
+    - navigation.instant
+    # the address bar changes to nearest tag
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+
 # https://squidfunk.github.io/mkdocs-material/setup/extensions/
 plugins:
   - mkdocstrings

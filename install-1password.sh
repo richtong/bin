@@ -25,7 +25,7 @@ DIRENV="${DIRENV:-$HOME/.envrc}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvfr:e:ot:k:" opt; do
+while getopts "hdvfr:e:oc:k:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -37,12 +37,12 @@ while getopts "hdvfr:e:ot:k:" opt; do
 				   -v $($VERBOSE && echo "not ")verbose
 				   -f $($FORCE && echo "do not ")force install even is 1Password exists
 
-				   -r 1Pssword version number (default: $VERSION)
+				   -r 1Password version number (default: $VERSION)
 
-				   -t .envrc to use this vault (default: "$OP_VAULT")
+				   -c .envrc to use this vault (default: $OP_VAULT)
 				   -e install into .envrc for direnv if DIRENV is set (default: $DIRENV)
 				   -o $($OP_INIT && echo "No ")init for 1Password op plugins
-				   -k 1Password Item Suffix (default: "$OP_KEYTYPE")
+				   -k 1Password Item Suffix (default: $OP_KEYTYPE)
 
 
 			For plugins, you should set y our 1Password to use special names
@@ -134,7 +134,7 @@ while getopts "hdvfr:e:ot:k:" opt; do
 	e)
 		DIRENV="$OPTARG"
 		;;
-	t)
+	c)
 		OP_VAULT="$OPTARG"
 		;;
 	k)
@@ -220,9 +220,10 @@ fi
 # localstack - aws local development has a low cost cloud
 # oaieval - OpenAI not needed and will cause duplicated .envrc
 # oaievalset - OpenAI
+log_warning "aws anc cdk should not use access key's, instead, use aws sso login"
 PLUGIN+=(
-	aws
-	cdk
+	# aws
+	# cdk
 	doctl
 	gh
 	huggingface-cli
@@ -326,8 +327,8 @@ if [[ -n $DIRENV ]] && ! config_mark "$DIRENV"; then
 		log_verbose "op item get ${OP_ITEM[$ENTRY]}"
 		log_verbose "fields ${OP_FIELD[$ENTRY]}"
 		config_add "$DIRENV" <<-EOF
-			export "${DIRENV_ENV[$ENTRY]}"="\$(op item get "${OP_ITEM[$PLUG]}${OP_KEYTYPE}" \\
-				--fields "${OP_FIELD[$ENTRY]}" --vault "${OP_VAULT}" --reveal)"
+			export "${DIRENV_ENV[$ENTRY]}"="\$(op item get "${OP_ITEM[$PLUG]} ${OP_KEYTYPE}" \\
+				--fields "${OP_FIELD[$ENTRY]} $ENV" --vault "${OP_VAULT}" --reveal)"
 		EOF
 	done
 fi
