@@ -81,6 +81,7 @@ PACKAGE+=(
 	markdownlint-cli
 	markdownlint-cli2
 	markdown-toc
+	zettler
 )
 
 package_install "${PACKAGE[@]}"

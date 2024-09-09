@@ -81,7 +81,9 @@ fi
 
 # 1password - opswd wraps the op command so opswd github will put your us
 # alias - acs shows all alias by group
+# alias-finder - if there is an alias for a command it suggests it
 # asdf - completions (not working)
+# autojump - j does a fuzzy search for a directory complements warp
 # brew - new command bubo brew update & brew outdated bubc brew update && brew
 # 		- btrestart - restart bluetooth
 # catimg - display an image from the commandline requires ImageMagick
@@ -91,23 +93,30 @@ fi
 # command-not-found - suggest missing package
 # copyfile - copyfile puts the contents of the file to your clipboard
 # copypath - copypath will copy the last path onto clipboard
+# dircycle - dircycle will cycle through the last 10 directories with CTRL-SHIFT ⬅️ and ➡️
 # dirhistory - ALT-Left goes to previous directory, ALT-right so like dirs (does not work with AnnePro2)
-# docker completions
+# docker - completions and aliases like dbl for docker build
+# docker-compose - completions and alias
 # doctl - digital ocean command completions
 # emoji-clock - emoji not characters for clock
+# emoji - echo $emoji[mouse_face] works or juse Mac emojify to get :smile:
+# encode64 - alias like e64
 # extract - general file extract command
+# fancy-ctrl-z - use with Ctrl-Z to return to normal mode instead of needing fg
 # fzf - completions
 # gcloud - google cloud completions
 # gh - add command completions for gh
 # git -  ga git add, gca git commit -av, gd - git diff, gfa - git fetch --all --prune
+# git-commit - alias for git commit like git build docs, style, wip
+# git-escape-magic - do not need to single quote complex expressions like [<>]
 # gitignore - gi list shows all the .gitignore templates
 # git-lfs - completions and alias like glfsi git lfs install glfsls
+# globalias - touch {1..10}<space>
 # gnu-utils - use gnu without the g prefix
 # golang - alias like gob for go build
-#        gp - git push
 # helm - command completions
 # history - h for history and hs for history | grep but CTRL-R from fzf is
-# https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/vi-mode
+# iterm2 - iterm2_profile <profile> to change it
 # kubectl - completions and k kubectl, kaf kubectl apply -f
 # macos - ofd - open in finder, pfd - print finder path, cdf - change to finder
 # mactl - tab is currect directory, pushdf the finder director music
@@ -125,6 +134,7 @@ fi
 # thefuck - ESC twice to correct command (conflicts with sudo plugin do not use
 # together)
 # ubuntu - acs apt-cache search
+# fzf note that vi-mode overwrites ^r so it must come before fzf
 # vi-mode - ESC to enter vi edit mode. vv edit command line
 # wd - warp directory do a wd add to add to a list of directories
 # web-search - type "google any-string"
@@ -132,6 +142,7 @@ fi
 
 PACKAGE+=(
 	pygments
+	autojump
 )
 log_verbose "Install Package ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
@@ -146,59 +157,83 @@ log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 
 PLUGIN+=(
 	1password
+	alias-finder
 	aliases
 	asdf
+	autojump
 	aws
+	azure
 	brew
 	catimg
 	colored-man-pages
 	colorize
 	command-not-found
 	common-aliases
+	copybuffer # Ctrl-O to copy current text to the clipbard
 	copyfile
 	copypath
+	dircycle
 	dirhistory
 	docker
+	docker-compose
 	doctl
 	dotenv
 	emoji-clock
+	emoji
+	encode64
 	extract
-	fig
+	fancy-ctrl-z
+	vi-mode # vi-mode overwrites ^r so it must come before fzf
+	fzf     # fzf and vi-mode both use Ctrl-R so use fzf instead put later
 	gcloud
 	gh
 	git
-	gitignore
+	git-commit
+	git-escape-magic
 	git-lfs
 	gnu-utils
+	gitignore
 	golang
 	helm
 	history
 	ipfs
 	iterm2
 	kubectl
-	macos
+	jsontools # pp_json pretty print urlencode_json
+	localstack
+	macos # tab opens directory in new tab, ofd open in finder
 	microk8s
 	multipass
 	npm
 	pip
 	pipenv
+	podman     # pbl: podman build
+	poetry     # aliases
+	poetry-env # each entry and poetry shell starts
+	pre-commit # prc: pre-commit, prcr pre-commit run
 	python
 	rand-quote
 	ripgrep
 	rsync
+	ssh # host completion from ..ssh/config
+	# sudo   # ESC twice to add sudo to previous command
+	tailscale # completions
 	terraform
-	thefuck
+	thefuck # ESC twice to correct command (conflicts with sudo plugin do not use together)
 	themes
 	transfer
-	tmux
-	tmuxinator
+	tmux       #  ts for tmus attach -t, tl: tmux list-sessions
+	tmuxinator # txs tmuxinator start
 	ubuntu
 	wd
-	web-search
-	z
-	zsh-interactive-cd
-	vi-mode
-	fzf
+	web-search           # google - runs google from command line, bing, ddg
+	wp-cli               # Wordpress command line
+	xcode                # xcb: xcodebuild
+	vscode               # vsc: code, vscg
+	z                    # yet another directory nav, z p: finds the directory that has p the most
+	zsh-interactive-cd   # cd<TAB> starts fzf
+	zsh-navigation-tools # n-history, n-cd, n-kill
+
 )
 
 log_verbose "adding zinit plugins must be done early in installation"
