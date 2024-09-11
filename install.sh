@@ -253,7 +253,9 @@ fi
 
 # run dotfiles-stow as soon as possible use the personal repo above
 # Otherwise the installation scripts below will cause conflicts
+# Starting to replace rich's fine dotfiles with chezmoi.io
 if $DOTFILES_STOW; then
+	"$SCRIPT_DIR/install-chezmoi.sh"
 	log_verbose "put into .bak all files that need to be stowed"
 	"$SCRIPT_DIR/dotfiles-backup.sh"
 	log_verbose "install dotfiles note that this needs the personal repo installed to work"
