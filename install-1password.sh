@@ -195,10 +195,6 @@ elif in_os mac; then
 
 fi
 
-log_verbose "Installing auth0 cli"
-tap_install auth0/auth0-cii
-brew install auth0
-
 PACKAGE+=(
 	1password-cli
 )
