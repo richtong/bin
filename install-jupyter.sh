@@ -124,33 +124,16 @@ fi
 # https://pandoc.org/installing.html
 # mermaid-cli - install chromium in the background so beware
 log_verbose "Run mermaid to generate JPGs from .mermaid files"
-log_verbose "Warning mactex is huge at 5GB so only basictex and load modules as"
-log_verbose "needed install if needed for pdfs"
 PACKAGE=(
 	mermaid-cli
 	pandoc
-	basictex
 )
 
 package_install "${PACKAGE[@]}"
 
-# https://tex.stackexchange.com/questions/307483/setting-up-basictex-homebrew
-# recommends running path_helper but this does not work it odes add the
-# additional library but also masks everything else with /usr/bin and other
-# things in the standard /etc/paths.d/ directory.
-#log_verbose "Add to the path"
-#eval "$(/usr/libexec/path_helper)"
-# need to source again since basictex installs tlmgr
-# https://pandoc.org/installing.html
-if ! config_mark; then
-	config_add <<-'EOF'
-		# shellcheck disable=SC1090
-		echo "$PATH" | grep -q "/Library/TeX/texbin" || PATH="/Library/TeX/texbin:$PATH"
-	EOF
-fi
-log_verbose "Post basictex installation put in the fonts"
-sudo tlmgr update --self
-sudo tlmgr install collection-fontsrecommended
+log_verbose "Warning mactex is huge at 5GB so only basictex and load modules as"
+log_verbose "needed install if needed for pdfs"
+"$BIN_DIR/install-latex.sh"
 
 # this is for node applications but you need to know the node package names
 # Latex not up to date

@@ -9,32 +9,51 @@ set -u && SCRIPTNAME=$(basename "${BASH_SOURCE[0]}")
 # for bashdb
 trap 'exit $?' ERR
 SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
-# July 2020
-VERSION="${VERSION:-12}"
+
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
+FORCE="${FORCE:-false}"
+
+VERSION="${VERSION:-20}"
 BREW="${BREW:-true}"
+
 OPTIND=1
-while getopts "hdvr:x" opt; do
+while getopts "hdvfr:x" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
-$SCRIPTNAME: Install Node and NPM
-    "flags: -d debug, -v verbose, -h help"
-	       -r release of node [default: $VERSION]"
-           -x set to disable brew (brew is normally $BREW)"
+    $SCRIPTNAME: Install Node and NPM
+    flags:
+				   -h help
+				   -d $($DEBUGGING && echo "no ")debugging
+				   -v $($VERBOSE && echo "not ")verbose
+				   -f $($FORCE && echo "do not ")force install
+           -r release of node [default: $VERSION]
+           -x $($BREW && echo "no ")installation with homebrew
 EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
+		;;
+	f)
+		FORCE="$($FORCE && echo false || echo true)"
+		export FORCE
 		;;
 	r)
 		VERSION="$OPTARG"
 		;;
 	x)
-		BREW=false
+		BREW="$($BREW && echo false || echo true)"
+		export BREW
 		;;
 	*)
 		log_warning "invalid flag $opt"
@@ -54,8 +73,13 @@ if $BREW; then
 	# change from package to brew
 	# package_install nodejs6 npm2
 	log_verbose install brew
-	brew_install node
-	log_exit brew complete
+	PACKAGES+=(
+		node
+		yarn
+		yarn-completion
+	)
+	package_install "${PACKAGES[@]}"
+	log_exit "brew complete"
 fi
 
 if command -v node >/dev/null && vergte "$(node --version)" "v$VERSION"; then
