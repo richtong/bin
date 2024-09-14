@@ -107,7 +107,8 @@ neovim"
 # pynvim for deoplete is a dependency of neovim so just need one installations
 PIP_PACKAGE+=(
 	neovim
-	ruff-lsp
+	ruff-lsp   # python format, linting
+	pylatexenc # for lazyvim extras render-markdown to render Latex string
 )
 pip_install "${PIP_PACKAGE[@]}"
 

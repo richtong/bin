@@ -6,7 +6,6 @@ description = "Rich's Fine Script Library"
 authors = ["Rich Tong <1782087+richtong@users.noreply.github.com>"]
 readme = "README.md"
 
-# python 3.8.1 is now needed due to bugs
 [tool.poetry.dependencies]
 python = "^3.11.1"
 black = ">=22.12"
@@ -30,6 +29,7 @@ twine = "^4.0.2"
 wheel = "^0.38.4"
 yamllint = "^1.29.0"
 mkdocstrings = { extras = ["python"], version = "^0.23.0" }
+pylatexenc = "^2.10"
 
 
 [build-system]

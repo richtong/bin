@@ -1438,6 +1438,16 @@ files = [
 windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
+name = "pylatexenc"
+version = "2.10"
+description = "Simple LaTeX parser providing latex-to-unicode and unicode-to-latex conversion"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pylatexenc-2.10.tar.gz", hash = "sha256:3dd8fd84eb46dc30bee1e23eaab8d8fb5a7f507347b23e5f38ad9675c84f40d3"},
+]
+
+[[package]]
 name = "pymdown-extensions"
 version = "10.9"
 description = "Extension pack for Python Markdown."
@@ -2048,4 +2058,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.1"
-content-hash = "2dea80615012df2589be9ba30b474c6f7e063f0e0b55ac29a3e5b1a3d4ce76bd"
+content-hash = "f40e3446e124bb7ad4a1b5dfb83578719d742c5c75cfc9f233764b268626b2f9"
