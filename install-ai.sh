@@ -49,58 +49,56 @@ shift $((OPTIND - 1))
 # l
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
-source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh
+source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
-# lm-studio -  run different LLMs from Hugging Face locally
-# ollama - ollama local runner
-# ollamac - ollama graphical interface
-# diffusionbee - Stability diffusion on Mac
 #
 # Need to try more:
-# mochi-diffusion - Stability diffusion on Mac (hanvent' used
-# jan - yet another ollama close
-# open-interpreter - local llm can run local code
 #
-# vincelwt-chatgpt - ChatGPT in menubar (not using)
-# macgpt - ChatGPT in menubar (pretty useless, deprecated)
-# shell-gpt - cli including running shell commands (never use deprecated)
-# gpt4all - lm-studio local runner (lm-studio now does this as well nicer us)
-# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
-# fig - command completion and dotfile manager (bought by Amazon and closed)
-#
-if in_os mac; then
-	PACKAGE+=(
+PACKAGE+=(
 
-		appflowy
-		diffusionbee
-		jan
-		lm-studio
-		mochi-diffusion
-		ollama
-		ollamac
+	# fig - command completion and dotfile manager (bought by Amazon and closed)
+	# gpt4all - lm-studio local runner (lm-studio now does this as well nicer us)
+	# macgpt - ChatGPT in menubar (pretty useless, deprecated)
+	# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
+	# shell-gpt - cli including running shell commands (never use deprecated)
+	# vincelwt-chatgpt - ChatGPT in menubar (not using)
+	appflowy
+	diffusionbee    # diffusionbee - Stability diffusion on Mac
+	jan             # yet another ollama close
+	lm-studio       # lm-studio -  run different LLMs from Hugging Face locally
+	mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (hanvent' used
+	ollama          # ollama - ollama local runner
+	ollamac         # ollamac is a self contained mac app crashes on startup
 
-	)
+)
+package_install "${PACKAGE[@]}"
 
-	PIP_PACKAGE+=(
+PIP_PACKAGE+=(
 
-		open-interpreter
+	open-interpreter # local llm run with interpreter at the cli with interpreter
+	open-webui       # create a web app at localhost:8080 run with open-webui server
 
-	)
+)
 
-	# Install Stabiliity Diffusion with DiffusionBee"
-	# Download Chat GPT in menubar
-	# Use brew install instead of
-	#ARCH=x86
-	#if mac_is_arm; then
-	#ARCH=arm64
-	#fi
-	#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
-	package_install "${PACKAGE[@]}"
-	log_verbose "Pip install only in current environment rerun in other venvs"
-	pip_install --upgrade "${PIP_PACKAGE[@]}"
-	log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
+# Install Stabiliity Diffusion with DiffusionBee"
+# Download Chat GPT in menubar
+# Use brew install instead of
+#ARCH=x86
+#if mac_is_arm; then
+#ARCH=arm64
+#fi
+#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
+log_verbose "Pip install only in current environment rerun in other venvs"
+pip_install --upgrade "${PIP_PACKAGE[@]}"
+log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
 
-	# no need for gp4all
-	#download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
+# no need for gp4all
+#download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
 
+if ! config_mark "$(config_profile_interactive)"; then
+	config_add "$(config_profile_interactive)" <<-EOF
+		if command -v open-webui > /dev/null; then
+			open-webui --install-completion
+		fi
+	EOF
 fi
