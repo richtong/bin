@@ -91,7 +91,9 @@ PIP_PACKAGE+=(
 package_install "${PACKAGE[@]}"
 log_verbose "Pip install only in current environment rerun in other venvs"
 pip_install --upgrade "${PIP_PACKAGE[@]}"
-log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
+
+# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc
+log_warning "WEBUI_SECRET_KEY and OPENAI_API_KEY should both be defined before running ideally in a .envrc"
 
 # no need for gp4all
 #download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
