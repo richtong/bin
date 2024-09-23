@@ -89,9 +89,16 @@ PIP_PACKAGE+=(
 #ARCH=arm64
 #fi
 #download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
-log_verbose "Pip install only in current environment rerun in other venvs"
-pip_install --upgrade "${PIP_PACKAGE[@]}"
-log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
+if [[ -v poetry_active ]]; then
+	log_verbose "In poetry so add to the project"
+	log_warning "If you want in the system, you must exit poetry and rerun"
+	poetry add "${PIP_PACKAGE[@]}"
+else
+	log_verbose "Pip install only in current environment rerun in other venvs"
+	pip_install "${PIP_PACKAGE[@]}"
+fi
+
+# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
 
 # no need for gp4all
 #download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
@@ -109,22 +116,50 @@ if (($(pfind ollama | wc -l) == 0)); then
 	ollama serve &
 fi
 
+# note things like neovim code companion will use the first model
+# that comes out of ollama list and this is the last one pulled, so this
+# pull order has the default at the bottom
+# These are too large for a 64GB machine
+# deepseek-v2.5              # 2024-09-03 instruct 236B very large
 MODEL+=(
+	# vision
+	minicpm-v    # vision mLLM 8b-2.6-q4_0
+	llava-llama3 # older vision model based on llama3
+	llava        # older vision model
 
-	llama3.1                   # 8B, 98B-instruct-q4_0
-	llama3.1:8b-text-q4_0      # test tuneded
-	llama3.1:70b-instruct-q4_0 # 70b instruct 4bit- quantized
-	gemma2                     # Google
-	qwen2.5                    # Alibaba 2024-09-16
-	qwen2.5-coder              # code specific
-	phi3.5                     # Microsoft 3.8B-instruct-q4_0
-	nemotron-mini              # nViida ropepaly, TAG QSA and function calling
-	starcoder2                 ## 3B and 7B
-	bespoke-minicheck          # Fact check 7B
-	reader-lm                  # HTML to Markdown conversion 0.5B and 1.5B
-	deepseek-v2.5              # 2024-09-03 integrated chat and instruct
-	yi-coder                   # Coding 9B-instruct-q4_0
-	mistral-large              # 128K context winod 123B
+	# big models
+	mistral-large:123b-instruct-24-07-q3_K_S # 128K context winod 123B-instruct-q3_K_S
+	command-r-plus                           # 104b-08-2024-q4_0 big at 59GB
+
+	bespoke-minicheck     # Fact check 7B q4_K_M
+	llama3.1:8b-text-q4_0 # test tuneded
+	qwen2.5-math          # Alibaba math 7b-instruct-q4_K_M
+	qwen2.5-math:72b      # Alibaba math 72b-instruct-q4_K_M
+
+	# small LLMs
+	phi3.5        # Microsoft 3.8B-instruct-q4_0
+	nemotron-mini # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+
+	# coder models
+	reader-lm         # HTML to Markdown conversion 1.5B-q4_K_M
+	deepseek-coder-v2 # 16-lite-base-q4_0
+	qwen2.5-coder     # Alibaba coder 7b-bas-q4_K_M
+	starcoder2        ## 7b chat or basenstruct-q4_0
+	yi-coder          # 9B model q4
+
+	# general purpose
+	hermes3               # Nous research 8b
+	hermes3:70b           # Nous research q4
+	solarpro              # 22b comparable to llama 3.1 70b 4k context
+	command-r             # 35b-08-2024-q4_0 at 18GB
+	qwen2.5               # Alibaba 2024-09-16 7b-base-=q4_K_M
+	qwen2.5:72b           # Alibaba 72b-instruct-q4_K-M instruct
+	mistral-nemo          # 128k context 12b-instruct-2407-q4_0
+	mistral-small         # Mistral 22b-instruct-2409-q4_0
+	gemma2                # Google
+	llama3.1:8b-text-q4_0 # text tuned model
+	llama3.1:70b          # 70b instruct 70b-instruct-q4_0
+	llama3.1              # 8B, 98B-instruct-q4_0
 
 )
 

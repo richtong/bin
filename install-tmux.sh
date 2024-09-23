@@ -11,6 +11,10 @@
 set -u && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
+FORCE="${FORCE:-false}"
+
 trap 'exit $?' ERR
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
@@ -20,17 +24,22 @@ while getopts "hdv" opt; do
 		cat <<-EOF
 			Installs Tmux, the tmux plug in manager and tmux plugins
 			    usage: $SCRIPTNAME [ flags ]
-			    flags: -d debug, -v verbose, -h help"
+			          flags:
+				   -d $($DEBUGGING && echo "no ")debugging
+				   -v $($VERBOSE && echo "not ")verbose
+				   -f $($FORCE && echo "do not ")force install even $SCRIPTNAME exists
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING=true
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE=true
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
-		export FLAGS+=" -v "
+		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	*)
 		echo "not flag -$opt"
@@ -43,7 +52,18 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 # package install tries brew first then apt-get on linux
-package_install tmux tmuxinator tumuxinator-completion
+PACKAGE+=(
+
+	tmux
+	tmuxinator
+	tumuxinator-completion
+	# needed for tmux-plugins/tmux-sessionx
+	fzf
+	bat
+)
+
+package_install "${PACKAGE[@]}"
+
 log_verbose tmuxinator requires latest ruby
 "$SCRIPT_DIR/install-ruby.sh"
 
