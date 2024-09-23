@@ -64,11 +64,14 @@ PACKAGE+=(
 	# vincelwt-chatgpt - ChatGPT in menubar (not using)
 	ollama  # ollama - ollama local runner
 	ollamac # ollamac is a self contained mac app crashes on startup
+	jan     # yet another ollama front-end (but why?)
 
 )
+
 package_install "${PACKAGE[@]}"
 
 MAS+=(
+
 	6474268307 # Enchanted LLM Mac only selfhosted
 
 )
@@ -128,8 +131,8 @@ MODEL+=(
 	llava        # older vision model
 
 	# big models
-	mistral-large:123b-instruct-24-07-q3_K_S # 128K context winod 123B-instruct-q3_K_S
-	command-r-plus                           # 104b-08-2024-q4_0 big at 59GB
+	mistral-large:123b-instruct-2407-q3_K_S # 128K context winod 123B-instruct-q3_K_S
+	command-r-plus                          # 104b-08-2024-q4_0 big at 59GB
 
 	bespoke-minicheck     # Fact check 7B q4_K_M
 	llama3.1:8b-text-q4_0 # test tuneded

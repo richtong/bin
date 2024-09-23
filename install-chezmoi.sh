@@ -158,8 +158,16 @@ if $CHEZMOI_INIT; then
 	for FILE in "${CHEZMOI_FILE[@]}"; do
 		FULL_FILE="$CHEZMOI_DEST/$FILE"
 		if [[ -e $FULL_FILE ]]; then
-			log_verbose "adding $FULL_FILE"
-			chezmoi add "$FULL_FILE"
+			if [[ -L $FULL_FILE ]]; then
+				log_verbose "$FULL_FILE is a symlink, so get the contents and check in"
+				mv $"$FULL_FILE" $"$FULL_FILE".ln
+				cp $"$FULL_FILE".ln $"$FULL_FILE"
+				chezmoi add $"$FULL_FILE"
+				mv $"$FULL_FILE".ln $"$FULL_FILE"
+			else
+				log_verbose "adding $FULL_FILE"
+				chezmoi add "$FULL_FILE"
+			fi
 		fi
 	done
 	log_verbose "examine the chezmoi and you should now commit this as $CHEZMOI_REPO"

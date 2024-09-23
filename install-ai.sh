@@ -61,9 +61,9 @@ PACKAGE+=(
 	# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
 	# shell-gpt - cli including running shell commands (never use deprecated)
 	# vincelwt-chatgpt - ChatGPT in menubar (not using)
-	appflowy
+	appflowy        # project manager based on ai
+	cursor          # pair programming using VScode, takes over the `code`
 	diffusionbee    # diffusionbee - Stability diffusion on Mac
-	jan             # yet another ollama close
 	lm-studio       # lm-studio -  run different LLMs from Hugging Face locally
 	mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (hanvent' used
 
