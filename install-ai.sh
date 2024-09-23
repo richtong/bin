@@ -67,6 +67,10 @@ PACKAGE+=(
 	lm-studio       # lm-studio -  run different LLMs from Hugging Face locally
 	mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
 	parquet-cli     # command line opening parquet data files
+	ollama          # ollama - ollama local runner
+	ollamac         # ollamac is a self contained mac app crashes on startup
+	cursor          # ai code editor that's based on code
+	zed             # yet another ai editor
 
 )
 
