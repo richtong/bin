@@ -185,7 +185,8 @@ fi
 log_verbose "can also install per directory with asdf plugin add chezmoi"
 
 log_verbose "compare with current installation then apply"
-chezmoi diff
+# this command shows the diff and then hangs
+# chezmoi diff
 log_verbose "if ok then manually apply with chezmoi apply -vim"
 log_verbose "if you want to change it then chezmoi edit $FILE"
 log_verbose "you can pull with chezmoi update"
