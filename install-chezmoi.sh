@@ -188,6 +188,6 @@ log_verbose "compare with current installation then apply"
 # this command shows the diff and then hangs
 # chezmoi diff
 log_verbose "if ok then manually apply with chezmoi apply -vim"
-log_verbose "if you want to change it then chezmoi edit $FILE"
+log_verbose "if you want to change it then chezmoi edit FILE"
 log_verbose "you can pull with chezmoi update"
 log_verbose "or just chezmoi cd and then use git as usual"
