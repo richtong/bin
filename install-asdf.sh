@@ -36,13 +36,17 @@ if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]:-${D
 # openjdk18 is Java 8 for Unifi.app
 DEFAULT_JAVA=(openjdk-18 openjdk-21)
 if ((${#DEFAULT_JAVA[@]} > 0)); then JAVA_VERSION=("${JAVA_VERSION[@]:-${DEFAULT_JAVA[@]}}"); fi
-#
+
 # Ruby is used with LazyVim
 DEFAULT_RUBY=(3.3.4)
 if ((${#DEFAULT_RUBY[@]} > 0)); then RUBY_VERSION=("${RUBY_VERSION[@]:-${DEFAULT_RUBY[@]}}"); fi
 
+# UV is used with LazyVim
+DEFAULT_UV=(0.4.17)
+if ((${#DEFAULT_UV[@]} > 0)); then UV_VERSION=("${UV_VERSION[@]:-${DEFAULT_UV[@]}}"); fi
+
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvn:e:p:j:r:" opt; do
+while getopts "hdvn:e:p:j:r:u:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -58,6 +62,7 @@ while getopts "hdvn:e:p:j:r:" opt; do
 				-n Node.js version (default: ${NODE_VERSION[*]})
 				-j Java version (default: ${JAVA_VERSION[*]})
 				-r Ruby version (default: ${RUBY_VERSION[*]})
+				-u UV version (default: ${UV_VERSION[*]})
 		EOF
 		exit 0
 		;;
@@ -85,10 +90,12 @@ while getopts "hdvn:e:p:j:r:" opt; do
 		;;
 	j)
 		read -ra JAVA_VERSION <<<"$OPTARG"
-
 		;;
 	r)
 		read -ra RUBY_VERSION <<<"$OPTARG"
+		;;
+	u)
+		read -ra UV_VERSION <<<"$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt"
@@ -138,6 +145,7 @@ declare -A ASDF+=(
 	[python]=${PYTHON_VERSION[@]}
 	[java]=${JAVA_VERSION[@]}
 	[ruby]=${RUBY[@]}
+	[uv]=${UV[@]}
 )
 
 # https://github.com/pyenv/pyenv/issues/950

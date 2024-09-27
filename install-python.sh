@@ -20,6 +20,7 @@ DEBUGGING="${DEBUGGING:-false}"
 ANACONDA="${ANACONDA:-false}"
 PIPENV="${PIPENV:-false}"
 POETRY="${POETRY:-true}"
+UV="${UV:-true}"
 
 # If version is set to null then the default python version is used
 PYTHON_VERSION="${PYTHON_VERSION-}"
@@ -29,7 +30,7 @@ OLD_PYTHON="${OLD_PYTHON:-@3.11}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
-while getopts "hdvaeoyp:" opt; do
+while getopts "hdvaeoyp:u" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -52,6 +53,7 @@ while getopts "hdvaeoyp:" opt; do
 			  -o $(! $POETRY || echo "no ")poetry install
 			  -e $(! $PIPENV || echo "no ")pipenv install
 			  -y $(! $PYENV || echo "no ")pyenv install
+			  -u $(! $UV || echo "no ")uv install
 			  -p install python version (default: ${PYTHON_VERSION:-stable})
 		EOF
 		exit 0
@@ -79,6 +81,9 @@ while getopts "hdvaeoyp:" opt; do
 	y)
 		PYENV="$($PYENV && echo false || echo true)"
 		;;
+	u)
+		UV="$($UV && echo false || echo true)"
+		;;
 	*)
 		echo "no -$opt flag" >&2
 		;;
@@ -104,6 +109,7 @@ shift $((OPTIND - 1))
 #black
 #flake8
 PACKAGE+=(
+
 	python-argcomplete
 	bandit
 	mypy
@@ -159,6 +165,12 @@ fi
 if $ANACONDA; then
 	log_verbose "use anaconda"
 	"$SCRIPT_DIR/install-conda.sh"
+fi
+
+if $UV; then
+	log_verbose "use uv"
+	PACKAGE+=(uv)
+	PYTHON_PACKAGE+=(poetry_to_uv)
 fi
 
 # Note do not quote, want to process each as separate arguments
