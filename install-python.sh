@@ -205,6 +205,7 @@ PYTHON_PACKAGE+=(
 	pytest-cov
 	pytest-timeout
 	pytest-xdist
+	types-requests ## mypy needs this for checking
 
 )
 #fi
