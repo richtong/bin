@@ -91,10 +91,16 @@ PIP_PACKAGE+=(
 #if mac_is_arm; then
 #ARCH=arm64
 #fi
-#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
+# if [[ -v poetry_active ]]; then
+# 	log_verbose "In poetry so add to the project"
+# 	log_warning "If you want in the system, you must exit poetry and rerun"
+# 	poetry add "${PIP_PACKAGE[@]}"
+# else
 log_verbose "Pip install only in current environment rerun in other venvs"
-pip_install --upgrade "${PIP_PACKAGE[@]}"
-log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
+pip_install "${PIP_PACKAGE[@]}"
+# fi
+
+# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
 
 # no need for gp4all
 #download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
@@ -118,45 +124,52 @@ fi
 # These are too large for a 64GB machine
 # deepseek-v2.5              # 2024-09-03 instruct 236B very large
 MODEL+=(
+	# coder models
+	# deepseek-coder-v2 # 16-lite-base-q4_0 -- deepseek 2.5 replaces
+	codestral      # 22B Mistral code model 32K context window
+	qwen2.5-coder  # 128K Tuned for coding 7B
+	starcoder2     ## 3B chat 16K context
+	starcoder2:7b  # 4GB
+	starcoder2:15b # 9GB
+	yi-coder       # 9B model q4 128K context
+
+	# general purpose
+	# llama3.1:8b-text-q4_0 # text tuned model poor
+	command-r                 # 128K context 35b 19GB
+	gemma2                    # Google 9B Q4 5.4GB 8K context
+	gemma2:27b                # Q4 16GB 8K context
+	hermes3                   # fine tuned llama 3.1 8B 128K context
+	hermes3:70b               # fine tuned llama 3.1 q4 128K Context
+	llama3.2                  # Meta 3.2-3B Q4 128 context 2GB
+	llama3.2:3b-instruct-q8_0 # 3GB
+	mistral-nemo              # 128k context 12b-instruct-2407-q4_0
+	mistral-small             # v0.3 Mistral 22b-instruct-2409-q4_0
+	qwen2.5                   # 128K context Alibaba 2024-09-16 7b
+	qwen2.5-math              # Alibaba math 7b-instruct-q4_K_M
+	solarpro                  # 22b comparable to llama 3.1 70b 4k context
+
+	# speciality models
+	bespoke-minicheck # Fact check 7B q4_K_M
+	reader-lm         # HTML to Markdown conversion 1.5B-q4_K_M
+
+	# small LLMs
+	gemma2:2b     # Q4 1.6GB 8K context RoPE
+	nemotron-mini # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	phi3.5        # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+
+	# purpose large models
+	# llama3.1              # deprecated
+	# mistral-large:123b-instruct-2407-q3_K_S # 128K context winod 123B-instruct-q3_K_S
+	command-r-plus:104b-q2_K # 39GB Q2 with 128K context for enterprise
+	llama3.1:70b             # 70b-instruct-q4_0  40GB 128K context
+	qwen2.5-math:72b         # Q4 41GB
+	qwen2.5:72b              # 128K context Alibaba 72b-instruct-q4_K-M instruct
+	mistral-large:q3_K_S     # Mistral v2 128k context only q2_K will fit
+
 	# vision
 	minicpm-v    # vision mLLM 8b-2.6-q4_0
 	llava-llama3 # older vision model based on llama3
 	llava        # older vision model
-
-	# big models
-	mistral-large:123b-instruct-2407-q3_K_S # 128K context winod 123B-instruct-q3_K_S
-	command-r-plus                          # 104b-08-2024-q4_0 big at 59GB
-
-	bespoke-minicheck     # Fact check 7B q4_K_M
-	llama3.1:8b-text-q4_0 # test tuneded
-	qwen2.5-math          # Alibaba math 7b-instruct-q4_K_M
-	qwen2.5-math:72b      # Alibaba math 72b-instruct-q4_K_M
-
-	# small LLMs
-	phi3.5        # Microsoft 3.8B-instruct-q4_0
-	nemotron-mini # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-
-	# coder models
-	reader-lm         # HTML to Markdown conversion 1.5B-q4_K_M
-	deepseek-coder-v2 # 16-lite-base-q4_0
-	qwen2.5-coder     # Alibaba coder 7b-bas-q4_K_M
-	starcoder2        ## 7b chat or basenstruct-q4_0
-	yi-coder          # 9B model q4
-
-	llama3.1                   # 8B, 98B-instruct-q4_0
-	llama3.1:8b-text-q4_0      # test tuneded
-	llama3.1:70b-instruct-q4_0 # 70b instruct 4bit- quantized
-	gemma2                     # Google
-	qwen2.5                    # Alibaba 2024-09-16
-	qwen2.5-coder              # code specific
-	phi3.5                     # Microsoft 3.8B-instruct-q4_0
-	nemotron-mini              # nViida ropepaly, TAG QSA and function calling
-	starcoder2                 ## 3B and 7B
-	bespoke-minicheck          # Fact check 7B
-	reader-lm                  # HTML to Markdown conversion 0.5B and 1.5B
-	deepseek-v2.5              # 2024-09-03 integrated chat and instruct
-	yi-coder                   # Coding 9B-instruct-q4_0
-	mistral-large              # 128K context winod 123B
 
 )
 

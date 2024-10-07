@@ -36,8 +36,8 @@ while getopts "hdvr:u:" opt; do
 	d)
 		# invert the variable when flag is set
 		DEBUGGING="$($DEBUGGING && echo false || echo true)"
-		xport DEBUGGING
-		xport DEBUGGING=true
+		export DEBUGGING
+		export DEBUGGING=true
 		;;
 	v)
 		VERBOSE="$($VERBOSE && echo false || echo true)"
