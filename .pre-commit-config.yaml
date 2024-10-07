@@ -11,7 +11,7 @@
 # cannot run  markdownlint checks for hugo
 ---
 # need this so gitlint only runs during commit-msg
-default_stages: [commit, push]
+default_stages: [pre-commit, pre-push]
 # python regex https://www.programiz.com/python-programming/regex
 exclude: (^archive/|^user/|deprecated/)
 repos:
