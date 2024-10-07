@@ -91,6 +91,7 @@ PIP_PACKAGE+=(
 #if mac_is_arm; then
 #ARCH=arm64
 #fi
+#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
 # if [[ -v poetry_active ]]; then
 # 	log_verbose "In poetry so add to the project"
 # 	log_warning "If you want in the system, you must exit poetry and rerun"
