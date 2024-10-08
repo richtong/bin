@@ -136,6 +136,7 @@ MODEL+=(
 
 	# general purpose
 	# llama3.1:8b-text-q4_0 # text tuned model poor
+	# qwen2-math              # Alibaba math 7b-instruct-q4_K_M
 	command-r                 # 128K context 35b 19GB
 	gemma2                    # Google 9B Q4 5.4GB 8K context
 	gemma2:27b                # Q4 16GB 8K context
@@ -146,8 +147,7 @@ MODEL+=(
 	mistral-nemo              # 128k context 12b-instruct-2407-q4_0
 	mistral-small             # v0.3 Mistral 22b-instruct-2409-q4_0
 	qwen2.5                   # 128K context Alibaba 2024-09-16 7b
-	qwen2.5-math              # Alibaba math 7b-instruct-q4_K_M
-	solarpro                  # 22b comparable to llama 3.1 70b 4k context
+	solar-pro                 # 22b comparable to llama 3.1 70b 4k context
 
 	# speciality models
 	bespoke-minicheck # Fact check 7B q4_K_M
@@ -161,11 +161,10 @@ MODEL+=(
 	# purpose large models
 	# llama3.1              # deprecated
 	# mistral-large:123b-instruct-2407-q3_K_S # 128K context winod 123B-instruct-q3_K_S
-	command-r-plus:104b-q2_K # 39GB Q2 with 128K context for enterprise
-	llama3.1:70b             # 70b-instruct-q4_0  40GB 128K context
-	qwen2.5-math:72b         # Q4 41GB
-	qwen2.5:72b              # 128K context Alibaba 72b-instruct-q4_K-M instruct
-	mistral-large:q3_K_S     # Mistral v2 128k context only q2_K will fit
+	command-r-plus:104b-q2_K              # 39GB Q2 with 128K context for enterprise
+	llama3.1:70b                          # 70b-instruct-q4_0  40GB 128K context
+	qwen2.5:72b                           # 128K context Alibaba 72b-instruct-q4_K-M instruct
+	mistral-large:123b-instruct-2407-q2_K # Mistral v2 128k context only q2_K will fit
 
 	# vision
 	minicpm-v    # vision mLLM 8b-2.6-q4_0
