@@ -95,26 +95,24 @@ source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
 # log_verbose "PATH=$PATH"
 
-# Kite is Python code completer not used use Codeium
-# https://github.com/kiteco/jupyterlab-kite
-# kite
-# https://github.com/PyCQA/pydocstyle
-# pydocstyle - no longer maintained use ruff
-# mypy - python type checking
-# pyyaml - python yaml parser
 # favor the brew packages vs pip
 # autocomplete will not install in brew so must be in an environment remove it as not used much
 # flake8 and black are replaced by ruff and ruff also does markdownlint so move
 # to install-lint
-#black
-#flake8
+# kite  # Kite is Python code completer not used use Codeium
+# black  # formatter (replaced by ruff)
+# flake8  # python linter (replaced by ruff)
+# pydocstyle - no longer maintained use ruff (deprecated)
 PACKAGE+=(
 
-	python-argcomplete
-	bandit
-	mypy
-	pyyaml
-	tox
+	bandit             # check for security problems
+	mypy               # mypy - python type checking
+	pipx               # run python cli in venv
+	python-argcomplete # argument parser
+	pyyaml             # pyyaml - python yaml parser
+	ruff               # fast linter replaces flake8, pydocstyle, black
+	tox                # tox - python test runner for different versions of python
+
 )
 
 if [[ -v PYTHON_VERSION ]]; then
@@ -191,11 +189,6 @@ done
 # Only install pip packages if not in homebrew as
 # raw pip in homebrew does not allow it
 
-# argparse complete
-# bandit - check for security problems
-# black - a very strick python formatter (repalced by ruff)
-# pytest - python test runner
-# tox - python test runner for different versions of python
 # pydantic - data validation and type checking integrates with mypy
 # pymdown-extensions - Markdown helpers
 # autoimport - add and remove imports
@@ -213,7 +206,7 @@ PYTHON_PACKAGE+=(
 	pdoc3
 	pydantic
 	pymdown-extensions
-	pytest
+	pytest # pytest - python test runner
 	pytest-cov
 	pytest-timeout
 	pytest-xdist
@@ -221,6 +214,15 @@ PYTHON_PACKAGE+=(
 
 )
 #fi
+
+# pipx creates python cli in venv with PATH links so use for real python apps
+# which need isolation, favor homebrew first then use pipx, if you wnat
+# an installation just in a venv use pip install.
+PIPX_PACKAGES+=(
+
+)
+
+pipx install "${PIPX_PACKAGES[@]}"
 
 if [[ $(command -v python) =~ "conda" ]]; then
 	log_warning "Anaconda is installed so pip packages will go into conda environment"

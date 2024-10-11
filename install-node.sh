@@ -75,7 +75,8 @@ if $BREW; then
 	log_verbose install brew
 	PACKAGES+=(
 		node
-		yarn
+		yarn # an alternative npm from Facebook
+		pnpm # much faaster npm
 		yarn-completion
 	)
 	package_install "${PACKAGES[@]}"

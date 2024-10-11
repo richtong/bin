@@ -1,0 +1,192 @@
+[project]
+name = "src"
+version = "0.1.0"
+description = "TNE.ai main src repo"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aquirdturtle-collapsible-headings>=3.1",
+    "black[jupyter]>=24.10.0",
+    "graphviz>=0.20.3",
+    "ipydrawio[all]>=1.3.0",
+    "ipyleaflet>=0.17",
+    "ipywidgets>=7.5",
+    "jupyter-bokeh>=3.0.4",
+    "jupyter-dash>=0.4.2",
+    "jupyterlab-code-formatter>=3.0.2",
+    "jupyterlab-git>=0.37",
+    "jupyterlab-github>=3.0",
+    "jupyterlab-latex>=3.1.0",
+    "jupyterlab-lsp>=3.10",
+    "jupyterlab-spellchecker>=0.8.3",
+    "jupyterlab-system-monitor>=0.8",
+    "jupyterlab-vim>=0.15",
+    "jupyterlab-widgets>=1.1",
+    "jupyterlab>=3.3",
+    "jupyterlite>=0.4.2",
+    "jupytext>=1.16.4",
+    "lckr-jupyterlab-variableinspector>=3.2.4",
+    "nbdime>=1.1.1",
+    "nodejs>=0.1.1",
+    "pillow>=10.4.0",
+    "python-lsp-server[all]>=1.5.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+  "build>=1.2.2",
+  "fontawesome-markdown>=0.2.6",
+  "mkdocs>=1.6.1",
+  "mkdocs-material>=9.5.38",
+  "mkdocstrings[python]>=0.26.1",
+  "mypy>=1.11.2",
+  "neovim>=0.3.1",
+  "pdoc3>=0.11.1",
+  "pre-commit>=3.8.0",
+  "pymdown-extensions>=10.11",
+  "ruff>=0.6.8",
+  "setuptools>=75.1.0",
+  "twine>=5.1.1",
+  "wheel>=0.44.0",
+  "yamllint>=1.35.1",
+]
+
+# https://docs.astral.sh/ruff/configuration/
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".ipynb_checkpoints",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pyenv",
+  ".pytest_cache",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  ".vscode",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "site-packages",
+  "venv",
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Assume Python 3.11
+target-version = "py311"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+
+# Richt's aggressive defaults are:
+# "F", -- pyright
+# "E", -- pycodestyle
+# "W", -- pycodestyle warnings
+# "C", -- mccabe code complexity
+# "I", -- isort
+# "N", -- PEP8 naming
+# "N", -- PEP8 naming
+# "D", -- pydocstyle docstrings
+# "UP", -- pyupgrade
+# "YTT", -- flake8-2020
+# "ANN", -- flake8-annotations
+# "S", -- flake8-bandit
+# "FBT", -- flake8-boolean-trap
+# "B", -- flake8-bugbear
+# "A", -- flake8-builtin showing
+# "COM", -- flake8-commas missing
+# "C4", -- flake8-comprehensions simplification
+# "DTZ", -- flake8-datetimez errors
+# "EM", -- flake8-errmsg
+# "EXE", -- flake8-executalbe
+# "PTH", -- flake8-use-pathlib no os.path
+# "PD", -- pandas-vet
+# "PL", -- pylint refactor, warn, errors
+# "NPY", -- numpy
+# "PERF", -- perflint
+# "DOC", -- pydoclint
+# "RUF", -- ruff specific rules
+select = [
+  "F",
+  "E",
+  "W",
+  "C",
+  "I",
+  "N",
+  "N",
+  "D",
+  "UP",
+  "YTT",
+  "ANN",
+  "S",
+  "FBT",
+  "B",
+  "A",
+  "COM",
+  "C4",
+  "DTZ",
+  "EM",
+  "EXE",
+  "PTH",
+  "PD",
+  "PL",
+  "NPY",
+  "PERF",
+  "DOC",
+  "RUF",
+]
+# ignor conflicting rules
+ignore = [
+  "D203", # no blank lines before docstring in class (Google convention)
+  "D213", # one line after summary (Google convention)
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = true
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"

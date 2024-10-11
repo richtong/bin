@@ -73,11 +73,15 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
+PACKAGES+=(
+	"$ANACONDA"
+	conda-lock
+)
+
 log_warning "link $HOME/.local/bin/gcc to gcc-version but this break Ubuntu"
 if in_os mac; then
 	log_verbose "In Mac install trying to install $ANACONDA"
-	cask_install "$ANACONDA"
-	log_verbose "$ANACONDA installed"
+	brew_install "${PACKAGES[@]}"
 elif ! command -v conda &>/dev/null; then
 	log_verbose "downloading $URL and running it"
 	# https://docs.continuum.io/anaconda/install/linux/

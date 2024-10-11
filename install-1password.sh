@@ -18,14 +18,13 @@ FORCE="${FORCE:-false}"
 OP_INIT="${OP_INIT:-false}"
 # if Private you do not need to set
 OP_VAULT="{OP_VAULT:-DevOps}"
-# make this a null string normally
-OP_KEYTYPE="{OP_KEYTYPE:- Dev}"
 VERSION="${VERSION:-8}"
+DIRENV_PROFILE="${ENV_PROFILE:-false}"
 DIRENV="${DIRENV:-$HOME/.envrc}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvfr:e:oc:k:" opt; do
+while getopts "hdvfr:e:oc:n" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -36,13 +35,13 @@ while getopts "hdvfr:e:oc:k:" opt; do
 				   -d $($DEBUGGING && echo "no ")debugging
 				   -v $($VERBOSE && echo "not ")verbose
 				   -f $($FORCE && echo "do not ")force install even is 1Password exists
+				   -n $(DIRENV_PROFILE && echo "no ")install variables in direnv
 
 				   -r 1Password version number (default: $VERSION)
 
 				   -c .envrc to use this vault (default: $OP_VAULT)
 				   -e install into .envrc for direnv if DIRENV is set (default: $DIRENV)
 				   -o $($OP_INIT && echo "No ")init for 1Password op plugins
-				   -k 1Password Item Suffix (default: $OP_KEYTYPE)
 
 
 			For plugins, you should set y our 1Password to use special names
@@ -137,8 +136,8 @@ while getopts "hdvfr:e:oc:k:" opt; do
 	c)
 		OP_VAULT="$OPTARG"
 		;;
-	k)
-		OP_KEYTYPE="$OPTARG"
+	n)
+		DIRENV_PROFILE="$($DIRENV_PROFILE && echo false || echo true)"
 		;;
 	*)
 		echo "no flag -$opt"
@@ -246,20 +245,24 @@ ENTRY+=(
 # need quotes for huggingface-cli because shfmt will
 declare -A OP_ITEM
 OP_ITEM=(
-	[aws]="AWS Access Key"
-	[cdk]="AWS Access Key"
-	[doctl]="DigitalOcean Personal Access Token"
-	[gh]="GitHub Personal Access Token"
-	["huggingface-cli"]="Hugging Face API Token"
-	[localstack]="LocalStack API Key"
-	[openai]="OpenAI API Key"
-	[oaieval]="OpenAI API Key"
-	[oaievalset]="OpenAI API Key"
-	[anthropic]="Anthropic API Key"
-	[openrouter]="OpenRouter API Key"
-	[groq]="Groq API Key"
-	[replicate]="Replicate API Token"
-	["google-gemini"]="Google Gemini API Key"
+	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
+	[AWS_ACCESS_KEY_ID]="AWS Access Key"
+	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
+	[DIGITALOCEAN_TOKEN]="DigitalOcean Personal Access Token"
+	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
+	[GEMINI_API_KEY]="Google Gemini API Key Dev"
+	[GITHUB_TOKEN]="GitHub Personal Access Token"
+	[GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
+	[GROQ_API_KEY]="Groq API Key Dev"
+	[HF_TOKEN]="Hugging Face API Token Dev"
+	[LOCALSTACK_API_KEY]="LocalStack API Key"
+	[OPENAI_API_KEY]="OpenAI API Key Dev"
+	[OPENROUTER_API_KEY]="OpenRouter API Key Dev"
+	[REPLICATE_API_KEY]="Replicate API Token"
+	[SLASHGPT_ENV_WEBPILOT_UID]="Webpilot UID Dev"
+	[SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
+	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
+
 )
 
 # the field where the token lives in the item
@@ -271,38 +274,24 @@ OP_ITEM=(
 # so auth token should be changed to when the plugin changes in 1password
 declare -A OP_FIELD
 OP_FIELD=(
-	[aws]="access key id"
-	[cdk]="secret access key"
-	[doctl]=token
-	[gh]=token
-	["huggingface-cli"]="user access token"
-	[localstack]="api key"
-	[openai]="api key"
-	[oaieval]="api key"
-	[oaievalset]="api key"
-	[anthropic]="api key"
-	[openrouter]="key"
-	[groq]="api key"
-	[replicate]="api token"
-	["google-gemini"]="api key"
-)
+	[ANTHROPIC_API_KEY]="api key"
+	[AWS_ACCESS_KEY_ID]="access key id"
+	[AWS_SECRET_ACCESS_KEY]="secret access key"
+	[DIGITALOCEAN_TOKEN]=token
+	[DEEPSEEK_API_KEY]="api key"
+	[GEMINI_API_KEY]="api key"
+	[GITHUB_TOKEN]=token
+	[GITHUB_TOKEN_CLASSIC]="personal access token"
+	[GROQ_API_KEY]="api key"
+	[HF_TOKEN]="user access token"
+	[LOCALSTACK_API_KEY]="api key"
+	[OPENAI_API_KEY]="api key"
+	[OPENROUTER_API_KEY]="key"
+	[REPPLICATE_API_KEY]="api token"
+	[SLASHGPT_ENV_WEBPILOT_UID]=key
+	[SUPERSET_SECRET_KEY]="api key"
+	[WEBUI_SECRET_KEY]="secret key"
 
-declare -A DIRENV_ENV
-DIRENV_ENV=(
-	[aws]=AWS_ACCESS_KEY_ID
-	[cdk]=AWS_SECRET_ACCESS_KEY
-	[doctl]=DIGITALOCEAN_TOKEN
-	[gh]=GITHUB_TOKEN
-	["huggingface-cli"]=HF_TOKEN
-	[localstack]=LOCALSTACK_API_KEY
-	[openai]=OPENAI_API_KEY
-	[oaieval]=OPENAI_API_KEY
-	[oaievalset]=OPENAI_API_KEY
-	[anthropic]=ANTHROPIC_API_KEY
-	[openrouter]=OPENROUTER_API_KEY
-	[groq]=GROQ_API_KEY
-	[replicate]=REPLICATE_API_TOKEN
-	["google-gemini"]=GOOGLE_GEMINI_API_KEY
 )
 
 # this creates a ./.op directory in the CWD so make sure we are at HOME
@@ -317,21 +306,6 @@ if $FORCE || $OP_INIT; then
 	for PLUG in "${PLUGIN[@]}"; do
 		log_verbose "Installing $PLUG"
 		op plugin init "$PLUG"
-	done
-fi
-
-log_verbose "installing into $DIRENV note that this does slow direnv"
-log_verbose "Only install into the main monorepo $SRC_DIR"
-if [[ -n $DIRENV ]] && ! config_mark "$SRC_DIR/$DIRENV"; then
-	for ENTRY in "${PLUGIN[@]}"; do
-		log_verbose "Installing $ENTRY into $DIRENV"
-		log_verbose "expert ${DIRENV_ENV[$ENTRY]} = "
-		log_verbose "op item get ${OP_ITEM[$ENTRY]}"
-		log_verbose "fields ${OP_FIELD[$ENTRY]}"
-		config_add "$SRC_DIR/$DIRENV" <<-EOF
-			export "${DIRENV_ENV[$ENTRY]}"="\$(op item get "${OP_ITEM[$PLUG]}${OP_KEYTYPE}" \\
-				--fields "${OP_FIELD[$ENTRY]}" --vault "${OP_VAULT}" --reveal)"
-		EOF
 	done
 fi
 
@@ -351,7 +325,35 @@ fi
 # 		EOF
 # 	fi
 # done
+#
 
+# usage: 1password_export [profile file]
+1password_export() {
+	local profile_file="${1:-$config_profile}"
+	for ENV_VAR in "${PLUGIN[@]}"; do
+		log_verbose "export $ENV_VAR"
+		log_verbose "op item get ${OP_ITEM[$ENV_VAR]}"
+		log_verbose "fields ${OP_FIELD[$ENV_VAR]}"
+		# https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash
+		# do not overwrite if a key already exists
+		config_add "$profile_file" <<-EOF
+			[ -z $${$ENV_VAR+x} ] || \\
+				export "$ENV_VAR"="\$(op item get "${OP_ITEM[$ENV_VAR]}" \\
+					--fields "${OP_FIELD[$ENV_VAR]}" --vault "${OP_VAULT}" --reveal)"
+		EOF
+	done
+}
+
+log_verbose "Install these in the universal export for the user"
+if $DIRENV_PROFILE; then
+	log_verbose "installing into $DIRENV note that this does slow direnv"
+	touch "$DIRENV"
+	if ! config_mark "$SRC_DIR/$DIRENV"; then
+		1password_export "$SRC_DIR/$DIRENV"
+	fi
+fi
+
+# since the 1password op needs user input we cannot put in the .profile
 log_verbose "Add bash and zsh completions"
 if ! config_mark "$(config_profile_nonexportable)"; then
 	config_add "$(config_profile_nonexportable)" <<-EOF
@@ -359,6 +361,9 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 		source <(op completion bash)
 		if [[ -e $HOME/.config/op/plugins.sh ]]; then . "$HOME/.config/op/plugins.sh"; fi
 	EOF
+	if ! $DIRENV_PROFILE; then
+		1password_export "$(config_profile_nonexportable)"
+	fi
 fi
 
 # assuming oh-my-zsh is installed
@@ -370,6 +375,9 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 		config_add "$(config_profile_nonexportable_zsh)" <<-EOF
 			plugins+=(1password)
 		EOF
+	fi
+	if ! $DIRENV_PROFILE; then
+		1password_export "$(config_profile_nonexportable_zsh)"
 	fi
 fi
 
