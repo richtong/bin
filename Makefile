@@ -44,7 +44,7 @@ clean:
 # if you use docker (who doesn't)
 -include $(INCLUDE_DIRS)/include.docker.mk
 # only include if it exists your companies specific stuff
--include $(INCLUDE_DIRS)/include.jupyter.mk
+# -include $(INCLUDE_DIRS)/include.jupyter.mk
 -include $(INCLUDE_DIRS)/include.node.mk
 
 # rhash is optional for hash checks

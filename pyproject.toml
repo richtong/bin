@@ -1,7 +1,7 @@
 [project]
-name = "src"
-version = "0.1.0"
-description = "TNE.ai main src repo"
+name = "bin"
+version = "0.1.1-202410"
+description = "Rich's bin repo"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
