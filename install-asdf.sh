@@ -45,6 +45,10 @@ if ((${#DEFAULT_RUBY[@]} > 0)); then RUBY_VERSION=("${RUBY_VERSION[@]:-${DEFAULT
 DEFAULT_UV=(0.4.17)
 if ((${#DEFAULT_UV[@]} > 0)); then UV_VERSION=("${UV_VERSION[@]:-${DEFAULT_UV[@]}}"); fi
 
+# Go used in Hugo
+DEFAULT_GOLANG=(1.23.2)
+if ((${#DEFAULT_GOLANG[@]} > 0)); then UV_VERSION=("${UV_VERSION[@]:-${DEFAULT_GOLANG[@]}}"); fi
+
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvn:e:p:j:r:u:" opt; do
 	case "$opt" in
@@ -146,6 +150,7 @@ declare -A ASDF+=(
 	[java]=${JAVA_VERSION[@]}
 	[ruby]=${RUBY[@]}
 	[uv]=${UV[@]}
+	[golang]=${GOLANG[@]}
 )
 
 # https://github.com/pyenv/pyenv/issues/950

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # vim: set noet ts=4 sw=4:
 #
-## install site editing and blogging tools
+## install website content management editing and blogging tools
 ## @author Rich Tong
 ## @returns 0 on success
 #
@@ -64,6 +64,8 @@ PACKAGE+=(
 	wordpresscom        # standalone blog edit
 	wordpresscom-studio # offline development for wordpress
 	publii              # git-backed cms visual editor
+	wp-cli              # wordpress command line
+	wp-cli-completion   # command completions
 )
 
 log_verbose "Install ${PACKAGE[*]}"

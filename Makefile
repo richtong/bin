@@ -8,7 +8,8 @@ TAG=0.9
 # can insert your own include in the CWD if you want to override
 # https://runebook.dev/en/docs/gnu_make/include
 # this directive does not seem to work
-.INCLUDE_DIRS=../lib
+# .INCLUDE_DIRS=../lib
+.INCLUDE_DIRS = $(WS_DIR)/ws/git/src/lib
 INCLUDE_DIRS ?= ../lib
 # adjust for your org
 ORG ?= tne
@@ -42,10 +43,10 @@ clean:
 # the first dash means ignore errors
 -include $(INCLUDE_DIRS)/include.python.mk
 # if you use docker (who doesn't)
--include $(INCLUDE_DIRS)/include.docker.mk
+# -include $(INCLUDE_DIRS)/include.docker.mk
 # only include if it exists your companies specific stuff
 # -include $(INCLUDE_DIRS)/include.jupyter.mk
--include $(INCLUDE_DIRS)/include.node.mk
+# -include $(INCLUDE_DIRS)/include.node.mk
 
 # rhash is optional for hash checks
 # -include $(INCLUDE_DIRS)/include.rhash.mk

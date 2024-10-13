@@ -243,24 +243,27 @@ ENTRY+=(
 
 # the list of 1Password names for each of these API keys
 # need quotes for huggingface-cli because shfmt will
-declare -A OP_ITEM
+# do not use github_otken, use gh auth login
+# do not use AWS_SECRET_ACCESS_KEY, use AWS_SECRET_ACCESS_KEY use aws ssologin
+# declare -A OP_ITEM
+# not currnetly using superset or localstack
 OP_ITEM=(
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
-	[AWS_ACCESS_KEY_ID]="AWS Access Key"
-	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
 	[DIGITALOCEAN_TOKEN]="DigitalOcean Personal Access Token"
+	# 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
+	# 	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
 	[GEMINI_API_KEY]="Google Gemini API Key Dev"
-	[GITHUB_TOKEN]="GitHub Personal Access Token"
+	# [GITHUB_TOKEN]="GitHub Personal Access Token"
 	[GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
 	[GROQ_API_KEY]="Groq API Key Dev"
 	[HF_TOKEN]="Hugging Face API Token Dev"
-	[LOCALSTACK_API_KEY]="LocalStack API Key"
+	# [LOCALSTACK_API_KEY]="LocalStack API Key"
 	[OPENAI_API_KEY]="OpenAI API Key Dev"
 	[OPENROUTER_API_KEY]="OpenRouter API Key Dev"
 	[REPLICATE_API_KEY]="Replicate API Token"
 	[SLASHGPT_ENV_WEBPILOT_UID]="Webpilot UID Dev"
-	[SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
+	# [SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
 	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
 
 )
@@ -275,21 +278,21 @@ OP_ITEM=(
 declare -A OP_FIELD
 OP_FIELD=(
 	[ANTHROPIC_API_KEY]="api key"
-	[AWS_ACCESS_KEY_ID]="access key id"
-	[AWS_SECRET_ACCESS_KEY]="secret access key"
+	# [AWS_ACCESS_KEY_ID]="access key id"
+	# [AWS_SECRET_ACCESS_KEY]="secret access key"
 	[DIGITALOCEAN_TOKEN]=token
 	[DEEPSEEK_API_KEY]="api key"
 	[GEMINI_API_KEY]="api key"
-	[GITHUB_TOKEN]=token
+	# [GITHUB_TOKEN]=token
 	[GITHUB_TOKEN_CLASSIC]="personal access token"
 	[GROQ_API_KEY]="api key"
 	[HF_TOKEN]="user access token"
-	[LOCALSTACK_API_KEY]="api key"
+	# [LOCALSTACK_API_KEY]="api key"
 	[OPENAI_API_KEY]="api key"
 	[OPENROUTER_API_KEY]="key"
 	[REPPLICATE_API_KEY]="api token"
 	[SLASHGPT_ENV_WEBPILOT_UID]=key
-	[SUPERSET_SECRET_KEY]="api key"
+	# [SUPERSET_SECRET_KEY]="api key"
 	[WEBUI_SECRET_KEY]="secret key"
 
 )
@@ -337,7 +340,7 @@ fi
 		# https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash
 		# do not overwrite if a key already exists
 		config_add "$profile_file" <<-EOF
-			[ -z $${$ENV_VAR+x} ] || \\
+			[ -n "$${$ENV_VAR+x}" ] || \\
 				export "$ENV_VAR"="\$(op item get "${OP_ITEM[$ENV_VAR]}" \\
 					--fields "${OP_FIELD[$ENV_VAR]}" --vault "${OP_VAULT}" --reveal)"
 		EOF
@@ -384,3 +387,12 @@ fi
 # https://developer.1password.com/docs/cli/get-started/#step-2-turn-on-the-1password-desktop-app-integration
 log_verbose "login to 1Password"
 op signin
+
+# https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
+log_verbose "use ssh key for signing commits"
+git config --global gpg.format ssh
+# disable because op returns a double quoted string
+# shellcheck disable=SC2046
+git config --global user.signingkey $(op item get "GitHub SSH Key" --fields "public key" --reveal)
+git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+git config --global commit.gpgsign true
