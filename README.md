@@ -8,13 +8,10 @@ local-bin/README.md for how to do that
 Most of time if you need to install something just try grepping for the right
 shell file.
 
-For complete documentation, see the Mkdocs site at
-[Documentation](https://bin.docs.tongfamily.com) or look on GitHub look see the
-[docs directory](https://github.com/richtong/bin/docs).
+For complete documentation, see the Mkdocs site at the GitHub pages for this
+entry, you can regenerated documentation with `mkdocs gh-deploy`
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/63017acd-c889-441c-9ab6-1c80cd02ea67/deploy-status)](https://app.netlify.com/sites/bespoke-kangaroo-976158/deploys)
-
-## Building for Netlify
+## Building for Netlify (deprecated)
 
 This is all a little complicated, but if you want to make this work, then you
 need to make sure that there are three files loaded as [Niles](https://www.nileshdalvi.com/blog/deploy-static-web-mkdocs-netlify/)
