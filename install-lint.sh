@@ -100,6 +100,8 @@ PACKAGES+=(
 	hadolint
 	actionlint
 	checkmake
+	prettier  # general formatted
+	prettierd # very fast daemon version
 )
 log_verbose "install ${PACKAGES[*]}"
 package_install "${PACKAGES[@]}"

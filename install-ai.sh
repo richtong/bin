@@ -82,6 +82,9 @@ mas_install "${MAS[@]}"
 PIP_PACKAGE+=(
 
 	open-interpreter
+	"open-interpreter[local]"
+	"open-interpreter[os]"
+	open-webui
 
 )
 

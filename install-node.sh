@@ -75,9 +75,11 @@ if $BREW; then
 	log_verbose install brew
 	PACKAGES+=(
 		node
-		yarn # an alternative npm from Facebook
 		pnpm # much faaster npm
+		vite # the altest in build tools long live webpack
+		yarn # an alternative npm from Facebook
 		yarn-completion
+
 	)
 	package_install "${PACKAGES[@]}"
 	log_exit "brew complete"
