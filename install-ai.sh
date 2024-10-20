@@ -81,10 +81,10 @@ mas_install "${MAS[@]}"
 
 PIP_PACKAGE+=(
 
-	open-interpreter
+	open-interpreter # let's LLMs run code locally
 	"open-interpreter[local]"
 	"open-interpreter[os]"
-	open-webui
+	open-webui # chat interface to multiple local and remove llms
 
 )
 
@@ -93,7 +93,7 @@ PIP_PACKAGE+=(
 # Use brew install instead of
 #ARCH=x86
 #if mac_is_arm; then
-#ARCH=arm64
+#ARCH=arZZm64
 #fi
 #download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
 package_install "${PACKAGE[@]}"
@@ -102,6 +102,16 @@ pip_install --upgrade "${PIP_PACKAGE[@]}"
 
 # log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc
 log_warning "WEBUI_SECRET_KEY and OPENAI_API_KEY should both be defined before running ideally in a .envrc"
+log_verbose "To add Groq to OPen-webui Lower Left > Admin Panel > Settings > Connections > OpenAI API"
+log_verbose "Click on + on he right and add URL https://api.groq.com/openai/v1 and your GROQ key"
+# https://zohaib.me/extending-openwebui-using-pipelines/
+# log_verbose "https://github.com/open-webui/pipelines"
+log_verbose "To add Gemini, add functions or pipelines you need to run a docker and add it"
+log_verbose 'docker run -d -p 9099:9099 --add-host=host.docker.internal:host-gateway \ '
+log_verbose '-v pipelines:/app/pipelines --name pipelines --restart always \ '
+log_verbose "ghcr.io/open-webui/pipelines:main"
+log_verbose "or fork and submodule add git@githbu.com:open-webui/pipelines"
+log_verbose "pip install - requriements.txt && sh .start.sh"
 
 # no need for gp4all
 #download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
