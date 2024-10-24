@@ -94,6 +94,7 @@ PYTHON_PACKAGE+=(
 	mkdocs-git-revision-date-localized-plugin
 	mkdocs-enumerate-headings-plugin
 	"markdown-exec[ansi]"
+	mkdocs-git-commiters-plugin-2
 
 )
 
