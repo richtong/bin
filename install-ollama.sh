@@ -158,12 +158,12 @@ MODEL+=(
 	firefunction-v2                                                      # gpt-40 level function calling
 	hf.co/ICEPVP8977/Uncensored_gemma_2b                                 # make sure your hf enabled for shield tests
 	hf.co/mradermacher/Llama-3.2-3B-Instruct-Spatial-SQL-1.0-GGUF:Q4_K_S # sql model
-	hf.co/PurpleAILAB/SQL_Llama-3.2-3B-Instruct-uncensored_final-gguf
+	hf.co/PurpleAILAB/SQL_Llama-3.2-3B-Instruct-uncensored_final-gguf    # living dangerously
 
 	# small LLMs
-	gemma2:2b # Q4 1.6GB 8K context RoPE
 	# nemotron-mini # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	phi3.5 # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	gemma2:2b # Q4 1.6GB 8K context RoPE
+	phi3.5    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 
 	# purpose large models
 	# llama3.1              # deprecated
