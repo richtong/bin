@@ -3,9 +3,13 @@
 Installation and configuration depend on a few key variables like WS_DIR and
 having a bootstrap that depends on the environment variables.
 
+## Table of Contents
+
+[TOC]
+
 ## WS_DIR and directory layout
 
-The key shell variable is WS_DIR which is set by [include.sh](include.sh) this
+The key shell variable is WS_DIR which is set by include.sh this
 does a search for the directories the parents of a directory close to the
 script with a directory `git` in it. So if there are multiple workspace
 directories you can end up with errors, it will search alphabetically, so
@@ -33,10 +37,10 @@ submodules. The preinstall will take a Mac convert it with enough git and bash
 to run.
 
 To have everything ready, it assumes you have a Veracrypt installation with
-your passwords on it in *your username*.vc which lives on your Google Drive.
+your passwords on it in _your username_.vc which lives on your Google Drive.
 It will link your keys from there into ~/.ssh which is nice
 
-It also assumes you have a src/user/*your name*/dotfiles directory and will
+It also assumes you have a src/user/_your name_/dotfiles directory and will
 link your profile and other configurations there.
 
 If you have a network, then you should do:
