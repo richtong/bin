@@ -86,6 +86,12 @@ PACKAGE+=(
 
 package_install "${PACKAGE[@]}"
 
+PYTHON_PACKAGES+=(
+	marker-pdf # pdf to markdown https://github.com/VikParuchuri/marker
+)
+
+pipx_install "${PYTHON_PACKAGES[@]}"
+
 # only using markdownllint-cli2 now
 # https://dev.to/jonasbn/blog-post-markdownlint-24ig
 # log_verbose "Installing markdownlint the ruby version as mdl for compatibility"

@@ -79,12 +79,11 @@ MAS+=(
 )
 mas_install "${MAS[@]}"
 
-PIP_PACKAGE+=(
+PYTHON_PACKAGE+=(
 
 	open-interpreter # let's LLMs run code locally
 	"open-interpreter[local]"
 	"open-interpreter[os]"
-	open-webui # chat interface to multiple local and remove llms
 
 )
 
@@ -98,7 +97,7 @@ PIP_PACKAGE+=(
 #download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
 package_install "${PACKAGE[@]}"
 log_verbose "Pip install only in current environment rerun in other venvs"
-pip_install --upgrade "${PIP_PACKAGE[@]}"
+pipx_install "${PYTHON_PACKAGE[@]}"
 
 # log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc
 log_warning "WEBUI_SECRET_KEY and OPENAI_API_KEY should both be defined before running ideally in a .envrc"

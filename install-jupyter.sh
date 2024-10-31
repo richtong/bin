@@ -71,7 +71,6 @@ PIP_PACKAGE=(
 
 	aquirdturtle_collapsible_headings
 	black
-	black
 	blockdiagmagic
 	graphviz
 	"ipydrawio[all]"

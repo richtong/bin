@@ -78,7 +78,7 @@ PYTHON_PACKAGES+=(
 	mdformat-ruff
 )
 log_verbose "install ${PYTHON_PACKAGES[*]}"
-pip_install "${PYTHON_PACKAGES[@]}"
+pipx_install "${PYTHON_PACKAGES[@]}"
 
 log_verbose "Use markdown-cli and not mdl"
 #RUBY_PACKAGES+=(

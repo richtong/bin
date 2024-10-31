@@ -45,4 +45,4 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-install.sh
 
-pip_install streamlit
+pipx_install streamlit

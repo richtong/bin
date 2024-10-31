@@ -48,4 +48,4 @@ if [[ ! -e $HOME/.kaggle/kaggle.json ]]; then
 	log_warning get kaggle.json from kaggle.com/_your_name/account creat api key
 fi
 
-pip_install kaggle
+pipx_install kaggle

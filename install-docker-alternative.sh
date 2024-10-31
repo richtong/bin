@@ -254,7 +254,7 @@ if $PODMAN; then
 	# use docker compose with a podman pipe instead
 	# this podman compose does not suppor --env-file
 	#log_verbose "Install podman-compose"
-	#pip_install podman-compose
+	#pipx_install podman-compose
 
 fi
 

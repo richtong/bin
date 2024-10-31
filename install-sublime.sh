@@ -131,9 +131,11 @@ fi
 
 # Install the lint programs and pip installs locally and does update
 package_install python-pip
-pip_install --user --upgrade pyflakes
+# pip_install --user --upgrade pyflakes
+pipx_install pyflakes
 package_install tidy
-pip_install --user --upgrade pyyaml
+# pip_install --user --upgrade pyyaml
+pipx_install pyyaml
 
 log_warning "run subl and type View/Console copy and paste from  https://packagecontrol.io/installation and restart"
 

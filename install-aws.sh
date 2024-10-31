@@ -88,7 +88,7 @@ if $APT_INSTALL; then
 	# https://stackoverflow.com/questions/36969391/how-to-upgrade-aws-cli-to-the-latest-version
 	log_verbose package install
 	package_install awscli
-	# pip_install --user --upgrade awscli
+	# pipx_install --user --upgrade awscli
 	log_exit "install awscli"
 
 	if ! in_os docker; then
@@ -127,6 +127,7 @@ if $DOWNLOAD; then
 # --upgrade means update all requirements
 # --user means install for current user only not for all users
 # pip_install --upgrade --user awscli
+# pipx_install awscli
 # log_exit "pip install succeeded"
 
 fi

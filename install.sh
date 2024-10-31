@@ -409,7 +409,8 @@ fi
 # currently no python packages are needed
 log_verbose "installing python packages ${PYTHON_PACKAGES[*]} in user mode and upgrade dependencies"
 if [[ -v PYTHON_PACKAGES ]]; then
-	pip_install --user --upgrade "${PYTHON_PACKAGES[@]}"
+	# pip_install --user --upgrade "${PYTHON_PACKAGES[@]}"
+	pipx_install "${PYTHON_PACKAGES[@]}"
 fi
 
 # https://kislyuk.github.io/argcomplete/ for pytest

@@ -63,8 +63,9 @@ package_install "${PACKAGE[@]}"
 PYTHON_PACKAGE=(
 	awscli-local
 )
+
 log_verbose "Installing ${PYTHON_PACKAGE[*]}"
-pip_install "${PYTHON_PACKAGE[@]}"
+pipx_install "${PYTHON_PACKAGE[@]}"
 
 NODE_PACKAGE=(
 	aws-cdk-local

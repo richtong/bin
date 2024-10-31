@@ -77,7 +77,7 @@ MAS+=(
 )
 mas_install "${MAS[@]}"
 
-PIP_PACKAGE+=(
+PYTHON_PACKAGE+=(
 
 	open-interpreter # local llm run with interpreter at the cli with interpreter
 	open-webui       # create a web app at localhost:8080 run with open-webui server
@@ -95,10 +95,10 @@ PIP_PACKAGE+=(
 # if [[ -v poetry_active ]]; then
 # 	log_verbose "In poetry so add to the project"
 # 	log_warning "If you want in the system, you must exit poetry and rerun"
-# 	poetry add "${PIP_PACKAGE[@]}"
+# 	poetry add "${PYTHON_PACKAGE[@]}"
 # else
 log_verbose "Pip install only in current environment rerun in other venvs"
-pip_install "${PIP_PACKAGE[@]}"
+pipx_install "${PYTHON_PACKAGE[@]}"
 # fi
 
 # log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"

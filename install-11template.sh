@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 # vim: set noet ts=4 sw=4:
 #
-## install  chezmoi dotfile management
 ## @author Rich Tong
 ## @returns 0 on success
 #
-# https://chezmoi.io/
 #
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}

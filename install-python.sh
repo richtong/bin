@@ -176,9 +176,10 @@ log_verbose "installing ${PACKAGE[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
+
 log_verbose "black needs keg link"
-# brew link pydocstyle
-brew unlink black && brew link black
+# brew link pydocstyle  # pydostyle no longer maintained
+# brew unlink black && brew link black  # using ruff instead
 #log_verbose "PATH=$PATH"
 
 for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
@@ -186,6 +187,22 @@ for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	package_install "python$version"
 done
 
+# https://pipx.pypa.io/latest/installation/
+# pipx make sure it can change global and local paths
+pipx ensurepath
+sudo pipx ensurepath --global
+pipx_install argcomplete
+
+if ! config_mark "$(config_profile_nonexportable)"; then
+	config_add "$(config_profile_nonexportable)" <<-EOF
+		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+	EOF
+fi
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+	EOF
+fi
 # Only install pip packages if not in homebrew as
 # raw pip in homebrew does not allow it
 

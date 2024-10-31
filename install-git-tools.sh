@@ -167,7 +167,7 @@ if ! in_os mac; then
 	brew link nbdime pyyaml virtualenv
 fi
 
-pip_install "${PIP_PACKAGE[@]}"
+pipx_install "${PYTHON_PACKAGE[@]}"
 
 log_verbose "check if authenticated"
 if ! gh auth status | grep -q "Logged in"; then

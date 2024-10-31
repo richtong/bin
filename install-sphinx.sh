@@ -103,15 +103,17 @@ source_lib lib-install.sh lib-config.sh
 # https://bitbucket.org/birkenfeld/sphinx-contrib/
 # has all the sphinx modules in a git repo, but easier to let pip maintain the
 # versions
-log_verbose pip install sphinx-doc globally
-pip_install --user --upgrade sphinx
+log_verbose "pip install sphinx-doc globally"
+# pip_install --user --upgrade sphinx
+pipx_install sphinx-doc
 # https://scicomp.stackexchange.com/questions/2987/what-is-the-simplest-way-to-do-a-user-local-install-of-a-python-package
 log_verbose "install extensions $EXTENSIONS"
 for ext in $EXTENSIONS; do
 	# if you want to be only local
 	# pip install --user "$USER" sphinx-contrib-$ext
 	log_verbose "install extension $ext globally"
-	pip_install --user --upgrade "sphinxcontrib-$ext"
+	# pip_install --user --upgrade "sphinxcontrib-$ext"
+	pipx_install "sphinxcontrib-$ext"
 done
 
 log_verbose install graphviz

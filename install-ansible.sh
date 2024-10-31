@@ -52,7 +52,8 @@ if in_os mac; then
 	package_install ansible
 	if ! command -v ansible >/dev/null; then
 		log_verbose "install failed trying pip"
-		pip_install --upgrade --user ansible
+		# pip_install --upgrade --user ansible
+		pipx_install ansible
 	fi
 	log_verbose checking maxfiles limit
 	if ! launchctl limit maxfiles | awk '{print $3}' | grep -q unlimited; then
