@@ -2,37 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.tongfamily.com/bin/</loc>
-         <lastmod>2024-10-13</lastmod>
+         <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.tongfamily.com/bin/dev/</loc>
-         <lastmod>2024-10-13</lastmod>
+         <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.tongfamily.com/bin/files/</loc>
-         <lastmod>2024-10-13</lastmod>
+         <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.tongfamily.com/bin/install/</loc>
-         <lastmod>2024-10-13</lastmod>
+         <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.tongfamily.com/bin/setup/</loc>
-         <lastmod>2024-10-13</lastmod>
+         <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.tongfamily.com/bin/special/</loc>
-         <lastmod>2024-10-13</lastmod>
+         <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.tongfamily.com/bin/test/</loc>
-         <lastmod>2024-10-13</lastmod>
+         <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
