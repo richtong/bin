@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://docs.tongfamily.com/bin/</loc>
+         <loc>https://richtong.github.io/bin/</loc>
          <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://docs.tongfamily.com/bin/dev/</loc>
+         <loc>https://richtong.github.io/bin/dev/</loc>
          <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://docs.tongfamily.com/bin/files/</loc>
+         <loc>https://richtong.github.io/bin/files/</loc>
          <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://docs.tongfamily.com/bin/install/</loc>
+         <loc>https://richtong.github.io/bin/install/</loc>
          <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://docs.tongfamily.com/bin/setup/</loc>
+         <loc>https://richtong.github.io/bin/setup/</loc>
          <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://docs.tongfamily.com/bin/special/</loc>
+         <loc>https://richtong.github.io/bin/special/</loc>
          <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://docs.tongfamily.com/bin/test/</loc>
+         <loc>https://richtong.github.io/bin/test/</loc>
          <lastmod>2024-11-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
