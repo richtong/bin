@@ -5,7 +5,8 @@
 #
 # this is used by monorepo as in the url so make it short
 site_name: bin
-site_url: https://docs.tongfamily.com/bin
+site_url: https://richtong.github.io/bin/
+# https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/
 repo_url: https://github.com/richtong/bin
 edit_uri: edit/main/docs
 
