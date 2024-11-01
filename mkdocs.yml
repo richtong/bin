@@ -10,6 +10,13 @@ site_url: https://richtong.github.io/bin/
 repo_url: https://github.com/richtong/bin
 edit_uri: edit/main/docs
 
+# https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin/issues/90
+# Using awesome pages does not work with monorepo, so a nav section is required
+# and ... are not processed properly here by monorepo
+# nav:
+#   - index.md
+# - ...
+# Need to manually add each page sigh
 nav:
   - Home: index.md
   - install.md
@@ -27,42 +34,45 @@ theme:
   # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/
   icon:
     repo: fontawesome/brands/github
-    edit: material/pencil
-    view: material/eye
   palette:
     primary: deep purple
     scheme: slate
     accent: indigo
   features:
-    - content.action.edit
+    - content.action.edit # edit if in a github repo
     - header.autohide
     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/
-    # no more round trips to the server
     - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.instant.preview
     # the address bar changes to nearest tag
     - navigation.tracking
     - navigation.sections
     - navigation.indexes
     - navigation.top
-    - navigation.instant.prefetch
+    - navigation.tabs
+    - navigation.tags.sticky
     # tabs eliminates the side nav bar only use for big sites
     # - navigation.tabs
     # - navigation.tags.sticky
     - navigation.path
-    - navigation.expand
     # prune reverse the expand
-    # - navigation.prune
+    - navigation.prune
+    # - navigation.expand
     - toc.follow
     - toc.integrate
 
 # https://squidfunk.github.io/mkdocs-material/setup/extensions/
 plugins:
-  - mkdocstrings
+  # https://github.com/byrnereese/mkdocs-git-committers-plugin
+  # generates a plugin error
+  # - git-committers:
+  #   repository: tne-ai/src
+  #   branch: main
+  #   token: !!python/object/apply:os.getenv ["GITHUB_TOKEN_CLASSIC"]
   - redirects
-  # allows the use of !include for mono repos
-  - monorepo
   - search
-  - awesome-pages
   - minify:
       minify_css: true
       minify_js: true
@@ -70,6 +80,32 @@ plugins:
       htmlmin_opts:
         remove_comments: true
       cache_safe: true
+  # @richt's additions use
+  # pdoc3 instead
+  # - mkdocstrings
+  # allows the use of !include for mono repos
+  - monorepo
+  - awesome-pages
+  # pymdownx superfences has this already
+  # mkdocs-mermaid2-plugin
+  # vegalite for charts
+  - charts
+  # add .ipynb directly into nav
+  - mkdocs-jupyter
+  # materials automatically inserts git change date
+  # need to set action/checkouit / with / fetch-depth=0
+  - git-revision-date-localized:
+      fallback_to_build_date: true
+  # automatically number headers (looks bad for large sites)
+  # - enumerate-headings
+  # requires superfences runs code on the doc site
+  - markdown-exec
+
+# for charts
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/vega@5
+  - https://cdn.jsdelivr.net/npm/vega-lite@5
+  - https://cdn.jsdelivr.net/npm/vega-embed@6
 
 markdown_extensions:
   - abbr
@@ -78,25 +114,66 @@ markdown_extensions:
   - def_list
   - footnotes
   - md_in_html
+  - smarty
   - toc:
       permalink: true
+  # https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown-extensions/
+  # latex requires mathjax.js to work in docs/javascript/mathjax.js
   - pymdownx.arithmatex:
       generic: true
+  # adds better **bold** and _italic_ detection
   - pymdownx.betterem:
       smart_enable: all
+  # adds ^^underline^^ and ^superscript^
   - pymdownx.caret
+  # adds ==yellow highlight==
+  - pymdownx.mark
+  # adds ~~strikeout~~ ~subscript~
+  - pymdownx.tilde
+  # adds Critic Markup to show edits {++insert text++} {--remove text--}
+  # {==highlight text==} {>>comment text<<}
+  - pymdownx.critic
+  # collapsible callsouts with 3 lines, need a space between
+  # ???+ title
+  #
+  # detail hidden under a close
   - pymdownx.details
+  # automatic syntax highlighting in `code blocks`
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
+  # handles in-line code highlighting
+  - pymdownx.inlinehilite
+  # keyboard key combinations ++ctrl+alt+delete++ ++arrow-up++ ++cmd++ ++option++
   - pymdownx.keys
+  # autolinks mail, ftp lines
   - pymdownx.magiclink:
       normalize_issue_symbols: true
       repo_url_shorthand: true
-  - pymdownx.mark
+  # converts (tm) (c) +/-
   - pymdownx.smartsymbols
+  # insert a file with --8<--- "file.ext"
+  - pymdownx.snippets
+  # next code and content blocks
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: vegalite
+          class: vegalite
+          format:
+            !!python/name:mkdocs_charts_plugin.fences.fence_vegalite # adds twitter emojis like :smile: see https://emojipedia.org/twitter
+
+
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator:
+        !!python/name:material.extensions.emoji.to_svg # adds tab agove content to group code blocks for different operating systems
+
+
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
