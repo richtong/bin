@@ -106,9 +106,7 @@ pipx_install "${PYTHON_PACKAGE[@]}"
 
 if ! config_mark "$(config_profile_interactive)"; then
 	config_add "$(config_profile_interactive)" <<-EOF
-		if command -v open-webui > /dev/null; then
-			open-webui --install-completion
-		fi
+		if command -v open-webui > /dev/null; then open-webui --install-completion; fi
 	EOF
 fi
 

@@ -48,11 +48,12 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-install.sh lib-config.sh
 
 package_install thefuck
-if ! config_mark "$(config_profile_nonexportable)"; then
-	config_add "$(config_profile_nonexportable)" <<-'EOF'
+
+if ! config_mark "$(config_profile_for_bash)"; then
+	config_add "$(config_profile_for_bash)" <<-'EOF'
 		# shellcheck disable=SC2046
 		if command -v thefuck >/dev/null; then eval $(thefuck --alias); fi
 	EOF
 fi
 
-log_warning "If using zsh the install thefuck onmyzsh plugin"
+log_verbose "expects zsh installed by install-zsh.sh"

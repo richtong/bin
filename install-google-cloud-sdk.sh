@@ -73,7 +73,7 @@ if in_os mac; then
 		#    source \
 		#    "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.bash.inc";
 		#fi
-		config_add <<-'EOF'
+		config_add "$(config_profile_for_bash)" <<-'EOF'
 			# shellcheck disable=SC1091
 			if [ -r "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.bash.inc" ]; then
 				source \

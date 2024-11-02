@@ -165,15 +165,9 @@ declare -A ASDF_ENV+=(
 
 log_warning "use oh-my-zsh asdf plugin to install paths"
 
-PROFILE_TO_ADD="$(config_profile_shell_bash)"
-if in_os linux; then
-	log_verbose "In linux add to $PROFILE_TO_ADD"
-	PROFILE_TO_ADD="$(config_profile_interactive_bash)"
-fi
-
-if ! config_mark "$PROFILE_TO_ADD"; then
+if ! config_mark "$(config_profile_shell)"; then
 	log_verbose "Adding to $PROFILE_TO_ADD"
-	config_add "$PROFILE_TO_ADD" <<-'EOF'
+	config_add "$(config_profile_shell)" <<-'EOF'
 		if command -v asdf >/dev/null; then
 		    # shellcheck disable=SC1090,SC1091
 		    source "$(brew --prefix asdf)/libexec/asdf.sh"
