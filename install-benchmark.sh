@@ -46,7 +46,7 @@ set -u
 
 if in_os mac; then
 	log_verbose "installing MacOS benchmarking"
-	package_install geekbench cinebench phoronix-test-suite
+	package_install geekbench cinebench phoronix-test-suite geekbench-ai
 	log_exit "Run Geekbench and Cinebench"
 	exit
 fi

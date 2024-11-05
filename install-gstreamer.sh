@@ -33,11 +33,12 @@ source_lib lib-install.sh
 set -u
 shift $((OPTIND - 1))
 PACKAGES+=(
-	gstreamer
-	gst-plugins-base
-	gst-plugins-good
-	gst-plugins-bad
-	gst-plugins-ugly
+	# gstreamer  #
+	libnice # this include gstremer now
+	# gst-plugins-base  # now part of gstreamer
+	# gst-plugins-good  # now part of gstreamer
+	# gst-plugins-bad   # now part of gstreamer
+	# gst-plugins-ugly  # now part of gstreamer
 )
 
 package_install "${PACKAGES[@]}"

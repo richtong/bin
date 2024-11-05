@@ -335,6 +335,7 @@ fi
 # usage: 1password_export [profile file]
 1password_export() {
 	local profile_file="${1:-$config_profile}"
+	config_add "$profile_file" <<<"if "
 	for ENV_VAR in "${PLUGIN[@]}"; do
 		log_verbose "export $ENV_VAR"
 		log_verbose "op item get ${OP_ITEM[$ENV_VAR]}"
@@ -358,6 +359,7 @@ if $DIRENV_PROFILE; then
 	fi
 fi
 
+# shell too for each)
 # since the 1password op needs user input we cannot put in the .profile
 log_verbose "Add bash and zsh completions"
 if ! config_mark "$(config_profile_nonexportable)"; then
@@ -365,10 +367,14 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 		# shellcheck disable=SC1090
 		source <(op completion bash)
 		if [[ -e $HOME/.config/op/plugins.sh ]]; then . "$HOME/.config/op/plugins.sh"; fi
+
+		# only run if interactive as op calls 1password for authentication
+		if [[ $- == *i* ]]; then
 	EOF
-	if ! $DIRENV_PROFILE; then
-		1password_export "$(config_profile_nonexportable)"
-	fi
+	1password_export "$(config_profile_nonexportable)"
+	config_add "$(config_profile_nonexportable)" <<-EOF
+		fi
+	EOF
 fi
 
 # assuming oh-my-zsh is installed
@@ -376,14 +382,17 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
 		if [[ -e $HOME/.config/op/plugins.sh ]]; then . "$HOME/.config/op/plugins.sh"; fi
 	EOF
-	if ! grep -q "$(config_profile_nonexportable_zsh)" 1password; then
-		config_add "$(config_profile_nonexportable_zsh)" <<-EOF
-			plugins+=(1password)
-		EOF
-	fi
-	if ! $DIRENV_PROFILE; then
-		1password_export "$(config_profile_nonexportable_zsh)"
-	fi
+	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+		plugins+=(1password)
+
+		# only run if interactive as op calls 1password for authentication
+		if [[ -o login ]]; then
+	EOF
+	1password_export "$(config_profile_nonexportable_zsh)"
+	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+		fi
+	EOF
+
 fi
 
 # https://developer.1password.com/docs/cli/get-started/#step-2-turn-on-the-1password-desktop-app-integration

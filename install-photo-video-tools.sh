@@ -115,6 +115,7 @@ CASK+=(
 	handbrake
 	luminance-hdr
 	mkvtoolnix
+	asciicinema # terminal recording with asciinema rec demo.cast
 
 )
 
