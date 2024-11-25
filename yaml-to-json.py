@@ -6,15 +6,15 @@
 """
 
 # http://stackoverflow.com/questions/5574702/how-to-print-to-stderr-in-python
-from __future__ import print_function
 
-import sys
-import pyyaml as yaml  # type: ignore
+import argparse
 import json
 
 # Need expanduser to interpret the ~ in filenames
 import logging
-import argparse
+import sys
+
+import pyyaml as yaml  # type: ignore
 
 
 def main(args):
