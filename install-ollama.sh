@@ -18,6 +18,7 @@ INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
 INCLUDE_HF="${INCLUDE_HF:-true}"
 INCLUDE_EXTRA="${INCLUDE_EXTRA:-false}"
 
+=======
 AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
 # if set to false will remove/uninstall models
 ACTION="${ACTION:-pull}"
@@ -25,7 +26,7 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvmlfeus:a" opt; do
+while getopts "hdvr:e:s:lfmu" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
