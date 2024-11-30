@@ -109,9 +109,10 @@ if in_os mac; then
 		# note this should be /bin/sh scripting
 		# https://keith.github.io/xcode-man-pages/ssh-add.1.html
 		# for MacOS earlier than Sierra, need ssh-add -A to load all passphrases from MacOS keychain"
+		# https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash
 		config_add <<-EOF
 			            # shellcheck disable=1091
-						if [ -z "\$SSH_AUTH_SOCK" ]; then . "$WS_DIR/git/src/bin/set-ssh-agent.sh"; fi
+						if [ -z "\${SSH_AUTH_SOCK+x}" ]; then . "$WS_DIR/git/src/bin/set-ssh-agent.sh"; fi
 						# ssh-add is slow so only run if no keys in the agent
 						if [ "\$(ssh-add -l | wc -l)" -le 1 ] ; then ssh-add $SSH_LOAD_FLAG; fi
 		EOF

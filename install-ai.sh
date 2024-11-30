@@ -67,10 +67,9 @@ PACKAGE+=(
 	lm-studio       # lm-studio -  run different LLMs from Hugging Face locally
 	mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
 	parquet-cli     # command line opening parquet data files
-	ollama          # ollama - ollama local runner
-	ollamac         # ollamac is a self contained mac app crashes on startup
 	cursor          # ai code editor that's based on code
 	zed             # yet another ai editor
+	jan             # grafical front-end for llama.cpp
 
 )
 
@@ -114,3 +113,6 @@ log_verbose "pip install - requriements.txt && sh .start.sh"
 
 # no need for gp4all
 #download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
+
+log_verbose "install ollama and models"
+"$BIN_DIR/install-ollama.sh"
