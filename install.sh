@@ -28,7 +28,7 @@ export ORGANIZATION="${ORGANIZATION:-netdrones}"
 export GIT_EMAIL="${GIT_EMAIL:-"$REPO_USER@$REPO_DOMAIN"}"
 NO_SUDO_PASSWORD="${NO_SUDO_PASSWORD:=false}"
 NEW_HOSTNAME="${NEW_HOSTNAME:-"$HOSTNAME"}"
-DOTFILES_STOW="${DOTFILES_STOW:-true}"
+DOTFILES_STOW="${DOTFILES_STOW:-false}"
 FORCE="${FORCE:-false}"
 MAC_SYSTEM_UPDATE="${MAC_SYSTEM_UPDATE:-false}"
 WS_DIR="${WS_DIR:-$HOME/ws}"
@@ -72,7 +72,7 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xz" opt; do
 				   -u User name for github (default: $GIT_USERNAME)
 
 			Check these as well:
-				   -a Use dotfiles $DOTFILES_STOW)
+					-a $($DOTFILES_STOW && echo "Stow" || echo "Chez-moi") the dotfiles
 
 			Login to a container registries docker.io and another registry
 				   -k login to all docker container registries (default: $DOCKER_LOGIN)
@@ -255,12 +255,13 @@ fi
 # Otherwise the installation scripts below will cause conflicts
 # Starting to replace rich's fine dotfiles with chezmoi.io
 if $DOTFILES_STOW; then
-	"$SCRIPT_DIR/install-chezmoi.sh"
 	log_verbose "put into .bak all files that need to be stowed"
 	"$SCRIPT_DIR/dotfiles-backup.sh"
 	log_verbose "install dotfiles note that this needs the personal repo installed to work"
 	"$SCRIPT_DIR/dotfiles-stow.sh"
 	log_verbose "in the stow process if .ssh is touched the permissions will be too wide"
+else
+	"$SCRIPT_DIR/install-chezmoi.sh"
 fi
 
 # install this after you stow
