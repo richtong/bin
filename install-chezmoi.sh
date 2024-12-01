@@ -58,7 +58,11 @@ while getopts "hdvfo:ir:g:" opt; do
 					Other file backups will work with chezmoi:
 
 					.nvim is a repo default is richtong/nvim (about to deprecate)
-					dotfiles-stow.sh links these key things to richtong/dotfile (deprecated)
+
+					Incompatible systems because chezmoi will overwrite the links with real files
+					dotfiles-stow.sh links these key things to richtong/dotfile, so you can
+					make new versions with chezmoi with chezmoi re-add but you can never apply
+					without removing all the stows
 
 		EOF
 		exit 0
