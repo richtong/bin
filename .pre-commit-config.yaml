@@ -13,6 +13,7 @@
 # need this so gitlint only runs during commit-msg
 # default_stages: [pre-commit, pre-push]
 # new names as of v3.2
+# default_stages: [pre-commit, pre-push]
 default_stages: [commit, push]
 # python regex https://www.programiz.com/python-programming/regex
 exclude: (^archive/|^user/|deprecated/)
