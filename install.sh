@@ -28,11 +28,12 @@ export ORGANIZATION="${ORGANIZATION:-netdrones}"
 export GIT_EMAIL="${GIT_EMAIL:-"$REPO_USER@$REPO_DOMAIN"}"
 NO_SUDO_PASSWORD="${NO_SUDO_PASSWORD:=false}"
 NEW_HOSTNAME="${NEW_HOSTNAME:-"$HOSTNAME"}"
-DOTFILES_STOW="${DOTFILES_STOW:-false}"
 FORCE="${FORCE:-false}"
 MAC_SYSTEM_UPDATE="${MAC_SYSTEM_UPDATE:-false}"
 WS_DIR="${WS_DIR:-$HOME/ws}"
 
+SSH_USE_KEYCHAIN="${SSH_USE_KEYCHAIN:false}"
+DOTFILES_STOW="${DOTFILES_STOW:-false}"
 INSTALL_SECRETS="${INSTALL_SECRETS:-false}"
 SECRETS_DIR_ROOT="${SECRETS_DIR_ROOT:-"$HOME/.secret"}"
 
@@ -43,7 +44,7 @@ ACCOUNTS="${ACCOUNTS:-false}"
 # which user is the source of secrets
 
 OPTIND=1
-while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xz" opt; do
+while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:z" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -72,7 +73,8 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xz" opt; do
 				   -u User name for github (default: $GIT_USERNAME)
 
 			Check these as well:
-					-a $($DOTFILES_STOW && echo "Stow" || echo "Chez-moi") the dotfiles
+				-a $(! $DOTFILES_STOW && echo "Stow" || echo "Chez-moi") the dotfiles
+				-y $(! $SSH_USE_KEYCHAIN && echo "Keychain" || echo "1Password") for ssh keys
 
 			Login to a container registries docker.io and another registry
 				   -k login to all docker container registries (default: $DOCKER_LOGIN)
@@ -82,11 +84,11 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xz" opt; do
 				   -q other container registry token (default: $OTHER_DOCKER_TOKEN)
 
 			You should not normally need these:
-				   -f force a git pull of the origin (default: $FORCE)
-				   -m install the MacOS system updates as well (default: $MAC_SYSTEM_UPDATE)
+				   -f $(! $FORCE || echo "do not ") force a git pull of the origin
+				   -m $(! $MAC_SYSTEM_UPDATE || echo "do not ")install the MacOS system updates as well
 				   -n set the hostname of the system
 				   -w the current workspace (default: $WS_DIR)
-				   -x do not require a password when using sudo (default: $NO_SUDO_PASSWORD)
+				   -x $( $NO_SUDO_PASSWORD || echo "do not ")require a password when using sudo
 
 			Experimental. Setup of key storage only use if Dropbox has your keys and
 			are in a graphical installation does not work from ssh
@@ -95,19 +97,19 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xz" opt; do
 				   -s directory of private keys (default: $SECRETS_DIR_ROOT/$REPO_USER.vc)
 
 			Setup of automated build machines (deprecated)
-				   -c creates a deployment machine (default: $DEPLOY_MACHINE)
-				   -t creates a test machine with unit test and system test (default: $TESTING_MACHINE)
-				   -z create all the accounts deprecated (default: $ACCOUNTS)
+				   -c $(! DEPLOY_MACHINE && echo "do not ") create a deployment machine
+				   -t $(! $TESTING_MACHINE || echo "do not ")create a test machine with unit test and system test
+				   -z $(! $ACCOUNTS || echo "do not ")create all the accounts
 
 		EOF
 
 		exit 0
 		;;
 	d)
-		# invert the variable when flag is set
+		# invert the variable when flag is set and assume -v is on
 		DEBUGGING="$($DEBUGGING && echo false || echo true)"
 		export DEBUGGING
-		;;
+		;&
 	v)
 		VERBOSE="$($VERBOSE && echo false || echo true)"
 		export VERBOSE
@@ -123,17 +125,17 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xz" opt; do
 		OTHER_DOCKER_REGISTRY="$OPTARG"
 		;;
 	c)
-		DEPLOY_MACHINE=true
-		ACCOUNTS=true
+		DEPLOY_MACHINE="$($DEPLOY_MACHINE && echo false || echo true)"
+		ACCOUNTS="$($ACCOUNTS && echo false || echo true)"
 		;;
 	e)
 		GIT_EMAIL="$OPTARG"
 		;;
 	f)
-		FORCE=true
+		FORCE="$($FORCE && echo false || echo true)"
 		;;
 	i)
-		INSTALL_SECRETS=true
+		INSTALL_SECRETS="$($INSTALL_SECRETS && echo false || echo true)"
 		;;
 	j)
 		OTHER_DOCKER_USER="$OPTARG"
@@ -168,8 +170,8 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xz" opt; do
 		SECRETS_DIR_ROOT="$OPTARG"
 		;;
 	t)
-		TESTING_MACHINE=true
-		ACCOUNTS=true
+		TESTING_MACHINE="$($TESTING_MACHINE && echo false || echo true)"
+		ACCOUNTS="$($ACCOUNTS && echo false || echo true)"
 		;;
 	u)
 		GIT_USERNAME="$OPTARG"
@@ -177,11 +179,15 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xz" opt; do
 	w)
 		WS_DIR="$OPTARG"
 		;;
+	y) 
+		SSH_USE_KEYCHAIN="$($SSH_USE_KEYCHAIN && echo false || echo true)"
+		export SSH_USE_KEYCHAIN
+		;;
 	x)
-		NO_SUDO_PASSWORD=true
+		NO_SUDO_PASSWORD="$($NO_SUDO_PASSWORD && echo false || echo true)"
 		;;
 	z)
-		ACCOUNTS=true
+		ACCOUNTS="$($ACCOUNTS && echo false || echo true)"
 		;;
 	*)
 		echo "$opt not valid"
@@ -226,8 +232,12 @@ if $INSTALL_SECRETS; then
 	"$SCRIPT_DIR/install-secrets.sh"
 fi
 
-log_verbose "Adding .ssh key passphrases to keychain or keyring"
-"$SCRIPT_DIR/install-ssh-config.sh"
+if $SSH_USE_KEYCHAIN; then
+	log_verbose "Adding .ssh key passphrases to keychain or keyring"
+	"$SCRIPT_DIR/install-ssh-config.sh"
+else
+	log_verbose "Make sure to enable 1Password"
+fi
 
 # install-git-tools needs python
 log_verbose "installing python"
