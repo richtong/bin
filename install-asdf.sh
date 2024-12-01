@@ -23,14 +23,14 @@ VERBOSE="${VERBOSE:-false}"
 # https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
 # These versions should be kept in sync with .tool_versions in ./src, ./bin, ./lib and ./user/rich
 # Assumes the last item is the one to be set for global
-DEFAULT_NODE=(18.19.1 20.11.1)
+DEFAULT_NODE=(20.18.1 22.11.0)
 if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]:-${DEFAULT_NODE[@]}}"); fi
 
 DEFAULT_DIRENV=(2.32.3 2.33.0)
 if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
 
 # Python 3.11.8 has to be built so use a lower version as of Mar 2024
-DEFAULT_PYTHON=(3.10.11 3.11.8)
+DEFAULT_PYTHON=(3.10.15 3.11.10 3.12.7)
 if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]:-${DEFAULT_PYTHON[@]}}"); fi
 
 # openjdk18 is Java 8 for Unifi.app
