@@ -97,7 +97,7 @@ PYTHON_PACKAGE+=(
 	marker-pdf # pdf to markdown https://github.com/VikParuchuri/marker
 )
 
-log_verbose "pipx install ${PYTHON_PACKAGE[*]}"
+log_verbose "pipx install ${PYTHON_PACKAGE[*]} with $PIPX_PYTHON"
 pipx_install -p "$PIPX_PYTHON" "${PYTHON_PACKAGE[@]}"
 
 # only using markdownllint-cli2 now

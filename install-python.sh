@@ -22,11 +22,10 @@ PIPENV="${PIPENV:-false}"
 POETRY="${POETRY:-true}"
 UV="${UV:-true}"
 
-# If version is set to null then the default python version is used
-PYTHON_VERSION="${PYTHON_VERSION-}"
 NEW_PYTHON="${NEW_PYTHON:-@3.12}"
 # we normally don't need the oldest version
 OLD_PYTHON="${OLD_PYTHON:-@3.11}"
+PYTHON_VERSION="${PYTHON_VERSION:-$OLD_PYTHON}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
@@ -54,7 +53,7 @@ while getopts "hdvaeoyp:u" opt; do
 			  -e $(! $PIPENV || echo "no ")pipenv install
 			  -y $(! $PYENV || echo "no ")pyenv install
 			  -u $(! $UV || echo "no ")uv install
-			  -p install python version (default: ${PYTHON_VERSION:-stable})
+			  -p install python version (default: ${PYTHON_VERSION:-$OLD_PYTHON})
 		EOF
 		exit 0
 		;;

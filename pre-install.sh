@@ -70,42 +70,58 @@ if ! command -v brew >/dev/null; then
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-for file in .profile .bash_profile .bashrc; do
-	if [[ ! -e $HOME/$file ]]; then
-		echo "$SCRIPTNAME: no $file create a shebang" >&2
-		echo "#!/usr/bin/env bash" >"$HOME/$file"
-	fi
-done
-
 # no lib-config.sh/brew_profile_install so assume you are only doing path addition which gofi
 # into .profile so this hack is just copied from there
-PROFILE="${PROFILE:-"$HOME/.profile"}"
-if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
-	echo "$SCRIPTNAME: update $PROFILE" >&2
-	cat >>"$PROFILE" <<-EOF
-		# Added by $SCRIPTNAME on $(date)
-		# add the check because asdf and pipenv override homebrew
-		if [ -z "\$HOMEBREW_PREFIX" ] || ! command -v brew >/dev/null; then
-			HOMEBREW_PREFIX="/opt/homebrew"
-			if  uname | grep -q Linux; then
-				HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
-			elif uname | grep -q Darwin && uname -m | grep -q x86_64; then
-				HOMEBREW_PREFIX="/usr/local"
-			fi
-			eval "\$(\$HOMEBREW_PREFIX/bin/brew shellenv)"
-		fi
-	EOF
-fi
+pushd $HOME >/dev/null 
+for PROFILE in .profile .bash_profile .bashrc; do
 
-echo "$SCRIPTNAME: make brew available in this script source $PROFILE" >&2
-# need to turn off set -u as undefined variables as the profile may have these
-set +u
-echo "source $PROFILE" >&2
-# Some installs may have missing files so ignore them
-# shellcheck disable=SC1091,SC1090
-if ! source "$PROFILE"; then
-	echo "SCRIPTNAME: warning $PROFILE failure"
-fi
+	if [[ ! -e $PROFILE ]]; then
+		cat >>$PROFILE <<-EOF
+			#!/usr/bin/env $([[ $PROFILE =~ bash ]] && echo bash || echo sh)
+			echo "\$PROFILE called from \$0"
+		EOF
+	fi
+
+	if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
+		echo "$SCRIPTNAME: update $PROFILE" >&2
+		echo "# Added by $SCRIPTNAME on $(date)" >> "$PROFILE"
+		case $PROFILE in
+		.profile)	
+			cat >>"$PROFILE" <<-EOF
+				# add the check because asdf and pipenv override homebrew
+				if [ -z "\$HOMEBREW_PREFIX" ] || ! command -v brew >/dev/null; then
+					HOMEBREW_PREFIX="/opt/homebrew"
+					if  uname | grep -q Linux; then
+						HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+					elif uname | grep -q Darwin && uname -m | grep -q x86_64; then
+						HOMEBREW_PREFIX="/usr/local"
+					fi
+					eval "\$(\$HOMEBREW_PREFIX/bin/brew shellenv)"
+				fi
+			EOF
+
+			echo "$SCRIPTNAME: make brew available in this script source $PROFILE" >&2
+			# need to turn off set -u as undefined variables as the profile may have these
+			set +u
+			echo "source $PROFILE" >&2
+			# Some installs may have missing files so ignore them
+			# shellcheck disable=SC1091,SC1090
+			if ! source "$PROFILE"; then
+				echo "SCRIPTNAME: warning $PROFILE failure"
+			fi
+
+		;;
+		.bash_profile)	
+			# because macos Terminal only calls .bash_profile
+			cat >>"$PROFILE" <<-EOF
+				source "$HOME/.profile"
+			EOF
+		;;
+		esac
+	fi
+done
+popd > /dev/null
+
 set -u
 if ! command -v brew >/dev/null; then
 	echo "$SCRIPTNAME: Brew installation failed" >&2
