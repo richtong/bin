@@ -221,6 +221,8 @@ if [[ ! -e "$WS_DIR/git/src" ]]; then
 	echo "$SCRIPTNAME: when calling gh auth login make sure to name the key so it appears properly in gnome-keyring"
 	gh auth login
 	echo "$SCRIPTNAME: gh auth login creates a key ~/.ssh/id_ed25519 do not delete from .ssh/config"
-	git clone --recurse-submodules "https://github.com/$REPO_ORG/src" "$WS_DIR/git"
+	git clone "git@github:$REPO_ORG/src"
+	pushd src
+	git submodule update --init --remote bin lib
 fi
 echo "$SCRIPTNAME: Restart the terminal to get new bash and profile"

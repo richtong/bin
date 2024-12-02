@@ -256,10 +256,11 @@ log_verbose must be installed is git lfs is used before installing repos
 "$BIN_DIR/install-git-lfs.sh"
 log_verbose install repos only if not in docker
 
-if ! in_os docker &&
-	"$SCRIPT_DIR/install-repos.sh" "${FORCE_FLAG-}"; then
-	log_warning "install-repos.sh returned $?"
-fi
+# now assume we are installing src, src/bin and src/lib
+# if ! in_os docker &&
+#	"$SCRIPT_DIR/install-repos.sh" "${FORCE_FLAG-}"; then
+#	log_warning "install-repos.sh returned $?"
+#fi
 
 # run dotfiles-stow as soon as possible use the personal repo above
 # Otherwise the installation scripts below will cause conflicts
