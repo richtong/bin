@@ -32,7 +32,7 @@ while getopts "hdvf" opt; do
 		# invert the variable when flag is set
 		DEBUGGING="$($DEBUGGING && echo false || echo true)"
 		export DEBUGGING
-		;;
+		;&
 	v)
 		VERBOSE="$($VERBOSE && echo false || echo true)"
 		export VERBOSE
