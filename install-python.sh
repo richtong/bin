@@ -34,10 +34,10 @@ while getopts "hdvaeoyp:u" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Install python and related commands and pip packages
+			Install python and related commands and pip packages system wide
+			using either homebrew or pipx
 
-			Also installs other virtual environments optionally. By default will install packages into
-			the current python environment.
+			Also installs other virtual environments optionally.
 
 			If you are using asdf this will be into the execution, then depending on where the script is running
 			it will install the specific shared shim.
@@ -103,13 +103,14 @@ shift $((OPTIND - 1))
 # black  # formatter (replaced by ruff)
 # flake8  # python linter (replaced by ruff)
 # pydocstyle - no longer maintained use ruff (deprecated)
+# pyyaml             # pyyaml - python yaml parser should be in each environment
+#	python-argcomplete # argument parser should be in environment not global
+
 PACKAGE+=(
 
 	bandit             # check for security problems
 	mypy               # mypy - python type checking
 	pipx               # run python cli in venv
-	python-argcomplete # argument parser
-	pyyaml             # pyyaml - python yaml parser
 	ruff               # fast linter replaces flake8, pydocstyle, black
 	tox                # tox - python test runner for different versions of python
 
@@ -168,7 +169,7 @@ fi
 if $UV; then
 	log_verbose "use uv"
 	PACKAGE+=(uv)
-	PYTHON_PACKAGE+=(poetry_to_uv)
+	PIPX_PACKAGE+=(poetry_to_uv)
 fi
 
 # Note do not quote, want to process each as separate arguments
@@ -187,22 +188,6 @@ for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	package_install "python$version"
 done
 
-# https://pipx.pypa.io/latest/installation/
-# pipx make sure it can change global and local paths
-pipx ensurepath
-sudo pipx ensurepath --global
-pipx_install argcomplete
-
-if ! config_mark "$(config_profile_nonexportable)"; then
-	config_add "$(config_profile_nonexportable)" <<-EOF
-		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-	EOF
-fi
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
-		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-	EOF
-fi
 # Only install pip packages if not in homebrew as
 # raw pip in homebrew does not allow it
 
@@ -215,8 +200,8 @@ fi
 # install into user's python default installation
 # these are onlyi available only as pip packages, we favor homebrew
 #if ! command -v brew; then
-#log_verbose "no homebrew so can install these packages"
-PYTHON_PACKAGE+=(
+#log_verbose "no homebrew so can install these packages but want everywhere so use pipx"
+PIPX_PACKAGE+=(
 
 	autocomplete
 	nptyping
@@ -232,14 +217,12 @@ PYTHON_PACKAGE+=(
 )
 #fi
 
-# pipx creates python cli in venv with PATH links so use for real python apps
-# which need isolation, favor homebrew first then use pipx, if you wnat
-# an installation just in a venv use pip install.
-PIPX_PACKAGES+=(
 
-)
+# https://pipx.pypa.io/latest/installation/
+# pipx make sure it can change global and local paths
+pipx ensurepath
+sudo pipx ensurepath --global
 
-pipx install "${PIPX_PACKAGES[@]}"
 
 if [[ $(command -v python) =~ "conda" ]]; then
 	log_warning "Anaconda is installed so pip packages will go into conda environment"
@@ -265,6 +248,20 @@ if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
 	pip_install --upgrade "${PYTHON_PACKAGE[@]}"
 	# fi
 fi
+
+pipx_install "${PIPX_PACKAGES[@]}"
+# https://github.com/pypa/pipx/issues/330
+# completions are supposed to be installed by homebrew for pipx now except for zsh
+#if ! config_mark "$(config_profile_nonexportable)"; then
+#	config_add "$(config_profile_nonexportable)" <<-EOF
+#		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+#	EOF
+#fi
+#if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+#	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+#		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+#	EOF
+#fi
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
 
