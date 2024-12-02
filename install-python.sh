@@ -202,26 +202,21 @@ PIPX_PACKAGE+=(
 log_verbose "installing ${PIPX_PACKAGE[*]}"
 pipx install "${PIPX_PACKAGE[@]}"
 
-log_verbose "Install argcomplete into profiles"
-if ! config_mark "$(config_profile_nonexportable)"; then
-	config_add "$(config_profile_nonexportable)" <<-EOF
-		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-	EOF
-fi
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
-		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-	EOF
-fi
->>>>>>> a79d602 (fix: install-python and prec-ommit)
-# Only install pip packages if not in homebrew as
-# raw pip in homebrew does not allow it
+# these are supposed to installed by default to bash but not zsh
+# log_verbose "Install argcomplete into profiles"
+# if ! config_mark "$(config_profile_nonexportable)"; then
+# 	config_add "$(config_profile_nonexportable)" <<-EOF
+# 		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+# 	EOF
+# fi
+# if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+# 	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+# 		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+# 	EOF
+# fi
 
-# pydantic - data validation and type checking integrates with mypy
-# pymdown-extensions - Markdown helpers
-# autoimport - add and remove imports
-# pdoc3 - python documentation extraction from comments (deprecated use ruff)
-# nptyping - types fo rnumpy
+# These should only be command line utilities, not packages for python compute
+# those packages should be installed in the venv system you are using
 
 # install into user's python default installation
 # these are onlyi available only as pip packages, we favor homebrew
@@ -229,17 +224,18 @@ fi
 #log_verbose "no homebrew so can install these packages but want everywhere so use pipx"
 PIPX_PACKAGE+=(
 
-	autocomplete
-	nptyping
-	pdoc3
-	pyyaml # pyyaml - python yaml parser (moved from brew install)
-	pydantic
-	pymdown-extensions
-	pytest # pytest - python test runner
-	pytest-cov
-	pytest-timeout
-	pytest-xdist
-	types-requests ## mypy needs this for checking
+	# autocomplete
+	# pydantic - data validation and type checking integrates with mypy
+	# pymdown-extensions - Markdown helpers
+	# autoimport - add and remove imports
+	# pdoc3 - python documentation extraction from comments (deprecated use ruff)
+	# nptyping - types fo rnumpy
+	# pyyaml # pyyaml - python yaml parser (moved from brew install)
+	# pytest # pytest - python test runner
+	# pytest-cov
+	# pytest-timeout
+	# pytest-xdist
+	# types-requests ## mypy needs this for checking
 
 )
 #fi
@@ -248,7 +244,6 @@ PIPX_PACKAGE+=(
 # pipx make sure it can change global and local paths
 pipx ensurepath
 sudo pipx ensurepath --global
-
 
 if [[ $(command -v python) =~ "conda" ]]; then
 	log_warning "Anaconda is installed so pip packages will go into conda environment"
@@ -276,7 +271,8 @@ if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
 	# fi
 fi
 
-pipx_install "${PIPX_PACKAGES[@]}"
+log_verbose "installing ${PIPX_PACKAGE[*]}"
+pipx_install "${PIPX_PACKAGE[@]}"
 # https://github.com/pypa/pipx/issues/330
 # completions are supposed to be installed by homebrew for pipx now except for zsh
 #if ! config_mark "$(config_profile_nonexportable)"; then
