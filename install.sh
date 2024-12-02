@@ -88,7 +88,7 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:z" opt; do
 				   -m $(! $MAC_SYSTEM_UPDATE || echo "do not ")install the MacOS system updates as well
 				   -n set the hostname of the system
 				   -w the current workspace (default: $WS_DIR)
-				   -x $( $NO_SUDO_PASSWORD || echo "do not ")require a password when using sudo
+				   -x $($NO_SUDO_PASSWORD || echo "do not ")require a password when using sudo
 
 			Experimental. Setup of key storage only use if Dropbox has your keys and
 			are in a graphical installation does not work from ssh
@@ -179,7 +179,7 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:z" opt; do
 	w)
 		WS_DIR="$OPTARG"
 		;;
-	y) 
+	y)
 		SSH_USE_KEYCHAIN="$($SSH_USE_KEYCHAIN && echo false || echo true)"
 		export SSH_USE_KEYCHAIN
 		;;

@@ -17,13 +17,13 @@ while getopts "hdvi:r" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
- 	$SCRIPTNAME: Install git lfs
-		flags:
-		   -d $($DEBUGGING && echo "no ")debugging
-		   -v $($VERBOSE && echo "not ")verbose
-	       	   -i git lfs release (default $VERSION)
-		   -r $(! $REMOVE && echo "install" || echo "remove") git lfs from current repo
-EOF
+			  $SCRIPTNAME: Install git lfs
+					flags:
+					   -d $($DEBUGGING && echo "no ")debugging
+					   -v $($VERBOSE && echo "not ")verbose
+				           -i git lfs release (default $VERSION)
+					   -r $(! $REMOVE && echo "install" || echo "remove") git lfs from current repo
+		EOF
 		exit 0
 		;;
 	d)
@@ -98,11 +98,10 @@ else
 			log_verbose "Got $LINE"
 			log_verbose "untrack ${LINE%% *}"
 			git lfs untrack "${LINE%% *}"
-		done < .gitattributes
+		done <.gitattributes
 	fi
 
 	log_verbose "add renormalized files"
 	git add --renormalize .
 	log_verbose "check this is correct and push"
 fi
-
