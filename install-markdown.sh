@@ -15,9 +15,12 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
+
+PIPX_PYTHON="${PIPX_PYTHON:-3.12}"
+
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt; do
+while getopts "hdvp:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -27,6 +30,7 @@ while getopts "hdv" opt; do
 				   -h help
 				   -d $(! $DEBUGGING || echo "no ")debugging
 				   -v $(! $VERBOSE || echo "not ")verbose
+				   -p Python version for pipx (default: $PIPX_PYTHON)
 		EOF
 		exit 0
 		;;
@@ -40,6 +44,9 @@ while getopts "hdv" opt; do
 		export VERBOSE
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
+		;;
+	p)
+		PIPX_PYTHON="$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt"
@@ -81,16 +88,17 @@ PACKAGE+=(
 	markdownlint-cli
 	markdownlint-cli2
 	markdown-toc
-	zettler
+	zettlr
 )
 
 package_install "${PACKAGE[@]}"
 
-PYTHON_PACKAGES+=(
+PYTHON_PACKAGE+=(
 	marker-pdf # pdf to markdown https://github.com/VikParuchuri/marker
 )
 
-pipx_install "${PYTHON_PACKAGES[@]}"
+log_verbose "pipx install ${PYTHON_PACKAGE[*]}"
+pipx_install -p "$PIPX_PYTHON" "${PYTHON_PACKAGE[@]}"
 
 # only using markdownllint-cli2 now
 # https://dev.to/jonasbn/blog-post-markdownlint-24ig

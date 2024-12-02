@@ -202,18 +202,18 @@ PIPX_PACKAGE+=(
 log_verbose "installing ${PIPX_PACKAGE[*]}"
 pipx install "${PIPX_PACKAGE[@]}"
 
-# these are supposed to installed by default to bash but not zsh
-# log_verbose "Install argcomplete into profiles"
-# if ! config_mark "$(config_profile_nonexportable)"; then
-# 	config_add "$(config_profile_nonexportable)" <<-EOF
-# 		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-# 	EOF
-# fi
-# if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-# 	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
-# 		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-# 	EOF
-# fi
+# these are supposed to installed by default to bash but not zsh but are not
+log_verbose "Install argcomplete into profiles"
+if ! config_mark "$(config_profile_nonexportable)"; then
+ 	config_add "$(config_profile_nonexportable)" <<-'EOF'
+ 		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+EOF
+fi
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+ 	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
+ 		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+EOF
+fi
 
 # These should only be command line utilities, not packages for python compute
 # those packages should be installed in the venv system you are using
@@ -275,16 +275,16 @@ log_verbose "installing ${PIPX_PACKAGE[*]}"
 pipx_install "${PIPX_PACKAGE[@]}"
 # https://github.com/pypa/pipx/issues/330
 # completions are supposed to be installed by homebrew for pipx now except for zsh
-#if ! config_mark "$(config_profile_nonexportable)"; then
-#	config_add "$(config_profile_nonexportable)" <<-EOF
-#		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-#	EOF
-#fi
-#if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-#	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
-#		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-#	EOF
-#fi
+if ! config_mark "$(config_profile_nonexportable)"; then
+	config_add "$(config_profile_nonexportable)" <<-'EOF'
+		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+	EOF
+fi
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
+		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+	EOF
+fi
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
 

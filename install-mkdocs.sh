@@ -26,8 +26,9 @@ while getopts "hdv" opt; do
 		cat <<-EOF
 
 
-			Install mkdocs, mkdocs-material another documentation plugins
-			even if conda is not activated. So you need to manage the conda version at all times.
+			Install mkdocs
+			The plugins should be installed in the venv
+			mkdocs-material another documentation plugins
 
 			usage: $SCRIPTNAME [flags...]
 			  -h help
@@ -68,7 +69,6 @@ package_install "${PACKAGE[@]}"
 
 # Only install pip packages if not in homebrew as
 # raw pip in homebrew does not allow it
-
 # mkdocs-material - Add material design to documentation
 # mkdocs-material[imaging] - for social support
 # mkdocstrings - Add docstrings from python code into mkdocs
@@ -94,13 +94,13 @@ PYTHON_PACKAGE+=(
 	mkdocs-git-revision-date-localized-plugin
 	mkdocs-enumerate-headings-plugin
 	"markdown-exec[ansi]"
-	mkdocs-git-commiters-plugin-2
+	mkdocs-git-committers-plugin-2
 
 )
 
-if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
-	log_verbose "installing python packages ${PYTHON_PACKAGE[*]} in the base system and upgrade dependencies"
-	pip_install --upgrade "${PYTHON_PACKAGE[@]}"
-fi
+log_verbose "Install these recommended packages ${PYTHON_PACKAGE[*]}"
+log_verbose "Complete list in github.com/richtong/lib"
+# do not bare pip install anymre
+# pip_install --upgrade "${PYTHON_PACKAGE[@]}"
 
-log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
+# log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
