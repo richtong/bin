@@ -9,11 +9,9 @@
 # note that we exclude node_modules and _vendor for hugo
 # since these are typically third party modules
 # cannot run  markdownlint checks for hugo
----
 # need this so gitlint only runs during commit-msg
 # default_stages: [pre-commit, pre-push]
-# new names as of v3.2
-# default_stages: [pre-commit, pre-push]
+# needed by v4.0
 default_stages: [commit, push]
 # python regex https://www.programiz.com/python-programming/regex
 exclude: (^archive/|^user/|deprecated/)

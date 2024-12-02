@@ -104,13 +104,12 @@ shift $((OPTIND - 1))
 # flake8  # python linter (replaced by ruff)
 # pydocstyle - no longer maintained use ruff (deprecated)
 # pyyaml             # pyyaml - python yaml parser should be in each environment
-#	python-argcomplete # argument parser should be in environment not global
-
+# bandit             # check for security problems deprecated for ruff
 PACKAGE+=(
 
-	bandit             # check for security problems
 	mypy               # mypy - python type checking
 	pipx               # run python cli in venv
+	python-argcomplete # argument parser
 	ruff               # fast linter replaces flake8, pydocstyle, black
 	tox                # tox - python test runner for different versions of python
 
@@ -178,7 +177,7 @@ log_verbose "installing ${PACKAGE[*]}"
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
 
-log_verbose "black needs keg link"
+# log_verbose "black needs keg link"
 # brew link pydocstyle  # pydostyle no longer maintained
 # brew unlink black && brew link black  # using ruff instead
 #log_verbose "PATH=$PATH"
@@ -188,6 +187,33 @@ for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	package_install "python$version"
 done
 
+# https://pipx.pypa.io/latest/installation/
+# pipx make sure it can change global and local paths
+log_verbose "ensurepath for globals"
+pipx ensurepath
+sudo pipx ensurepath --global
+
+# pipx creates python cli in venv with PATH links so use for real python apps
+# which need isolation, favor homebrew first then use pipx, if you wnat
+# an installation just in a venv use pip install.
+PIPX_PACKAGE+=(
+	argcomplete
+)
+log_verbose "installing ${PIPX_PACKAGE[*]}"
+pipx install "${PIPX_PACKAGE[@]}"
+
+log_verbose "Install argcomplete into profiles"
+if ! config_mark "$(config_profile_nonexportable)"; then
+	config_add "$(config_profile_nonexportable)" <<-EOF
+		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+	EOF
+fi
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+	EOF
+fi
+>>>>>>> a79d602 (fix: install-python and prec-ommit)
 # Only install pip packages if not in homebrew as
 # raw pip in homebrew does not allow it
 
@@ -206,6 +232,7 @@ PIPX_PACKAGE+=(
 	autocomplete
 	nptyping
 	pdoc3
+	pyyaml # pyyaml - python yaml parser (moved from brew install)
 	pydantic
 	pymdown-extensions
 	pytest # pytest - python test runner
@@ -216,7 +243,6 @@ PIPX_PACKAGE+=(
 
 )
 #fi
-
 
 # https://pipx.pypa.io/latest/installation/
 # pipx make sure it can change global and local paths
@@ -236,6 +262,7 @@ elif [[ $(command -v python) =~ "asdf" ]]; then
 	log_warning "should installation outside of an asdf environment where an .tool-versions file exists"
 fi
 
+# should not be set as pipx is preferred
 if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
 	# this is no longer needed
 	# if in_os mac; then
