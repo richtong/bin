@@ -114,7 +114,7 @@ for PROFILE in .profile .bash_profile .bashrc; do
 		.bash_profile)	
 			# because macos Terminal only calls .bash_profile
 			cat >>"$PROFILE" <<-EOF
-				source "$HOME/.profile"
+				source "\$HOME/.profile"
 			EOF
 		;;
 		esac

@@ -77,6 +77,8 @@ if ! config_mark; then
 	EOF
 fi
 
+source "$HOME/.profile"
+
 log_verbose "update tlmgr"
 sudo tlmgr update --self
 

@@ -153,27 +153,26 @@ fi
 # note we use /bin/sh for this since it goes into .profile
 if ! config_mark; then
 	log_verbose "add paths for utilities"
-	# single quote except where we have the $NAME entry
-	config_add <<-"EOF"
-		        echo "$PATH" | grep -q "$BREW_GNU" || PATH="$BREW_GNU:\$PATH"
+	config_add <<-EOF
+		        echo "\$PATH" | grep -q "$BREW_GNU" || PATH="$BREW_GNU:\$PATH"
 		        for NAME in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils gawk; do
-		            echo "$PATH" | grep -q "opt/$NAME/libexec/gnubin" ||
-		                PATH="$HOMEBREW_PREFIX/opt/$NAME/libexec/gnubin:$PATH"
+		            echo "\$PATH" | grep -q "opt/$NAME/libexec/gnubin" ||
+		                PATH="\$HOMEBREW_PREFIX/opt/$NAME/libexec/gnubin:\$PATH"
 		        done
 		        for NAME in gnu-getopt gettext m4 curl; do
-		            echo "$PATH" | grep -q "opt/$NAME/bin" ||
-		                PATH="$HOMEBREW_PREFIX/opt/$NAME/bin:$PATH"
+		            echo "\$PATH" | grep -q "opt/\$NAME/bin" ||
+		                PATH="\$HOMEBREW_PREFIX/opt/\$NAME/bin:\$PATH"
 		        done
 				# shellcheck disable=SC2043
 				for NAME in man-db; do
-					echo "$PATH" | grep -q "opt/$NAME/libexec/bin" ||
-						PATH="$HOMEBREW_PREFIX/opt/$NAME/libexec/bin:$PATH"
+					echo "\$PATH" | grep -q "opt/\$NAME/libexec/bin" ||
+						PATH="\$HOMEBREW_PREFIX/opt/\$NAME/libexec/bin:\$PATH"
 				done
-				echo "$PATH" | grep -q "opt/coreutils/libexec/gnubin" ||
-					PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
+				echo "\$PATH" | grep -q "opt/coreutils/libexec/gnubin" ||
+					PATH="\$HOMEBREW_PREFIX//opt/coreutils/libexec/gnubin:\$PATH"
 				for NAME in bin, sbin; do
-					echo "$PATH" | grep -q "opt/util-linux/$NAME" ||
-						PATH="$HOMEBREW_PREFIX/opt/util-linux/$NAME:$PATH"
+					echo "\$PATH" | grep -q "opt/util-linux/\$NAME" ||
+						PATH="\$HOMEBREW_PREFIX/opt/util-linux/\$NAME:\$PATH"
 				done
 	EOF
 fi
