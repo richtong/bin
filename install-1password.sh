@@ -174,10 +174,10 @@ if in_os linux && linux_version ubuntu; then
 
 elif in_os mac; then
 
-	if ! $FORCE && [[ -n $(find /Applications -maxdepth 1 -name "1Password*" -print -quit) ]]; then
-		log_verbose "1Password for Mac already installed"
-		exit
-	fi
+	# if ! $FORCE && [[ -n $(find /Applications -maxdepth 1 -name "1Password*" -print -quit) ]]; then
+	# 	log_verbose "1Password for Mac already installed"
+	# 	exit
+	# fi
 
 	log_verbose using brew to install on Mac 1Password and the CLI
 	if ! package_install 1password; then
@@ -202,7 +202,6 @@ log_verbose "Install ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
 
 log_verbose "Enable command line integrations to store credentials in 1Password"
-a
 # https://developer.1password.com/docs/cli/get-started/#step-2-turn-on-the-1password-desktop-app-integration
 log_warning "In 1Password App go to Settings > Developers"
 log_warning "And enable Use the SSH Agents, Integrate with 1Password CLI"
@@ -243,10 +242,9 @@ ENTRY+=(
 
 # the list of 1Password names for each of these API keys
 # need quotes for huggingface-cli because shfmt will
-# do not use github_otken, use gh auth login
+# do not use github_token, use gh auth login
 # do not use AWS_SECRET_ACCESS_KEY, use AWS_SECRET_ACCESS_KEY use aws ssologin
-# declare -A OP_ITEM
-# not currnetly using superset or localstack
+declare -A OP_ITEM
 OP_ITEM=(
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
 	[DIGITALOCEAN_TOKEN]="DigitalOcean Personal Access Token"
@@ -298,7 +296,8 @@ OP_FIELD=(
 	[WEBUI_SECRET_KEY]="secret key"
 
 )
-
+log_verbose "OP_FIELD:${OP_FIELD[*]}"
+log_verbose "OP_FIELD[AN]:${OP_FIELD[ANTHROPIC_API_KEY]}"
 # this creates a ./.op directory in the CWD so make sure we are at HOME
 
 WORKING_DIR="$PWD"
@@ -404,6 +403,11 @@ log_verbose "use ssh key for signing commits"
 git config --global gpg.format ssh
 # disable because op returns a double quoted string
 # shellcheck disable=SC2046
+log_verbose "add signing key"
 git config --global user.signingkey $(op item get "GitHub SSH Key" --fields "public key" --reveal)
-git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-git config --global commit.gpgsign true
+log_verbose "add 1password as app"
+# git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+# a bug so do not enable
+# log_verbose "enable signing"
+# git config --global commit.gpgsign true

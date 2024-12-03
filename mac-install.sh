@@ -358,9 +358,3 @@ if $VMWARE; then
 	log_message "ISOs available to Fusion in $DOWNLOADS"
 	popd >/dev/null || return
 fi
-
-# Install kubernetes as docker desktop is only a single node
-# remove from mac installation
-#"$SCRIPT_DIR/install-kubernetes.sh"
-# Needed for docker for kubernetes minikube
-# "$SCRIPT_DIR/install-xhyve.sh"

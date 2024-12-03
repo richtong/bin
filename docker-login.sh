@@ -21,10 +21,10 @@ OPTIND=1
 DOCKER_USER=${DOCKER_USER:-netdrones-$USER}
 DOCKER_REGISTRY="${DOCKER_REGISTRY:-ghcr.io}"
 DOCKER_PASSWORD="${DOCKER_PASSWORD:-insert_your_password_here_}"
-DOCKER_SECRET_FILE="${DOCKER_SECRET_FILE:"$HOME/.ssh/$DOCKER_REGISTRY.pat"}"
-USE_SECRET_FILE="$(USE_SECRET_FILE:-true)"
-ONEPASSWORD="$(ONEPASSWORD:-true)"
-ONEPASSWORD_URI="$(ONEPASSWORD_URI:-op://NetDrones/GitHub ghcr.io/token)"
+DOCKER_SECRET_FILE="${DOCKER_SECRET_FILE:-"$HOME/.ssh/$DOCKER_REGISTRY.pat"}"
+USE_SECRET_FILE="${USE_SECRET_FILE:-true}"
+ONEPASSWORD="${ONEPASSWORD:-true}"
+ONEPASSWORD_URI="${ONEPASSWORD_URI:-op://NetDrones/GitHub ghcr.io/token}"
 
 FORCE=false
 while getopts "hdv1fl:m:st:u:" opt; do
@@ -117,7 +117,7 @@ fi
 
 if in_os mac; then
 
-	if [[ -n $DOCKER_MACHINE ]] && [[ ! -e /Applications/Docker.app ]] && ! docker-machine active; then
+	if [[ -v DOCKER_MACHINE ]] && [[ ! -e /Applications/Docker.app ]] && ! docker-machine active; then
 		log_verbose "using docker machine to login at $DOCKER_MACHINE"
 		if ! docker-machine status "$DOCKER_MACHINE" | grep Running; then
 			if ! docker-machine ls | grep "$DOCKER_MACHINE"; then

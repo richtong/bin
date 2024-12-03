@@ -50,7 +50,7 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 "$SCRIPT_DIR/install-node.sh"
 log_verbose install linters
 # note that markdownlint here is API only the cli is separately installed
-NODE_PACKAGES+=(
+NODE_PACKAGE+=(
 	eslint
 	babel-eslint
 	eslint-plugin-react
@@ -64,35 +64,49 @@ NODE_PACKAGES+=(
 	csslint
 )
 
-log_verbose "install ${NODE_PACKAGES[*]}"
-npm_install -g "${NODE_PACKAGES[@]}"
+log_verbose "install ${NODE_PACKAGE[*]}"
+npm_install -g "${NODE_PACKAGE[@]}"
 
 # ruff - replaces flake8, black, isort, pydoctstyle, pyupgrade and is very fast
 # mdformat-ruff - ruff formatter that is like markdownlint
-PYTHON_PACKAGES+=(
+PYTHON_PACKAGE+=(
 	jedi
 	vim-vint
 	beautysh
 	yamlfix
 	ruff
-	mdformat-ruff
 )
-log_verbose "install ${PYTHON_PACKAGES[*]}"
-pipx_install "${PYTHON_PACKAGES[@]}"
+log_verbose "install ${PYTHON_PACKAGE[*]}"
+pipx_install "${PYTHON_PACKAGE[@]}"
+
+# https://mdformat.readthedocs.io/en/stable/
+# mdformat competes with prettier to make markdown look nice
+# https://mdformat.readthedocs.io/en/stable/users/plugins.html
+RUFF_PLUGIN+=(
+	mdformat-shfmt  # bash, sh
+	mdformat-gofmt  # requires go installed
+	mdformat-ruff  # python formatting
+	mdformat-web  # js, css, html, xml
+	mdformat-gfm  # git-flavored markdown
+	mdformat-tables  # gfm tables
+	mdformat-toc  # table of contents generator
+)
+log_verbose "install ruff plugins ${RUFF_PLUGIN[*]}"
+pipx inject ruff "${RUFF_PLUGIN[@]}"
 
 log_verbose "Use markdown-cli and not mdl"
-#RUBY_PACKAGES+=(
+#RUBY_PACKAGE+=(
 #    mdl
 #)
-#log_verbose "install ${RUBY_PACKAGES[*]}"
-#gem_install "${RUBY_PACKAGES[@]}"
+#log_verbose "install ${RUBY_PACKAGE[*]}"
+#gem_install "${RUBY_PACKAGE[@]}"
 
 # note we install both the ruby mdl and the node markdown-cli
 # but prefer markdown-cli
 # hadolint: dockerfile lint https://github.com/hadolint/hadolint
 # actionlint: github workflow actions
 # checkmake: Makefile lint
-PACKAGES+=(
+PACKAGE+=(
 	yapf
 	shellcheck
 	shfmt
@@ -103,11 +117,12 @@ PACKAGES+=(
 	prettier  # general formatted
 	prettierd # very fast daemon version
 )
-log_verbose "install ${PACKAGES[*]}"
-package_install "${PACKAGES[@]}"
+log_verbose "install ${PACKAGE[*]}"
+package_install "${PACKAGE[@]}"
 
-log_verbose "yapf needs to be keg linked"
-brew link yapf
+# it links now
+# log_verbose "yapf needs to be keg linked"
+# brew link yapf
 
 # now installed by main install.sh
 #"$SCRIPT_DIR/install-markdown.sh"
@@ -119,15 +134,14 @@ brew link yapf
 # Note that the FORCE variable is passed down to all the scripts by the  export
 "$SCRIPT_DIR/install-stylelint.sh"
 
-log_verbose need flake8 for python linting
+# log_verbose need flake8 for python linting (deprecated)
 # python https://flake8.pycqa.org/en/latest/
 # this merges server checkers
-# not robust
-if [[ $OSTYPE =~ darwin ]]; then
-	brew_install flake8
-else
-	pip_install --upgrade flake8
-fi
+# if [[ $OSTYPE =~ darwin ]]; then
+	#brew_install flake8
+#else
+#	pip_install --upgrade flake8
+#fi
 
 # https://github.com/yannickcr/eslint-plugin-react
 # https://github.com/facebookincubator/create-react-app/blob/master/template/README.md#displaying-lint-output-in-the-editor

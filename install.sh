@@ -14,6 +14,7 @@ export REPO_USER="${REPO_USER:-"$USER"}"
 export REPO_DOMAIN="${REPO_DOMAIN:-"tongfamily.com"}"
 export REPO_ORG="${REPO_ORG:-"richtong"}"
 
+DOCKER_INSTALL="${DOCKER_INSTALL:-docker}"
 DOCKER_LOGIN="${DOCKER_LOGIN:-true}"
 export DOCKER_USER="${DOCKER_USER:-"$REPO_USER"}"
 export DOCKER_TOKEN="${DOCKER_TOKEN:-"op://Private/Docker Container Registry - $DOCKER_USER/token"}"
@@ -44,7 +45,7 @@ ACCOUNTS="${ACCOUNTS:-false}"
 # which user is the source of secrets
 
 OPTIND=1
-while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:z" opt; do
+while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:zD:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -77,6 +78,7 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:z" opt; do
 				-y $(! $SSH_USE_KEYCHAIN && echo "Keychain" || echo "1Password") for ssh keys
 
 			Login to a container registries docker.io and another registry
+				   -D docker installation [ docker | colima ] (default: $DOCKER_INSTALL)
 				   -k login to all docker container registries (default: $DOCKER_LOGIN)
 				   -r dockeR.io user name (default: $DOCKER_USER)
 				   -b other container registry url address (default: $OTHER_DOCKER_REGISTRY)
@@ -189,6 +191,9 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:z" opt; do
 	z)
 		ACCOUNTS="$($ACCOUNTS && echo false || echo true)"
 		;;
+	D)
+		DOCKER_INSTALL="$OPTARG"
+		;;
 	*)
 		echo "$opt not valid"
 		;;
@@ -226,6 +231,8 @@ log_verbose "install gnu with BASH=$BASH"
 log_verbose "Install git and git tooling"
 package_install git
 # Install secrets before doing a git
+
+"$SCRIPT_DIR/install-1password.sh"
 
 if $INSTALL_SECRETS; then
 	log_verbose "Bailing secrets from veracrypt"
@@ -434,7 +441,6 @@ log_verbose "installing development and devops systems"
 "$SCRIPT_DIR/install-node.sh"
 "$SCRIPT_DIR/install-google-cloud-sdk.sh"
 "$SCRIPT_DIR/install-jupyter.sh"
-"$SCRIPT_DIR/install-1password.sh"
 "$SCRIPT_DIR/install-google-chrome.sh"
 
 "$SCRIPT_DIR/install-ssh.sh"
@@ -473,18 +479,24 @@ if [[ $BASH_VERSION != 4* || $BASH_VERSION != 5* ]]; then
 	log_warning "$SCRIPTNAME running $BASH_VERSION but subscripts running in $(bash --version | head -1)"
 fi
 
-# docker is the lowest level, so install first
-# These are clones from src/infra/docker files
-if ! "$BIN_DIR/install-docker.sh"; then
-	log_warning "need to logout and return to get into the docker group"
-	exit 0
+# Install kubernetes as docker desktop is only a single node
+#"$SCRIPT_DIR/install-kubernetes.sh"
+# Needed for docker for kubernetes minikube
+# "$SCRIPT_DIR/install-xhyve.sh"
+
+# docker or colima installation
+if [[ $DOCKER_INSTALL =~ docker ]]; then
+	if ! "$BIN_DIR/install-docker.sh"; then
+		log_exit 0 "need to logout and return to get into the docker group"
+	fi
+else
+	"$BIN_DIR/install-docker-alternative.sh" -c
 fi
 
 if $DOCKER_LOGIN; then
-	log_verbose "login to hub.docker.com and ghcr.io with 1Password tokens"
-	"$BIN_DIR/docker-login.sh" -u "$DOCKER_USER" -t "$DOCKER_TOKEN"
+	# "$BIN_DIR/docker-login.sh" -u "$DOCKER_USER" -t "$DOCKER_TOKEN"
+	log_verbose "login to ghcr.io with 1Password tokens"
 	"$BIN_DIR/docker-login.sh" -u "$GIT_USERNAME" -r "$OTHER_DOCKER_REGISTRY" -t "$OTHER_DOCKER_TOKEN"
-
 fi
 
 log_verbose "Installing fonts"

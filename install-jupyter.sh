@@ -157,6 +157,7 @@ nbdime config-git --enable --global
 if [[ ! -e $HOME/.jupyter/nbconfig.json ]]; then
 	# https://stackoverflow.com/questions/36419342/how-to-wrap-code-text-in-jupyter-notebooks
 	log_verbose "Adding word wrap to cells"
+	mkdir -p "$HOME/.jupyter"
 	cat >"$HOME/.jupyter/nbconfig.json" <<-"EOF"
 		{
 		  "Cell": {
