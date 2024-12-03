@@ -85,7 +85,7 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:zD:" opt; do
 				   -m $(! $MAC_SYSTEM_UPDATE || echo "do not ")install the MacOS system updates as well
 				   -n set the hostname of the system
 				   -w the current workspace (default: $WS_DIR)
-				   -x $( $NO_SUDO_PASSWORD || echo "do not ")require a password when using sudo
+				   -x $($NO_SUDO_PASSWORD || echo "do not ")require a password when using sudo
 
 			Experimental. Setup of key storage only use if Dropbox has your keys and
 			are in a graphical installation does not work from ssh
@@ -176,7 +176,7 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:zD:" opt; do
 	w)
 		WS_DIR="$OPTARG"
 		;;
-	y) 
+	y)
 		SSH_USE_KEYCHAIN="$($SSH_USE_KEYCHAIN && echo false || echo true)"
 		export SSH_USE_KEYCHAIN
 		;;
@@ -254,13 +254,8 @@ else
 	"$BIN_DIR/install-docker-alternative.sh" -c
 fi
 
-log_verbose "Multiple login to all container registries"
-"$BIN_DIR/docker-login.sh" -u "$DOCKER_USER" -t "$DOCKER_TOKEN"
-"$BIN_DIR/docker-login.sh" -r gcr.io
-"$BIN_DIR/docker-login.sh" -r ghcr.io -u "$REPO_USER" -t
-
-
-
+log_verbose "Multiple login to all container registries with -a"
+"$BIN_DIR/login-container-registry.sh"
 
 # install-git-tools needs python
 log_verbose "installing python"
@@ -369,9 +364,6 @@ if [[ $OSTYPE =~ darwin ]]; then
 fi
 
 mkdir -p "$WS_DIR"
-if $FORCE; then
-	FORCE_FLAG="-f"
-fi
 
 # common packages
 
@@ -493,7 +485,6 @@ log_assert "bash --version | awk 'NR==1 {print \$4}' | grep -q '^[45]'" "bash ve
 if [[ $BASH_VERSION != 4* || $BASH_VERSION != 5* ]]; then
 	log_warning "$SCRIPTNAME running $BASH_VERSION but subscripts running in $(bash --version | head -1)"
 fi
-
 
 log_verbose "Installing fonts"
 "$BIN_DIR/install-fonts.sh"
