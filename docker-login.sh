@@ -18,47 +18,52 @@ DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
 OPTIND=1
-DOCKER_USER=${DOCKER_USER:-netdrones-$USER}
-DOCKER_REGISTRY="${DOCKER_REGISTRY:-ghcr.io}"
-DOCKER_PASSWORD="${DOCKER_PASSWORD:-insert_your_password_here_}"
+
+USE_SECRET_FILE="${USE_SECRET_FILE:-false}"
 DOCKER_SECRET_FILE="${DOCKER_SECRET_FILE:-"$HOME/.ssh/$DOCKER_REGISTRY.pat"}"
-USE_SECRET_FILE="${USE_SECRET_FILE:-true}"
-ONEPASSWORD="${ONEPASSWORD:-true}"
-ONEPASSWORD_URI="${ONEPASSWORD_URI:-op://NetDrones/GitHub ghcr.io/token}"
+DOCKER_PASSWORD="${DOCKER_PASSWORD:-""}"
+
+LOGIN_ALL="${LOGIN_ALL:-true}"
+DOCKER_USER="${DOCKER_USER:-richt}"
+DOCKER_REGISTRY="${DOCKER_REGISTRY:-docker.io}"
+DOCKER_TOKEN_URI="${DOCKER_TOKEN_URI:-"op://Private/Docker Container Registry - $DOCKER_USER/token"}"
+
+GITHUB_USER="${GITHUB_USER:-richtong}"
+GITHUB_REGISTRY="${GITHUB_REGISTRY:-ghcr.io}"
+GITHUB_TOKEN_URI="${GITHUB_TOKEN_URI:-"op://Private/GitHub Container Registry - $REPO_USER/token"}"
+
+GOOGLE_CONTAINER_REGISTRY="${GOOGLE_CONTAINER_REGISTRY:-gcr.io}"
+
 
 FORCE=false
-while getopts "hdv1fl:m:st:u:" opt; do
+while getopts "hdv1fl:m:r:st:u:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			$SCRIPTNAME: logon to docker container registries with personal access token
+			$SCRIPTNAME: logon to docker container registries using 1Password
 
-			Usage:
-				echo $DOCKER_PASSWORD | docker-login.sh -r $DOCKER_REGISTRY -u $DOCKER_USER
-
-			This can be called repeatedly if you need to login to multiple registries
-
-			For example to login to docker create PAT at https://hub.docker.com/settings/security
-				docker-login -u richt
-			To login to GitHub Container Registry create a PAT at https://github.com/settings/tokens?type=beta
-				docker-login -u richtong -r ghcr.io
-			Google Cloud uses a different mechanism and require google-cloud-sdk to be installed
-
-			Expects that the Personal Access Token you get from the registry
-			will be the read from stdin so feed the password with the password
-
-			echo $DOCKER_PASSWORD | docker-login -u richtong -ghcr.io
+				logs in to all registries:
+				docker-login.sh -a
+				
+				equivalent to:
+				docker-login.sh -r gcr.io
+				docker-login.sh -r ghcr.io -u $REPO_USER -t "$GITHUB_TOKEN_URI"
+				docker-login.sh -r docker.io -u $DOCKER_USER -t "$DOCKER_TOKEN_URI"
 
 			flags: -d debug, -h help -v verbose
-				   -1 use 1Password for tokens (default: $ONEPASSWORD)
+			       -f force a new login even if one already exists (default $FORCE)
+
+				   -r container registry name (default: $DOCKER_REGISTRY)
+			       -u Container registry user name (default $DOCKER_USER)
+				   -t 1Password Token URI (default: $ONEPASSWORD_URI)
+
+			Deprecated:
+				Usage:
+				echo $DOCKER_PASSWORD | docker-login.sh -r docker.io -u richt
+				echo $GITHUB_PAT | docker-login.sh -r ghcr.io -u richt
+				   -l location of the secret file (default:"$DOCKER_SECRET_FILE") deprecated
 				   -s instead of reading from stdin look in a file deprecated (default: $USE_SECRET_FILE)
 				   -m docker machine to use for login is now deprecated (default $DOCKER_MACHINE)
-
-			       -f force a new login even if one already exists (default $FORCE)
-				   -l location of the secret file (default:"$DOCKER_SECRET_FILE")
-				   -r docker container registry name (default: $DOCKER_REGISTRY)
-				   -t 1Password Token URI (default: $ONEPASSWORD_URI)
-			       -u docker user name (default $DOCKER_USER)
 		EOF
 		exit 0
 		;;
@@ -73,9 +78,6 @@ while getopts "hdv1fl:m:st:u:" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
-	1)
-		ONEPASSWORD="$(ONEPASSWORD && echo false || echo true)"
-		;;
 	f)
 		FORCE="$($FORCE && echo false || echo true)"
 		;;
@@ -84,6 +86,9 @@ while getopts "hdv1fl:m:st:u:" opt; do
 		;;
 	m)
 		DOCKER_MACHINE="$OPTARG"
+		;;
+	r)
+		DOCKER_REGISTRY="$OPTARG"
 		;;
 	s)
 		USE_SECRET_FILE="$($USE_SECRET_FILE && echo false || echo true)"
@@ -156,36 +161,41 @@ if ! docker_available; then
 
 fi
 
-# https://github.com/community/community/discussions/38467
-log_verbose "Note for ghcr.io only classis tokens are supported so do not use fine grained"
+	# https://github.com/community/community/discussions/38467
+	log_verbose "Note for ghcr.io only classis tokens are supported so do not use fine grained"
+if $LOGIN_ALL; then
+	export URI="$DOCKER_TOKEN_URI"
+	# shellcheck disable=SC2086
+	op run -- printenv URI | docker login $DOCKER_REGISTRY --username="$DOCKER_USER" --password-stdin
+	export URI="$GITHUB_TOKEN_URI"
+	# shellcheck disable=SC2086
+	op run -- printenv URI | docker login $GITHUB_REGISTRY --username="$GITHUB_USER" --password-stdin
+	gcloud auth configure-docker
+fi
 
 if [[ $DOCKER_REGISTRY =~ gcr.io ]]; then
 	# https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
 	log_verbose "Google Cloud has its own configuration assumes you are gh auth login or gh auth activate-service-account"
 	gcloud auth configure-docker
-
-elif $ONEPASSWORD; then
+elif [[ -n $DOCKER_REGISTRY  && -n $DOCKER_TOKEN_URI]]; then
 	# https://developer.1password.com/docs/cli/shell-plugins/github/
 	log_verbose "Recommend using 1Password to store Access Tokens"
 	# use printenv as shell variable substitution needs to be delayed
 	# so that op can process it as a shell variable
-	export URI="$ONEPASSWORD_URI"
+	export URI="$DOCKER_TOKEN_URI"
 	# shellcheck disable=SC2086
 	op run -- printenv URI | docker login $DOCKER_REGISTRY --username="$DOCKER_USER" --password-stdin
-
 elif $USE_SECRET_FILE; then
 	# do not quote since null registry defaults to hub.docker.com
 	# shellcheck disable=SC2086
 	docker login $DOCKER_REGISTRY --username="$DOCKER_USER" --password-stdin <"$DOCKER_SECRET_FILE"
-
-else
+elif [[ -n $DOCKER_PASSWORD ]]; thne
 	log_verbose "For docker login, you can use the web based login in Docker graphical apps"
 	log_verbose "Otherwise hub.docker.com personal access token for $DOCKER_USER"
 	log_verbose "You should create a personal access token "
 	# do not quote since null registry defaults to hub.docker.com
 	# shellcheck disable=SC2086
 	docker login $DOCKER_REGISTRY --username="$DOCKER_USER" --password "$DOCKER_PASSWORD"
-
 fi
 
 # now that newgrp doesn't work because this is interactive

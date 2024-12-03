@@ -354,7 +354,7 @@ if $DIRENV_PROFILE; then
 	log_verbose "installing into $DIRENV note that this does slow direnv"
 	touch "$DIRENV"
 	if ! config_mark "$SRC_DIR/$DIRENV"; then
-		1password_export "$SRC_DIR/$DIRENV"
+		$(1password_export "$SRC_DIR/$DIRENV")
 	fi
 fi
 
@@ -365,12 +365,12 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 	config_add "$(config_profile_nonexportable)" <<-EOF
 		# shellcheck disable=SC1090
 		source <(op completion bash)
-		if [[ -e $HOME/.config/op/plugins.sh ]]; then . "$HOME/.config/op/plugins.sh"; fi
+		if [[ -e \$HOME/.config/op/plugins.sh ]]; then . "\$HOME/.config/op/plugins.sh"; fi
 
 		# only run if interactive as op calls 1password for authentication
-		if [[ $- == *i* ]]; then
+		if [[ \$- == *i* ]]; then
 	EOF
-	1password_export "$(config_profile_nonexportable)"
+	$(1password_export "$(config_profile_nonexportable)")
 	config_add "$(config_profile_nonexportable)" <<-EOF
 		fi
 	EOF
@@ -387,7 +387,7 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 		# only run if interactive as op calls 1password for authentication
 		if [[ -o login ]]; then
 	EOF
-	1password_export "$(config_profile_nonexportable_zsh)"
+	$(1password_export "$(config_profile_nonexportable_zsh)")
 	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
 		fi
 	EOF

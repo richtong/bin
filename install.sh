@@ -10,20 +10,15 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
-export REPO_USER="${REPO_USER:-"$USER"}"
+export REPO_USER="${REPO_USER:-richtong}"
 export REPO_DOMAIN="${REPO_DOMAIN:-"tongfamily.com"}"
 export REPO_ORG="${REPO_ORG:-"richtong"}"
 
 DOCKER_INSTALL="${DOCKER_INSTALL:-docker}"
 DOCKER_LOGIN="${DOCKER_LOGIN:-true}"
-export DOCKER_USER="${DOCKER_USER:-"$REPO_USER"}"
-export DOCKER_TOKEN="${DOCKER_TOKEN:-"op://Private/Docker Container Registry - $DOCKER_USER/token"}"
-
-export GIT_USERNAME="${GIT_USERNAME:-"${REPO_USER^}"}"
-OTHER_DOCKER_USER="${OTHER_DOCKER_USER:-"$GIT_USERNAME"}"
-export OTHER_DOCKER_REGISTRY="${OTHER_DOCKER_REGISTRY:-ghcr.io}"
-export OTHER_DOCKER_TOKEN="${OTHER_DOCKER_TOKEN:-"op://Private/GitHub Container Registry - $OTHER_DOCKER_USER/token"}"
-export ORGANIZATION="${ORGANIZATION:-netdrones}"
+DOCKER_USER="${DOCKER_USER:-richt}"
+DOCKER_TOKEN_URI="${DOCKER_TOKEN_URI:-"op://Private/Docker Container Registry - $DOCKER_USER/token"}"
+GITHUB_TOKEN_URI="${GITHUB_TOKEN_URI:-"op://Private/Docker Container Registry - $REPO_USER/token"}"
 
 # Note do not use GIT_DIR, this is a defined variable for git
 export GIT_EMAIL="${GIT_EMAIL:-"$REPO_USER@$REPO_DOMAIN"}"
@@ -246,15 +241,30 @@ else
 	log_verbose "Make sure to enable 1Password"
 fi
 
+# Install kubernetes as docker desktop is only a single node
+#"$SCRIPT_DIR/install-kubernetes.sh"
+# Needed for docker for kubernetes minikube
+# "$SCRIPT_DIR/install-xhyve.sh"
+# docker or colima installation
+if [[ $DOCKER_INSTALL =~ docker ]]; then
+	if ! "$BIN_DIR/install-docker.sh"; then
+		log_exit 0 "need to logout and return to get into the docker group"
+	fi
+else
+	"$BIN_DIR/install-docker-alternative.sh" -c
+fi
+
+log_verbose "Multiple login to all container registries"
+"$BIN_DIR/docker-login.sh" -u "$DOCKER_USER" -t "$DOCKER_TOKEN"
+"$BIN_DIR/docker-login.sh" -r gcr.io
+"$BIN_DIR/docker-login.sh" -r ghcr.io -u "$REPO_USER" -t
+
+
+
+
 # install-git-tools needs python
 log_verbose "installing python"
 "$SCRIPT_DIR/install-python.sh"
-
-log_verbose "Install markdown and mkdocs tools"
-"$BIN_DIR/install-mkdocs.sh"
-# deprecated Sphinx use Markdown
-# "$SCRIPT_DIR/install-sphinx.sh"
-"$SCRIPT_DIR/install-markdown.sh"
 
 # the {-} means replace with null if FORCE_FLAG is not set
 log_verbose "Installing git tools"
@@ -328,15 +338,6 @@ fi
 
 "$SCRIPT_DIR/install-go.sh"
 
-if [[ $OSTYPE =~ darwin ]]; then
-	log_verbose "mac-install.sh with ${MAC_FLAGS-no flags}"
-	"$SOURCE_DIR/bin/mac-install.sh" "${MAC_FLAGS-}"
-	# to get the latest mac ports, need to source the new .profile
-	# note make sure that things like :ll
-	source_profile
-	log_verbose "using bash at $(command -v bash)"
-fi
-
 log_warning mac-install.sh must be run first before sourcing libraries
 # These are set later as they depend on variables that can be
 # positional parameters
@@ -351,6 +352,20 @@ if in_os linux; then
 	log_verbose "checking if this is bare metal linux"
 	"$SCRIPT_DIR/linux-install.sh"
 
+fi
+
+log_verbose "Install markdown and mkdocs tools"
+"$BIN_DIR/install-mkdocs.sh"
+# deprecated Sphinx use Markdown
+# "$SCRIPT_DIR/install-sphinx.sh"
+"$SCRIPT_DIR/install-markdown.sh"
+if [[ $OSTYPE =~ darwin ]]; then
+	log_verbose "mac-install.sh with ${MAC_FLAGS-no flags}"
+	"$SOURCE_DIR/bin/mac-install.sh" "${MAC_FLAGS-}"
+	# to get the latest mac ports, need to source the new .profile
+	# note make sure that things like :ll
+	source_profile
+	log_verbose "using bash at $(command -v bash)"
 fi
 
 mkdir -p "$WS_DIR"
@@ -479,25 +494,6 @@ if [[ $BASH_VERSION != 4* || $BASH_VERSION != 5* ]]; then
 	log_warning "$SCRIPTNAME running $BASH_VERSION but subscripts running in $(bash --version | head -1)"
 fi
 
-# Install kubernetes as docker desktop is only a single node
-#"$SCRIPT_DIR/install-kubernetes.sh"
-# Needed for docker for kubernetes minikube
-# "$SCRIPT_DIR/install-xhyve.sh"
-
-# docker or colima installation
-if [[ $DOCKER_INSTALL =~ docker ]]; then
-	if ! "$BIN_DIR/install-docker.sh"; then
-		log_exit 0 "need to logout and return to get into the docker group"
-	fi
-else
-	"$BIN_DIR/install-docker-alternative.sh" -c
-fi
-
-if $DOCKER_LOGIN; then
-	# "$BIN_DIR/docker-login.sh" -u "$DOCKER_USER" -t "$DOCKER_TOKEN"
-	log_verbose "login to ghcr.io with 1Password tokens"
-	"$BIN_DIR/docker-login.sh" -u "$GIT_USERNAME" -r "$OTHER_DOCKER_REGISTRY" -t "$OTHER_DOCKER_TOKEN"
-fi
 
 log_verbose "Installing fonts"
 "$BIN_DIR/install-fonts.sh"
