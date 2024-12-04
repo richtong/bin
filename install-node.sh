@@ -75,8 +75,8 @@ if $BREW; then
 	log_verbose install brew
 	PACKAGES+=(
 		node
-		pnpm # much faaster npm
-		vite # the altest in build tools long live webpack
+		pnpm # much faster npm
+		vite # the laltest in build tools long live webpack
 		yarn # an alternative npm from Facebook
 		yarn-completion
 
