@@ -15,9 +15,14 @@ DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 
-OP_INIT="${OP_INIT:-false}"
+# do not use OP_ as this is reserved for 1Password CLI
+OP_API_INIT="${OP_API_INIT:-false}"
 # if Private you do not need to set
-OP_VAULT="${OP_VAULT:-DevOps}"
+# the default is a tne.ai account do not change OP_ACCOUNT which is the general default
+# but you should copy the keys into your private repo
+# OP_API_ACCOUNT="${OP_API_ACCOUNT:-63OLTT7NNJDFLOMAMAIDXWXYQM}"
+# OP_API_VAULT="${OP_API_VAULT:-DevOps}"
+OP_API_VAULT="${OP_API_VAULT:-Private}"
 VERSION="${VERSION:-8}"
 DIRENV_PROFILE="${ENV_PROFILE:-true}"
 DIRENV_PATH="${DIRENV_PATH:-$HOME/.envrc}"
@@ -42,8 +47,8 @@ while getopts "hdvfr:e:oc:ns" opt; do
 
 				   -r 1Password version number (default: $VERSION)
 
-				   -c .envrc to use this vault (default: $OP_VAULT)
-				   -o $($OP_INIT && echo "No ")init for 1Password op plugins
+				   -c .envrc to use this vault (default: $OP_API_VAULT)
+				   -o $($OP_API_INIT && echo "No ")init for 1Password op plugins
 
 
 			For plugins, you should set y our 1Password to use special names
@@ -122,8 +127,8 @@ while getopts "hdvfr:e:oc:ns" opt; do
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	o)
-		OP_INIT="$($OP_INIT && echo false || echo true)"
-		export OP_INIT
+		OP_API_INIT="$($OP_API_INIT && echo false || echo true)"
+		export OP_API_INIT
 		;;
 	f)
 		FORCE="$($FORCE && echo false || echo true)"
@@ -136,7 +141,7 @@ while getopts "hdvfr:e:oc:ns" opt; do
 		DIRENV_PATH="$OPTARG"
 		;;
 	c)
-		OP_VAULT="$OPTARG"
+		OP_API_VAULT="$OPTARG"
 		;;
 	n)
 		DIRENV_PROFILE="$($DIRENV_PROFILE && echo false || echo true)"
@@ -246,8 +251,8 @@ ENTRY+=(
 # need quotes for huggingface-cli because shfmt will
 # do not use github_token, use gh auth login
 # do not use AWS_SECRET_ACCESS_KEY, use AWS_SECRET_ACCESS_KEY use aws ssologin
-declare -A OP_ITEM
-OP_ITEM=(
+declare -A OP_API_ITEM
+OP_API_ITEM=(
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
 	[DIGITALOCEAN_TOKEN]="DigitalOcean Personal Access Token"
 	# 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
@@ -261,8 +266,8 @@ OP_ITEM=(
 	[HF_TOKEN]="Hugging Face API Token Dev"
 	# [LOCALSTACK_API_KEY]="LocalStack API Key"
 	[OPENAI_API_KEY]="OpenAI API Key Dev"
-	[OPENROUTER_API_KEY]="OpenRouter API Key Dev"
-	[REPLICATE_API_KEY]="Replicate API Token"
+	[OPENROUTER_API_KEY]="OpenRouter Key Dev"
+	[REPLICATE_API_KEY]="Replicate API Token Dev"
 	[SLASHGPT_ENV_WEBPILOT_UID]="Webpilot UID Dev"
 	# [SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
 	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
@@ -276,8 +281,8 @@ OP_ITEM=(
 # apply special fixup later to add the ID
 # note that Local stack is moving to auth tokens
 # so auth token should be changed to when the plugin changes in 1password
-declare -A OP_FIELD
-OP_FIELD=(
+declare -A OP_API_FIELD
+OP_API_FIELD=(
 	[ANTHROPIC_API_KEY]="api key"
 	# [AWS_ACCESS_KEY_ID]="access key id"
 	# [AWS_SECRET_ACCESS_KEY]="secret access key"
@@ -298,13 +303,13 @@ OP_FIELD=(
 	[WEBUI_SECRET_KEY]="secret key"
 
 )
-log_verbose "OP_FIELD:${OP_FIELD[*]}"
-log_verbose "OP_FIELD[AN]:${OP_FIELD[ANTHROPIC_API_KEY]}"
+log_verbose "OP_API_FIELD:${OP_API_FIELD[*]}"
+log_verbose "OP_API_FIELD[AN]:${OP_API_FIELD[ANTHROPIC_API_KEY]}"
 # this creates a ./.op directory in the CWD so make sure we are at HOME
 
 WORKING_DIR="$PWD"
 PUSHED=false
-if $FORCE || $OP_INIT; then
+if $FORCE || $OP_API_INIT; then
 	if ! pushd "$HOME" >/dev/null; then
 		log_warning "Could not go to HOME $HOME will create .op in $CWD"
 		PUSHED=true
@@ -337,20 +342,23 @@ fi
 1password_export() {
 	local profile_file="${1:-$config_profile}"
 	log_verbose "1password export to file $profile_file"
-	log_verbose "indices: ${!OP_ITEM[*]}"
-	log_verbose "values: ${OP_ITEM[*]}"
-	for ENV_VAR in "${!OP_ITEM[@]}"; do
-		log_verbose "index $ENV_VAR"
-		log_verbose "item ${OP_ITEM[$ENV_VAR]}"
-		log_verbose "field ${OP_FIELD[$ENV_VAR]}"
+	log_verbose "indices: ${!OP_API_ITEM[*]}"
+	log_verbose "values: ${OP_API_ITEM[*]}"
+	for op_api_index in "${!OP_API_ITEM[@]}"; do
+		log_verbose "index $op_api_index"
+		log_verbose "item ${OP_API_ITEM[$op_api_index]}"
+		log_verbose "field ${OP_API_FIELD[$op_api_index]}"
 		# https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash
 		# do not overwrite if a key already exists
 		# we are using bash syntax here since you can't put interactive stuff in
 		# .profile
+		# if you are going to use a shared vault then add this
+		#			--account "$OP_API_ACCOUNT"
 		config_add "$profile_file" <<-EOF
-			[[ -v $ENV_VAR ]] || \\
-				export "$ENV_VAR"="\$(op item get "${OP_ITEM[$ENV_VAR]}" \\
-					--fields "${OP_FIELD[$ENV_VAR]}" --vault "$OP_VAULT" --reveal)"
+			[[ -v $op_api_index ]] || \\
+				export "$op_api_index"="\$(op item get "${OP_API_ITEM[$op_api_index]}" \\
+					--fields "${OP_API_FIELD[$op_api_index]}" --vault "$OP_API_VAULT" \\
+					--reveal)"
 		EOF
 	done
 }
@@ -419,11 +427,12 @@ log_verbose "use ssh key for signing commits"
 git config --global gpg.format ssh
 # disable because op returns a double quoted string
 # shellcheck disable=SC2046
-log_verbose "add signing key"
-git config --global user.signingkey "$(op item get "GitHub SSH Key" --fields "public key" --reveal)"
-log_verbose "add 1password as app"
+# log_verbose "add signing key"
+# FIX this only adds the first id_ed25519
+# git config --global user.signingkey "$(op item get "GitHub SSH Key" --fields "public key" --reveal)"
+# log_verbose "add 1password as app"
 # git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+# git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 # a bug so do not enable
 # log_verbose "enable signing"
 # git config --global commit.gpgsign true
