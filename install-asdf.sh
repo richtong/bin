@@ -148,11 +148,13 @@ declare -A ASDF+=(
 	[nodejs]=${NODE_VERSION[@]}
 	[python]=${PYTHON_VERSION[@]}
 	[java]=${JAVA_VERSION[@]}
-	[ruby]=${RUBY[@]}
-	[uv]=${UV[@]}
-	[golang]=${GOLANG[@]}
-	[pipx]=${PIPX[@]}
+	[ruby]=${RUBY_VERSION[@]}
+	[uv]=${UV_VERSION[@]}
+	[golang]=${GOLANG_VERSION[@]}
+	[pipx]=${PIPX_VERSION[@]}
 )
+
+log_verbose ASDF indexes ${!ASDF[*]} and data ${ASDF[*]}
 
 # https://github.com/pyenv/pyenv/issues/950
 # asdf install python uses pyenv underneath and brew install open-ssl does not put the
@@ -201,8 +203,7 @@ fi
 # https://unix.stackexchange.com/questions/91943/is-there-a-way-to-list-all-indexes-ids-keys-on-a-bash-associative-array-vari
 log_verbose "Installing asdf plugins from ${ASDF[*]}"
 for LANG in "${!ASDF[@]}"; do
-	log_verbose "Install for language $LANG"
-	log_verbose "install asdf for language $LANG"
+	log_verbose "asdf language $LANG"
 	if ! asdf list "$LANG" >/dev/null; then
 		log_verbose "Install asdf plugin $LANG"
 		asdf plugin add "$LANG"
@@ -216,7 +217,9 @@ for LANG in "${!ASDF[@]}"; do
 	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
 	# note this word splits so versions cannot have spaces there seems to be no
 	# way to generate an array here
+	log_verbose looking for version in \${ASDF[$LANG]}=${ASDF[$LANG]}
 	for VERSION in ${ASDF[$LANG]}; do
+		log_verbose "Install $LANG version $VERSION"
 		# remove the asterisk which means current selected
 		# shellcheck disable=SC2086
 
@@ -227,7 +230,7 @@ for LANG in "${!ASDF[@]}"; do
 			#    continue
 			#fi
 
-			log_verbose running eval ${ASDF_ENV[$LANG]:-} asdf install "$LANG" "$VERSION"
+			log_verbose try eval ${ASDF_ENV[$LANG]:-} asdf install "$LANG" "$VERSION"
 
 			# python needs an environment set so add it as needed with eval
 			# note we use {:-} since not all ASDF_ENVs are set
