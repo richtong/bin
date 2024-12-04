@@ -156,8 +156,8 @@ if ! config_mark; then
 	config_add <<-EOF
 		        echo "\$PATH" | grep -q "$BREW_GNU" || PATH="$BREW_GNU:\$PATH"
 		        for NAME in gnu-indent gnu-sed gnu-tar gnu-which grep make findutils gawk; do
-		            echo "\$PATH" | grep -q "opt/$NAME/libexec/gnubin" ||
-		                PATH="\$HOMEBREW_PREFIX/opt/$NAME/libexec/gnubin:\$PATH"
+		            echo "\$PATH" | grep -q "opt/\$NAME/libexec/gnubin" ||
+		                PATH="\$HOMEBREW_PREFIX/opt/\$NAME/libexec/gnubin:\$PATH"
 		        done
 		        for NAME in gnu-getopt gettext m4 curl; do
 		            echo "\$PATH" | grep -q "opt/\$NAME/bin" ||
