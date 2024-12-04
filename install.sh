@@ -13,6 +13,9 @@ VERBOSE="${VERBOSE:-false}"
 export REPO_USER="${REPO_USER:-richtong}"
 export REPO_DOMAIN="${REPO_DOMAIN:-"tongfamily.com"}"
 export REPO_ORG="${REPO_ORG:-"richtong"}"
+REPO_EMAIL="${REPO_EMAIL:-"$REPO_USER@$REPO_DOMAIN"}"
+
+USER_ORG="${USER_ORG:-tongfamily}"
 
 DOCKER_INSTALL="${DOCKER_INSTALL:-docker}"
 DOCKER_LOGIN="${DOCKER_LOGIN:-true}"
@@ -21,7 +24,6 @@ DOCKER_TOKEN_URI="${DOCKER_TOKEN_URI:-"op://Private/Docker Container Registry - 
 GITHUB_TOKEN_URI="${GITHUB_TOKEN_URI:-"op://Private/Docker Container Registry - $REPO_USER/token"}"
 
 # Note do not use GIT_DIR, this is a defined variable for git
-export GIT_EMAIL="${GIT_EMAIL:-"$REPO_USER@$REPO_DOMAIN"}"
 NO_SUDO_PASSWORD="${NO_SUDO_PASSWORD:=false}"
 NEW_HOSTNAME="${NEW_HOSTNAME:-"$HOSTNAME"}"
 FORCE="${FORCE:-false}"
@@ -65,7 +67,7 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:zD:" opt; do
 				   -e Email for user (default: $GIT_EMAIL)
 				   -g repo name for github (default: $REPO_ORG)
 				   -l Set the name for Logins (default: $REPO_USER)
-				   -p Organization path for install (default: $ORGANIZATION-install.sh)
+				   -p Organization path for install (default: $REPO_ORG-install.sh)
 				   -u User name for github (default: $GIT_USERNAME)
 
 			Check these as well:
@@ -155,7 +157,7 @@ while getopts "a:b:c:def:g:hi:j:k:l:mn:o:p:q:r:s:tu:vw:xy:zD:" opt; do
 		export DOCKER_LOGIN
 		;;
 	p)
-		ORGANIZATION="$OPTARG"
+		USER_ORG="$OPTARG"
 		;;
 	q)
 		OTHER_DOCKER_TOKEN="$OPTARG"
@@ -263,7 +265,7 @@ log_verbose "installing python"
 
 # the {-} means replace with null if FORCE_FLAG is not set
 log_verbose "Installing git tools"
-"$SCRIPT_DIR/install-git-tools.sh" -u "$GIT_USERNAME" -e "$GIT_EMAIL"
+"$SCRIPT_DIR/install-git-tools.sh" -u "$REPO_USER" -e "$REPO_EMAIL"
 log_verbose must be installed is git lfs is used before installing repos
 "$BIN_DIR/install-git-lfs.sh"
 log_verbose install repos only if not in docker
@@ -496,8 +498,8 @@ log_verbose "Installing fonts"
 log_verbose "source profiles in case we did not reboot"
 source_profile
 
-log_verbose "Install organization specific componenets for $ORGANIZATION if any"
-run_if "$SCRIPT_DIR/$ORGANIZATION-install.sh"
+log_verbose "Install organization specific componenets for $USER_ORG if any"
+run_if "$SCRIPT_DIR/$USER_ORG-install.sh"
 
 # Assumes that personal.git is at the same level as src
 log_verbose Chain to your personal installs

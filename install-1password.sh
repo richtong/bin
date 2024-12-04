@@ -17,7 +17,7 @@ FORCE="${FORCE:-false}"
 
 OP_INIT="${OP_INIT:-false}"
 # if Private you do not need to set
-OP_VAULT="{OP_VAULT:-DevOps}"
+OP_VAULT="${OP_VAULT:-DevOps}"
 VERSION="${VERSION:-8}"
 DIRENV_PROFILE="${ENV_PROFILE:-false}"
 DIRENV="${DIRENV:-$HOME/.envrc}"
@@ -290,7 +290,7 @@ OP_FIELD=(
 	# [LOCALSTACK_API_KEY]="api key"
 	[OPENAI_API_KEY]="api key"
 	[OPENROUTER_API_KEY]="key"
-	[REPPLICATE_API_KEY]="api token"
+	[REPLICATE_API_KEY]="api token"
 	[SLASHGPT_ENV_WEBPILOT_UID]=key
 	# [SUPERSET_SECRET_KEY]="api key"
 	[WEBUI_SECRET_KEY]="secret key"
@@ -334,17 +334,19 @@ fi
 # usage: 1password_export [profile file]
 1password_export() {
 	local profile_file="${1:-$config_profile}"
-	config_add "$profile_file" <<<"if "
-	for ENV_VAR in "${PLUGIN[@]}"; do
-		log_verbose "export $ENV_VAR"
-		log_verbose "op item get ${OP_ITEM[$ENV_VAR]}"
-		log_verbose "fields ${OP_FIELD[$ENV_VAR]}"
+	log_verbose "1password export to $1"
+	log_verbose "indices: ${!OP_ITEM[*]}"
+	log_verbose "values: ${OP_ITEM[*]}"
+	for ENV_VAR in "${!OP_ITEM[@]}"; do
+		log_verbose "index $ENV_VAR"
+		log_verbose "item ${OP_ITEM[$ENV_VAR]}"
+		log_verbose "field ${OP_FIELD[$ENV_VAR]}"
 		# https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash
 		# do not overwrite if a key already exists
 		config_add "$profile_file" <<-EOF
-			[ -n "$${$ENV_VAR+x}" ] || \\
+			[ -n "\${$ENV_VAR+x}" ] || \\
 				export "$ENV_VAR"="\$(op item get "${OP_ITEM[$ENV_VAR]}" \\
-					--fields "${OP_FIELD[$ENV_VAR]}" --vault "${OP_VAULT}" --reveal)"
+					--fields "${OP_FIELD[$ENV_VAR]}" --vault "$OP_VAULT" --reveal)"
 		EOF
 	done
 }
@@ -370,7 +372,8 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 		# only run if interactive as op calls 1password for authentication
 		if [[ \$- == *i* ]]; then
 	EOF
-	$(1password_export "$(config_profile_nonexportable)")
+	log_verbose "adding 1password_export"
+	1password_export "$(config_profile_nonexportable)"
 	config_add "$(config_profile_nonexportable)" <<-EOF
 		fi
 	EOF
@@ -379,7 +382,7 @@ fi
 # assuming oh-my-zsh is installed
 if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
-		if [[ -e $HOME/.config/op/plugins.sh ]]; then . "$HOME/.config/op/plugins.sh"; fi
+		if [[ -e \$HOME/.config/op/plugins.sh ]]; then . "\$HOME/.config/op/plugins.sh"; fi
 	EOF
 	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
 		plugins+=(1password)
@@ -387,7 +390,8 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 		# only run if interactive as op calls 1password for authentication
 		if [[ -o login ]]; then
 	EOF
-	$(1password_export "$(config_profile_nonexportable_zsh)")
+	log_verbose "adding 1password_export"
+	1password_export "$(config_profile_nonexportable_zsh)"
 	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
 		fi
 	EOF

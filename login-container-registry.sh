@@ -189,7 +189,7 @@ registry_login() {
 		# https://developer.1password.com/docs/cli/shell-plugins/github/
 		# op needs the variables exported
 		export token
-		log_verbose "passing $token as $(op run --no-masking -- printenv token)"
+		log_verbose "passing $token as $(op run -- printenv token)"
 		# export DOCKER_TOKEN_URI
 		# log_verbose "passing $DOCKER_TOKEN_URI as $(op run --no-masking -- printenv DOCKER_TOKEN_URI)"
 		# https://developer.1password.com/docs/cli/secret-references/
