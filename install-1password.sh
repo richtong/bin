@@ -19,12 +19,13 @@ OP_INIT="${OP_INIT:-false}"
 # if Private you do not need to set
 OP_VAULT="${OP_VAULT:-DevOps}"
 VERSION="${VERSION:-8}"
-DIRENV_PROFILE="${ENV_PROFILE:-false}"
-DIRENV="${DIRENV:-$HOME/.envrc}"
+DIRENV_PROFILE="${ENV_PROFILE:-true}"
+DIRENV_PATH="${DIRENV_PATH:-$HOME/.envrc}"
+SHELL_PROFILE="${SHELL_PROFILE:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvfr:e:oc:n" opt; do
+while getopts "hdvfr:e:oc:ns" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -36,11 +37,12 @@ while getopts "hdvfr:e:oc:n" opt; do
 				   -v $($VERBOSE && echo "not ")verbose
 				   -f $($FORCE && echo "do not ")force install even is 1Password exists
 				   -n $(DIRENV_PROFILE && echo "no ")install variables in direnv
+				   -e install into .envrc for direnv if DIRENV is set (default: $DIRENV_PATH)
+				   -s $(SHELL_PROFILE && echo "no ")install variables in shell (not recommended slow)
 
 				   -r 1Password version number (default: $VERSION)
 
 				   -c .envrc to use this vault (default: $OP_VAULT)
-				   -e install into .envrc for direnv if DIRENV is set (default: $DIRENV)
 				   -o $($OP_INIT && echo "No ")init for 1Password op plugins
 
 
@@ -131,7 +133,7 @@ while getopts "hdvfr:e:oc:n" opt; do
 		VERSION="$OPTARG"
 		;;
 	e)
-		DIRENV="$OPTARG"
+		DIRENV_PATH="$OPTARG"
 		;;
 	c)
 		OP_VAULT="$OPTARG"
@@ -334,7 +336,7 @@ fi
 # usage: 1password_export [profile file]
 1password_export() {
 	local profile_file="${1:-$config_profile}"
-	log_verbose "1password export to $1"
+	log_verbose "1password export to file $profile_file"
 	log_verbose "indices: ${!OP_ITEM[*]}"
 	log_verbose "values: ${OP_ITEM[*]}"
 	for ENV_VAR in "${!OP_ITEM[@]}"; do
@@ -343,8 +345,10 @@ fi
 		log_verbose "field ${OP_FIELD[$ENV_VAR]}"
 		# https://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash
 		# do not overwrite if a key already exists
+		# we are using bash syntax here since you can't put interactive stuff in
+		# .profile
 		config_add "$profile_file" <<-EOF
-			[ -n "\${$ENV_VAR+x}" ] || \\
+			[[ -v $ENV_VAR ]] || \\
 				export "$ENV_VAR"="\$(op item get "${OP_ITEM[$ENV_VAR]}" \\
 					--fields "${OP_FIELD[$ENV_VAR]}" --vault "$OP_VAULT" --reveal)"
 		EOF
@@ -353,10 +357,10 @@ fi
 
 log_verbose "Install these in the universal export for the user"
 if $DIRENV_PROFILE; then
-	log_verbose "installing into $DIRENV note that this does slow direnv"
-	touch "$DIRENV"
-	if ! config_mark "$SRC_DIR/$DIRENV"; then
-		$(1password_export "$SRC_DIR/$DIRENV")
+	log_verbose "installing into $DIRENV_PATH note that this does slow direnv but is faster than .bashrc"
+	touch "$DIRENV_PATH"
+	if ! config_mark "$DIRENV_PATH"; then
+		1password_export "$DIRENV_PATH"
 	fi
 fi
 
@@ -368,15 +372,19 @@ if ! config_mark "$(config_profile_nonexportable)"; then
 		# shellcheck disable=SC1090
 		source <(op completion bash)
 		if [[ -e \$HOME/.config/op/plugins.sh ]]; then . "\$HOME/.config/op/plugins.sh"; fi
+	EOF
+	if $SHELL_PROFILE; then
+		config_add "$(config_profile_nonexportable)" <<-EOF
+			# only run if interactive as op calls 1password for authentication
+			if [[ \$- == *i* ]]; then
+		EOF
+		log_verbose "adding 1password_export"
+		1password_export "$(config_profile_nonexportable)"
+		config_add "$(config_profile_nonexportable)" <<-EOF
+			fi
+		EOF
+	fi
 
-		# only run if interactive as op calls 1password for authentication
-		if [[ \$- == *i* ]]; then
-	EOF
-	log_verbose "adding 1password_export"
-	1password_export "$(config_profile_nonexportable)"
-	config_add "$(config_profile_nonexportable)" <<-EOF
-		fi
-	EOF
 fi
 
 # assuming oh-my-zsh is installed
@@ -386,15 +394,19 @@ if ! config_mark "$(config_profile_nonexportable_zsh)"; then
 	EOF
 	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
 		plugins+=(1password)
+	EOF
 
-		# only run if interactive as op calls 1password for authentication
-		if [[ -o login ]]; then
-	EOF
-	log_verbose "adding 1password_export"
-	1password_export "$(config_profile_nonexportable_zsh)"
-	config_add "$(config_profile_nonexportable_zsh)" <<-EOF
-		fi
-	EOF
+	if $SHELL_PROFILE; then
+		config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+			# only run if interactive as op calls 1password for authentication
+			if [[ -o login ]]; then
+		EOF
+		log_verbose "adding 1password_export"
+		1password_export "$(config_profile_nonexportable_zsh)"
+		config_add "$(config_profile_nonexportable_zsh)" <<-EOF
+			fi
+		EOF
+	fi
 
 fi
 
@@ -408,7 +420,7 @@ git config --global gpg.format ssh
 # disable because op returns a double quoted string
 # shellcheck disable=SC2046
 log_verbose "add signing key"
-git config --global user.signingkey $(op item get "GitHub SSH Key" --fields "public key" --reveal)
+git config --global user.signingkey "$(op item get "GitHub SSH Key" --fields "public key" --reveal)"
 log_verbose "add 1password as app"
 # git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
