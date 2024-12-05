@@ -12,7 +12,7 @@ SCRIPT_DIR=${SCRIPT_DIR:-"$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"}
 # Pass the force flag down
 FORCE="${FORCE:-false}"
 FLAGS="${FLAGS:-""}"
-ALIAS="${ALIAS:-false}"
+ALIAS="${ALIAS:-true}"
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
@@ -184,6 +184,7 @@ mkdir -p "$NVIM_CONFIG"
 if $LAZYVIM; then
 	log_verbose "Install lazyvim as a repo in $NVIM_CONFIG"
 	log_verbose "Remove $NVIM_CONFIG/.git if you do not want updates from $LAZYVIM_REPO"
+
 	# https://github.com/LazyVim/starter/tree/main/lua/config
 	log_verbose "YOu can use chezmoi to get the installation which is recommended"
 	log_verbose " But you need just two files init.lua and lazy.lua will install if not present"
