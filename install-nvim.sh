@@ -37,8 +37,8 @@ while getopts "hdvfalu" opt; do
 			  -v $($VERBOSE || echo "not ")verbose
 			  -f $($FORCE || echo "no ")force install
 			  -a $($ALIAS || echo "no ")set alias as vi
-			      -l $($LAZYVIM || echo "no ")lazyvim install
-			      -u $($LUNARVIM || echo "no ")lunarvim install
+			        -l $($LAZYVIM || echo "no ")lazyvim install
+			        -u $($LUNARVIM || echo "no ")lunarvim install
 
 		EOF
 		exit 0
@@ -183,8 +183,72 @@ mkdir -p "$NVIM_CONFIG"
 
 if $LAZYVIM; then
 	log_verbose "Install lazyvim as a repo in $NVIM_CONFIG"
-	git clone "$LAZYVIM_REPO" "$NVIM_CONFIG"
 	log_verbose "Remove $NVIM_CONFIG/.git if you do not want updates from $LAZYVIM_REPO"
+	# https://github.com/LazyVim/starter/tree/main/lua/config
+	log_verbose "YOu can use chezmoi to get the installation which is recommended"
+	log_verbose " But you need just two files init.lua and lazy.lua will install if not present"
+	log_verbose "Best to copy them from LazyVim/starter but this is a startup copy"
+	mkdir -p "$HOME/.config/nvim/config"
+	if ! config_mark "$HOME/.config/nvim/init.lua" "--"; then
+		config_add <<-EOF
+			      require("config.lazy")
+		EOF
+	fi
+	if ! config_mark "$HOME/.config/nvim/lua/config/lazy.lua" "--"; then
+		config_add <<-EOF
+			 defaults = {
+			    -- By default, only LazyVim plugins will be lazy-loaded. Your custom plugins will load during startup.
+			    -- If you know what you're doing, you can set this to $(true) to have all your custom plugins lazy-loaded by default.
+			    lazy = false,
+			    -- It's recommended to leave version=false for now, since a lot the plugin that support versioning,
+			    -- have outdated releases, which may break your Neovim install.
+			    version = false, -- always use the latest git commit
+			    -- version = "*", -- try installing the latest stable version for plugins that support semver
+			  },
+			  install = { colorscheme = { "tokyonight", "habamax" } },
+			  checker = {
+			    enabled = true, -- check for plugin updates periodically
+			    notify = false, -- notify on update
+			  }, -- automatically check for plugin updates
+			  performance = {
+			    rtp = {
+			      -- disable some rtp plugins
+			      disabled_plugins = {
+			        "gzip",
+			        -- "matchit",
+			        -- "matchparen",
+			        -- "netrwPlugin",
+			        "tarPlugin",
+			        "tohtml",
+			        "tutor",
+			        "zipPlugin",
+			      },
+			    },
+			  },
+			})local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+			if not (vim.uv or vim.loop).fs_stat(lazypath) then
+			  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+			  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+			  if vim.v.shell_error ~= 0 then
+			    vim.api.nvim_echo({
+			      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+			      { out, "WarningMsg" },
+			      { "\nPress any key to exit..." },
+			    }, true, {})
+			    vim.fn.getchar()
+			    os.exit(1)
+			  end
+			end
+			vim.opt.rtp:prepend(lazypath)
+			require("lazy").setup({
+			  spec = {
+			    -- add LazyVim and import its plugins
+			    { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+			    -- import/override with your plugins
+			    { import = "plugins" },
+			  },
+		EOF
+	fi
 else
 	# https://www.linode.com/docs/tools-reference/tools/how-to-install-neovim-and-plugins-with-vim-plug/
 	# https://www.reddit.com/r/neovim/comments/3z6c2i/how_does_one_install_vimplug_for_neovim/

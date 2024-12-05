@@ -182,6 +182,7 @@ INSTALL_CHEZMOI_FILE+=(
 
 	# Neovim with LazyVim a pain since you can't do directories
 	.config/nvim/init.lua
+	.config/nvim/stylua.toml
 	.config/nvim/lua/config/README.md
 	.config/nvim/lua/config/autocmds.lua
 	.config/nvim/lua/config/keymaps.lua
