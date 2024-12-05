@@ -71,18 +71,18 @@ if in_os mac; then
 		font-menlo-for-powerline
 	)
 
-	tap_install homebrew/cask-fonts
+	# tap_install homebrew/cask-fonts -- these fonts are now in main
 	# brew as of June 2022 does not handle reinstall correctly.
 	# throws an error. So uninstall it and reinstall do not just delete
 	# as it will show as installed.
-	log_verbose "uninstalling powerline ${FONT[*]}"
-	package_uninstall "${FONT[@]}"
+        #	log_verbose "uninstalling powerline ${FONT[*]}"
+	#package_uninstall "${FONT[@]}"
 	#log_verbose "Manually delete the fonts so install can happen"
 	#rm -f "$HOME/Library/Fonts/FuraMono-"* \
 	#    "$HOME/Library/Fonts/SF-Mono-Powerline-"* \
 	#    "$HOME/Library/Fonts/Menlo"*
 	log_verbose "installing powerline ${FONT[*]}"
-	package_install "${FONT[@]}"
+	brew_install "${FONT[@]}"
 
 elif in_os linux; then
 
