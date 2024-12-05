@@ -140,8 +140,7 @@ declare -A PYTHON_PACKAGE+=(
 # 	log_warning "If you want in the system, you must exit poetry and rerun"
 # 	poetry add "${PYTHON_PACKAGE[@]}"
 # else
-for package in "${!PYTHON_PACKAGE[@]}; do
-	log_verbose pipx_install -p "${PYTHON_PACKAGE["$package"]}" "$package"
+for package in "${!PYTHON_PACKAGE[@]}"; do
 	pipx_install -p "${PYTHON_PACKAGE[$package]}" "$package"
 done
 
@@ -161,6 +160,8 @@ fi
 if (($(pfind ollama | wc -l) == 0)); then
 	log_verbose "ollama serve starting"
 	ollama serve &
+	log_verbose "waiting for the server to start"
+	sleep 20
 fi
 
 # note things like neovim code companion will use the first model
