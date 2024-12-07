@@ -204,14 +204,14 @@ pipx install "${PIPX_PACKAGE[@]}"
 # these are supposed to installed by default to bash but not zsh but are not
 log_verbose "Install argcomplete into profiles"
 if ! config_mark "$(config_profile_nonexportable)"; then
- 	config_add "$(config_profile_nonexportable)" <<-'EOF'
- 		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-EOF
+	config_add "$(config_profile_nonexportable)" <<-'EOF'
+		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+	EOF
 fi
 if ! config_mark "$(config_profile_nonexportable_zsh)"; then
- 	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
- 		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-EOF
+	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
+		   if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+	EOF
 fi
 
 # These should only be command line utilities, not packages for python compute

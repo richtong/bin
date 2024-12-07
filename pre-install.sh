@@ -75,20 +75,20 @@ fi
 # into .profile so this hack is just copied from there
 # implements the strategy in ./lib/lib-config.sh
 # .bash_profile -> .profile -> (if BASH) -> .bashrc
-pushd $HOME >/dev/null 
+pushd "$HOME" >/dev/null
 for PROFILE in .profile .bash_profile .bashrc .zprofile .zshrc; do
 
 	if [[ ! -e $PROFILE ]]; then
-		cat >$PROFILE <<-EOF
+		cat >"$PROFILE" <<-EOF
 			#!/usr/bin/env $([[ $PROFILE =~ bash ]] && echo bash || [[ $PROFILE =~ .z ]] && echo zsh || echo sh)
 		EOF
 	fi
 
 	if ! grep -q "^# Added by $SCRIPTNAME" "$PROFILE"; then
 		echo "$SCRIPTNAME: update $PROFILE" >&2
-		echo "# Added by $SCRIPTNAME on $(date)" >> "$PROFILE"
+		echo "# Added by $SCRIPTNAME on $(date)" >>"$PROFILE"
 		case $PROFILE in
-		.profile)	
+		.profile)
 			cat >>"$PROFILE" <<-'EOF'
 				echo ".profile called from $0"
 				# add the check because asdf and pipenv override homebrew
@@ -115,24 +115,24 @@ for PROFILE in .profile .bash_profile .bashrc .zprofile .zshrc; do
 				echo "SCRIPTNAME: warning $PROFILE failure"
 			fi
 
-		;;
-		.bash_profile)	
+			;;
+		.bash_profile)
 			# because macos Terminal only calls .bash_profile, chain to .profile
 			cat >>"$PROFILE" <<-'EOF'
 				echo ".bash_profile: ${BASH_SOURCE[0]} called from $0"
 				if [[ -r $HOME/.profile ]]; then source "$HOME/.profile"; fi
 			EOF
-		;;
+			;;
 		.bashrc)
 			cat >>"$PROFILE" <<-'EOF'
 				echo ".bashrc: $BASH_SOURCE[0] called from $0"
 				# make sure to guard interactives with if [[ $- == *i* ]]; then XXX; fi
 			EOF
-		;;
+			;;
 		esac
 	fi
 done
-popd > /dev/null
+popd >/dev/null
 
 set -u
 if ! command -v brew >/dev/null; then

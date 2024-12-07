@@ -49,7 +49,7 @@ source_lib lib-util.sh lib-install.sh lib-config.sh
 
 package_install thefuck
 
-# note the omz plugin thefuck conflicts with sudo and just handles ESC ESC this lets you run 
+# note the omz plugin thefuck conflicts with sudo and just handles ESC ESC this lets you run
 # the correct command by typing fuck
 for profile in "$(config_profile_nonexportable_bash)" "$(config_profile_nonexportable_zsh)"; do
 	if ! config_mark "$profile"; then

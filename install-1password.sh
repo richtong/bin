@@ -254,7 +254,7 @@ ENTRY+=(
 declare -A OP_API_ITEM
 OP_API_ITEM=(
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
-	[DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Access Token Personal"
+	[DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
 	# 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
 	# 	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
@@ -427,12 +427,12 @@ log_verbose "use ssh key for signing commits"
 git config --global gpg.format ssh
 # disable because op returns a double quoted string
 # shellcheck disable=SC2046
-# log_verbose "add signing key"
+log_verbose "add signing key"
 # FIX this only adds the first id_ed25519
-# git config --global user.signingkey "$(op item get "GitHub SSH Key" --fields "public key" --reveal)"
+git config --global user.signingkey \""$(op item get "GitHub SSH Key" --fields "public key" --reveal)"\"
 # log_verbose "add 1password as app"
-# git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-# git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 # a bug so do not enable
-# log_verbose "enable signing"
-# git config --global commit.gpgsign true
+log_verbose "enable signing"
+git config --global commit.gpgsign true
