@@ -184,6 +184,7 @@ MODEL_HF+=(
 # These are kept in most recent first from https://ollama.com/search?o=newest
 # These models fit in 64GB and are less than 30B parameters
 MODEL+=(
+	snowflake-arctic-embed2  # new embeddings
 	marco-o1 # Alibab open large reasoning
 	marco-o1:7b
 	tulu3 # AI2 model
@@ -254,6 +255,8 @@ MODEL_MEDIUM+=(
 
 log_verbose "loading all models over 32B parameters, requires >64GB RAM"
 MODEL_LARGE+=(
+	llama3.3  # same perforamnce as llama 3.1 405B
+	llama3.3:70b
 	tulu3:70b           # AI2 instruction following
 	athene-v2           # nexusflow based on qwen2.5
 	athene-v2:72b       # code, math, log extraction

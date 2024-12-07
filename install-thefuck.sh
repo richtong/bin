@@ -49,11 +49,15 @@ source_lib lib-util.sh lib-install.sh lib-config.sh
 
 package_install thefuck
 
-if ! config_mark "$(config_profile_for_bash)"; then
-	config_add "$(config_profile_for_bash)" <<-'EOF'
-		# shellcheck disable=SC2046
-		if command -v thefuck >/dev/null; then eval $(thefuck --alias); fi
-	EOF
-fi
+# note the omz plugin thefuck conflicts with sudo and just handles ESC ESC this lets you run 
+# the correct command by typing fuck
+for profile in "$(config_profile_nonexportable_bash)" "$(config_profile_nonexportable_zsh)"; do
+	if ! config_mark "$profile"; then
+		config_add "$profile" <<-'EOF'
+			# shellcheck disable=SC2046
+			if command -v thefuck >/dev/null; then eval $(thefuck --alias); fi
+		EOF
+	fi
+done
 
 log_verbose "expects zsh installed by install-zsh.sh"
