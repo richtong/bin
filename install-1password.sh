@@ -254,7 +254,7 @@ ENTRY+=(
 declare -A OP_API_ITEM
 OP_API_ITEM=(
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
-	[DIGITALOCEAN_TOKEN]="DigitalOcean Personal Access Token"
+	[DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Access Token Personal"
 	# 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
 	# 	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
@@ -286,7 +286,7 @@ OP_API_FIELD=(
 	[ANTHROPIC_API_KEY]="api key"
 	# [AWS_ACCESS_KEY_ID]="access key id"
 	# [AWS_SECRET_ACCESS_KEY]="secret access key"
-	[DIGITALOCEAN_TOKEN]=token
+	[DIGITALOCEAN_ACCESS_TOKEN]=token
 	[DEEPSEEK_API_KEY]="api key"
 	[GEMINI_API_KEY]="api key"
 	[GOOGLE_AI_API_KEY]="api key"

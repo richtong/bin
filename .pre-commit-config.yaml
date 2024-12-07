@@ -12,7 +12,7 @@
 # need this so gitlint only runs during commit-msg
 # default_stages: [pre-commit, pre-push]
 # needed by v4.0
-default_stages: [commit, push]
+default_stages: [pre-commit, pre-push]
 # python regex https://www.programiz.com/python-programming/regex
 exclude: (^archive/|^user/|deprecated/)
 repos:
@@ -108,7 +108,7 @@ repos:
 
   # replace markdownlint-cli with markdownlint-cli2 which is supposed to be faster
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.13.0
+    rev: v0.15.0
     hooks:
       - id: markdownlint-cli2
 

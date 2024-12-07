@@ -461,7 +461,7 @@ log_verbose "Installing fonts"
 # if ! "$SCRIPT_DIR/set-profile.sh"; then
 # log_warning
 # fi
-config_setup
+# config_setup
 log_verbose "source profiles in case we did not reboot"
 source_profile
 

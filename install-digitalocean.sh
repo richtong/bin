@@ -62,6 +62,15 @@ PACKAGE+=(
 log_verbose "Install ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
 
+if [[ ! -v DIGITALOCEAN_ACCESS_TOKEN ]]; then
+	if command -v op >/dev/null; then
+		if ! op plugin init doctl; then
+			log_verbose "No DIGITALOCEAN_ACCESS_TOKEN add one"
+			doctl auth init
+		fi
+	fi
+fi
+
 # https://docs.digitalocean.com/reference/doctl/how-to/install/
 doctl serverless install
 

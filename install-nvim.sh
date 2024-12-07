@@ -131,8 +131,8 @@ if command -v latex >/dev/null; then
 	sudo tlmgr install latexmk
 fi
 
-log_verbose "install IDE tools done by install.sh"
-"$SCRIPT_DIR/install-lint.sh"
+# log_verbose "install IDE tools done by install.sh"
+# "$SCRIPT_DIR/install-lint.sh"
 
 log_verbose "ALIAS set: $ALIAS"
 if $ALIAS; then

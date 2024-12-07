@@ -77,7 +77,9 @@ if ! config_mark; then
 	EOF
 fi
 
-source "$HOME/.profile"
+#source "$HOME/.profile"
+# use the path now
+echo "$PATH" | grep -q "/Library/TeX/texbin" || PATH="/Library/TeX/texbin:$PATH"
 
 log_verbose "update tlmgr"
 sudo tlmgr update --self
