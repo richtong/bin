@@ -199,6 +199,10 @@ if ! config_mark "$(config_profile_interactive_zsh)"; then
 	config_add "$(config_profile_interactive_zsh)" <<-EOF
 		[[ \$PATH =~ \$HOME/.local/bin ]] || PATH="\$HOME/.local/bin:\$PATH"
 		command -v compaudit >/dev/null && [[ \$(compaudit) ]] && compaudit | xargs chmod g-w,o-w
+		# plugins must be before the source on-my-zsh
+		plugins+=(
+			${PLUGIN[*]}
+		)
 		# oh-my-zsh will utter it is in asdf so suppress the warning
 		source \$ZSH/oh-my-zsh.sh &> /dev/null
 		source "\$(brew --prefix)/opt/zinit/zinit.zsh"
@@ -212,9 +216,6 @@ if ! config_mark "$(config_profile_interactive_zsh)"; then
 		zinit light romkatv/powerlevel10k
 		zinit light joel-porquet/zsh-dircolors-solarized
 		setupsolarized
-		plugins+=(
-			${PLUGIN[*]}
-		)
 	EOF
 fi
 
