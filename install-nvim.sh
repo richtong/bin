@@ -20,7 +20,7 @@ LAZYVIM="{LAZYVIM:-true}"
 # change this to your own fork if you want to keep updates going
 # of create your own tracking branch
 LAZYVIM_REPO="{LAZYVIM_REPO:-https://github.com/LazyVim/starter}"
-LUNARVIM="{LUNARVIM:-true}"
+LUNARVIM="${LUNARVIM:-false}"
 NVIM_CONFIG="${NVIM_CONFIG:-"$HOME/.config/nvim"}"
 
 OPTIND=1
@@ -134,8 +134,9 @@ fi
 log_verbose "install IDE tools done by install.sh"
 "$SCRIPT_DIR/install-lint.sh"
 
-log_verbose "create vi as alias for nvim and set git to use it"
+log_verbose "ALIAS set: $ALIAS"
 if $ALIAS; then
+	log_verbose "create vi as alias for nvim and set git to use it"
 	# use a null string because this will get the default shell
 	# put into .zshrc even though it could go into .zprofile
 	# since these are just paths

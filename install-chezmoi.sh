@@ -78,10 +78,9 @@ while getopts "hdvfo:ir:g:" opt; do
 					dotfiles-stow.sh: Incompatible systems because chezmoi will overwrite the links with real files
 					dotfiles-stow.sh links these key things to richtong/dotfile. The -i code detects symlinks, copies the
 					real file data and recreates the  symlink, so you can -i to get the initial repo. To get rid of the
-					stow, you can run $(chezmoi apply)
+					stow, you can run chezmoi apply
 
-
-		EOF
+			EOF
 		exit 0
 		;;
 	d)
@@ -242,9 +241,9 @@ if $INIT_NEW_REPO; then
 	log_verbose "if an entry is wrong then chezmoi -e _file_"
 	log_exit "run again when this is satisfactory"
 else
-	log_verbose "Assumes $REPO_PREFIX$REPO_OS_SUFFIX exists"
+	log_verbose "chezmoi init from $REPO_PREFIX$REPO_OS_SUFFIX"
 	chezmoi init "git@github.com:$REPO_PREFIX$REPO_OS_SUFFIX"
-	log_verbose "inspect chezmoi diff and then chezmoi apply"
+	log_warning "Now manually inspect wth chezmoz cd chezmoi diff and then chezmoi apply"
 fi
 
 log_verbose "can also install per directory with asdf plugin add chezmoi"

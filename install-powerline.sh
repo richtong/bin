@@ -121,7 +121,11 @@ fi
 
 # docker - uses ~/.docker to detect if running in a container not needed much
 # venv-name-size-limit does not work
-MODULES="${MODULES:-"aws,gcp,kube,direnv,docker,docker-context,goenv,venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root"}"
+# gcp - has an array error
+# kube - deprecated
+# docker-context - too long
+# goenv - do not use
+MODULES="${MODULES:-"aws,direnv,docker,venv,user,host,ssh,cwd,perms,git,hg,jobs,exit,root"}"
 # priorities if the prompt exceeds % max-width of screen
 # deprioritieze user we know who we are usually
 PRIORITIES="${PRIORITIES:-"aws,gcp,kube,direnv,docker,docker-context,kube,goenv,root,cwd,user,host,ssh,perms,git-branch,git-status,hg,jobs,load,exit,cwd-path"}"
@@ -140,6 +144,7 @@ fi
 if ! $INSTALL_POWERLINE; then
 	log_verbose "Installing Powerline-Go"
 	# https://github.com/vim-airline/vim-airline
+	# https://github.com/justjanne/powerline-go
 	# recommend .profile but .bashrc works better
 	# for pipenv shell etc
 	# note max-width seems buggy will sometimes just truncate
@@ -150,10 +155,10 @@ if ! $INSTALL_POWERLINE; then
 		config_add "$(config_profile_nonexportable)" <<-EOF
 			function _update_ps1() {
 			          # shellcheck disable=SC2215,SC2046
-			    PS1=\$(powerline-go -max-width 50 -cwd-max-dir-size 4 -cwd-max-depth 4 -condensed \
-						-theme solarized-dark16 -colorize-hostname -hostname-only-if-ssh \
-						-shorten-gke-names -shorten-eks-names -modules "$MODULES" \
-						-priority "$PRIORITIES" \
+			    PS1=\$(powerline-go -max-width 50 -cwd-max-dir-size 4 -cwd-max-depth 4 -condensed \\
+						-theme solarized-dark16 -colorize-hostname -hostname-only-if-ssh \\
+						-shorten-gke-names -shorten-eks-names -modules "$MODULES" \\
+						-priority "$PRIORITIES" \\
 						-error \$? -jobs \$(jobs -p | wc -l))
 			}
 			if [[ \$TERM != linux ]] && command -v powerline-go >& /dev/null; then

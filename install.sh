@@ -213,6 +213,23 @@ log_verbose "pre-install.sh can be run standalone to bootstrap everything"
 
 log_verbose "setup up bash and zsh profiles basic sourcing and paths"
 config_setup
+# https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
+# https://stackoverflow.com/questions/9953005/should-the-bashrc-in-the-home-directory-load-automatically
+# macOS defaults: interactive login shell: /etc/profile ->
+#										   first[~/.bash_profsle, ~/.bash_login ~/.profile] ->
+#										   ~/.bashrc
+#				  interactive non-login shell: ~/.bashrc -> /etc/ashrc
+#				  logout shell: ~/.bash_logout
+#
+# https://www.stefaanlippens.net/bashrc_and_others/
+# login shell means you login directly like an ssh session
+# non-login shell is a new terminal windows from iterm2
+
+# So what do I put in which file:
+# .profile:  for non-Bash related environment variables.
+# .bash_profile: for the first login and it sets things that are inherited to non-interactive shells
+# .bashrc - for interactive things like alias that do not get inherited
+# we use config_add to do this from lib-config.sh now for all install.sh
 
 log_verbose "source latest profiles with BASH=$BASH"
 source_profile
@@ -286,52 +303,13 @@ if $DOTFILES_STOW; then
 	"$SCRIPT_DIR/dotfiles-stow.sh"
 	log_verbose "in the stow process if .ssh is touched the permissions will be too wide"
 else
-	"$SCRIPT_DIR/install-chezmoi.sh"
+	log_verbose "init from chezmoi"
+	"$SCRIPT_DIR/install-chezmoi.sh" -i
 fi
 
 # install this after you stow
 log_verbose "Install Zsh options"
 "$SCRIPT_DIR/install-zsh.sh"
-
-# https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
-# https://stackoverflow.com/questions/9953005/should-the-bashrc-in-the-home-directory-load-automatically
-# macOS defaults: interactive login shell: /etc/profile ->
-#										   first[~/.bash_profsle, ~/.bash_login ~/.profile] ->
-#										   ~/.bashrc
-#				  interactive non-login shell: ~/.bashrc -> /etc/ashrc
-#				  logout shell: ~/.bash_logout
-#
-# https://www.stefaanlippens.net/bashrc_and_others/
-# login shell means you login directly like an ssh session
-# non-login shell is a new terminal windows from iterm2
-#
-# So what do I put in which file:
-# .profile:  for non-Bash related environment variables.
-# .bash_profile: for the first login and it sets things that are inherited to non-interactive shells
-# .bashrc - for interactive things like alias that do not get inherited
-
-# https://www.computerhope.com/unix/bash/shopt.htm
-# globstart ls **/.profile matches all directoris in the path
-# nullglob: is * doesn't match it is turned into an empty string
-# https://stackoverflow.com/questions/24173875/is-there-a-way-to-export-bash-shell-options-to-subshell
-log_verbose "Add to .bashrc parameters not inherited from login shell"
-if ! config_mark "$(config_profile_nonexportable)"; then
-	config_add "$(config_profile_nonexportable)" <<-'EOF'
-		set -o vi
-		shopt -s autocd cdspell cdable_vars checkhash checkjobs \
-				checkwinsize cmdhist direxpand dirspell dotglob \
-				extglob globstar nullglob
-	EOF
-fi
-
-if ! config_mark; then
-	config_add <<-'EOF'
-		# this runs everytime on login and for each interactive shell Mac Terminal
-		# creates. Chains to ~/.bashrc for aliases what needs to run on each subshell
-		# shellcheck disable=SC1091
-		if echo "$BASH" | grep -q "bash" && [ -f "$HOME/.bashrc" ]; then . "$HOME/.bashrc"; fi
-	EOF
-fi
 
 "$SCRIPT_DIR/install-go.sh"
 
@@ -495,6 +473,7 @@ log_verbose "Installing fonts"
 # if ! "$SCRIPT_DIR/set-profile.sh"; then
 # log_warning
 # fi
+config_setup
 log_verbose "source profiles in case we did not reboot"
 source_profile
 
