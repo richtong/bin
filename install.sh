@@ -209,30 +209,18 @@ shift $((OPTIND - 1))
 
 log_verbose "Run pre-install.sh to get brew and 1Password installed."
 log_verbose "pre-install.sh can be run standalone to bootstrap everything"
+# this does the basic scaffolding connection .bashrc -> .profile -> .bash_profile
 "$SCRIPT_DIR/pre-install.sh" -g "$REPO_ORG"
 
-log_verbose "setup up bash and zsh profiles basic sourcing and paths"
-config_setup
-# https://unix.stackexchange.com/questions/129143/what-is-the-purpose-of-bashrc-and-how-does-it-work
-# https://stackoverflow.com/questions/9953005/should-the-bashrc-in-the-home-directory-load-automatically
-# macOS defaults: interactive login shell: /etc/profile ->
-#										   first[~/.bash_profsle, ~/.bash_login ~/.profile] ->
-#										   ~/.bashrc
-#				  interactive non-login shell: ~/.bashrc -> /etc/ashrc
-#				  logout shell: ~/.bash_logout
-#
-# https://www.stefaanlippens.net/bashrc_and_others/
-# login shell means you login directly like an ssh session
-# non-login shell is a new terminal windows from iterm2
+log_verbose add the $WS_DIR paths assumes WS_DIR set by .envrc
+if ! config_mark; then
+	config_add <<-EOF
+		if [ -z "$WS_DIR" ]; then WS_DIR="$HOME/ws"
+		echo "$PATH" | grep -q "$WS_DIR/src/bin" || PATH=":$WS_DIR/src/bin:$PATH"
+		echo "$PATH" | grep -q "$HOME/.local/bin" || PATH=":$HOME/.local/bin:$PATH"
+	EOF
+fi
 
-# So what do I put in which file:
-# .profile:  for non-Bash related environment variables.
-# .bash_profile: for the first login and it sets things that are inherited to non-interactive shells
-# .bashrc - for interactive things like alias that do not get inherited
-# we use config_add to do this from lib-config.sh now for all install.sh
-
-log_verbose "source latest profiles with BASH=$BASH"
-source_profile
 
 log_verbose "install brew for linux and mac as common installer"
 "$SCRIPT_DIR/install-brew.sh"
@@ -485,8 +473,9 @@ log_verbose Chain to your personal installs
 # https://stackoverflow.com/questions/255898/how-to-iterate-over-arguments-in-a-bash-script
 run_if "$SOURCE_DIR/user/$REPO_USER/bin/user-install.sh" "$@"
 
-log_verbose "Now chain to .rc"
-config_setup_end
+# not sure this is needed
+# log_verbose "Now chain to .rc"
+# config_setup_end
 
 # log_verbose update all submodules only for special use cases
 # "$SOURCE_DIR/scripts/build/update-all-submodules.sh"

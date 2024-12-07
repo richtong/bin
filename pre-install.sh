@@ -71,14 +71,16 @@ if ! command -v brew >/dev/null; then
 fi
 
 # no lib-config.sh/brew_profile_install so assume you are only doing path addition which gofi
+# .zshrc and .zprofile cannot have any output because powerline complains
 # into .profile so this hack is just copied from there
+# implements the strategy in ./lib/lib-config.sh
+# .bash_profile -> .profile -> (if BASH) -> .bashrc
 pushd $HOME >/dev/null 
-for PROFILE in .profile .bash_profile .bashrc; do
+for PROFILE in .profile .bash_profile .bashrc .zprofile .zshrc; do
 
 	if [[ ! -e $PROFILE ]]; then
-		cat >>$PROFILE <<-EOF
-			#!/usr/bin/env $([[ $PROFILE =~ bash ]] && echo bash || echo sh)
-			echo "\$PROFILE called from \$0"
+		cat >$PROFILE <<-EOF
+			#!/usr/bin/env $([[ $PROFILE =~ bash ]] && echo bash || [[ $PROFILE =~ .z ]] && echo zsh || echo sh)
 		EOF
 	fi
 
@@ -87,17 +89,20 @@ for PROFILE in .profile .bash_profile .bashrc; do
 		echo "# Added by $SCRIPTNAME on $(date)" >> "$PROFILE"
 		case $PROFILE in
 		.profile)	
-			cat >>"$PROFILE" <<-EOF
+			cat >>"$PROFILE" <<-'EOF'
+				echo ".profile called from $0"
 				# add the check because asdf and pipenv override homebrew
-				if [ -z "\$HOMEBREW_PREFIX" ] || ! command -v brew >/dev/null; then
+				if [ -z "$HOMEBREW_PREFIX" ] || ! command -v brew >/dev/null; then
 					HOMEBREW_PREFIX="/opt/homebrew"
 					if  uname | grep -q Linux; then
 						HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
 					elif uname | grep -q Darwin && uname -m | grep -q x86_64; then
 						HOMEBREW_PREFIX="/usr/local"
 					fi
-					eval "\$(\$HOMEBREW_PREFIX/bin/brew shellenv)"
+					eval "$($HOMEBREW_PREFIX/bin/brew shellenv)"
 				fi
+				# chaining to if BASH .bash_profile -> .profile -> .bashrc
+				if echo "$BASH" | grep -q "bash" && [ -f "$HOME/.bashrc" ]; then . "$HOME/.bashrc"; fi
 			EOF
 
 			echo "$SCRIPTNAME: make brew available in this script source $PROFILE" >&2
@@ -112,9 +117,16 @@ for PROFILE in .profile .bash_profile .bashrc; do
 
 		;;
 		.bash_profile)	
-			# because macos Terminal only calls .bash_profile
-			cat >>"$PROFILE" <<-EOF
-				source "\$HOME/.profile"
+			# because macos Terminal only calls .bash_profile, chain to .profile
+			cat >>"$PROFILE" <<-'EOF'
+				echo ".bash_profile: ${BASH_SOURCE[0]} called from $0"
+				if [[ -r $HOME/.profile ]]; then source "$HOME/.profile"; fi
+			EOF
+		;;
+		.bashrc)
+			cat >>"$PROFILE" <<-'EOF'
+				echo ".bashrc: $BASH_SOURCE[0] called from $0"
+				# make sure to guard interactives with if [[ $- == *i* ]]; then XXX; fi
 			EOF
 		;;
 		esac
