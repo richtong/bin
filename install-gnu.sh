@@ -170,7 +170,7 @@ if ! config_mark; then
 				done
 				echo "\$PATH" | grep -q "opt/coreutils/libexec/gnubin" ||
 					PATH="\$HOMEBREW_PREFIX//opt/coreutils/libexec/gnubin:\$PATH"
-				for NAME in bin, sbin; do
+				for NAME in bin sbin; do
 					echo "\$PATH" | grep -q "opt/util-linux/\$NAME" ||
 						PATH="\$HOMEBREW_PREFIX/opt/util-linux/\$NAME:\$PATH"
 				done
