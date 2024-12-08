@@ -102,82 +102,82 @@ log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 # pipenv pcl is pipenv clean prun and psh and psy for sync
 # thefuck # ESC twice to correct command (conflicts with sudo plugin do not use together)
 # ubuntu
-	# azure  # completions
+# azure  # completions
 PLUGIN+=(
 	vi-mode # vi-mode overwrites ^r so it must come before fzf
 
-	1password # opswd wraps the op command so opswd github will put your us
-	alias-finder # if there is an alias for a command it suggests it
-	aliases # acs shows all alias by group
-	asdf # asdf - completions (not working)
-	autojump # autojump - j does a fuzzy search for a directory complements warp
-	aws  #completions
-	bgnotify  # baackground notify
-	brew # bubo brew update & brew outdated bubc brew update && brew
-	chezmoi  # completions
+	1password         # opswd wraps the op command so opswd github will put your us
+	alias-finder      # if there is an alias for a command it suggests it
+	aliases           # acs shows all alias by group
+	asdf              # asdf - completions (not working)
+	autojump          # autojump - j does a fuzzy search for a directory complements warp
+	aws               #completions
+	bgnotify          # baackground notify
+	brew              # bubo brew update & brew outdated bubc brew update && brew
+	chezmoi           # completions
 	colored-man-pages # colored-man-pages - make man pages look nice
-	colorize # colorize - uses pygmenter to ccat files in color
-	command-not-found  # suggestions
-	common-aliases # l ls -lFh h history ff find . -type f -name hgrep
-	conda  # aliases
-	copybuffer # Ctrl-O to copy current text to the clipbard
-	copyfile # puts the contents of the file to your clipboard
-	copypath # copy the last path onto clipboard
-	dircycle # cycle through the last 10 directories with CTRL-SHIFT ⬅️ and ➡️
-	direnv  # hook
-	dirhistory # dirhistory - ALT-Left goes to previous directory, ALT-right so like dirs (does not work with AnnePro2)
-	docker # docker - completions and aliases like dbl for docker build
-	docker-compose # docker-compose - completions and alias
-	doctl # doctl - digital ocean command completions
-	emoji # emoji - echo $emoji[mouse_face] works or juse Mac emojify to get :smile:
-	emoji-clock # emoji-clock - emoji not characters for clock
-	encode64 # encode64 - alias like e64
-	extract # extract - general file extract command
-	fancy-ctrl-z # fancy-ctrl-z - use with Ctrl-Z to return to normal mode instead of needing fg
-	fzf     # fzf and vi-mode both use Ctrl-R so use fzf instead put later
-	gcloud # gcloud - google cloud completions
-	gh # gh - add command completions for gh
-	git # git -  ga git add, gca git commit -av, gd - git diff, gfa - git fetch --all --prune
-	git-commit # git-commit - alias for git commit like git build docs, style, wip
-	git-escape-magic # git-escape-magic - do not need to single quote complex expressions like [<>]
-	git-lfs # git-lfs - completions and alias like glfsi git lfs install glfsls
-	gitignore # gitignore - gi list shows all the .gitignore templates
-	globalias # globalias - touch {1..10}<space>
-	gnu-utils # gnu-utils - use gnu without the g prefix
-	golang # golang - alias like gob for go build
+	colorize          # colorize - uses pygmenter to ccat files in color
+	command-not-found # suggestions
+	common-aliases    # l ls -lFh h history ff find . -type f -name hgrep
+	conda             # aliases
+	copybuffer        # Ctrl-O to copy current text to the clipbard
+	copyfile          # puts the contents of the file to your clipboard
+	copypath          # copy the last path onto clipboard
+	dircycle          # cycle through the last 10 directories with CTRL-SHIFT ⬅️ and ➡️
+	direnv            # hook
+	dirhistory        # dirhistory - ALT-Left goes to previous directory, ALT-right so like dirs (does not work with AnnePro2)
+	docker            # docker - completions and aliases like dbl for docker build
+	docker-compose    # docker-compose - completions and alias
+	doctl             # doctl - digital ocean command completions
+	emoji             # emoji - echo $emoji[mouse_face] works or juse Mac emojify to get :smile:
+	emoji-clock       # emoji-clock - emoji not characters for clock
+	encode64          # encode64 - alias like e64
+	extract           # extract - general file extract command
+	fancy-ctrl-z      # fancy-ctrl-z - use with Ctrl-Z to return to normal mode instead of needing fg
+	fzf               # fzf and vi-mode both use Ctrl-R so use fzf instead put later
+	gcloud            # gcloud - google cloud completions
+	gh                # gh - add command completions for gh
+	git               # git -  ga git add, gca git commit -av, gd - git diff, gfa - git fetch --all --prune
+	git-commit        # git-commit - alias for git commit like git build docs, style, wip
+	git-escape-magic  # git-escape-magic - do not need to single quote complex expressions like [<>]
+	git-lfs           # git-lfs - completions and alias like glfsi git lfs install glfsls
+	gitignore         # gitignore - gi list shows all the .gitignore templates
+	globalias         # globalias - touch {1..10}<space>
+	gnu-utils         # gnu-utils - use gnu without the g prefix
+	golang            # golang - alias like gob for go build
 	helm
-	history # history - h for history and hs for history | grep but CTRL-R from fzf is
-	iterm2 # iterm2 - iterm2_profile <profile> to change it
+	history   # history - h for history and hs for history | grep but CTRL-R from fzf is
+	iterm2    # iterm2 - iterm2_profile <profile> to change it
 	jsontools # pp_json pretty print urlencode_json
-	kubectl # kubectl - completions and k kubectl, kaf kubectl apply -f
+	kubectl   # kubectl - completions and k kubectl, kaf kubectl apply -f
 	localstack
-	macos # tab opens directory in new tab, ofd open in finder
-	man # insert man before previous command
-    marked2  # markdown preview
-	microk8s # microk8s adds aliases like ce for enable or mh for helm, mst for m start
+	macos     # tab opens directory in new tab, ofd open in finder
+	man       # insert man before previous command
+	marked2   # markdown preview
+	microk8s  # microk8s adds aliases like ce for enable or mh for helm, mst for m start
 	multipass # multipass - adds mp for multipass and mps for multipass shell
 	npm
 	nvm
-	opentofu # open source terraform
-	pip # pip - command completion
+	opentofu   # open source terraform
+	pip        # pip - command completion
 	podman     # pbl: podman build
 	poetry     # aliases
 	poetry-env # each entry and poetry shell starts
 	pre-commit # prc: pre-commit, prcr pre-commit run
-	python # python py for python, pyfind for find *.py pygrep rand-quote ripgrep
-	rg # rg - completions
-	rsync # rsync - adda rsync-copy for -avz
-	rust # completions
-	ssh # host completion from ..ssh/config
-	sudo   # ESC twice to add sudo to previous command
-	tailscale # completions
-	terraform # terraform - tfa for apply, tfv for validate...
+	python     # python py for python, pyfind for find *.py pygrep rand-quote ripgrep
+	rg         # rg - completions
+	rsync      # rsync - adda rsync-copy for -avz
+	rust       # completions
+	ssh        # host completion from ..ssh/config
+	sudo       # ESC twice to add sudo to previous command
+	tailscale  # completions
+	terraform  # terraform - tfa for apply, tfv for validate...
 	themes
 	tmux       #  ts for tmus attach -t, tl: tmux list-sessions
 	tmuxinator # txs tmuxinator start
 	transfer
 	vscode               # vsc: code, vscg
-	wd # wd - warp directory do a wd add to add to a list of directories
+	wd                   # wd - warp directory do a wd add to add to a list of directories
 	web-search           # google - runs google from command line, bing, ddg
 	wp-cli               # Wordpress command line
 	xcode                # xcb: xcodebuild
@@ -197,7 +197,6 @@ log_verbose "adding zinit plugins must be done early in installation"
 
 if ! config_mark "$(config_profile_interactive_zsh)"; then
 	config_add "$(config_profile_interactive_zsh)" <<-EOF
-		[[ \$PATH =~ \$HOME/.local/bin ]] || PATH="\$HOME/.local/bin:\$PATH"
 		command -v compaudit >/dev/null && [[ \$(compaudit) ]] && compaudit | xargs chmod g-w,o-w
 		# plugins must be before the source on-my-zsh
 		plugins+=(
