@@ -8,14 +8,14 @@ Automatic installation of vim and it"s packages
 Rich learning to write python
 """
 
-import sys
-import os
+import argparse
 
 # Need expanduser to interpret the ~ in filenames
 import logging
-import argparse
+import os
 import subprocess
-from time import strftime, gmtime
+import sys
+from time import gmtime, strftime
 
 
 def main(args):
@@ -49,7 +49,7 @@ def main(args):
     bashrc = home + "/.bashrc"
     vimrc = home + "/.vimrc"
     added = "".join(
-        ["Added by ", script, " on ", strftime("%D %T", gmtime()), "\n"]
+        ["Added by ", script, " on ", strftime("%D %T", gmtime()), "\n"],
     )
 
     logging.debug("checking if vim is latest and greatest")
@@ -76,7 +76,7 @@ def main(args):
                     '" and now use soft tabs with expandtab\n',
                     "set shiftwidth=4 tabstop=4 expandtab\n",
                     "set textwidth=80\n",
-                ]
+                ],
             )
 
     logging.debug("check if vi is our default editor")
@@ -141,7 +141,7 @@ def main(args):
                 "-LSso",
                 home + "/.vim/autoload/pathogen.vim",
                 "https://tpo.pe/pathogen.vim",
-            ]
+            ],
         ):
             logging.error("Could not download pathogen")
             return 4
@@ -157,7 +157,7 @@ def main(args):
                     "execute pathogen#infect()\n",
                     "syntax on\n",
                     "filetype plugin indent on\n",
-                ]
+                ],
             )
 
     def installVim(author, package):
@@ -170,12 +170,8 @@ def main(args):
                     [
                         "git",
                         "clone",
-                        "https://github.com/"
-                        + author
-                        + "/"
-                        + package
-                        + ".git",
-                    ]
+                        "https://github.com/" + author + "/" + package + ".git",
+                    ],
                 )
                 if err != 0:
                     logging.error("could not git clone" + package)
@@ -205,7 +201,7 @@ def main(args):
                     "let g:syntastic_mode_map = { 'mode' : 'passive' }\n",
                     "let g:syntastic_javascript_checkers=['eslint']\n",
                     "au BufRead,BufNewFile *.json set filetype=json",
-                ]
+                ],
             )
 
     # http://ethanschoonover.com/solarized/vim-colors-solarized
@@ -227,7 +223,7 @@ def main(args):
                     "else\n",
                     "  set background=dark\n",
                     "endif\n",
-                ]
+                ],
             )
 
     return 0

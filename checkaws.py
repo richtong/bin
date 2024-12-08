@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Check for AWS Credentials."""
 
-import sys
 import os
+import sys
 
 from surroundio.utility.awstools import getAwsProfile  # type:ignore
 
@@ -55,7 +55,7 @@ print(
     + FAILRED
     + "You should examine your ~/.aws/config"
     + "~/.aws/credentials, or"
-    + ENDC
+    + ENDC,
 )
 print(BOLD + FAILRED + "  your AWS_CONFIG_FILE env var." + ENDC)
 if not region:

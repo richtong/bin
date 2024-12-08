@@ -114,10 +114,11 @@ repos:
   # replace markdownlint-cli with markdownlint-cli2 which is supposed to be faster
   # as of Dec 2024 this does not work with python 3.13 use the older
   # markdownlint for now
-  # - repo: https://github.com/DavidAnson/markdownlint-cli2
-  #   rev: v0.15.0
-  #   hooks:
-  #     - id: markdownlint-cli2
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.15.0
+    hooks:
+      - id: markdownlint-cli2
+        language_version: 22.12.0
 
   # https://jorisroovers.com/gitlint/#using-gitlint-through-pre-commit
   - repo: https://github.com/jorisroovers/gitlint
