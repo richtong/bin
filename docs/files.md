@@ -3,48 +3,302 @@
 This is not a complete list as it is manually generated. The next step is to
 use a shell extract to get it.
 
-- create-keys.sh - Creates ssh keys securely using latest on disk encryption
-- docker-machine-create.sh - So you can have a docker machine swarm
-- git-reset.sh - When you just want everything reset to master
-- install-1password.sh - Installs Linux 1-password
-- install-accounts.sh - Used by prebuild, this populates your local machine with
-- all user accounts
-- install-agent.sh - Run by a local agent to create crontab etc
-- install-agents.sh - Creates all agent currently test, build and deploy
-- install-apache.sh - Installs apache
-- install-aws-config.sh - Installs your personal config of aws from your secret
-- keys
-- install-aws.sh - Installs aws command line
-- install-caffe.sh - Not complete, but this installs caffe
-- install-crontab.sh - Installs entries into crontab used by agents
-- install-dwa182.sh - For the D-link Wifi USB adapter (AC1200!)
-- install-flocker.sh - not complete, this is docker for data volumes
-- install-hostname.sh - Gives you a new hostname from wordlist.txt
-- install-lfs.sh - Installs lfs for you
-- install-mail.sh - Used by agents, verifies that ssmtp is installed
-- install-modular-boost.sh - Not used but testing for modular boost standalone
-- install-neon.sh - Not complete for Neon machine learning
-- install-nvidia.sh - Installs nvidia proprietary drivers
-- install-pia.sh - Installs Private Internet access VPN
-- install-ruby.sh - Not sued, installs ruby
-- install-spotify.sh - Installs spotify for Linux, not debugged
-- install-sshd.py - Installs the ssh daemon so you can ssh into your machine
-- install-ssmtp.sh - Installs a simple mail transport send through ops@surround.io
-- install-sublime.sh - Installs sublime, not debugged
-- install-travis-env.sh - Installs the travis routines for 12.04, deprecated,
-- install-travis.sh - Installs travis, not debugged
-- install-vim.py - deprecated Vim lint checkers for sh, python, Javascript
-- install-vim.sh - installs vim
-- install-vmware-tools.sh - Checks for latest vmware tools
-- install-vpn.sh - Installs a vpn file
-- make-bin.sh - Converts one of these files into a general use with src/bin
-- make-password.sh - Creates a secure password
-- remove-accounts.sh - Cleans up a machine removing all create by install-users.sh
-- remove-agents.sh - Cleans up install-agents.sh
-- remove-all.sh - Cleans everything that accounts and agents does
-- remove-crontab.sh - Removes all crontab entries
-- remove-prebuild.sh - Removes all the files create
-- start-vpn.sh - starts a vpn to surround.io
-- system-run.sh - used by agents, runs wscons and starts alpha 2
-- system-test.sh - Not debugged yet, but runs system wide tests for alpha 2
-- verify-docker.sh - Ensures we have the rights to run docker
+add-groups.sh
+add-user.sh
+change-string.sh
+change-user.sh
+clean-ssh-keys.sh
+cleanup-brew.sh
+conda-activate.sh
+create-agents-authorized-keys.sh
+create-cloud.sh
+create-ml-aws.sh
+create-ml-fusion.sh
+create-prebuild-private.sh
+create-prebuild-usb.sh
+create-private-prebuild.sh
+create-react-app-in-docker.sh
+create-ssl-request.sh
+disk-info.sh
+disk-wipe.sh
+dns-flush.sh
+docker-list-tags.sh
+docker-machine-certs.sh
+docker-machine-create-virtualbox.sh
+docker-machine-create-vmware-fusion.sh
+docker-machine-create.sh
+docker-run-jupyter.sh
+docker-swap-version.sh
+dotfiles-backup.sh
+dotfiles-stow.sh
+dotfiles-to-repo.sh
+download-acml.sh
+exif-copy.sh
+find-broken-symlinks.sh
+fix-ssh-permissions.sh
+gcloud-create.sh
+gcloud-serviceaccount-create.sh
+get-ip.sh
+git-ls-large.sh
+git-merge-repos.sh
+git-move-default.sh
+git-reset.sh
+git-retag.sh
+git-set-default-branch.sh
+git-submodule-clean-all.sh
+git-submodule-rm.sh
+git-submodule-set-branch.sh
+git-submodule-switch-default.sh
+git-submodule-update.sh
+git-submodule-upstream-install.sh
+git-submodule-upstream-rebase.sh
+git-submodule-upstream-util-sync.sh
+hashdeep-audit.sh
+hashdeep-create.sh
+include.sh
+install-11template.sh
+install-1password.sh
+install-3d.sh
+install-accounts.sh
+install-agent.sh
+install-agents.sh
+install-ai.sh
+install-airflow.sh
+install-android-tools.sh
+install-android.sh
+install-ansible.sh
+install-apache.sh
+install-apollo.sh
+install-asdf.sh
+install-atom.sh
+install-auth0.sh
+install-aws-config.sh
+install-aws-local.sh
+install-aws.sh
+install-bash-completion.sh
+install-battery.sh
+install-bazel.sh
+install-bcm43228.sh
+install-bcm4360.sh
+install-benchmark.sh
+install-boingo-wi-finder.sh
+install-bonding.sh
+install-brew.sh
+install-btrfs.sh
+install-caffe.sh
+install-chezmoi.sh
+install-cms.sh
+install-conda.sh
+install-crontab.sh
+install-cssh.sh
+install-deluge.sh
+install-dev-repos.sh
+install-digitalocean.sh
+install-divvy.sh
+install-docker-alternative.sh
+install-docker-for-mac.sh
+install-docker-toolbox.sh
+install-docker.sh
+install-dorothy.sh
+install-dropbox.sh
+install-dwa182.sh
+install-ecryptfs.sh
+install-enpass.sh
+install-fig.sh
+install-flocker.sh
+install-flutter.sh
+install-flux.sh
+install-fonts.sh
+install-gazebo.sh
+install-git-lfs.sh
+install-git-tools.sh
+install-gitter.sh
+install-gnu.sh
+install-go.sh
+install-google-chrome.sh
+install-google-cloud-sdk.sh
+install-google-drive.sh
+install-gpg.sh
+install-grub.sh
+install-gstreamer.sh
+install-hammerspoon.sh
+install-hfs.sh
+install-hugin.sh
+install-iam-key-daemon.sh
+install-intel-opencl.sh
+install-intel-realsense.sh
+install-iterm2.sh
+install-java.sh
+install-jenv.sh
+install-jupyter.sh
+install-kaggle.sh
+install-karabiner-elements.sh
+install-keychain.sh
+install-kubernetes.sh
+install-latex.sh
+install-lint.sh
+install-mac-wireless.sh
+install-macapp.sh
+install-machines.sh
+install-macports.sh
+install-mail.sh
+install-markdown.sh
+install-menumeters.sh
+install-minikube.sh
+install-mkdocs.sh
+install-ml.sh
+install-modular-boost.sh
+install-mongodb.sh
+install-mysql.sh
+install-netlify.sh
+install-nfs-client.sh
+install-node.sh
+install-nonfree.sh
+install-nordvpn.sh
+install-nosleep.sh
+install-nvidia-docker.sh
+install-nvidia.sh
+install-nvim.sh
+install-nvm.sh
+install-obs.sh
+install-ollama.sh
+install-packages.sh
+install-photo-video-tools.sh
+install-pia.sh
+install-post-macos-upgrade.sh
+install-powerline.sh
+install-px4.sh
+install-pyenv.sh
+install-python.sh
+install-qgc.sh
+install-quicktile.sh
+install-rdp.sh
+install-repos.sh
+install-rkt.sh
+install-rpi-os.sh
+install-rstudio.sh
+install-ruby.sh
+install-samba.sh
+install-secrets.sh
+install-selfhost.sh
+install-shiftit.sh
+install-slack.sh
+install-snap.sh
+install-solarized.sh
+install-sound.sh
+install-sphinx.sh
+install-spotify.sh
+install-ssh-config.sh
+install-ssh-keys.sh
+install-ssh.sh
+install-sshfs.sh
+install-ssmtp.sh
+install-streamlit.sh
+install-stylelint.sh
+install-sublime.sh
+install-tailscale.sh
+install-tensorflow.sh
+install-terraform.sh
+install-thefuck.sh
+install-tlp.sh
+install-tmux.sh
+install-torbrowser.sh
+install-travis-env.sh
+install-travis.sh
+install-typescript.sh
+install-ubuntu-to-usb.sh
+install-ufw.sh
+install-unifi.sh
+install-vagrant.sh
+install-veracrypt.sh
+install-vim.sh
+install-virtualbox.sh
+install-vmware-tools.sh
+install-vpn.sh
+install-vscode.sh
+install-window-manager.sh
+install-world.sh
+install-wxpython.sh
+install-xhyve.sh
+install-xquartz.sh
+install-xrandr.sh
+install-yay.sh
+install-yeoman.sh
+install-yq.sh
+install-yubikey.sh
+install-zfs-auto-snapshot.sh
+install-zfs-datasets.sh
+install-zfs-quotas.sh
+install-zfs.sh
+install-zotero.sh
+install-zsh.sh
+install.sh
+linux-install.sh
+login-container-registry.sh
+mac-install.sh
+macports-migrate.sh
+make-bin.sh
+make-password.sh
+mk-sshfs-files.sh
+mkdir-accounts.sh
+mount-and-copy-ecryptfs.sh
+mount-ecryptfs.sh
+mount-nfs.sh
+mount-private-dmg.sh
+mount-sshfs.sh
+mount-volume.sh
+netdrones-install.sh
+pre-install.sh
+preinstall.v1.sh
+propagate-ssh-keys.sh
+remove-accounts.sh
+remove-agents.sh
+remove-all.sh
+remove-crontab.sh
+remove-git-file.sh
+remove-nvidia.sh
+remove-prebuild.sh
+rm-port.sh
+rsync-and-hash.sh
+rsync-existing.sh
+run-benchmark.sh
+run-ubuntu.sh
+run-vino.sh
+secrets-bootstrap.sh
+secrets-create.sh
+secrets-find-file-sharing.sh
+secrets-generate.sh
+secrets-keygen.sh
+secrets-mount-ecryptfs-and-dmg.sh
+secrets-mount.sh
+secrets-op.sh
+secrets-passwd.sh
+secrets-stow.sh
+secrets-to-veracrypt.sh
+set-console-or-graphical.sh
+set-hostname.sh
+set-passwd.sh
+set-profile.sh
+set-ssh-agent.sh
+sphinx-configure.sh
+split-frames.sh
+ssh-copy-ids.sh
+start-vpn.sh
+stow-all.sh
+stress.sh
+surround-install.sh
+surround.sh
+system-run.sh
+upgrade-python.sh
+upgrade-release.sh
+upgrade.sh
+veracrypt-create.sh
+veracrypt-find.sh
+veracrypt-mount.sh
+verify-docker.sh
+win-install.sh
+zfs-add.sh
+zfs-fix.sh
+zfs-rename.sh
+zfs-shapshot-rm.sh
+zfs-snapshot.sh

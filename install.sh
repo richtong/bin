@@ -212,7 +212,7 @@ log_verbose "pre-install.sh can be run standalone to bootstrap everything"
 # this does the basic scaffolding connection .bashrc -> .profile -> .bash_profile
 "$SCRIPT_DIR/pre-install.sh" -g "$REPO_ORG"
 
-log_verbose add the $WS_DIR paths assumes WS_DIR set by .envrc
+log_verbose "add the $WS_DIR paths assumes WS_DIR set by .envrc"
 if ! config_mark; then
 	config_add <<-EOF
 		if [ -z "$WS_DIR" ]; then WS_DIR="$HOME/ws"
@@ -220,7 +220,6 @@ if ! config_mark; then
 		echo "$PATH" | grep -q "$HOME/.local/bin" || PATH=":$HOME/.local/bin:$PATH"
 	EOF
 fi
-
 
 log_verbose "install brew for linux and mac as common installer"
 "$SCRIPT_DIR/install-brew.sh"
