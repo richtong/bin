@@ -8,6 +8,7 @@ VERBOSE="${VERBOSE:-false}"
 
 PHOTOMATIX_URL="${PHOTOMATIX_URL:-https://www.hdrsoft.com/download/mac}"
 PHOTOMATIX_VERSION="${PHOTOMATIX_VERSION:-6.3.2}"
+# PHOTOMATIX_VERSION="${PHOTOMATIX_VERSION:-7.2.1}"
 DXO_VERSION="${DXO_VERSION:-6}"
 DXO_URL="${DXO_URL:-"https://download-center.dxo.com/PhotoLab/v$DXO_VERSION/Mac/DxO_PhotoLab$DXO_VERSION.dmg"}"
 CAPTUREONE_VERSION="${CAPTUREONE_VERSION:-"23"}"
@@ -16,9 +17,9 @@ PTGUI_VERSION="${PTGUI_VERSION:-"12.24"}"
 FORCE="${FORCE:-false}"
 OPTIND=1
 while getopts "hdvp:c:t:a:f" opt; do
-	case "$opt" in
-	h)
-		cat <<-EOF
+  case "$opt" in
+  h)
+    cat <<-EOF
 			         $SCRIPTNAME flags: -d debug
 							-d $($DEBUGGING && echo "no ")debugging
 							-v $($VERBOSE && echo "not ")verbose
@@ -28,38 +29,38 @@ while getopts "hdvp:c:t:a:f" opt; do
 			                -a Capture One Version (default: $CAPTUREONE_VERSION)
 			                -f Force install Photomatix (default: $FORCE)
 		EOF
-		exit 0
-		;;
-	d)
-		# invert the variable when flag is set
-		DEBUGGING="$($DEBUGGING && echo false || echo true)"
-		export DEBUGGING
-		;;
-	v)
-		VERBOSE="$($VERBOSE && echo false || echo true)"
-		export VERBOSE
-		# add the -v which works for many commands
-		if $VERBOSE; then export FLAGS+=" -v "; fi
-		;;
-	p)
-		PTGUI_GUID="$OPTARG"
-		;;
-	t)
-		PTGUI_VERSION="$OPTARG"
-		;;
-	c)
-		CAPTUREONE_GUID="$OPTARG"
-		;;
-	a)
-		CAPTUREONE_VERSION="$OPTARG"
-		;;
-	f)
-		FORCE="$(FORCE && echo false || echo true)"
-		;;
-	*)
-		echo "no -$opt" >&2
-		;;
-	esac
+    exit 0
+    ;;
+  d)
+    # invert the variable when flag is set
+    DEBUGGING="$($DEBUGGING && echo false || echo true)"
+    export DEBUGGING
+    ;;
+  v)
+    VERBOSE="$($VERBOSE && echo false || echo true)"
+    export VERBOSE
+    # add the -v which works for many commands
+    if $VERBOSE; then export FLAGS+=" -v "; fi
+    ;;
+  p)
+    PTGUI_GUID="$OPTARG"
+    ;;
+  t)
+    PTGUI_VERSION="$OPTARG"
+    ;;
+  c)
+    CAPTUREONE_GUID="$OPTARG"
+    ;;
+  a)
+    CAPTUREONE_VERSION="$OPTARG"
+    ;;
+  f)
+    FORCE="$(FORCE && echo false || echo true)"
+    ;;
+  *)
+    echo "no -$opt" >&2
+    ;;
+  esac
 done
 # shellcheck disable=SC1091
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
@@ -76,26 +77,27 @@ set -u
 log_verbose "handbrake needs libdvdcss from el capitan on"
 PACKAGE+=(
 
-	libdvdcss
-	exiftool
+  libdvdcss
+  exiftool
+  asciinema # terminal recording with asciinema rec demo.cast
 
 )
 
-Log_verbose "Install ${PACKAGE[*]}"
+log_verbose "Install ${PACKAGE[*]}"
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
 
 # hugin not in snap or apt-get
 # https://ubuntuhandbook.org/index.php/2022/04/hugin-panorama-stitcher-ubuntu-22-04/
 if in_os linux; then
-	apt_repository_install "ppa:ubuntuhandbook1/apps"
+  apt_repository_install "ppa:ubuntuhandbook1/apps"
 fi
 
 # installs a cask on Mac or snap or apt-get on Ubuntu
 APP+=(
 
-	gimp
-	hugin
+  gimp
+  hugin
 
 )
 
@@ -109,70 +111,70 @@ package_install "${APP[@]}"
 
 CASK+=(
 
-	blender
-	darktable
-	geotag
-	handbrake
-	luminance-hdr
-	mkvtoolnix
-	asciicinema # terminal recording with asciinema rec demo.cast
+  blender
+  darktable
+  geotag
+  handbrake
+  luminance-hdr
+  mkvtoolnix
 
 )
 
 SNAP+=(
 
-	handbrake-jz
+  handbrake-jz
 
 )
 SNAP_CANDIDATE+=(
 
-	kgeotag
-	_
+  kgeotag
+  _
 )
 SNAP_CLASSIC+=(
 
-	blender
+  blender
 )
 
 if in_os mac; then
-	# shellcheck disable=SC2068
-	cask_install ${CASK[@]}
+  # shellcheck disable=SC2068
+  cask_install ${CASK[@]}
 
 elif in_os linux; then
-	# shellcheck disable=SC2068
-	snap_install ${SNAP[@]}
-	# shellcheck disable=SC2068
-	snap_install --classic ${SNAP_CLASSIC[@]}
-	# shellcheck disable=SC2068
-	snap_install --candidate ${SNAP_CANDIDATE[@]}
-	log_exit "Linux finished"
+  # shellcheck disable=SC2068
+  snap_install ${SNAP[@]}
+  # shellcheck disable=SC2068
+  snap_install --classic ${SNAP_CLASSIC[@]}
+  # shellcheck disable=SC2068
+  snap_install --candidate ${SNAP_CANDIDATE[@]}
+  log_exit "Linux finished"
 fi
 
 log_verbose "Install Mac specific downloads"
 
 if [[ -v DXO_VERSION ]]; then
-	log_verbose "install DXO from $DXO_URL"
-	download_url_open "$DXO_URL"
-	log_verbose "Drag DXO App from Volume to Application Folder"
+  log_verbose "install DXO from $DXO_URL"
+  download_url_open "$DXO_URL"
+  log_verbose "Drag DXO App from Volume to Application Folder"
 fi
 
 log_warning "Capture One needs a user specific URL set as CAPTUREONE_GUID get by logging in "
 if [[ -v CAPTUREONE_GUID ]]; then
-	CAPTUREONE_URL="${CAPTUREONE_URL:-"https://downloads.phaseone.com/$CAPTUREONE_GUID/International/CaptureOne21.Mac.$CAPTUREONE_VERSION.dmg"}"
-	log_verbose "Install Capture One from $CAPTUREONE_URL"
-	download_url_open "$CAPTUREONE_URL"
-	log_verbose "Drag Capture One and eject the Volume"
+  CAPTUREONE_URL="${CAPTUREONE_URL:-"https://downloads.phaseone.com/$CAPTUREONE_GUID/International/CaptureOne21.Mac.$CAPTUREONE_VERSION.dmg"}"
+  log_verbose "Install Capture One from $CAPTUREONE_URL"
+  download_url_open "$CAPTUREONE_URL"
+  log_verbose "Drag Capture One and eject the Volume"
 fi
 
 log_warning "Cannot automatically install PTGui for Panaramas"
 log_warning "goto https://www.ptgui.com and type in registration to and set PTGUI_GUID"
 if [[ -v PTGUI_GUID ]]; then
-	PTGUI_URL="${PTGUI_URL:-"https://www.ptgui.com/downloads/1218000/reg/mac105/standard/116185/$PTGUI_GUID/PTGui_$PTGUI_VERSION.dmg"}"
-	download_url_open "$PTGUI_URL"
-	log_verbose "Drag PTGUI and eject the Volume"
+  PTGUI_URL="${PTGUI_URL:-"https://www.ptgui.com/downloads/1218000/reg/mac105/standard/116185/$PTGUI_GUID/PTGui_$PTGUI_VERSION.dmg"}"
+  download_url_open "$PTGUI_URL"
+  log_verbose "Drag PTGUI and eject the Volume"
 fi
 
+log_warning "As of Photomatix Pro 7 you can not longer download, you have to do manually"
 if $FORCE || [[ ! -e "/Applications/Photomatix Pro 6.app" ]]; then
-	log_verbose "install Photomatix for HDR photos"
-	download_url_open "$PHOTOMATIX_URL/Photomatix_Pro_$PHOTOMATIX_VERSION.pkg.zip"
+  log_verbose "install Photomatix for HDR photos"
+  download_url_open "$PHOTOMATIX_URL/Photomatix_Pro_$PHOTOMATIX_VERSION.pkg.zip"
 fi

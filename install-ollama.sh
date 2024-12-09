@@ -27,7 +27,7 @@ while getopts "hdvr:e:s:lfmu" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs Ollama models and removes obsolete or large ones
+			Installs Ollama models and removes obsolete or large ones and openwebui and ngrok
 			usage: $SCRIPTNAME [ flags ]
 			flags:
 				-h help
@@ -372,3 +372,51 @@ if [[ -v OLLAMA_MODELS ]]; then
 		EOF
 	fi
 fi
+
+# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc
+log_warning "WEBUI_SECRET_KEY and OPENAI_API_KEY should both be defined before running ideally in a .envrc"
+log_verbose "To add Groq to OPen-webui Lower Left > Admin Panel > Settings > Connections > OpenAI API"
+log_verbose "Click on + on he right and add URL https://api.groq.com/openai/v1 and your GROQ key"
+# https://zohaib.me/extending-openwebui-using-pipelines/
+# log_verbose "https://github.com/open-webui/pipelines"
+log_verbose "To add Gemini, add functions or pipelines you need to run a docker and add it"
+log_verbose 'docker run -d -p 9099:9099 --add-host=host.docker.internal:host-gateway \ '
+log_verbose '-v pipelines:/app/pipelines --name pipelines --restart always \ '
+log_verbose "ghcr.io/open-webui/pipelines:main"
+log_verbose "or fork and submodule add git@githbu.com:open-webui/pipelines"
+log_verbose "pip install - requriements.txt && sh .start.sh"
+
+declare -A PYTHON_PACKAGE+=(
+	["open-webui"]=3.11 # include the required python version
+)
+# Install Stabiliity Diffusion with DiffusionBee"
+# Download Chat GPT in menubar
+# Use brew install instead of
+#ARCH=x86
+#if mac_is_arm; then
+#ARCH=arm64
+#fi
+#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
+# if [[ -v poetry_active ]]; then
+# 	log_verbose "In poetry so add to the project"
+# 	log_warning "If you want in the system, you must exit poetry and rerun"
+# 	poetry add "${PYTHON_PACKAGE[@]}"
+# else
+for package in "${!PYTHON_PACKAGE[@]}"; do
+	pipx_install -p "${PYTHON_PACKAGE[$package]}" "$package"
+done
+# fi
+#
+log_verbose "install current shell completion"
+open-webui --install-completion
+
+PACKAGE+=(
+	ngrok # local ssh gateway for open-webui
+)
+
+log_verbose "installing ${PACKAGE[*]}"
+package_install "${PACKAGE[@]}"
+
+# https://dashboard.ngrok.com/get-started/setup/macos
+log_verbose "configure ngrok as front-end to open-webui"
+ngrok config add-authtoken "$(op item get "ngrok" --fields "auth token" --reveal)"
