@@ -43,10 +43,24 @@ source_lib lib-install.sh lib-util.sh
 shift $((OPTIND - 1))
 
 set -u
+MAS+=(
+
+	425264550  # Blackmagic Disk speed deprecated for Amorphous
+	1168254295 # Amorphous has more than just sequential
+	1495719766 # Amorphous memory benchmark
+)
+
+PACKAGE+=(
+	drivedx
+	geekbench
+	cinebench
+	phoronix-test-suite
+	geekbench-ai
+)
 
 if in_os mac; then
 	log_verbose "installing MacOS benchmarking"
-	package_install geekbench cinebench phoronix-test-suite geekbench-ai
+	package_install
 	log_exit "Run Geekbench and Cinebench"
 	exit
 fi
