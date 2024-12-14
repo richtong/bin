@@ -258,7 +258,7 @@ MODEL+=(
 	llama3.2:3b                         # Meta 3.2-3B Q4 128 context 2GB
 	llama3.2:3b-instruct-q4_K_M         # Meta 3.2-3B Q4 128 context 2GB
 	llama3.2:1b                         # Meta 1B 128K context
-	llama3.2:1b-q8_0                    # Meta 1B 128K context
+	llama3.2:1b-instruct-q8_0           # Meta 1B 128K context
 	qwen2.5-coder                       # Alibaba model
 	qwen2.5-coder:latest                # 128K Tuned for coding 7B
 	qwen2.5-coder:7b                    # 128K Tuned for coding 7B
@@ -320,24 +320,23 @@ MODEL+=(
 # these are models which are under 10B parameters
 log_verbose "loading all models over 9B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
-	qwq                                  # like o1
-	qwq:latest                           # like o1
-	qwq:32b                              # Alibaba advanced reasoning
-	qwq:32b-preview-q4_K_M               # Alibaba advanced reasoning
-	llama3.2-vision                      # should run in open-webui
-	llama3.2-vision:latest               # should run in open-webui
-	llama3.2-vision:11b                  # vision works now
-	llama3.2-vision:11b-insstruct-q4_K_M # vision works now
-	aya-expanse:32b                      # cohere model 128k content
-	aya-expanse:32b-q4_K_M               # cohere model 128k content
-	shieldgemma:27b                      # safety of text prompts
-	shieldgemma:27b-q4_K_M               # safety of text prompts
-	qwen2.5-coder:14b                    # 128K Tuned for coding 7B
-	qwen2.5-coder:14b-instruct           # 128K Tuned for coding 7B
-	qwen2.5-coder:14b-instruct-q4_K_M    # 128K Tuned for coding 7B
-	qwen2.5-coder:32b                    # 128K Tuned for coding 7B
-	qwen2.5-coder:32b-instruct           # 128K Tuned for coding 7B
-	qwen2.5-coder:32b-instruct-q4_K_M    # 128K Tuned for coding 7B
+	qwq                                 # like o1
+	qwq:latest                          # like o1
+	qwq:32b                             # Alibaba advanced reasoning
+	qwq:32b-preview-q4_K_M              # Alibaba advanced reasoning
+	llama3.2-vision                     # should run in open-webui
+	llama3.2-vision:latest              # should run in open-webui
+	llama3.2-vision:11b                 # vision works now
+	llama3.2-vision:11b-instruct-q4_K_M # vision works now
+	aya-expanse:32b                     # cohere model 128k content
+	aya-expanse:32b-q4_K_M              # cohere model 128k content
+	shieldgemma:27b                     # safety of text prompts
+	shieldgemma:27b-q4_K_M              # safety of text prompts
+	qwen2.5-coder:14b                   # 128K Tuned for coding 7B
+	qwen2.5-coder:14b-instruct-q4_K_M   # 128K Tuned for coding 7B
+	qwen2.5-coder:32b                   # 128K Tuned for coding 7B
+	qwen2.5-coder:32b-instruct          # 128K Tuned for coding 7B
+	qwen2.5-coder:32b-instruct-q4_K_M   # 128K Tuned for coding 7B
 	# these models are pre llama3.2 and are very close to gone
 	solar-pro                              # single gpu model
 	solar-pro:latest                       # 22b comparable to llama 3.1 70b 4k context
