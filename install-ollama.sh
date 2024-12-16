@@ -123,7 +123,7 @@ mas_install "${MAS[@]}"
 
 declare -A PYTHON_PACKAGE+=(
 
-	[open-webui]=3.11  # include the required python version
+	["open-webui"]=3.11 # include the required python version needs quotes to prevent reformat
 
 )
 
@@ -184,8 +184,8 @@ MODEL_HF+=(
 # These are kept in most recent first from https://ollama.com/search?o=newest
 # These models fit in 64GB and are less than 30B parameters
 MODEL+=(
-	snowflake-arctic-embed2  # new embeddings
-	marco-o1 # Alibab open large reasoning
+	snowflake-arctic-embed2 # new embeddings
+	marco-o1                # Alibab open large reasoning
 	marco-o1:7b
 	tulu3 # AI2 model
 	tulu3:8b
@@ -244,26 +244,31 @@ MODEL+=(
 log_verbose "loading all models over 9B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
 	qwq
-	qwq:32b             # Alibaba advanced reasoning
-	llama3.2-vision     # should run in open-webui
-	llama3.2-vision:11b # vision works now
-	aya-expanse:32b     # cohere model 128k content
-	shieldgemma:27b     # safety of text prompts
-	qwen2.5-coder:32b   # 128K Tuned for coding 7B
-	gemma2:27b          # large gemma
+	qwq:32b              # Alibaba advanced reasoning
+	llama3.2-vision      # should run in open-webui
+	llama3.2-vision:11b  # vision works now
+	aya-expanse:32b      # cohere model 128k content
+	shieldgemma:27b      # safety of text prompts
+	qwen2.5-coder:32b    # 128K Tuned for coding 7B
+	gemma2:27b           # large gemma
+	dolphin-mixtral:8x7b # 26GB
 )
 
 log_verbose "loading all models over 32B parameters, requires >64GB RAM"
 MODEL_LARGE+=(
-	llama3.3  # same perforamnce as llama 3.1 405B
+	llama3.3 # same perforamnce as llama 3.1 405B
 	llama3.3:70b
-	tulu3:70b           # AI2 instruction following
-	athene-v2           # nexusflow based on qwen2.5
-	athene-v2:72b       # code, math, log extraction
-	llama3.2-vision:90b # vision works now
-	nemotron            # nvidia llama 3.1 obsolete soon
-	nemotron:70b        # nviida tuned llama 3.1
-	qwen2.5:72b         # 128K context Alibaba 2024-09-16 7b
+	tulu3:70b                          # AI2 instruction following
+	athene-v2                          # nexusflow based on qwen2.5
+	athene-v2:72b                      # code, math, log extraction
+	llama3.2-vision:90b                # vision works now
+	nemotron                           # nvidia llama 3.1 obsolete soon
+	nemotron:70b                       # nviida tuned llama 3.1
+	dolphin-mixtral:8x22b              # 80GB MoE 8x22b
+	deepseek-coder-v2:236b             # 134GB MoE
+	deepseek-coder-v2:236b-base-q3_K_S # 102GB MoE
+	mistral-large:123b                 # 73GB
+	qwen2.5:72b                        # 128K context Alibaba 2024-09-16 7b
 )
 #
 # move the deprecated models here to make sure to delete them
