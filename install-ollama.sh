@@ -197,9 +197,35 @@ MODEL_HF+=(
 # 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 MODEL+=(
+	granite3.1-dense                    # IBM tool, RAG, code, translation
+	granite3.1-dense:latest             # IBM
+	granite3.1-dense:2b                 # RAG, code  generation, translation
+	granite3.1-dense:2b-instruct-q4_K_M # RAG, code  generation, translation
+	granite3.1-dense:8b                 # RAG, code  generation, translation
+	granite3.1-dense:8b-instruct-q4_K_M # RAG, code  generation, translation
+	granite3.1-moe                      # mixture of experts
+	granite3.1-moe:latest               # low latency model
+	granite3.1-moe:1b                   # low latency model
+	granite3.1-moe:1b-instruct-q4_K_M   # low latency model
+	granite3.1-moe:3b                   # larger model
+	granite3.1-moe:3b-instruct-q4_K_M   # larger model
+	falcon3:latest                      # latest from Abu Dhabi
+	falcon3:7b                          # 7B parameters
+	falcon3:7b-instruct-q4_K_M          # 7B parameters
+	falcon3:3b                          # 7B parameters
+	falcon3:3b-instruct-q4_K_M          # 7B parameters
+	falcon3:1b                          # 7B parameters
+	falcon3:1b-instruct-q8_0
+	granite-embedding # latest ibm embeddings
+	granite-embedding:latest
+	granite-embedding:30m
+	granite-embedding:30m-en
+	granite-embedding:278m
+	granite-embedding:278m-fp16
+	snowflake-arctic-embed2             # new embeddings
+	snowflake-arctic-embed2:latest      # new embeddings
 	snowflake-arctic-embed2:568m-l-fp16 # new embeddings
 	snowflake-arctic-embed2:568m        # new embeddings
-	snowflake-arctic-embed2             # new embeddings
 	marco-o1                            # Alibab open large reasoning
 	marco-o1:latest                     # Alibab open large reasoning
 	marco-o1:7b                         # 7b
@@ -229,18 +255,6 @@ MODEL+=(
 	aya-expanse:latest                  # cohere
 	aya-expanse:8b                      # cohere model 128k content 23 languages
 	aya-expanse:8b-q4_K_M               # cohere model 128k content 23 languages
-	granite3-dense                      # IBM tool, RAG, code, translation
-	granite3-dense:latest               # IBM
-	granite3-dense:2b                   # RAG, code  generation, translation
-	granite3-dense:2b-instruct-q4_K_M   # RAG, code  generation, translation
-	granite3-dense:8b                   # RAG, code  generation, translation
-	granite3-dense:8b-instruct-q4_K_M   # RAG, code  generation, translation
-	granite3-moe                        # mixture of experts
-	granite3-moe:latest                 # low latency model
-	granite3-moe:1b                     # low latency model
-	granite3-moe:1b-instruct-q4_K_M     # low latency model
-	granite3-moe:3b                     # larger model
-	granite3-moe:3b-instruct-q4_K_M     # larger model
 	shieldgemma                         # google safety policies
 	shieldgemma:latest                  # google safety policies
 	shieldgemma:9b                      # safety of text prompts
@@ -320,6 +334,8 @@ MODEL+=(
 # these are models which are under 10B parameters
 log_verbose "loading all models over 9B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
+	falcon3:10b                         # 7B parameters
+	falcon3:10b-instruct-q4_K_M         # 7B parameters
 	qwq                                 # like o1
 	qwq:latest                          # like o1
 	qwq:32b                             # Alibaba advanced reasoning
@@ -335,21 +351,20 @@ MODEL_MEDIUM+=(
 	qwen2.5-coder:14b                   # 128K Tuned for coding 7B
 	qwen2.5-coder:14b-instruct-q4_K_M   # 128K Tuned for coding 7B
 	qwen2.5-coder:32b                   # 128K Tuned for coding 7B
-	qwen2.5-coder:32b-instruct          # 128K Tuned for coding 7B
 	qwen2.5-coder:32b-instruct-q4_K_M   # 128K Tuned for coding 7B
 	# these models are pre llama3.2 and are very close to gone
-	solar-pro                              # single gpu model
-	solar-pro:latest                       # 22b comparable to llama 3.1 70b 4k context
-	solar-pro:22b                          # 22b comparable to llama 3.1 70b 4k context
-	solar-pro:22b-preview-instruct-q4_K_M  # 22b comparable to llama 3.1 70b 4k context
-	qwen2.5:14b                            # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:32b                            # 128K context Alibaba 2024-09-16 7b
-	mistral-small                          # on the bubble to remove
-	mistral-small:latest                   # v0.3 Mistral 22b-instruct-2409-q4_0
-	mistral-small:22b                      # v0.3 Mistral 22b-instruct-2409-q4_0
-	mistral-small:22b-instruct-2409_q4_K_M # v0.3 Mistral 22b-instruct-2409-q4_0
-	gemma2:27b                             # old but only Google model
-	gemma2:27b-instruct-q4_0               # old but only Google model
+	solar-pro                             # single gpu model
+	solar-pro:latest                      # 22b comparable to llama 3.1 70b 4k context
+	solar-pro:22b                         # 22b comparable to llama 3.1 70b 4k context
+	solar-pro:22b-preview-instruct-q4_K_M # 22b comparable to llama 3.1 70b 4k context
+	qwen2.5:14b                           # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:32b                           # 128K context Alibaba 2024-09-16 7b
+	mistral-small                         # on the bubble to remove
+	mistral-small:latest                  # v0.3 Mistral 22b-instruct-2409-q4_0
+	mistral-small:22b                     # v0.3 Mistral 22b-instruct-2409-q4_0
+	mistral-small:22b-instruct-2409-q4_0  # v0.3 Mistral 22b-instruct-2409-q4_0
+	gemma2:27b                            # old but only Google model
+	gemma2:27b-instruct-q4_0              # old but only Google model
 )
 
 log_verbose "loading all models over 32B parameters, requires >64GB RAM"
@@ -384,6 +399,19 @@ MODEL_LARGE+=(
 #
 # move the deprecated models here to make sure to delete them
 MODELS_REMOVE+=(
+	# succeeded by 3.1
+	granite3-dense                    # IBM tool, RAG, code, translation
+	granite3-dense:latest             # IBM
+	granite3-dense:2b                 # RAG, code  generation, translation
+	granite3-dense:2b-instruct-q4_K_M # RAG, code  generation, translation
+	granite3-dense:8b                 # RAG, code  generation, translation
+	granite3-dense:8b-instruct-q4_K_M # RAG, code  generation, translation
+	granite3-moe                      # mixture of experts
+	granite3-moe:latest               # low latency model
+	granite3-moe:1b                   # low latency model
+	granite3-moe:1b-instruct-q4_K_M   # low latency model
+	granite3-moe:3b                   # larger model
+	granite3-moe:3b-instruct-q4_K_M   # larger model
 	# post llama3.2 but trying new vision models
 	hermes3               # fine tuned llama 3.1 8B 128K context
 	hermes3:70b           # fine tuned llama 3.1 q4 128K Context

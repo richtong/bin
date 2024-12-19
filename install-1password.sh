@@ -27,6 +27,7 @@ VERSION="${VERSION:-8}"
 DIRENV_PROFILE="${ENV_PROFILE:-true}"
 DIRENV_PATH="${DIRENV_PATH:-$HOME/.envrc}"
 SHELL_PROFILE="${SHELL_PROFILE:-false}"
+SSH_CONFIG="${SSH_CONFIG:-"$HOME/.ssh/config"}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
@@ -423,6 +424,19 @@ fi
 # https://developer.1password.com/docs/cli/get-started/#step-2-turn-on-the-1password-desktop-app-integration
 log_verbose "login to 1Password"
 op signin
+
+log_verbose "Add .ssh/config settings for 1Password"
+# need the forward agent so the 1Password goes there
+if ! config_mark "$SSH_CONFIG"; then
+	config_add "$SSH_CONFIG" <<-EOF
+		Host *
+			IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+			XAuthLocation /opt/X11/bin/xauth
+			ForwardX11Timeout 596h
+			# https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding
+			ForwardAgent Yes
+	EOF
+fi
 
 # https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
 log_verbose "use ssh key for signing commits"
