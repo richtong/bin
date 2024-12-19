@@ -85,11 +85,11 @@ pipx_install "${PYTHON_PACKAGE[@]}"
 RUFF_PLUGIN+=(
 	mdformat-shfmt  # bash, sh
 	mdformat-gofmt  # requires go installed
-	mdformat-ruff  # python formatting
-	mdformat-web  # js, css, html, xml
-	mdformat-gfm  # git-flavored markdown
-	mdformat-tables  # gfm tables
-	mdformat-toc  # table of contents generator
+	mdformat-ruff   # python formatting
+	mdformat-web    # js, css, html, xml
+	mdformat-gfm    # git-flavored markdown
+	mdformat-tables # gfm tables
+	mdformat-toc    # table of contents generator
 )
 log_verbose "install ruff plugins ${RUFF_PLUGIN[*]}"
 pipx inject ruff "${RUFF_PLUGIN[@]}"
@@ -138,7 +138,7 @@ package_install "${PACKAGE[@]}"
 # python https://flake8.pycqa.org/en/latest/
 # this merges server checkers
 # if [[ $OSTYPE =~ darwin ]]; then
-	#brew_install flake8
+#brew_install flake8
 #else
 #	pip_install --upgrade flake8
 #fi

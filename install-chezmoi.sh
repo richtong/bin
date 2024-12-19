@@ -80,7 +80,7 @@ while getopts "hdvfo:ir:g:" opt; do
 					real file data and recreates the  symlink, so you can -i to get the initial repo. To get rid of the
 					stow, you can run chezmoi apply
 
-			EOF
+		EOF
 		exit 0
 		;;
 	d)

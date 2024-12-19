@@ -154,7 +154,7 @@ declare -A ASDF+=(
 	[pipx]=${PIPX_VERSION[@]}
 )
 
-log_verbose ASDF indexes ${!ASDF[*]} and data ${ASDF[*]}
+log_verbose "ASDF indexes ${!ASDF[*]} and data ${ASDF[*]}"
 
 # https://github.com/pyenv/pyenv/issues/950
 # asdf install python uses pyenv underneath and brew install open-ssl does not put the
@@ -217,7 +217,7 @@ for LANG in "${!ASDF[@]}"; do
 	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
 	# note this word splits so versions cannot have spaces there seems to be no
 	# way to generate an array here
-	log_verbose looking for version in \${ASDF[$LANG]}=${ASDF[$LANG]}
+	log_verbose "looking for version in \${ASDF[$LANG]}=${ASDF[$LANG]}"
 	for VERSION in ${ASDF[$LANG]}; do
 		log_verbose "Install $LANG version $VERSION"
 		# remove the asterisk which means current selected
