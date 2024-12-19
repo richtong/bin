@@ -183,114 +183,219 @@ MODEL_HF+=(
 
 # These are kept in most recent first from https://ollama.com/search?o=newest
 # These models fit in 64GB and are less than 30B parameters
+# https://github.com/ggerganov/llama.cpp/discussions/2094
+# https://github.com/ggerganov/llama.cpp/pull/1684
+# https://en.wikipedia.org/wiki/Perplexity
+# Perplexity of 247 means for each word, you have 247 guesses
+# Typically a q6 model is with 0.1% of the original fp16 model
+# K quantization so Q4_K is type 1 auanitzation with 8 blocks using 4.5bpw
+# q4 - 4 bit quantization of original floating point 16-bit model
+# S, M or L - Small, Medium, Large which tellls you what Q you are
+# using so Q4_K_M usts Q6_K for half the attention and feed forward
+# To see the tradeoff for a 7B model, the perplexity (lower is better in bits
+# per word and you can see why Q4_K_M is the default, at the knee of the curve
+# 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
+# perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 MODEL+=(
-	snowflake-arctic-embed2 # new embeddings
-	marco-o1                # Alibab open large reasoning
-	marco-o1:7b
-	tulu3 # AI2 model
-	tulu3:8b
-	opencoder      # completely open source
-	opencoder:1.5b #  english and chinse
-	opencoder:8b   # reproducible
-	smollm2        # open source
-	smollm2:135m   # 135m is small
-	smollm2:1.7b   # large is smarll
-	granite3-guardian
-	granite3-guardian:8b #  prompt guard ibm
-	aya-expanse          # cohere
-	aya-expanse:8b       # cohere model 128k content 23 languages
-	granite3-moe         # mixture of experts
-	granite3-moe:3b
-	granite3-dense
-	granite3-dense:2b # RAG, code  generation, translation
-	granite3-dense:8b # RAG, code  generation, translation
-	shieldgemma
-	shieldgemma:2b # safety of text prompts
-	shieldgemma:9b # safety of text prompts
-	llama-guard3
-	llama-guard3:1b    # safety of prompts
-	llama-guard3:8b    # safety of prompts
-	llama3.2           # Meta 3.2-3B Q4 128 context
-	llama3.2:3b        # Meta 3.2-3B Q4 128 context 2GB
-	llama3.2:1b        # Meta 1B 128K context
-	qwen2.5-coder      # Alibaba model
-	qwen2.5-coder:1.5b # 128K Tuned for coding 7B
-	qwen2.5-coder:7b   # 128K Tuned for coding 7B
+	snowflake-arctic-embed2:568m-l-fp16 # new embeddings
+	snowflake-arctic-embed2:568m        # new embeddings
+	snowflake-arctic-embed2             # new embeddings
+	marco-o1                            # Alibab open large reasoning
+	marco-o1:latest                     # Alibab open large reasoning
+	marco-o1:7b                         # 7b
+	marco-o1:7b-q4_K_M                  # q4_K_M
+	tulu3                               # AI2 instruction following
+	tulu3:latest                        # full open source data, code, recipes
+	tulu3:8b                            # 128 K content has 70B brother
+	tulu3:8b-q4_K_M                     # standard quantization
+	opencoder                           # completely open source
+	opencoder:latest                    # completely open source
+	opencoder:1.5b                      #  english and chinse
+	opencoder:1.5b-instruct-q4_K_M      #  english and chinse
+	opencoder:8b                        # reproducible
+	opencoder:8b-instruct-q4_K_M        # reproducible
+	smollm2                             # open source
+	smollm2:latest                      # open source
+	smollm2:135m-instruct-q4_K_M        # 135m is small
+	smollm2:1.7b                        # large is smarll
+	smollm2:1.7b-instruct-q4_K_M        # large is smarll
+	granite3-guardian                   # IBM prompt risk
+	granite3-guardian:latest            # IBM prompt risk
+	granite3-guardian:8b                #  prompt guard ibm
+	granite3-guardian:8b-q5_K_M         #  prompt guard ibm
+	granite3-guardian:2b                #  prompt guard ibm
+	granite3-guardian:2b-q8_0           #  prompt guard ibm
+	aya-expanse                         # cohere
+	aya-expanse:latest                  # cohere
+	aya-expanse:8b                      # cohere model 128k content 23 languages
+	aya-expanse:8b-q4_K_M               # cohere model 128k content 23 languages
+	granite3-dense                      # IBM tool, RAG, code, translation
+	granite3-dense:latest               # IBM
+	granite3-dense:2b                   # RAG, code  generation, translation
+	granite3-dense:2b-instruct-q4_K_M   # RAG, code  generation, translation
+	granite3-dense:8b                   # RAG, code  generation, translation
+	granite3-dense:8b-instruct-q4_K_M   # RAG, code  generation, translation
+	granite3-moe                        # mixture of experts
+	granite3-moe:latest                 # low latency model
+	granite3-moe:1b                     # low latency model
+	granite3-moe:1b-instruct-q4_K_M     # low latency model
+	granite3-moe:3b                     # larger model
+	granite3-moe:3b-instruct-q4_K_M     # larger model
+	shieldgemma                         # google safety policies
+	shieldgemma:latest                  # google safety policies
+	shieldgemma:9b                      # safety of text prompts
+	shieldgemma:9b-q4_K_M               # safety of text prompts
+	shieldgemma:2b                      # safety of text prompts
+	shieldgemma:2b-q4_K_M               # safety of text prompts
+	llama-guard3                        # safety classification
+	llama-guard3:latest                 # safety classification
+	llama-guard3:8b                     # safety of prompts
+	llama-guard3:8b-q4_K_M              # safety of prompts
+	llama-guard3:1b                     # safety of prompts
+	llama-guard3:1b-q8_0                # safety of prompts
+	llama3.2                            # Meta 3.2-3B Q4 128 context
+	llama3.2:latest                     # Meta 3.2-3B Q4 128 context
+	llama3.2:3b                         # Meta 3.2-3B Q4 128 context 2GB
+	llama3.2:3b-instruct-q4_K_M         # Meta 3.2-3B Q4 128 context 2GB
+	llama3.2:1b                         # Meta 1B 128K context
+	llama3.2:1b-q8_0                    # Meta 1B 128K context
+	qwen2.5-coder                       # Alibaba model
+	qwen2.5-coder:latest                # 128K Tuned for coding 7B
+	qwen2.5-coder:7b                    # 128K Tuned for coding 7B
+	qwen2.5-coder:7b-instruct           # 128K Tuned for coding 7B
+	qwen2.5-coder:7b-instruct-q4_K_M    # 128K Tuned for coding 7B
+	qwen2.5-coder:0.5b                  # 128K Tuned for coding 7B
+	qwen2.5-coder:0.5b-instruct         # 128K Tuned for coding 7B
+	qwen2.5-coder:0.5b-instruct-q8_0    # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b                  # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct         # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct         # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct-q4_K_M  # 128K Tuned for coding 7B
 
 	# these models are pre llama3.2 and subject to deprecation
-	solar-pro:22b    # 22b comparable to llama 3.1 70b 4k context
-	nemotron-mini:4b # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	qwen2.5
-	qwen2.5:7b           # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:14b          # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:32b          # 128K context Alibaba 2024-09-16 7b
-	bespoke-minicheck:7b # Fact check 7B q4_K_M
-	mistral-small        # on the bubble to remove
-	mistral-small:22b    # v0.3 Mistral 22b-instruct-2409-q4_0
-	reader-lm
-	reader-lm:0.5b # HTML to Markdown conversion 1.5B-q4_K_M
-	reader-lm:1.5b # HTML to Markdown conversion 1.5B-q4_K_M
-	minicpm-v      # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:8b   # mLLM visual too, ocr v2.6 ModelBest CN
-	yi-coder:9b    # 9B model q4 128K context
-	phi3.5:3.8b    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-
+	nemotron-mini:4b               # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	nemotron-mini:latest           # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	qwen2.5                        # the larger Alibab models
+	qwen2.5:latest                 # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:7b                     # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:0.5b                   # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:1.5b                   # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b                     # 128K context Alibaba 2024-09-16 7b
+	bespoke-minicheck              # Fact check 7B q4_K_M UT Austin
+	bespoke-minicheck:latest       # Fact check 7B q4_K_M
+	bespoke-minicheck:7b           # Fact check 7B q4_K_M
+	bespoke-minicheck:7b-q4_K_M    # Fact check 7B q4_K_M
+	reader-lm                      # Just for HTML to  markdown conversion
+	reader-lm:latest               # Just for HTML to  markdown conversion
+	reader-lm:1.5b                 # HTML to Markdown conversion 1.5B-q4_K_M
+	reader-lm:1.5b-q4_0            # HTML to Markdown conversion 1.5B-q4_K_M
+	reader-lm:0.5b                 # HTML to Markdown conversion 1.5B-q4_K_M
+	reader-lm:0.5b-q4_0            # HTML to Markdown conversion 1.5B-q4_K_M
+	minicpm-v                      # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:latest               # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:8b                   # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:8b-2.6-q4_0          # mLLM visual too, ocr v2.6 ModelBest CN
+	yi-coder                       # 9B model q4 128K context
+	yi-coder:latest                # 9B model q4 128K context
+	yi-coder:9b                    # 9B model q4 128K context
+	yi-coder:9b-chat               # 9B model q4 128K context
+	yi-coder:9b-chat-q4_0          # 9B model q4 128K context
+	yi-coder:1.5b                  # 9B model q4 128K context
+	yi-coder:1.5b-chat             # 9B model q4 128K context
+	yi-coder:1.5b-chat-q4_0        # 9B model q4 128K context
+	phi3.5                         # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:latest                  # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b                    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b-mini-instruct-q4_0 # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	# these models are pre llama3.1 and are very close to gone
-	bge-large:335m # tokens to embeddings
-
-	gemma2:9b # Google 9B Q4 5.4GB 8K context
+	gemma2                  # Google 9B Q4 5.4GB 8K context
+	gemma2:latest           # Google 9B Q4 5.4GB 8K context
+	gemma2:9b               # Google 9B Q4 5.4GB 8K context
+	gemma2:9b-instruct-q4_0 # Google 9B Q4 5.4GB 8K context
+	gemma2:2b               # Google 9B Q4 5.4GB 8K context
+	gemma2:2b-instruct-q4_0 # Google 9B Q4 5.4GB 8K context
 
 )
 #
 # these are models which are under 10B parameters
 log_verbose "loading all models over 9B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
-	qwq
-	qwq:32b              # Alibaba advanced reasoning
-	llama3.2-vision      # should run in open-webui
-	llama3.2-vision:11b  # vision works now
-	aya-expanse:32b      # cohere model 128k content
-	shieldgemma:27b      # safety of text prompts
-	qwen2.5-coder:32b    # 128K Tuned for coding 7B
-	gemma2:27b           # large gemma
-	dolphin-mixtral:8x7b # 26GB
+	qwq                                  # like o1
+	qwq:latest                           # like o1
+	qwq:32b                              # Alibaba advanced reasoning
+	qwq:32b-preview-q4_K_M               # Alibaba advanced reasoning
+	llama3.2-vision                      # should run in open-webui
+	llama3.2-vision:latest               # should run in open-webui
+	llama3.2-vision:11b                  # vision works now
+	llama3.2-vision:11b-insstruct-q4_K_M # vision works now
+	aya-expanse:32b                      # cohere model 128k content
+	aya-expanse:32b-q4_K_M               # cohere model 128k content
+	shieldgemma:27b                      # safety of text prompts
+	shieldgemma:27b-q4_K_M               # safety of text prompts
+	qwen2.5-coder:14b                    # 128K Tuned for coding 7B
+	qwen2.5-coder:14b-instruct           # 128K Tuned for coding 7B
+	qwen2.5-coder:14b-instruct-q4_K_M    # 128K Tuned for coding 7B
+	qwen2.5-coder:32b                    # 128K Tuned for coding 7B
+	qwen2.5-coder:32b-instruct           # 128K Tuned for coding 7B
+	qwen2.5-coder:32b-instruct-q4_K_M    # 128K Tuned for coding 7B
+	# these models are pre llama3.2 and are very close to gone
+	solar-pro                              # single gpu model
+	solar-pro:latest                       # 22b comparable to llama 3.1 70b 4k context
+	solar-pro:22b                          # 22b comparable to llama 3.1 70b 4k context
+	solar-pro:22b-preview-instruct-q4_K_M  # 22b comparable to llama 3.1 70b 4k context
+	qwen2.5:14b                            # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:32b                            # 128K context Alibaba 2024-09-16 7b
+	mistral-small                          # on the bubble to remove
+	mistral-small:latest                   # v0.3 Mistral 22b-instruct-2409-q4_0
+	mistral-small:22b                      # v0.3 Mistral 22b-instruct-2409-q4_0
+	mistral-small:22b-instruct-2409_q4_K_M # v0.3 Mistral 22b-instruct-2409-q4_0
+	gemma2:27b                             # old but only Google model
+	gemma2:27b-instruct-q4_0               # old but only Google model
 )
 
 log_verbose "loading all models over 32B parameters, requires >64GB RAM"
 MODEL_LARGE+=(
-	llama3.3 # same perforamnce as llama 3.1 405B
-	llama3.3:70b
-	tulu3:70b                          # AI2 instruction following
-	athene-v2                          # nexusflow based on qwen2.5
-	athene-v2:72b                      # code, math, log extraction
-	llama3.2-vision:90b                # vision works now
-	nemotron                           # nvidia llama 3.1 obsolete soon
-	nemotron:70b                       # nviida tuned llama 3.1
-	dolphin-mixtral:8x22b              # 80GB MoE 8x22b
-	deepseek-coder-v2:236b             # 134GB MoE
-	deepseek-coder-v2:236b-base-q3_K_S # 102GB MoE
-	mistral-large:123b                 # 73GB
-	qwen2.5:72b                        # 128K context Alibaba 2024-09-16 7b
+	llama3.3                            # same perforamnce as llama 3.1 405B
+	llama3.3:latest                     # 128K context
+	llama3.3:70b                        # 128K context
+	llama3.3:70b-instruct-q4_K_M        # 128K context
+	tulu3:70b                           # AI2 instruction following
+	tulu3:70b-q4_K_M                    # AI2 instruction following
+	athene-v2                           # nexusflow based on qwen2.5
+	athene-v2:latest                    # code, math, log extraction
+	athene-v2:72b                       # code, math, log extraction
+	athene-v2:72b-q4_K_M                # code, math, log extraction
+	llama3.2-vision:90b                 # vision works now
+	llama3.2-vision:90b-instruct-q4_K_M # vision works now
+	# these models are pre llama3.2 and are very close to gone
+	nemotron                                # nvidia llama 3.1 but performs well
+	nemotron:latest                         # nvidia llama 3.1 obsolete soon
+	nemotron:70b                            # nvidia tuned llama 3.1
+	nemotron:70b-instruct-q4_K_M            # nvidia tuned llama 3.1
+	qwen2.5:72b                             # 128K context Alibaba 2024-09-16 7b
+	reflection                              # some cheating on the model
+	reflection:latest                       # some cheating on the model
+	reflection:70b                          # some cheating on the model
+	reflection:70b-q4_0                     # some cheating on the model
+	mistral-large                           # Mistral flagship Large 2
+	mistral-large:latest                    # Mistral flagship
+	mistral-large:123b                      # Mistral flagship
+	mistral-large:123b-instruct-2411-q4_K_M # Mistral flagship
 )
 #
 # move the deprecated models here to make sure to delete them
 MODELS_REMOVE+=(
 	# post llama3.2 but trying new vision models
-	minicpm-v
-	minicpm-v:8b  # vision mLLM 8b-2.6-q4_0
-	deepseek-v2.5 # 236B is way too big for a 64GB machine
-	hermes3       # fine tuned llama 3.1 8B 128K context
-	hermes3:70b   # fine tuned llama 3.1 q4 128K Context
-	smollm        # small language models on device
-	smollm:135m   # 135m is small
-	smollm:1.7b
-	mistral-large
-	mistral-large:123b-instruct-2407-q3_K_S # 128K context winod 123B-instruct-q3_K_S
-
+	hermes3               # fine tuned llama 3.1 8B 128K context
+	hermes3:70b           # fine tuned llama 3.1 q4 128K Context
+	smollm                # small language models on device
+	smollm:135m           # 135m is small
+	smollm:1.7b           # deprecated by smollm2
+	deepseek-v2.5         # 236B is way too big for a 64GB machine
 	llama3.1              # deprecated
 	llama3.1:8b-text-q4_0 # text tuned model poor results
-
 	# models pre-llama3.1
+	bge-large:335m # tokens to embeddings
 	mistral-nemo
 	mistral-nemo:12b # 128k context 12b-instruct-2407-q4_0
 	firefunction-v2
