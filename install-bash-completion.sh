@@ -65,6 +65,8 @@ if vergte "$(version_extract "$(bash --version)")" 4.0; then
 				fi
 			fi
 EOF
+	fi
+
 else
 	package_install bash-completion
 	if ! config_mark "$CONFIG"; then
@@ -73,23 +75,23 @@ else
 				source "$HOMEBREW_PREFIX/etc/bash_completion
 			fi
 EOF
-fi
-# http://davidalger.com/development/bash-completion-on-os-x-with-brew/
-# this is now deprecated as of Aug 2017
-#if brew list bash-completion > /dev/null
-#then
-#    log_verbose install additional completions
-#    brew tap homebrew/completions
-#fi
-log_verbose "install in the non-login shell profile so it completion always runs"
+	fi
+	# http://davidalger.com/development/bash-completion-on-os-x-with-brew/
+	# this is now deprecated as of Aug 2017
+	#if brew list bash-completion > /dev/null
+	#then
+	#    log_verbose install additional completions
+	#    brew tap homebrew/completions
+	#fi
+	log_verbose "install in the non-login shell profile so it completion always runs"
 
-if ! config_mark "$(config_profile_for_bash)"; then
-	# We need to quote this since it is going into the profile
-	# shellcheck disable=SC2016
-	# config_add "$(config_profile_shell)" <<<'source "$(brew --prefix)/etc/bash_completion"'
-	# latest for brew completions
-	# https://docs.brew.sh/Shell-Completion
-	config_add "$(config_profile_for_bash)" <<'EOF'
+	if ! config_mark "$(config_profile_for_bash)"; then
+		# We need to quote this since it is going into the profile
+		# shellcheck disable=SC2016
+		# config_add "$(config_profile_shell)" <<<'source "$(brew --prefix)/etc/bash_completion"'
+		# latest for brew completions
+		# https://docs.brew.sh/Shell-Completion
+		config_add "$(config_profile_for_bash)" <<'EOF'
 		if type brew &>/dev/null; then
 			if [[ -r "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh" ]]; then
 				# shellcheck disable=SC1090
@@ -102,4 +104,5 @@ if ! config_mark "$(config_profile_for_bash)"; then
 			fi
 		fi
 EOF
+	fi
 fi
