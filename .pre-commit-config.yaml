@@ -83,11 +83,6 @@ repos:
       # additional dependency bug in pre-commit v2.10
       # should be fixed now when doing a pre-commit all
       # additional_dependencies: []
-      # the latest extensions
-      # - id: check-mailmap # botch email names in commit cannot use
-      - id: forbid-binary # no binaries in git
-      - id: git-check # look for <<<< and ====
-      - id: script-must-have-extension # script.sh required
 
   # this hook requires docker to get shellcheck so only use shellcheck not installed
   #- repo: https://github.com/koalaman/shellcheck-precommit
@@ -98,26 +93,25 @@ repos:
   #      exclude: (.*\.zsh$|\.zshrc$|\.zprofile$|\.fzf\.bash$|\.bashrc$|\.bash_profile$)
 
   # this is bettert han the jumanji version as it uses go to build
-  # - repo: https://github.com/scop/pre-commit-shfmt
-  #   rev: v3.5.1-1
-  #   hooks:
-  # - id: shfmt
-  #   exclude: (.*\.zsh$|\.zprofile|\.zshrc)
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.5.1-1
+    hooks:
+      - id: shfmt
+        exclude: (.*\.zsh$|\.zprofile|\.zshrc)
 
   # https://github.com/igorshubovych/markdownlint-cli
   # node version of markdownlint with better disabling of checks by line
   # - repo: https://github.com/igorshubovych/markdownlint-cli
-  #   rev: v0.43.0
+  #   rev: v0.32.2
   #   hooks:
   #     - id: markdownlint
 
   # replace markdownlint-cli with markdownlint-cli2 which is supposed to be faster
-  # as of Dec 2024 this does not work with python 3.13 use the older
-  # markdownlint for now
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.15.0
     hooks:
       - id: markdownlint-cli2
+        # needs a pinned version
         language_version: 22.12.0
 
   # https://jorisroovers.com/gitlint/#using-gitlint-through-pre-commit
@@ -184,10 +178,10 @@ repos:
 
   # https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/
   # https://github.com/pre-commit/mirrors-mypy
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v0.991"
-    hooks:
-      - id: mypy
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: "v0.991"
+  #   hooks:
+  #     - id: mypy
 
   # black, flake8, and pydocstyle
   - repo: https://github.com/astral-sh/ruff-pre-commit

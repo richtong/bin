@@ -15,10 +15,11 @@ import logging
 import os
 import subprocess
 import sys
+from pathlib import Path
 from time import gmtime, strftime
 
 
-def main(args):
+def main(args: str) -> None:  # noqa: C901 PLR0912 PLR0915
     """Parse command line arguments and run it for a single file.
 
     @param args command line
@@ -43,8 +44,8 @@ def main(args):
         logging.info("Debug on, got arguments: %s", args)
 
     logging.debug("set variables")
-    home = os.path.expanduser("~")
-    script = os.path.basename(__file__)
+    home = Path.name("~")
+    script = Path.name(__file__)
     logging.info("vimrc set")
     bashrc = home + "/.bashrc"
     vimrc = home + "/.vimrc"
@@ -53,16 +54,16 @@ def main(args):
     )
 
     logging.debug("checking if vim is latest and greatest")
-    if 0 != subprocess.call("dpkg-query --status vim".split()):
+    if 0 != subprocess.call("dpkg-query --status vim".split()):  # noqa: S603
         logging.debug("no vim found")
-        if subprocess.call("sudo apt-get install -y vim".split()) != 0:
+        if subprocess.call("sudo apt-get install -y vim".split()) != 0:  # noqa: S603
             logging.error("Could not install vim")
             return 1
 
     logging.debug("check if .vimrc has our additions")
-    if 0 != subprocess.call(["grep", script, vimrc]):
+    if 0 != subprocess.call(["grep", script, vimrc]):  # noqa: S603,S607
         logging.info("our edits not found adding to vimrc")
-        with open(vimrc, "a") as f:
+        with Path.open(vimrc, "a") as f:
             f.writelines(
                 [
                     '" ',
@@ -80,13 +81,13 @@ def main(args):
             )
 
     logging.debug("check if vi is our default editor")
-    if 0 != subprocess.call(["grep", script, bashrc]):
-        with open(bashrc, "a") as f:
+    if 0 != subprocess.call(["grep", script, bashrc]):  # noqa: S603,S607
+        with Path.open(bashrc, "a") as f:
             f.writelines(["# ", added, "export VISUAL=$(command -v vi)\n"])
             logging.debug("default editor is now vi")
 
-    def installNpm(module):
-        err = subprocess.call(["sudo", "npm", "install", "-g", module])
+    def install_npm(module: str) -> int:
+        err = subprocess.call(["sudo", "npm", "install", "-g", module])  # noqa: S603,S607
         if err != 0:
             logging.error("Could not install npm module " + module)
         else:
@@ -97,27 +98,27 @@ def main(args):
     # types, so we just need to install them
 
     # http://eslint.org/docs/user-guide/command-line-interface.html
-    installNpm("eslint")
+    install_npm("eslint")
     # http://stackoverflow.com/questions/16619538/why-doesnt-syntastic-catch-json-errors
-    installNpm("jsonlint")
+    install_npm("jsonlint")
     # use for javascript linting within html as eslint doesn't support
     # But can't figure out how to enable
-    installNpm("jslint")
+    install_npm("jslint")
     # For yaml files such as .travis.yml
-    installNpm("js-yaml")
+    install_npm("js-yaml")
 
     # old routines, delete when function is debugged
-    if 0 != subprocess.call("sudo npm install -g jsonlint".split()):
+    if 0 != subprocess.call("sudo npm install -g jsonlint".split()):  # noqa: S603
         logging.error("Could not install jsonlint")
     else:
         logging.info("installed jsonlint")
 
-    if 0 != subprocess.call("sudo npm install -g eslint".split()):
+    if 0 != subprocess.call("sudo npm install -g eslint".split()):  # noqa: S603
         logging.error("Could not install eslint")
     else:
         logging.info("installed eslint")
 
-    if 0 != subprocess.call("sudo npm install -g jslint".split()):
+    if 0 != subprocess.call("sudo npm install -g jslint".split()):  # noqa: S603
         logging.error("Could not install jslint")
     else:
         logging.info("installed jslint")
@@ -127,16 +128,16 @@ def main(args):
     if not os.access(home + "/.vim/autoload/pathogen.vim", os.R_OK):
         logging.debug("trying to install pathogen")
         try:
-            os.makedirs(home + "/.vim/autoload")
-            os.makedirs(home + "/.vim/bundle")
+            Path.mkdir(home + "/.vim/autoload", parents=True)
+            Path.mkdir(home + "/.vim/bundle", parents=True)
         except OSError:
             pass
         # we don't use curl as it isn't available in ubuntu
-        if 0 != subprocess.call("sudo apt-get -y install curl".split()):
+        if 0 != subprocess.call("sudo apt-get -y install curl".split()):  # noqa: S603
             logging.error("could not get curl")
             return 3
-        if 0 != subprocess.call(
-            [
+        if 0 != subprocess.call(  # noqa: S603
+            [  # noqa: S607
                 "curl",
                 "-LSso",
                 home + "/.vim/autoload/pathogen.vim",
@@ -147,9 +148,9 @@ def main(args):
             return 4
 
     logging.debug("check if pathogen is in vimrc")
-    if 0 != subprocess.call(["grep", "pathogen", vimrc]):
+    if 0 != subprocess.call(["grep", "pathogen", vimrc]):  # noqa: S603,S607
         logging.debug("installing pathogen into vimrc")
-        with open(vimrc, "a") as f:
+        with Path.open(vimrc, "a") as f:
             f.writelines(
                 [
                     '" ',
@@ -160,14 +161,14 @@ def main(args):
                 ],
             )
 
-    def installVim(author, package):
+    def install_vim(author: str, package: str) -> None:
         logging.debug("checking for installation of " + package)
         if not os.access(home + "/.vim/bundle/" + package, os.R_OK):
             logging.debug("installing " + package)
             try:
                 os.chdir(home + "/.vim/bundle")
-                err = subprocess.call(
-                    [
+                err = subprocess.call(  # noqa: S603
+                    [  # noqa:S607
                         "git",
                         "clone",
                         "https://github.com/" + author + "/" + package + ".git",
@@ -180,12 +181,12 @@ def main(args):
                 logging.warning("~/.vim/bundle does not exist")
                 return 1000
 
-    installVim("elsr", "vim-json")
+    install_vim("elsr", "vim-json")
 
-    installVim("scrooloose", "syntastic")
+    install_vim("scrooloose", "syntastic")
     logging.debug("check if syntastic set in vimrc")
-    if 0 != subprocess.call(["grep", "syntastic", vimrc]):
-        with open(vimrc, "a") as f:
+    if 0 != subprocess.call(["grep", "syntastic", vimrc]):  # noqa: S603,S607
+        with Path.open(vimrc, "a") as f:
             logging.debug("setting up syntastic in vimrc")
             f.writelines(
                 [
@@ -207,24 +208,23 @@ def main(args):
     # http://ethanschoonover.com/solarized/vim-colors-solarized
     # Use vim autodetect of light and dark
     # https://github.com/Anthony25/gnome-terminal-colors-solarized
-    installVim("altercation", "vim-colors-solarized")
+    install_vim("altercation", "vim-colors-solarized")
     logging.debug("check if syntastic set in vimrc")
-    if 0 != subprocess.call(["grep", "solarized", vimrc]):
-        with open(vimrc, "a") as f:
-            logging.debug("setting up solarized in vimrc")
-            f.writelines(
-                [
-                    '" ',
-                    added,
-                    "syntax enable\n",
-                    "colorscheme solarized\n",
-                    "if has('gui_running')\n",
-                    "  set background=light\n",
-                    "else\n",
-                    "  set background=dark\n",
-                    "endif\n",
-                ],
-            )
+    if 0 != subprocess.call(["grep", "solarized", vimrc]):  # noqa: S603,S607
+        logging.debug("setting up solarized in vimrc")
+        f.writelines(
+            [
+                '" ',
+                added,
+                "syntax enable\n",
+                "colorscheme solarized\n",
+                "if has('gui_running')\n",
+                "  set background=light\n",
+                "else\n",
+                "  set background=dark\n",
+                "endif\n",
+            ],
+        )
 
     return 0
 

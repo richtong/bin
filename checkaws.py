@@ -3,29 +3,30 @@
 
 import os
 import sys
+from pathlib import Path
 
 from surroundio.utility.awstools import getAwsProfile  # type:ignore
 
 
-def findPymodDir(start):
+def find_pymod_dir(start: str) -> None:
     """Find standard lib location logic."""
     path = os.path.realpath(start)
     while path != "/":
-        candidatePymod = os.path.realpath("%s/common/pymod" % path)
-        if os.path.exists(candidatePymod + "/surroundio/utility"):
-            return candidatePymod
-        candidatePymod = os.path.realpath("%s/pymod" % path)
-        if os.path.exists(candidatePymod + "/surroundio/utility"):
-            return candidatePymod
-        path = os.path.realpath("%s/.." % path)
-
-    raise Exception("Can't find the pymod dir; something is wrong")
+        candidate_pymod = os.path.realpath(f"{path}/common/pymod")
+        if Path.exists(candidate_pymod + "/surroundio/utility"):
+            return candidate_pymod
+        candidate_pymod = os.path.realpath(f"{path}/pymod")
+        if Path.exists(candidate_pymod + "/surroundio/utility"):
+            return candidate_pymod
+        path = os.path.realpath("{path}/..")
+    msg = "find the pymod dir; something is wrong"
+    raise Exception(msg)
 
 
 # Find pymod so we can import the common utility code.
-scriptDir = os.path.dirname(os.path.realpath(sys.argv[0]))
-pymodDir = findPymodDir(scriptDir)
-sys.path.append(pymodDir)
+script_dir = Path.parent(os.path.realpath(sys.argv[0]))
+pymod_dir = find_pymod_dir(script_dir)
+sys.path.append(pymod_dir)
 
 # Surround imports
 
@@ -36,15 +37,15 @@ FAILRED = "\033[91m"
 ENDC = "\033[0m"
 BOLD = "\033[1m"
 
-yourAwsProfile = getAwsProfile()
+your_aws_profile = getAwsProfile()
 print(BOLD + "Your AWS Profile:\n==============" + ENDC)
 
-print(yourAwsProfile)
+print(your_aws_profile)
 
-region = "region" in yourAwsProfile
-output = "output" in yourAwsProfile
-aws_secret_access_key = "aws_secret_access_key" in yourAwsProfile
-aws_access_key_id = "aws_access_key_id" in yourAwsProfile
+region = "region" in your_aws_profile
+output = "output" in your_aws_profile
+aws_secret_access_key = "aws_secret_access_key" in your_aws_profile
+aws_access_key_id = "aws_access_key_id" in your_aws_profile
 
 if region and output and aws_access_key_id and aws_secret_access_key:
     print(OKGREEN + BOLD + "Your profile looks complete!!" + ENDC)

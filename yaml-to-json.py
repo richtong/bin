@@ -17,7 +17,7 @@ import sys
 import pyyaml as yaml  # type: ignore
 
 
-def main(args):
+def main(args: str) -> None:
     """Run the dumper.
 
     @param args command line
