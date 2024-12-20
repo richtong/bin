@@ -256,9 +256,8 @@ if [[ $DOCKER_INSTALL =~ docker ]]; then
 	if ! "$BIN_DIR/install-docker.sh"; then
 		log_exit 0 "need to logout and return to get into the docker group"
 	fi
-else
-	"$BIN_DIR/install-docker-alternative.sh" -c
 fi
+"$BIN_DIR/install-docker-alternative.sh" -c
 
 log_verbose "Multiple login to all container registries with -a"
 "$BIN_DIR/login-container-registry.sh"

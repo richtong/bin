@@ -136,9 +136,9 @@ if $COLIMA; then
 	# if you want Docker for mac then you need cask_install
 	log_verbose "Installing command line docker"
 	brew_install docker
-	log_verbose "linking command line docker could overwrite Docker for Mac"
-	brew link --overwrite docker
-	log_verbose "docker or colima nerdctl to run containers"
+	# log_verbose "linking command line docker could overwrite Docker for Mac"
+	# brew link --overwrite docker
+	# log_verbose "docker or colima nerdctl to run containers"
 
 	if ! $COLIMA_STABLE; then
 		PACKAGE_FLAGS="--head"
