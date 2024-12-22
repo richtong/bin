@@ -49,6 +49,14 @@ if ((${#DEFAULT_UV[@]} > 0)); then UV_VERSION=("${UV_VERSION[@]:-${DEFAULT_UV[@]
 DEFAULT_GOLANG=(1.23.2)
 if ((${#DEFAULT_GOLANG[@]} > 0)); then GOLANG_VERSION=("${GOLANG_VERSION[@]:-${DEFAULT_GOLANG[@]}}"); fi
 
+# Go used in Vite
+DEFAULT_RUST=(1.83.0)
+if ((${#DEFAULT_RUST[@]} > 0)); then RUST_VERSION=("${RUST_VERSION[@]:-${DEFAULT_RUST[@]}}"); fi
+
+# pip packages as installed executables
+DEFAULT_PIPX=(1.7.1)
+if ((${#DEFAULT_PIPX[@]} > 0)); then PIPX_VERSION=("${PIPX_VERSION[@]:-${DEFAULT_PIPX[@]}}"); fi
+
 export FLAGS="${FLAGS:-""}"
 while getopts "hdvn:e:p:j:r:u:" opt; do
 	case "$opt" in

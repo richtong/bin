@@ -256,8 +256,8 @@ declare -A OP_API_ITEM
 OP_API_ITEM=(
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
 	[DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
-	# 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
-	# 	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
+	[AWS_ACCESS_KEY_ID]="AWS Access Key"
+	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
 	[GEMINI_API_KEY]="Google Gemini API Key Dev"
 	[GOOGLE_AI_API_KEY]="Google Gemini API Key Dev" # used by zed
@@ -286,8 +286,8 @@ OP_API_ITEM=(
 declare -A OP_API_FIELD
 OP_API_FIELD=(
 	[ANTHROPIC_API_KEY]="api key"
-	# [AWS_ACCESS_KEY_ID]="access key id"
-	# [AWS_SECRET_ACCESS_KEY]="secret access key"
+	[AWS_ACCESS_KEY_ID]="access key id"
+	[AWS_SECRET_ACCESS_KEY]="secret access key"
 	[DIGITALOCEAN_ACCESS_TOKEN]=token
 	[DEEPSEEK_API_KEY]="api key"
 	[GEMINI_API_KEY]="api key"
