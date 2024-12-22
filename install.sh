@@ -298,6 +298,7 @@ log_verbose "Install Zsh options"
 "$SCRIPT_DIR/install-zsh.sh"
 
 "$SCRIPT_DIR/install-go.sh"
+"$SCRIPT_DIR/install-rust.sh"
 
 log_warning mac-install.sh must be run first before sourcing libraries
 # These are set later as they depend on variables that can be

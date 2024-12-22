@@ -25,11 +25,7 @@ while getopts "hdv" opt; do
 	h)
 		cat <<-EOF
 
-
-			Install mkdocs
-			The plugins should be installed in the venv
-			mkdocs-material another documentation plugins
-
+			Install mkdocs for base installation with pipx inject
 			usage: $SCRIPTNAME [flags...]
 			  -h help
 			  -d $(! $DEBUGGING || echo "no ")debugging
@@ -59,13 +55,15 @@ source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
 # log_verbose "PATH=$PATH"
 
-# mkdocs - documents made easy
+# mkdocs-material - this bundles mkdocs and mkdocs-material but does not work
+# with pipx
 PACKAGE+=(
-	mkdocs
+	mkdocs # includes mkdocs
 )
 
+log_verbose "Install these packages ${PACKAGE[*]} into the shell python"
 # shellcheck disable=SC2086
-package_install "${PACKAGE[@]}"
+pipx_install "${PACKAGE[@]}"
 
 # Only install pip packages if not in homebrew as
 # raw pip in homebrew does not allow it
@@ -79,16 +77,17 @@ package_install "${PACKAGE[@]}"
 # mkdocs-git-revision-date-localized-plugin - Add date using material
 # mkdocs-enumerate-headings-plugin - automatically add heading numbers
 # markdown-exec[ansi] -  can run the code blocks in the doc site!@#!
-PYTHON_PACKAGE+=(
 
+# brew install mkdocs already has these
+# mkdocs-material
+# pymdown-extensions
+PYTHON_PACKAGE+=(
 	mkdocstrings
-	mkdocs-material
 	"mkdocs-material[imaging]"
 	mkdocs-minify-plugin
 	mkdocs-redirects
 	mkdocs-monorepo-plugin
 	mkdocs-awesome-pages-plugin
-	pymdown-extensions
 	mkdocs-charts-plugin
 	mkdocs-jupyter
 	mkdocs-git-revision-date-localized-plugin
@@ -98,9 +97,7 @@ PYTHON_PACKAGE+=(
 
 )
 
-log_verbose "Install these recommended packages ${PYTHON_PACKAGE[*]}"
-log_verbose "Complete list in github.com/richtong/lib"
-# do not bare pip install anymre
-# pip_install --upgrade "${PYTHON_PACKAGE[@]}"
-
-# log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
+for package in "${PACKAGE[@]}"; do
+	log_verbose "inject $package with ${PYTHON_PACKAGE[*]}"
+	pipx_install -i "$package" "${PYTHON_PACKAGE[@]}"
+done
