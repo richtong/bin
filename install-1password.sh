@@ -286,6 +286,7 @@ OP_API_ITEM=(
 # so auth token should be changed to when the plugin changes in 1password
 declare -A OP_API_FIELD
 OP_API_FIELD=(
+
 	# [GITHUB_TOKEN]=token
 	# [LOCALSTACK_API_KEY]="api key"
 	# [SUPERSET_SECRET_KEY]="api key"
