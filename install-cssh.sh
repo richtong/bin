@@ -37,7 +37,7 @@ if in_os mac; then
 	if ! config_mark "$(config_profile_nonexportable)"; then
 		log_verbose adding cssh alias
 		config_add "$(config_profile_nonexportable)" <<-EOF
-			if command -v csshx; then alias cssh=csshX; fi
+			if command -v csshx >/dev/null; then alias cssh=csshX; fi
 		EOF
 	fi
 else

@@ -124,17 +124,6 @@ if [[ $PYTHON_VERSION =~ @ ]]; then
 	log_warning "This is keg-only and requires manually linking"
 fi
 
-# deprecated as not portable to hard code a python version in profile
-# https://docs.brew.sh/Homebrew-and-Python
-# if ! config_mark; then
-# Use the brew location for python
-# config_add <<-EOF
-# 	# shellcheck disable=SC2155
-# 	echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
-# EOF
-# log_warning "source $(config_profile) to get the correct python"
-# fi
-
 # add the correct python if not already there
 # you cannot just source it again because this will
 # cause the default paths to be put in before this path
@@ -201,19 +190,6 @@ PIPX_PACKAGE+=(
 log_verbose "installing ${PIPX_PACKAGE[*]}"
 pipx install "${PIPX_PACKAGE[@]}"
 
-# these are supposed to installed by default to bash but not zsh but are not
-log_verbose "Install argcomplete into profiles"
-if ! config_mark "$(config_profile_nonexportable)"; then
-	config_add "$(config_profile_nonexportable)" <<-'EOF'
-		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-	EOF
-fi
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
-		   if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-	EOF
-fi
-
 # These should only be command line utilities, not packages for python compute
 # those packages should be installed in the venv system you are using
 
@@ -272,18 +248,23 @@ fi
 
 log_verbose "installing ${PIPX_PACKAGE[*]}"
 pipx_install "${PIPX_PACKAGE[@]}"
+
+# we need it to be python and pip to work and not python3 and pip3 only
+# https://docs.brew.sh/Homebrew-and-Python
+# do not hard link this as its not flexible python3 is in Homebrew
+#  so instead of this you shoud alias python=python3
+# echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
 # https://github.com/pypa/pipx/issues/330
 # completions are supposed to be installed by homebrew for pipx now except for zsh
-if ! config_mark "$(config_profile_nonexportable)"; then
-	config_add "$(config_profile_nonexportable)" <<-'EOF'
-		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-	EOF
-fi
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	config_add "$(config_profile_nonexportable_zsh)" <<-'EOF'
-		if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
-	EOF
-fi
+for profile in "$(config_profile_nonexportable_zsh)" "$(config_profile_nonexportable_bash)"; do
+	if ! config_mark "$profile"; then
+		log_verbose "adding to $profile alias python=python3 if python3 exists and python does not"
+		config_add "" <<-EOF
+			if ! command -v python >/dev/null && command -v python3; then alias python=python3; fi
+			if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+		EOF
+	fi
+done
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
 

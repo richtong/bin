@@ -56,7 +56,9 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 log_verbose "Installing auth0 cli"
-tap_install auth0/auth0-cii
+log_warning "bug in brew tap does not work in scripts install manually"
+log_warning "brew tap auth0/auth0-cli"
+# tap_install auth0/auth0-cii
 PACKAGE+=(
 	auth0
 )

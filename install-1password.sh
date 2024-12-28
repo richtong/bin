@@ -24,9 +24,9 @@ OP_API_INIT="${OP_API_INIT:-false}"
 # OP_API_VAULT="${OP_API_VAULT:-DevOps}"
 OP_API_VAULT="${OP_API_VAULT:-Private}"
 VERSION="${VERSION:-8}"
-DIRENV_PROFILE="${ENV_PROFILE:-true}"
+DIRENV_PROFILE="${ENV_PROFILE:-false}"
 DIRENV_PATH="${DIRENV_PATH:-$HOME/.envrc}"
-SHELL_PROFILE="${SHELL_PROFILE:-false}"
+SHELL_PROFILE="${SHELL_PROFILE:-true}"
 SSH_CONFIG="${SSH_CONFIG:-"$HOME/.ssh/config"}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
@@ -42,9 +42,9 @@ while getopts "hdvfr:e:oc:ns" opt; do
 				   -d $($DEBUGGING && echo "no ")debugging
 				   -v $($VERBOSE && echo "not ")verbose
 				   -f $($FORCE && echo "do not ")force install even is 1Password exists
-				   -n $(DIRENV_PROFILE && echo "no ")install variables in direnv
+				   -n $(DIRENV_PROFILE && echo "no ")install variables in direnv (not recommended slow)
 				   -e install into .envrc for direnv if DIRENV is set (default: $DIRENV_PATH)
-				   -s $(SHELL_PROFILE && echo "no ")install variables in shell (not recommended slow)
+				   -s $(SHELL_PROFILE && echo "no ")install variables in shell (recommended)
 
 				   -r 1Password version number (default: $VERSION)
 
@@ -254,24 +254,25 @@ ENTRY+=(
 # do not use AWS_SECRET_ACCESS_KEY, use AWS_SECRET_ACCESS_KEY use aws ssologin
 declare -A OP_API_ITEM
 OP_API_ITEM=(
+	# [GITHUB_TOKEN]="GitHub Personal Access Token"
+	# [LOCALSTACK_API_KEY]="LocalStack API Key"
+	# [SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
-	[DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
 	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
+	[CIVITAI_TOKEN]="Civitai API Key Dev"
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
+	[DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
 	[GEMINI_API_KEY]="Google Gemini API Key Dev"
-	[GOOGLE_AI_API_KEY]="Google Gemini API Key Dev" # used by zed
-	# [GITHUB_TOKEN]="GitHub Personal Access Token"
 	[GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
+	[GOOGLE_AI_API_KEY]="Google Gemini API Key Dev" # used by zed
 	[GROQ_API_KEY]="Groq API Key Dev"
 	[HF_TOKEN]="Hugging Face API Token Dev"
 	[MISTRAL_API_KEY]="Mistral API Key Dev"
-	# [LOCALSTACK_API_KEY]="LocalStack API Key"
 	[OPENAI_API_KEY]="OpenAI API Key Dev"
 	[OPENROUTER_API_KEY]="OpenRouter Key Dev"
 	[REPLICATE_API_KEY]="Replicate API Token Dev"
 	[SLASHGPT_ENV_WEBPILOT_UID]="Webpilot UID Dev"
-	# [SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
 	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
 
 )
@@ -285,24 +286,25 @@ OP_API_ITEM=(
 # so auth token should be changed to when the plugin changes in 1password
 declare -A OP_API_FIELD
 OP_API_FIELD=(
+	# [GITHUB_TOKEN]=token
+	# [LOCALSTACK_API_KEY]="api key"
+	# [SUPERSET_SECRET_KEY]="api key"
 	[ANTHROPIC_API_KEY]="api key"
 	[AWS_ACCESS_KEY_ID]="access key id"
 	[AWS_SECRET_ACCESS_KEY]="secret access key"
-	[DIGITALOCEAN_ACCESS_TOKEN]=token
+	[CIVITAI_TOKEN]="api key"
 	[DEEPSEEK_API_KEY]="api key"
+	[DIGITALOCEAN_ACCESS_TOKEN]=token
 	[GEMINI_API_KEY]="api key"
-	[GOOGLE_AI_API_KEY]="api key"
-	# [GITHUB_TOKEN]=token
 	[GITHUB_TOKEN_CLASSIC]="personal access token"
+	[GOOGLE_AI_API_KEY]="api key"
 	[GROQ_API_KEY]="api key"
 	[HF_TOKEN]="user access token"
 	[MISTRAL_API_KEY]="api key"
-	# [LOCALSTACK_API_KEY]="api key"
 	[OPENAI_API_KEY]="api key"
 	[OPENROUTER_API_KEY]="key"
 	[REPLICATE_API_KEY]="api token"
 	[SLASHGPT_ENV_WEBPILOT_UID]=key
-	# [SUPERSET_SECRET_KEY]="api key"
 	[WEBUI_SECRET_KEY]="secret key"
 
 )
@@ -336,10 +338,9 @@ fi
 # 			# shellcheck disable=SC2086
 # 			if command -v op >/dev/null && [ -n "${OP_SESSION+n}" ]; then
 # 			eval "$(op signin)"; fi
-# 		EOF
+# 	EOF
 # 	fi
 # done
-#
 
 # usage: 1password_export [profile file]
 1password_export() {
@@ -366,9 +367,9 @@ fi
 	done
 }
 
-log_verbose "Install these in the universal export for the user"
 if $DIRENV_PROFILE; then
-	log_verbose "installing into $DIRENV_PATH note that this does slow direnv but is faster than .bashrc"
+	log_verbose "Install these in the universal export for the user"
+	log_verbose "Installing in direnv is slow"
 	touch "$DIRENV_PATH"
 	if ! config_mark "$DIRENV_PATH"; then
 		1password_export "$DIRENV_PATH"
