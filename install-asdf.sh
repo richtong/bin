@@ -30,7 +30,7 @@ DEFAULT_DIRENV=(2.32.3 2.33.0)
 if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
 
 # Python 3.11.8 has to be built so use a lower version as of Mar 2024
-DEFAULT_PYTHON=(3.10.15 3.11.10 3.12.7)
+DEFAULT_PYTHON=(3.11.10 3.12.7)
 if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]:-${DEFAULT_PYTHON[@]}}"); fi
 
 # openjdk18 is Java 8 for Unifi.app
@@ -351,3 +351,14 @@ done
 
 log_warning "Please run 'asdf reshim' to install the plugins"
 log_warning "To enable direnv in every directory with a .envrc run direnv allow there"
+log_warning "To set .tool-versions run asdf direnv local golang 1.23 do not use asdf local"
+log_verbose "Setting $HOME local versions with the first or stable version"
+pushd "$HOME" >/dev/null
+for LANG in "${!ASDF[@]}"; do
+	for VERSION in ${ASDF[$LANG]}; do
+		log_verbose "Install $LANG version $VERSION"
+		asdf direnv local "$LANG" "$VERSION"
+		break
+	done
+done
+popd >/dev/null
