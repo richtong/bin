@@ -124,16 +124,16 @@ if [[ $PYTHON_VERSION =~ @ ]]; then
 	log_warning "This is keg-only and requires manually linking"
 fi
 
-# we need it to be python and pip to work and not python3 and pip3 only
+# deprecated as not portable to hard code a python version in profile
 # https://docs.brew.sh/Homebrew-and-Python
-if ! config_mark; then
-	# Use the brew location for python
-	config_add <<-EOF
-		# shellcheck disable=SC2155
-		echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
-	EOF
-	log_warning "source $(config_profile) to get the correct python"
-fi
+# if ! config_mark; then
+# Use the brew location for python
+# config_add <<-EOF
+# 	# shellcheck disable=SC2155
+# 	echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
+# EOF
+# log_warning "source $(config_profile) to get the correct python"
+# fi
 
 # add the correct python if not already there
 # you cannot just source it again because this will
