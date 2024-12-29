@@ -256,12 +256,14 @@ pipx_install "${PIPX_PACKAGE[@]}"
 # echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
 # https://github.com/pypa/pipx/issues/330
 # completions are supposed to be installed by homebrew for pipx now except for zsh
+log_verbose "checking profiles"
 for profile in "$(config_profile_nonexportable_zsh)" "$(config_profile_nonexportable_bash)"; do
+	log_verbose "checking $profile"
 	if ! config_mark "$profile"; then
 		log_verbose "adding to $profile alias python=python3 if python3 exists and python does not"
-		config_add "" <<-EOF
-			if ! command -v python >/dev/null && command -v python3; then alias python=python3; fi
-			if command -v pipx >/dev/null; then eval "$(register-python-argcomplete pipx)"; fi
+		config_add "$profile" <<-EOF
+			if ! command -v python >/dev/null && command -v python3 >/dev/null; then alias python=python3; fi
+			if command -v pipx >/dev/null; then eval "\$(register-python-argcomplete pipx)"; fi
 		EOF
 	fi
 done

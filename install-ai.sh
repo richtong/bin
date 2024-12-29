@@ -11,6 +11,7 @@
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 
 CIVITAI_CLI_CONFIG_DIR="${CIVITAI_CLI_CONFIG_DIR:-"$HOME/.config/civit-cli-manager"}"
+COMFYUI_USER_DIR="${COMFYUI_USER_DIR:-"$HOME/ComfyUI"}"
 
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
@@ -65,7 +66,7 @@ PACKAGE+=(
 	# shell-gpt - cli including running shell commands (never use deprecated)
 	# vincelwt-chatgpt - ChatGPT in menubar (not using)
 	# appflowy        # project manager based on ai (don't ever use)
-	cursor          # pair programming using VScode, takes over the `code`
+	cursor          # pair programming using VScode, takes over the $(code)
 	diffusionbee    # diffusionbee - Stability diffusion on Mac
 	lm-studio       # lm-studio -  run different LLMs from Hugging Face locally
 	mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)

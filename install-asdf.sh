@@ -273,6 +273,7 @@ if [[ -n ${ASDF[direnv]} ]]; then
 	# we know it was originally assigned from DIRENV_VERSIONS
 	for SHELL_VERSION in bash zsh; do
 		log_verbose "Found direnv install ${DIRENV_VERSION[-1]} for $SHELL"
+		log_verbose "direnv is array? 0=${DIRENV_VERSION[0]} 1=${DIRENV_VERSION[1]} -1=${DIRENV_VERSION[-1]}"
 		asdf direnv setup --shell "$SHELL_VERSION" --version "${DIRENV_VERSION[-1]}"
 	done
 	# the direnv setup now does this instead so comment out the manual
