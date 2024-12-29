@@ -175,12 +175,16 @@ declare -A ASDF_ENV+=(
 
 log_warning "use oh-my-zsh asdf plugin to install paths"
 
+# https://github.com/asdf-community/asdf-direnv?tab=readme-ov-file#pro-tips
+# do not source if using direnv
+# shellcheck disable=SC1090,SC1091
+# source "$(brew --prefix asdf)/libexec/asdf.sh"
 if ! config_mark "$(config_profile_shell)"; then
 	log_verbose "Adding to $(config_profile_shell)"
 	config_add "$(config_profile_shell)" <<-'EOF'
 		if command -v asdf >/dev/null; then
-		    # shellcheck disable=SC1090,SC1091
-		    source "$(brew --prefix asdf)/libexec/asdf.sh"
+			# if using direnv do not not add shims
+			if [[ -r $HOME/.asdf/bin && ! $PATH =~ .asdf/bin ]]; then PATH="$HOME/.asdf/bin:$PATH"; fi
 		fi
 	EOF
 	# https://linuxhint.com/associative_array_bash/
@@ -338,7 +342,9 @@ for SHELL_TYPE in bash zsh; do
 			config_add "$(config_profile_nonexportable_$SHELL_TYPE)" <<-EOF
 				if command -v asdf >/dev/null && asdf current direnv &> /dev/null; then
 				    # shellcheck disable=SC1090,SC1091
-				    source "\${XDG_CONFIG_HOME:-\$HOME/.config}/asdf-direnv/${SHELL_TYPE}rc"
+					if [[ -r \$(XDG_CONFIG_HOME:-\$HOME/.config)/asdf-direnv ]]; then
+						source "\${XDG_CONFIG_HOME:-\$HOME/.config}/asdf-direnv/${SHELL_TYPE}rc"
+					fi
 				fi
 			EOF
 			# this is replaced by the direnv setup

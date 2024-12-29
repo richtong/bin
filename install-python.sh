@@ -246,6 +246,7 @@ if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
 	# fi
 fi
 
+log_warning "install-asdf.sh should come first so pipx version is defined"
 log_verbose "installing ${PIPX_PACKAGE[*]}"
 pipx_install "${PIPX_PACKAGE[@]}"
 
