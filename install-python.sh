@@ -263,7 +263,8 @@ for profile in "$(config_profile_nonexportable_zsh)" "$(config_profile_nonexport
 	if ! config_mark "$profile"; then
 		log_verbose "adding to $profile alias python=python3 if python3 exists and python does not"
 		config_add "$profile" <<-EOF
-			if ! command -v python >/dev/null && command -v python3 >/dev/null; then alias python=python3; fi
+			# uncomment only if not using asdf
+			# if ! command -v python >/dev/null && command -v python3 >/dev/null; then alias python=python3; fi
 			if command -v pipx >/dev/null; then eval "\$(register-python-argcomplete pipx)"; fi
 		EOF
 	fi

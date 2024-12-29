@@ -26,7 +26,7 @@ VERBOSE="${VERBOSE:-false}"
 DEFAULT_NODE=(20.18.1 22.11.0)
 if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]:-${DEFAULT_NODE[@]}}"); fi
 
-DEFAULT_DIRENV=(2.32.3 2.33.0)
+DEFAULT_DIRENV=(2.35.0)
 if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
 
 # Python 3.11.8 has to be built so use a lower version as of Mar 2024
@@ -175,21 +175,6 @@ declare -A ASDF_ENV+=(
 
 log_warning "use oh-my-zsh asdf plugin to install paths"
 
-# https://github.com/asdf-community/asdf-direnv?tab=readme-ov-file#pro-tips
-# do not source if using direnv
-# shellcheck disable=SC1090,SC1091
-# source "$(brew --prefix asdf)/libexec/asdf.sh"
-if ! config_mark "$(config_profile_shell)"; then
-	log_verbose "Adding to $(config_profile_shell)"
-	config_add "$(config_profile_shell)" <<-'EOF'
-		if command -v asdf >/dev/null; then
-			# if using direnv do not not add shims
-			if [[ -r $HOME/.asdf/bin && ! $PATH =~ .asdf/bin ]]; then PATH="$HOME/.asdf/bin:$PATH"; fi
-		fi
-	EOF
-	# https://linuxhint.com/associative_array_bash/
-fi
-
 #  https://stackoverflow.com/questions/19816275/no-acceptable-c-compiler-found-in-path-when-installing-python
 if in_os linux; then
 	log_verbose "Install Linux prerequisites for asdf python"
@@ -255,40 +240,7 @@ for LANG in "${!ASDF[@]}"; do
 		fi
 	done
 done
-# not clear what this is so as login shell should go into .zprofile
-# for efficiency but leave in .zshrc as non-interactive
-if ! config_mark "$(config_profile_nonexportable_zsh)"; then
-	log_verbose "installing into .zshrc nonexportable"
-	# no longer need manual installation
-	asdf direnv setup --shell zsh --version "${ASDF[direnv]}"
-	# the direnv setup now does this instead so comment out the manual
-	# installation
-	#config_add "$(config_profile_zsh)" <<-'EOF'
-	#    # shellcheck disable=SC1090
-	#    source "$(brew --prefix asdf)/libexec/asdf.sh"
-	#EOF
-fi
-log_verbose "Checking for asdf direnv"
-if [[ -n ${ASDF[direnv]} ]]; then
 
-	# need this hack because can't index into an array inside an array
-	# ${ASDF[direnv][-1]} is what we want but there is no way to
-	# make ${ASDF[direnv]} into an array again so rely ont he fact that
-	# we know it was originally assigned from DIRENV_VERSIONS
-	for SHELL_VERSION in bash zsh; do
-		log_verbose "Found direnv install ${DIRENV_VERSION[-1]} for $SHELL"
-		log_verbose "direnv is array? 0=${DIRENV_VERSION[0]} 1=${DIRENV_VERSION[1]} -1=${DIRENV_VERSION[-1]}"
-		asdf direnv setup --shell "$SHELL_VERSION" --version "${DIRENV_VERSION[-1]}"
-	done
-	# the direnv setup now does this instead so comment out the manual
-	# installation https://direnv.net/docs/hook.html
-	#config_add <<-'EOF'
-	#    eval "$(asdf exec direnv hook bash)"
-	#    direnv() { asdf exec direnv "$@"; }
-	#EOF
-fi
-# https://github.com/asdf-vm/asdf-nodejs/issues/253
-log_verbose "must source otherwise reshim will fail"
 source_profile
 
 # this is no longer needed run the asdf setup instead
@@ -322,36 +274,50 @@ if ! config_mark "$HOME/.asdfrc"; then
 		java_macos_integration_enable = yes
 	EOF
 fi
-# .profile is only called from bash, also set .zshrc
-# https://github.com/halcyon/asdf-java#java_home
-for SHELL_TYPE in bash zsh; do
-	if ! config_mark "$(config_profile_nonexportable_$SHELL_TYPE)"; then
-		log_verbose "Adding to $(config_profile_nonexportable_$SHELL_TYPE)"
-		if [[ -n ${ASDF[java]} ]]; then
-			config_add "$(config_profile_nonexportable_$SHELL_TYPE)" <<-EOF
-				if command -v asdf >/dev/null && asdf current java &>/dev/null; then
-				    # shellcheck disable=SC1090,SC1091
-				    source "\$HOME/.asdf/plugins/java/set-java-home.$SHELL_TYPE"
-				fi
-			EOF
+
+# this is a direnv pro tip but doesn't work so always add the asdf shims
+# if [[ -r $HOME/.asdf/bin && ! $PATH =~ .asdf/bin ]]; then PATH="$HOME/.asdf/bin:$PATH"; fi
+for shell_type in bash zsh; do
+	if ! config_mark "$(config_profile_nonexportable_$shell_type)"; then
+		log_verbose "Adding to $(config_profile_nonexportable_$shell_type)"
+		if [[ $shell_type == bash ]]; then
+			config_add "$(config_profile_nonexportable_$shell_type)" <<'EOF'
+if [[ -r "$(brew --prefix asdf)/libexec/asdf.sh" ]]; then
+	# shellcheck disable=SC1090,SC1091
+	source "$(brew --prefix asdf)/libexec/asdf.sh"
+fi
+EOF
 		fi
+		log_verbose "direnv=${ASDF[direnv]}"
 		if [[ -n ${ASDF[direnv]} ]]; then
-			# do not use this setup because it does not guard against asdf not
-			# installed so we do the one liner it generates manually
-			#asdf direnv setup --shell "$SHELL_TYPE" --version "${ASDF[direnv]}"
-			config_add "$(config_profile_nonexportable_$SHELL_TYPE)" <<-EOF
-				if command -v asdf >/dev/null && asdf current direnv &> /dev/null; then
-				    # shellcheck disable=SC1090,SC1091
-					if [[ -r \$(XDG_CONFIG_HOME:-\$HOME/.config)/asdf-direnv ]]; then
-						source "\${XDG_CONFIG_HOME:-\$HOME/.config}/asdf-direnv/${SHELL_TYPE}rc"
-					fi
-				fi
-			EOF
+			log_verbose "Adding asdf-direnv for $shell_type"
+			# We do not use the setup below instead we check for existance first
+			# asdf direnv setup --shell "$shell_type" --version "${ASDF[direnv]}"
+			config_add "$(config_profile_nonexportable_$shell_type)" <<EOF
+if command -v asdf >/dev/null && asdf current direnv > /dev/null; then
+	# shellcheck disable=SC1090,SC1091
+	export XDG_CONFIG_HOME="\${XDG_CONFIG_HOME:-\$HOME/.config}"
+	if [[ -r \$XDG_CONFIG_HOME/asdf-direnv/${shell_type}rc ]]; then
+		source "\$XDG_CONFIG_HOME/asdf-direnv/${shell_type}rc"
+	fi
+fi
+EOF
 			# this is replaced by the direnv setup
 			#config_add <<-'EOF'
 			#    eval "$(asdf exec direnv hook bash)"
 			#    direnv() { asdf exec direnv "$@"; }
 			#EOF
+		fi
+		# https://github.com/halcyon/asdf-java#java_home
+		log_verbose "java=${ASDF[java]}"
+		if [[ -n ${ASDF[java]} ]]; then
+			log_verbose "Adding java_home for $shell_type"
+			config_add "$(config_profile_nonexportable_$shell_type)" <<EOF
+if command -v asdf >/dev/null && asdf current java &>/dev/null; then
+	# shellcheck disable=SC1090,SC1091
+	source "\$HOME/.asdf/plugins/java/set-java-home.$shell_type"
+fi
+EOF
 		fi
 	fi
 done
