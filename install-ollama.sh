@@ -137,6 +137,20 @@ declare -A PYTHON_PACKAGE+=(
 # no need for gp4all
 #download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
 
+for package in "${!PYTHON_PACKAGE[@]}"; do
+	pipx_install -p "${PYTHON_PACKAGE[$package]}" "$package"
+done
+if ! config_mark "$(config_profile_interactive)"; then
+	config_add "$(config_profile_interactive)" <<-EOF
+		if command -v open-webui > /dev/null; then open-webui --install-completion >/dev/null; fi
+	EOF
+fi
+# note things like neovim code companion will use the first model
+# that comes out of ollama list and this is the last one pulled, so this
+# pull order has the default at the bottom
+# These are too large for a 64GB machine
+# note we load latest and also the tagged version
+
 # we put all the big models here if you are disk constrained
 # now sorted by date added from ollama as of 11-15-24
 
@@ -289,12 +303,15 @@ MODEL+=(
 	phi3.5:3.8b                    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	phi3.5:3.8b-mini-instruct-q4_0 # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	# these models are pre llama3.1 and are very close to gone
-	gemma2                  # Google 9B Q4 5.4GB 8K context
-	gemma2:latest           # Google 9B Q4 5.4GB 8K context
-	gemma2:9b               # Google 9B Q4 5.4GB 8K context
-	gemma2:9b-instruct-q4_0 # Google 9B Q4 5.4GB 8K context
-	gemma2:2b               # Google 9B Q4 5.4GB 8K context
-	gemma2:2b-instruct-q4_0 # Google 9B Q4 5.4GB 8K context
+	gemma2                      # Google 9B Q4 5.4GB 8K context
+	gemma2:latest               # Google 9B Q4 5.4GB 8K context
+	gemma2:9b                   # Google 9B Q4 5.4GB 8K context
+	gemma2:9b-instruct-q4_0     # Google 9B Q4 5.4GB 8K context
+	gemma2:2b                   # Google 9B Q4 5.4GB 8K context
+	gemma2:2b-instruct-q4_0     # Google 9B Q4 5.4GB 8K context
+	bge-large                   # embedding model from BAAI
+	bge-large:335m              # embedding model from BAA
+	bge-large:335m-en-v1.5-fp16 # embedding model from BAA
 
 )
 #
