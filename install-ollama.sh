@@ -27,7 +27,7 @@ while getopts "hdvr:e:s:lfmu" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs Ollama models and removes obsolete or large ones and openwebui and ngrok
+			Installs Ollama models and removes obsolete or large ones
 			usage: $SCRIPTNAME [ flags ]
 			flags:
 				-h help
@@ -107,8 +107,8 @@ PACKAGE+=(
 	# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
 	# shell-gpt - cli including running shell commands (never use deprecated)
 	# vincelwt-chatgpt - ChatGPT in menubar (not using)
-	ollama  # ollama - ollama local runner
-	ollamac # ollamac is a self contained mac app crashes on startup
+	ollama # ollama - ollama local runner
+	# ollamac # ollamac is a mac app crashes on startup deprecated
 
 )
 
@@ -122,11 +122,10 @@ MAS+=(
 mas_install "${MAS[@]}"
 
 declare -A PYTHON_PACKAGE+=(
-
 	["open-webui"]=3.11 # include the required python version needs quotes to prevent reformat
-
 )
-
+# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
+#
 # Install Stabiliity Diffusion with DiffusionBee"
 # Download Chat GPT in menubar
 # Use brew install instead of
@@ -135,40 +134,8 @@ declare -A PYTHON_PACKAGE+=(
 #ARCH=arm64
 #fi
 #download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
-# if [[ -v poetry_active ]]; then
-# 	log_verbose "In poetry so add to the project"
-# 	log_warning "If you want in the system, you must exit poetry and rerun"
-# 	poetry add "${PYTHON_PACKAGE[@]}"
-# else
-for package in "${!PYTHON_PACKAGE[@]}"; do
-	pipx_install -p "${PYTHON_PACKAGE[$package]}" "$package"
-done
-
-# fi
-
-# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
-
 # no need for gp4all
 #download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
-
-if ! config_mark "$(config_profile_interactive)"; then
-	config_add "$(config_profile_interactive)" <<-EOF
-		if command -v open-webui > /dev/null; then open-webui --install-completion >/dev/null; fi
-	EOF
-fi
-
-if (($(pfind ollama | wc -l) == 0)); then
-	log_verbose "ollama serve starting"
-	ollama serve &
-	log_verbose "waiting for the server to start"
-	sleep 20
-fi
-
-# note things like neovim code companion will use the first model
-# that comes out of ollama list and this is the last one pulled, so this
-# pull order has the default at the bottom
-# These are too large for a 64GB machine
-# note we load latest and also the tagged version
 
 # we put all the big models here if you are disk constrained
 # now sorted by date added from ollama as of 11-15-24

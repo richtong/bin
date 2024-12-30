@@ -33,8 +33,8 @@ if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${D
 DEFAULT_PYTHON=(3.11.10 3.12.7)
 if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]:-${DEFAULT_PYTHON[@]}}"); fi
 
-# openjdk18 is Java 8 for Unifi.app
-DEFAULT_JAVA=(openjdk-18 openjdk-21)
+# openjdk18 is Java 8 for Unifi.app no longer needed, 23 for tika
+DEFAULT_JAVA=(openjdk-23)
 if ((${#DEFAULT_JAVA[@]} > 0)); then JAVA_VERSION=("${JAVA_VERSION[@]:-${DEFAULT_JAVA[@]}}"); fi
 
 # Ruby is used with LazyVim

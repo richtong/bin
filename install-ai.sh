@@ -74,6 +74,7 @@ PACKAGE+=(
 	cursor          # ai code editor that's based on code
 	zed             # yet another ai editor
 	jan             # grafical front-end for llama.cpp
+	tika            # Apache tika content extractor command line
 
 )
 package_install "${PACKAGE[@]}"
@@ -121,8 +122,35 @@ if ! config_mark "$CIVITAI_CLI_CONFIG_DIR/.env"; then
 	EOF
 fi
 
+log_verbose "install Jar for open-webui"
+TIKA_VERSION="${TIKA_VERSION:-2.9.2}"
+JAR_URL+=(
+	"https://dlcdn.apache.org/tika/$TIKA_VERSION/tika-server-standard-$TIKA_VERSION.jar"
+)
+JAR_PATH="${JAR_PATH:-$HOME/jar}"
+# usage: download_url url [dest_file [dest_dir [md5 [sha256]]]]
+for url in "${JAR_URL[@]}"; do
+	download_url "$url"
+done
+
+for package in "${!PYTHON_PACKAGE[@]}"; do
+	pipx_install -p "${PYTHON_PACKAGE[$package]}" "$package"
+done
+if ! config_mark "$(config_profile_interactive)"; then
+	config_add "$(config_profile_interactive)" <<-EOF
+		if command -v open-webui > /dev/null; then open-webui --install-completion >/dev/null; fi
+	EOF
+fi
+# note things like neovim code companion will use the first model
+# that comes out of ollama list and this is the last one pulled, so this
+# pull order has the default at the bottom
+# These are too large for a 64GB machine
+# note we load latest and also the tagged version
+
 # no need for gp4all
 #download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
 
-log_verbose "install ollama, open-webui and models"
+log_verbose "install ollama models"
 "$BIN_DIR/install-ollama.sh"
+
+log_verbose "you can start servers separate with make ai"
