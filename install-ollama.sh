@@ -16,6 +16,8 @@ VERBOSE="${VERBOSE:-false}"
 INCLUDE_MEDIUM="${INCLUDE_MEDIUM:-false}"
 INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
 INCLUDE_HF="${INCLUDE_HF:-true}"
+INCLUDE_EXTRA="${INCLUDE_EXTRA:-false}"
+
 AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
 # if set to false will remove/uninstall models
 ACTION="${ACTION:-pull}"
@@ -23,7 +25,7 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvr:e:s:lfmu" opt; do
+while getopts "hdvmlfeus:a" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -36,6 +38,7 @@ while getopts "hdvr:e:s:lfmu" opt; do
 				-m $(! $INCLUDE_MEDIUM || echo "not ")pull larger then 10B+ parameters (need 10GB+ RAM)
 				-l $(! $INCLUDE_LARGE || echo "not ")pull larger then 32B+ parameters (need 40GB+ RAM)
 				-f $(! $INCLUDE_HF || echo "not ")pull huggingface models
+				-e $(! $INCLUDE_EXTRA || echo "not ")pull extra models if you have lots of disk (>2TB)
 				-u $([[ $ACTION == pull ]] || echo "un")install models
 				-s storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
 				-a $(! AUTOMATIC_BY_MEMORY || echo "not ")automatic by system memory
@@ -74,6 +77,11 @@ while getopts "hdvr:e:s:lfmu" opt; do
 		# invert the variable when flag is set
 		INCLUDE_HF="$($INCLUDE_HF && echo false || echo true)"
 		export INCLUDE_HF
+		;;
+	e)
+		# invert action between pull and rm
+		INCLUDE_EXTRA="$([[ $INCLUDE_EXTRA == pull ]] && echo rm || echo pull)"
+		export INCLUDE_EXTRA
 		;;
 	u)
 		# invert action between pull and rm
@@ -268,40 +276,28 @@ MODEL+=(
 	qwen2.5-coder:1.5b-instruct-q4_K_M  # 128K Tuned for coding 7B
 
 	# these models are pre llama3.2 and subject to deprecation
-	nemotron-mini:4b               # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	nemotron-mini:latest           # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	qwen2.5                        # the larger Alibab models
-	qwen2.5:latest                 # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:7b                     # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:0.5b                   # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:1.5b                   # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:3b                     # 128K context Alibaba 2024-09-16 7b
-	bespoke-minicheck              # Fact check 7B q4_K_M UT Austin
-	bespoke-minicheck:latest       # Fact check 7B q4_K_M
-	bespoke-minicheck:7b           # Fact check 7B q4_K_M
-	bespoke-minicheck:7b-q4_K_M    # Fact check 7B q4_K_M
-	reader-lm                      # Just for HTML to  markdown conversion
-	reader-lm:latest               # Just for HTML to  markdown conversion
-	reader-lm:1.5b                 # HTML to Markdown conversion 1.5B-q4_K_M
-	reader-lm:1.5b-q4_0            # HTML to Markdown conversion 1.5B-q4_K_M
-	reader-lm:0.5b                 # HTML to Markdown conversion 1.5B-q4_K_M
-	reader-lm:0.5b-q4_0            # HTML to Markdown conversion 1.5B-q4_K_M
-	minicpm-v                      # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:latest               # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:8b                   # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:8b-2.6-q4_0          # mLLM visual too, ocr v2.6 ModelBest CN
-	yi-coder                       # 9B model q4 128K context
-	yi-coder:latest                # 9B model q4 128K context
-	yi-coder:9b                    # 9B model q4 128K context
-	yi-coder:9b-chat               # 9B model q4 128K context
-	yi-coder:9b-chat-q4_0          # 9B model q4 128K context
-	yi-coder:1.5b                  # 9B model q4 128K context
-	yi-coder:1.5b-chat             # 9B model q4 128K context
-	yi-coder:1.5b-chat-q4_0        # 9B model q4 128K context
-	phi3.5                         # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:latest                  # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b                    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b-mini-instruct-q4_0 # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	nemotron-mini:4b            # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	nemotron-mini:latest        # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	qwen2.5                     # the larger Alibab models
+	qwen2.5:latest              # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:7b                  # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:0.5b                # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:1.5b                # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b                  # 128K context Alibaba 2024-09-16 7b
+	bespoke-minicheck           # Fact check 7B q4_K_M UT Austin
+	bespoke-minicheck:latest    # Fact check 7B q4_K_M
+	bespoke-minicheck:7b        # Fact check 7B q4_K_M
+	bespoke-minicheck:7b-q4_K_M # Fact check 7B q4_K_M
+	reader-lm                   # Just for HTML to  markdown conversion
+	reader-lm:latest            # Just for HTML to  markdown conversion
+	reader-lm:1.5b              # HTML to Markdown conversion 1.5B-q4_K_M
+	reader-lm:1.5b-q4_0         # HTML to Markdown conversion 1.5B-q4_K_M
+	reader-lm:0.5b              # HTML to Markdown conversion 1.5B-q4_K_M
+	reader-lm:0.5b-q4_0         # HTML to Markdown conversion 1.5B-q4_K_M
+	minicpm-v                   # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:latest            # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:8b                # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:8b-2.6-q4_0       # mLLM visual too, ocr v2.6 ModelBest CN
 	# these models are pre llama3.1 and are very close to gone
 	gemma2                      # Google 9B Q4 5.4GB 8K context
 	gemma2:latest               # Google 9B Q4 5.4GB 8K context
@@ -343,12 +339,9 @@ MODEL_MEDIUM+=(
 	solar-pro:22b-preview-instruct-q4_K_M # 22b comparable to llama 3.1 70b 4k context
 	qwen2.5:14b                           # 128K context Alibaba 2024-09-16 7b
 	qwen2.5:32b                           # 128K context Alibaba 2024-09-16 7b
-	mistral-small                         # on the bubble to remove
-	mistral-small:latest                  # v0.3 Mistral 22b-instruct-2409-q4_0
-	mistral-small:22b                     # v0.3 Mistral 22b-instruct-2409-q4_0
-	mistral-small:22b-instruct-2409-q4_0  # v0.3 Mistral 22b-instruct-2409-q4_0
 	gemma2:27b                            # old but only Google model
 	gemma2:27b-instruct-q4_0              # old but only Google model
+
 )
 
 log_verbose "loading all models over 32B parameters, requires >64GB RAM"
@@ -359,18 +352,27 @@ MODEL_LARGE+=(
 	llama3.3:70b-instruct-q4_K_M        # 128K context
 	tulu3:70b                           # AI2 instruction following
 	tulu3:70b-q4_K_M                    # AI2 instruction following
-	athene-v2                           # nexusflow based on qwen2.5
-	athene-v2:latest                    # code, math, log extraction
-	athene-v2:72b                       # code, math, log extraction
-	athene-v2:72b-q4_K_M                # code, math, log extraction
 	llama3.2-vision:90b                 # vision works now
 	llama3.2-vision:90b-instruct-q4_K_M # vision works now
 	# these models are pre llama3.2 and are very close to gone
-	nemotron                                # nvidia llama 3.1 but performs well
-	nemotron:latest                         # nvidia llama 3.1 obsolete soon
-	nemotron:70b                            # nvidia tuned llama 3.1
-	nemotron:70b-instruct-q4_K_M            # nvidia tuned llama 3.1
-	qwen2.5:72b                             # 128K context Alibaba 2024-09-16 7b
+	nemotron                     # nvidia llama 3.1 but performs well
+	nemotron:latest              # nvidia llama 3.1 obsolete soon
+	nemotron:70b                 # nvidia tuned llama 3.1
+	nemotron:70b-instruct-q4_K_M # nvidia tuned llama 3.1
+	qwen2.5:72b                  # 128K context Alibaba 2024-09-16 7b
+)
+
+log_verbose "Extra modles if you have plenty of space"
+MODEL_EXTRA+=(
+	mixtral:8x7b                            # mistral moe (deprecated)
+	athene-v2                               # nexusflow based on qwen2.5
+	athene-v2:latest                        # code, math, log extraction
+	athene-v2:72b                           # code, math, log extraction
+	athene-v2:72b-q4_K_M                    # code, math, log extraction
+	mistral-small                           # on the bubble to remove
+	mistral-small:latest                    # v0.3 Mistral 22b-instruct-2409-q4_0
+	mistral-small:22b                       # v0.3 Mistral 22b-instruct-2409-q4_0
+	mistral-small:22b-instruct-2409-q4_0    # v0.3 Mistral 22b-instruct-2409-q4_0
 	reflection                              # some cheating on the model
 	reflection:latest                       # some cheating on the model
 	reflection:70b                          # some cheating on the model
@@ -379,6 +381,18 @@ MODEL_LARGE+=(
 	mistral-large:latest                    # Mistral flagship
 	mistral-large:123b                      # Mistral flagship
 	mistral-large:123b-instruct-2411-q4_K_M # Mistral flagship
+	yi-coder                                # 9B model q4 128K context
+	yi-coder:latest                         # 9B model q4 128K context
+	yi-coder:9b                             # 9B model q4 128K context
+	yi-coder:9b-chat                        # 9B model q4 128K context
+	yi-coder:9b-chat-q4_0                   # 9B model q4 128K context
+	yi-coder:1.5b                           # 9B model q4 128K context
+	yi-coder:1.5b-chat                      # 9B model q4 128K context
+	yi-coder:1.5b-chat-q4_0                 # 9B model q4 128K context
+	phi3.5                                  # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:latest                           # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b                             # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b-mini-instruct-q4_0          # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 )
 #
 # move the deprecated models here to make sure to delete them
@@ -424,7 +438,6 @@ MODELS_REMOVE+=(
 	command-r-plus:104b-q2_K # 39GB Q2 with 128K context for enterprise
 	command-r:35b            # 128K context 35b 19GB
 	mixtral
-	mixtral:8x7b # mistral moe (deprecated)
 
 )
 
@@ -459,6 +472,9 @@ if $INCLUDE_MEDIUM; then
 fi
 if $INCLUDE_HF; then
 	MODEL_LIST+=("${MODEL_HF[@]}")
+fi
+if $INCLUDE_EXTRA; then
+	MODEL_LIST+=("${MODEL_EXTRA[@]}")
 fi
 log_verbose "Action $ACTION on ${MODEL_LIST[*]}"
 
