@@ -18,6 +18,9 @@ VERSION="${VERSION:-7}"
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+DIRENVRC="$XDG_CONFIG_HOME/direnv/direnvrc"
+
 # make the default an array needs a hack
 # https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
 # https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
@@ -322,16 +325,65 @@ EOF
 	fi
 done
 
-log_warning "Please run 'asdf reshim' to install the plugins"
+# https://github.com/direnv/direnv/wiki/Python#uv
+if ! config_mark "$DIRENVRC"; then
+	config_add "$DIRENVRC" <<-'EOF'
+		layout_uv() {
+		    if [[ -d ".venv" ]]; then
+		        VIRTUAL_ENV="$(pwd)/.venv"
+		    fi
+
+		    if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
+		        log_status "No virtual environment exists. Executing \`uv venv\` to create one."
+		        uv venv
+		        VIRTUAL_ENV="$(pwd)/.venv"
+		    fi
+
+		    PATH_add "$VIRTUAL_ENV/bin"
+		    export UV_ACTIVE=1  # or VENV_ACTIVE=1
+		    export VIRTUAL_ENV
+		}
+
+		layout_anaconda() {
+		  local ACTIVATE="${HOME}/miniconda3/bin/activate"
+
+		  if [ -n "$1" ]; then
+		    # Explicit environment name from layout command.
+		    local env_name="$1"
+		    source $ACTIVATE ${env_name}
+		  elif (grep -q name: environment.yml); then
+		    # Detect environment name from `environment.yml` file in `.envrc` directory
+		    source $ACTIVATE `grep name: environment.yml | sed -e 's/name: //' | cut -d "'" -f 2 | cut -d '"' -f 2`
+		  else
+		    (>&2 echo No environment specified);
+		    exit 1;
+		  fi;
+		}
+		layout_poetry() {
+		    PYPROJECT_TOML="${PYPROJECT_TOML:-pyproject.toml}"
+		    if [[ ! -f "$PYPROJECT_TOML" ]]; then
+		        log_status "No pyproject.toml found. Executing \`poetry init\` to create a \`$PYPROJECT_TOML\` first."
+		        poetry init
+		    fi
+
+		    if [[ -d ".venv" ]]; then
+		        VIRTUAL_ENV="$(pwd)/.venv"
+		    else
+		        VIRTUAL_ENV=$(poetry env info --path 2>/dev/null ; true)
+		    fi
+
+		    if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
+		        log_status "No virtual environment exists. Executing \`poetry install\` to create one."
+		        poetry install
+		        VIRTUAL_ENV=$(poetry env info --path)
+		    fi
+
+		    PATH_add "$VIRTUAL_ENV/bin"
+		    export POETRY_ACTIVE=1  # or VENV_ACTIVE=1
+		    export VIRTUAL_ENV
+		}
+	EOF
+fi
+
 log_warning "To enable direnv in every directory with a .envrc run direnv allow there"
 log_warning "To set .tool-versions run asdf direnv local golang 1.23 do not use asdf local"
-log_verbose "Setting $HOME local versions with the first or stable version"
-pushd "$HOME" >/dev/null
-for LANG in "${!ASDF[@]}"; do
-	for VERSION in ${ASDF[$LANG]}; do
-		log_verbose "Install $LANG version $VERSION"
-		asdf direnv local "$LANG" "$VERSION"
-		break
-	done
-done
-popd >/dev/null

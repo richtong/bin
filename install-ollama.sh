@@ -80,7 +80,7 @@ while getopts "hdvmlfeus:a" opt; do
 		;;
 	e)
 		# invert action between pull and rm
-		INCLUDE_EXTRA="$([[ $INCLUDE_EXTRA == pull ]] && echo rm || echo pull)"
+		INCLUDE_EXTRA="$($INCLUDE_EXTRA && echo false || echo true)"
 		export INCLUDE_EXTRA
 		;;
 	u)
@@ -198,12 +198,13 @@ MODEL+=(
 	granite3.1-moe:1b-instruct-q4_K_M   # low latency model
 	granite3.1-moe:3b                   # larger model
 	granite3.1-moe:3b-instruct-q4_K_M   # larger model
-	falcon3:latest                      # latest from Abu Dhabi
-	falcon3:7b                          # 7B parameters
-	falcon3:7b-instruct-q4_K_M          # 7B parameters
-	falcon3:3b                          # 7B parameters
-	falcon3:3b-instruct-q4_K_M          # 7B parameters
-	falcon3:1b                          # 7B parameters
+	falcon3
+	falcon3:latest             # latest from Abu Dhabi
+	falcon3:7b                 # 7B parameters
+	falcon3:7b-instruct-q4_K_M # 7B parameters
+	falcon3:3b                 # 7B parameters
+	falcon3:3b-instruct-q4_K_M # 7B parameters
+	falcon3:1b                 # 7B parameters
 	falcon3:1b-instruct-q8_0
 	granite-embedding # latest ibm embeddings
 	granite-embedding:latest
@@ -465,15 +466,19 @@ fi
 
 MODEL_LIST=("${MODEL[@]}")
 if $INCLUDE_LARGE; then
+	log_verbose "Include large models"
 	MODEL_LIST+=("${MODEL_LARGE[@]}")
 fi
 if $INCLUDE_MEDIUM; then
+	log_verbose "Include medium models"
 	MODEL_LIST+=("${MODEL_MEDIUM[@]}")
 fi
 if $INCLUDE_HF; then
+	log_verbose "Include HF models"
 	MODEL_LIST+=("${MODEL_HF[@]}")
 fi
 if $INCLUDE_EXTRA; then
+	log_verbose "Include extra models for >2TB drives"
 	MODEL_LIST+=("${MODEL_EXTRA[@]}")
 fi
 log_verbose "Action $ACTION on ${MODEL_LIST[*]}"
@@ -532,29 +537,15 @@ log_verbose "install current shell completion"
 open-webui --install-completion
 
 PACKAGE+=(
-	ngrok # local ssh gateway for open-webui
 )
 
 log_verbose "installing ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
 
-# https://dashboard.ngrok.com/get-started/setup/macos
-log_verbose "configure ngrok as front-end to open-webui"
-ngrok config add-authtoken "$(op item get "ngrok" --fields "auth token" --reveal)"
-
-# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc
-log_warning "WEBUI_SECRET_KEY and OPENAI_API_KEY should both be defined before running ideally in a .envrc"
-log_warning "Or put the API key into OpenWebUI"
-log_verbose "To add Groq to OPen-webui Lower Left > Admin Panel > Settings > Connections > OpenAI API"
-log_verbose "Click on + on he right and add URL https://api.groq.com/openai/v1 and your GROQ key"
-# https://zohaib.me/extending-openwebui-using-pipelines/
-# log_verbose "https://github.com/open-webui/pipelines"
-log_verbose "To add Gemini, add functions or pipelines you need to run a docker and add it"
-log_verbose 'docker run -d -p 9099:9099 --add-host=host.docker.internal:host-gateway \ '
-log_verbose '-v pipelines:/app/pipelines --name pipelines --restart always \ '
-log_verbose "ghcr.io/open-webui/pipelines:main"
-log_verbose "or fork and submodule add git@githbu.com:open-webui/pipelines"
-log_verbose "pip install - requriements.txt && sh .start.sh"
-
-log_verbose "Installing the pipelines interface which allows compatible interfaces"
-log_verbose "See https://github.com/open-webui/pipelines"
+log_verbose "installing ollama environment variables to $WS_DIR/git/src/.envrc"
+if ! config_mark "$WS_DIR/git/src/.envrc"; then
+	config_add "$WS_DIR/git/src/.envrc" <<-EOF
+		export OLLAMA_KV_CACHE_TYPE=q4_0
+		export OLLAMA_FLASH_ATTENTION=1
+	EOF
+fi
