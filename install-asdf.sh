@@ -327,6 +327,7 @@ done
 
 # https://github.com/direnv/direnv/wiki/Python#uv
 if ! config_mark "$DIRENVRC"; then
+	log_verbose "Updating $DIRENVRC"
 	config_add "$DIRENVRC" <<-'EOF'
 		layout_uv() {
 		    if [[ -d ".venv" ]]; then
