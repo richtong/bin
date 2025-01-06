@@ -549,3 +549,19 @@ if ! config_mark "$WS_DIR/git/src/.envrc"; then
 		export OLLAMA_FLASH_ATTENTION=1
 	EOF
 fi
+# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc
+log_warning "WEBUI_SECRET_KEY and OPENAI_API_KEY should both be defined before running ideally in a .envrc"
+log_warning "Or put the API key into OpenWebUI"
+log_verbose "To add Groq to OPen-webui Lower Left > Admin Panel > Settings > Connections > OpenAI API"
+log_verbose "Click on + on he right and add URL https://api.groq.com/openai/v1 and your GROQ key"
+# https://zohaib.me/extending-openwebui-using-pipelines/
+# log_verbose "https://github.com/open-webui/pipelines"
+log_verbose "To add Gemini, add functions or pipelines you need to run a docker and add it"
+log_verbose 'docker run -d -p 9099:9099 --add-host=host.docker.internal:host-gateway \ '
+log_verbose '-v pipelines:/app/pipelines --name pipelines --restart always \ '
+log_verbose "ghcr.io/open-webui/pipelines:main"
+log_verbose "or fork and submodule add git@githbu.com:open-webui/pipelines"
+log_verbose "pip install - requirements.txt && sh .start.sh"
+
+log_verbose "Installing the pipelines interface which allows compatible interfaces"
+log_verbose "See https://github.com/open-webui/pipelines"
