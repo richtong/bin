@@ -77,6 +77,7 @@ PACKAGE+=(
 	tika            # Apache tika content extractor command line
 	ngrok           # local ssh gateway for open-webui
 	ffmpeg          # needed by open-webui
+	llama.cpp       # underlying server to ollama
 
 )
 package_install "${PACKAGE[@]}"

@@ -18,7 +18,6 @@ INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
 INCLUDE_HF="${INCLUDE_HF:-true}"
 INCLUDE_EXTRA="${INCLUDE_EXTRA:-false}"
 
-=======
 AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
 # if set to false will remove/uninstall models
 ACTION="${ACTION:-pull}"
@@ -187,6 +186,14 @@ MODEL_HF+=(
 # 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 MODEL+=(
+	dolphin3                            # llama3.1 8B tuned
+	dolphin3:latest                     # llama3.1 8B tuned
+	dolphin3:8b                         # llama3.1 8B tuned
+	dolphin3:8b-llama3.1-q4_K_M         # llama3.1 8B tuned
+	smallthinker                        # Fine tuned Qwen2.5-b-instruct
+	smallthinker:latest                 # qwq used to generate 8K synthetic
+	smallthinker:3b                     # long sequence encourage CoT
+	smallthinker:3b-preview-q8_0        # open dataset
 	granite3.1-dense                    # IBM tool, RAG, code, translation
 	granite3.1-dense:latest             # IBM
 	granite3.1-dense:2b                 # RAG, code  generation, translation
@@ -498,11 +505,12 @@ ollama_action() {
 	done
 }
 
-log_verbose "$ACTION on ${MODEL_LIST[*]}"
-ollama_action "$ACTION" "${MODEL_LIST[@]}"
-
-log_verbose "Removing deprecated models ${MODELS_REMOVE[*]}"
-ollama_action rm "${MODELS_REMOVE[@]}"
+if pgrep ollama >/dev/null; then
+	log_verbose "$ACTION on ${MODEL_LIST[*]}"
+	ollama_action "$ACTION" "${MODEL_LIST[@]}"
+	log_verbose "Removing deprecated models ${MODELS_REMOVE[*]}"
+	ollama_action rm "${MODELS_REMOVE[@]}"
+fi
 
 if [[ -v OLLAMA_MODELS ]]; then
 	log_verbose "Changing default storage of models to $OLLAMA_MODELS"
@@ -514,7 +522,7 @@ if [[ -v OLLAMA_MODELS ]]; then
 fi
 
 declare -A PYTHON_PACKAGE+=(
-	["open-webui"]=3.11 # include the required python version
+	["open-webui"]=3.12 # include the required python version
 )
 # Install Stabiliity Diffusion with DiffusionBee"
 # Download Chat GPT in menubar
