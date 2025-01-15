@@ -100,7 +100,6 @@ log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 # ipfs
 # ubuntu - acs apt-cache search
 # pipenv pcl is pipenv clean prun and psh and psy for sync
-# thefuck # ESC twice to correct command (conflicts with sudo plugin do not use together)
 # ubuntu
 # azure  # completions
 PLUGIN+=(
@@ -169,10 +168,11 @@ PLUGIN+=(
 	rsync      # rsync - adda rsync-copy for -avz
 	rust       # completions
 	ssh        # host completion from ..ssh/config
-	sudo       # ESC twice to add sudo to previous command
-	tailscale  # completions
-	terraform  # terraform - tfa for apply, tfv for validate...
+	# sudo       # ESC twice to add sudo to previous command (too annoying)
+	tailscale # completions
+	terraform # terraform - tfa for apply, tfv for validate...
 	themes
+	thefuck    # ESC twice to correct command (conflicts with sudo plugin do not use together)
 	tmux       #  ts for tmus attach -t, tl: tmux list-sessions
 	tmuxinator # txs tmuxinator start
 	transfer

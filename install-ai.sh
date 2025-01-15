@@ -122,6 +122,7 @@ if ! config_mark "$CIVITAI_CLI_CONFIG_DIR/.env"; then
 		MODELS_DIR="$COMFYUI_USER_DIR/models"
 		OLLAMA_API_BASE=http://localhost:11434
 		# OLLAMA_API_BASE=http://host.docker.internal:11434
+		CIVITAI_BASE_URL=https://civitai.com
 	EOF
 fi
 
@@ -142,6 +143,17 @@ done
 if ! config_mark "$(config_profile_interactive)"; then
 	config_add "$(config_profile_interactive)" <<-EOF
 		if command -v open-webui > /dev/null; then open-webui --install-completion >/dev/null; fi
+	EOF
+fi
+
+if ! config_mark "$WS_DIR/git/src/.envrc"; then
+	config_add "$WS_DIR/git/src/.envrc" <<-'EOF'
+		# for open-webui and comy integratoin
+		[[ -v COMFYUI_BASE_URL ]] || COMFYUI_BASE_URL="https://localhost:8188"
+		# For tne.ai orion
+		[[ -v VITE_AWS_KEY ]] || export VITE_AWS_KEY="$AWS_ACCESS_KEY_ID"
+		[[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
+		[[ -v VITE_OPEN_KEY ]] || export VITE_OPEN_KEY="$OPENAI_API_KEY"
 	EOF
 fi
 # note things like neovim code companion will use the first model

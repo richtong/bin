@@ -17,6 +17,9 @@ INCLUDE_MEDIUM="${INCLUDE_MEDIUM:-false}"
 INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
 INCLUDE_HF="${INCLUDE_HF:-true}"
 INCLUDE_EXTRA="${INCLUDE_EXTRA:-false}"
+INCLUDE_OLD="${INCLUDE_OLD:-false}"
+
+REMOVE_OBSOLETE="${REMOVE_OBSOLETE:-false}"
 
 AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
 # if set to false will remove/uninstall models
@@ -25,7 +28,7 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvr:e:s:lfmu" opt; do
+while getopts "hdvr:e:o:s:r:lfmu" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -39,6 +42,7 @@ while getopts "hdvr:e:s:lfmu" opt; do
 				-l $(! $INCLUDE_LARGE || echo "not ")pull larger then 32B+ parameters (need 40GB+ RAM)
 				-f $(! $INCLUDE_HF || echo "not ")pull huggingface models
 				-e $(! $INCLUDE_EXTRA || echo "not ")pull extra models if you have lots of disk (>2TB)
+				-o $(! $REMOVE_OBSOLETE || echo "not ")pull legacy old for comparisons (>2TB)
 				-u $([[ $ACTION == pull ]] || echo "un")install models
 				-s storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
 				-a $(! AUTOMATIC_BY_MEMORY || echo "not ")automatic by system memory
@@ -82,6 +86,16 @@ while getopts "hdvr:e:s:lfmu" opt; do
 		# invert action between pull and rm
 		INCLUDE_EXTRA="$($INCLUDE_EXTRA && echo false || echo true)"
 		export INCLUDE_EXTRA
+		;;
+	o)
+		# invert action between pull and rm
+		INCLUDE_OLD="$($INCLUDE_OLD && echo false || echo true)"
+		export INCLUDE_OLD
+		;;
+	r)
+		# invert action between pull and rm
+		REMOVE_OBSOLETE="$($REMOVE_OBSOLETE && echo false || echo true)"
+		export REMOVE_OBSOLETE
 		;;
 	u)
 		# invert action between pull and rm
@@ -186,6 +200,10 @@ MODEL_HF+=(
 # 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 MODEL+=(
+	phi4                                # Microsoft Jan 7 2025
+	phi4:latest                         # synthetic, filtered 9.1GB
+	phi4:14b                            # 16K context length only
+	phi4:14b-q4_K_M                     # MMLU equals llama3.3:70b qwen2.5:72b
 	dolphin3                            # llama3.1 8B tuned
 	dolphin3:latest                     # llama3.1 8B tuned
 	dolphin3:8b                         # llama3.1 8B tuned
@@ -403,9 +421,25 @@ MODEL_EXTRA+=(
 	phi3.5:3.8b                             # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	phi3.5:3.8b-mini-instruct-q4_0          # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 )
-#
+
+# legacy models for comparison with modern ones
+MODEL_OLD+=(
+	# early 2024 models
+	llama2:7b           # original llama2
+	llama2:13b          # 13b
+	orca-mini:3b        # Microsoft Research
+	falcon:7b           # abu dahbi TII
+	mistral:7b          # v0.3 of original Mistral
+	starcoder:1b        # another fined tuned model
+	yi:6b               # yi 1.5
+	deepseek-coder:6.7b # first deepseek
+	orca2:7b            # Microsoft
+	phi:2.7b            # phi-2
+	qwen:7b             ## Qwen 1.5
+)
+
 # move the deprecated models here to make sure to delete them
-MODELS_REMOVE+=(
+MODEL_REMOVE+=(
 	# succeeded by 3.1
 	granite3-dense                    # IBM tool, RAG, code, translation
 	granite3-dense:latest             # IBM
@@ -443,7 +477,6 @@ MODELS_REMOVE+=(
 	starcoder2
 	starcoder2:7b            # 4GB
 	starcoder2:15b           # 9GB
-	mistral:7b               # 4GB 7B Q4 (deprecated)
 	command-r-plus:104b-q2_K # 39GB Q2 with 128K context for enterprise
 	command-r:35b            # 128K context 35b 19GB
 	mixtral
@@ -489,6 +522,10 @@ if $INCLUDE_EXTRA; then
 	log_verbose "Include extra models for >2TB drives"
 	MODEL_LIST+=("${MODEL_EXTRA[@]}")
 fi
+if $INCLUDE_OLD; then
+	log_verbose "Include old models"
+	MODEL_LIST+=("${MODEL_OLD[@]}")
+fi
 log_verbose "Action $ACTION on ${MODEL_LIST[*]}"
 
 # usage: ollama_action [ pull | rm  | ls] [ models...]
@@ -508,8 +545,11 @@ ollama_action() {
 if pgrep ollama >/dev/null; then
 	log_verbose "$ACTION on ${MODEL_LIST[*]}"
 	ollama_action "$ACTION" "${MODEL_LIST[@]}"
-	log_verbose "Removing deprecated models ${MODELS_REMOVE[*]}"
-	ollama_action rm "${MODELS_REMOVE[@]}"
+
+	if $REMOVE_OBSOLETE; then
+		log_verbose "Removing deprecated models ${MODEL_REMOVE[*]}"
+		ollama_action rm "${MODEL_REMOVE[@]}"
+	fi
 fi
 
 if [[ -v OLLAMA_MODELS ]]; then
