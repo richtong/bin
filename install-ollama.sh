@@ -19,7 +19,7 @@ INCLUDE_HF="${INCLUDE_HF:-true}"
 INCLUDE_EXTRA="${INCLUDE_EXTRA:-false}"
 INCLUDE_OLD="${INCLUDE_OLD:-false}"
 
-REMOVE_OBSOLETE="${REMOVE_OBSOLETE:-false}"
+REMOVE_OBSOLETE="${REMOVE_OBSOLETE:-true}"
 
 AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
 # if set to false will remove/uninstall models
@@ -28,7 +28,7 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvr:e:os:r:lfmu" opt; do
+while getopts "hdveos:rlfmu" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -38,14 +38,15 @@ while getopts "hdvr:e:os:r:lfmu" opt; do
 				-h help
 				-d $(! $DEBUGGING || echo "no ")debugging
 				-v $(! $VERBOSE || echo "not ")verbose
-				-m $(! $INCLUDE_MEDIUM || echo "not ")pull larger then 10B+ parameters (need 10GB+ RAM)
-				-l $(! $INCLUDE_LARGE || echo "not ")pull larger then 32B+ parameters (need 40GB+ RAM)
-				-f $(! $INCLUDE_HF || echo "not ")pull huggingface models
-				-e $(! $INCLUDE_EXTRA || echo "not ")pull extra models if you have lots of disk (>2TB)
-				-o $(! $REMOVE_OBSOLETE || echo "not ")pull legacy old for comparisons (>2TB)
+				-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (need 10GB+ RAM)
+				-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (need 40GB+ RAM)
+				-f $(! $INCLUDE_HF || echo "do not ")pull huggingface models
+				-e $(! $INCLUDE_EXTRA || echo "do not ")pull extra models if you have lots of disk (>2TB)
+				-o $(! $INCLUDE_OLD || echo "do not ")pull legacy old for comparisons (>2TB)
+				-r $(! $REMOVE_OBSOLETE || echo "do not ")pull obsolete models (>2TB)
 				-u $([[ $ACTION == pull ]] || echo "un")install models
 				-s storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
-				-a $(! AUTOMATIC_BY_MEMORY || echo "not ")automatic by system memory
+				-a $(! $AUTOMATIC_BY_MEMORY || echo "do not ")automatically install models based on system memory
 					always install base and hugging face models
 					system memory > 32GB add medium models
 					system memory > 64GB add large models
@@ -270,10 +271,6 @@ MODEL+=(
 	granite3-guardian:8b-q5_K_M         #  prompt guard ibm
 	granite3-guardian:2b                #  prompt guard ibm
 	granite3-guardian:2b-q8_0           #  prompt guard ibm
-	aya-expanse                         # cohere
-	aya-expanse:latest                  # cohere
-	aya-expanse:8b                      # cohere model 128k content 23 languages
-	aya-expanse:8b-q4_K_M               # cohere model 128k content 23 languages
 	shieldgemma                         # google safety policies
 	shieldgemma:latest                  # google safety policies
 	shieldgemma:9b                      # safety of text prompts
@@ -318,12 +315,6 @@ MODEL+=(
 	bespoke-minicheck:latest    # Fact check 7B q4_K_M
 	bespoke-minicheck:7b        # Fact check 7B q4_K_M
 	bespoke-minicheck:7b-q4_K_M # Fact check 7B q4_K_M
-	reader-lm                   # Just for HTML to  markdown conversion
-	reader-lm:latest            # Just for HTML to  markdown conversion
-	reader-lm:1.5b              # HTML to Markdown conversion 1.5B-q4_K_M
-	reader-lm:1.5b-q4_0         # HTML to Markdown conversion 1.5B-q4_K_M
-	reader-lm:0.5b              # HTML to Markdown conversion 1.5B-q4_K_M
-	reader-lm:0.5b-q4_0         # HTML to Markdown conversion 1.5B-q4_K_M
 	minicpm-v                   # mLLM visual too, ocr v2.6 ModelBest CN
 	minicpm-v:latest            # mLLM visual too, ocr v2.6 ModelBest CN
 	minicpm-v:8b                # mLLM visual too, ocr v2.6 ModelBest CN
@@ -368,14 +359,10 @@ MODEL_MEDIUM+=(
 	qwen2.5-coder:32b                   # 128K Tuned for coding 7B
 	qwen2.5-coder:32b-instruct-q4_K_M   # 128K Tuned for coding 7B
 	# these models are pre llama3.2 and are very close to gone
-	solar-pro                             # single gpu model
-	solar-pro:latest                      # 22b comparable to llama 3.1 70b 4k context
-	solar-pro:22b                         # 22b comparable to llama 3.1 70b 4k context
-	solar-pro:22b-preview-instruct-q4_K_M # 22b comparable to llama 3.1 70b 4k context
-	qwen2.5:14b                           # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:32b                           # 128K context Alibaba 2024-09-16 7b
-	gemma2:27b                            # old but only Google model
-	gemma2:27b-instruct-q4_0              # old but only Google model
+	qwen2.5:14b              # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:32b              # 128K context Alibaba 2024-09-16 7b
+	gemma2:27b               # old but only Google model
+	gemma2:27b-instruct-q4_0 # old but only Google model
 
 )
 
@@ -390,11 +377,7 @@ MODEL_LARGE+=(
 	llama3.2-vision:90b                 # vision works now
 	llama3.2-vision:90b-instruct-q4_K_M # vision works now
 	# these models are pre llama3.2 and are very close to gone
-	nemotron                     # nvidia llama 3.1 but performs well
-	nemotron:latest              # nvidia llama 3.1 obsolete soon
-	nemotron:70b                 # nvidia tuned llama 3.1
-	nemotron:70b-instruct-q4_K_M # nvidia tuned llama 3.1
-	qwen2.5:72b                  # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:72b # 128K context Alibaba 2024-09-16 7b
 )
 
 log_verbose "Extra modles if you have plenty of space"
@@ -461,15 +444,34 @@ MODEL_REMOVE+=(
 	granite3-moe:1b-instruct-q4_K_M   # low latency model
 	granite3-moe:3b                   # larger model
 	granite3-moe:3b-instruct-q4_K_M   # larger model
-	# post llama3.2 but trying new vision models
-	hermes3               # fine tuned llama 3.1 8B 128K context
-	hermes3:70b           # fine tuned llama 3.1 q4 128K Context
-	smollm                # small language models on device
-	smollm:135m           # 135m is small
-	smollm:1.7b           # deprecated by smollm2
-	deepseek-v2.5         # 236B is way too big for a 64GB machine
-	llama3.1              # deprecated
-	llama3.1:8b-text-q4_0 # text tuned model poor results
+	aya-expanse                       # cohere replaced by command-r
+	aya-expanse:latest                # cohere
+	aya-expanse:8b                    # cohere model 128k content 23 languages
+	aya-expanse:8b-q4_K_M             # cohere model 128k content 23 languages
+	reader-lm                         # Just for HTML to  markdown conversion
+	reader-lm:latest                  # Just for HTML to  markdown conversion
+	reader-lm:1.5b                    # HTML to Markdown conversion 1.5B-q4_K_M
+	reader-lm:1.5b-q4_0               # HTML to Markdown conversion 1.5B-q4_K_M
+	reader-lm:0.5b                    # HTML to Markdown conversion 1.5B-q4_K_M
+	reader-lm:0.5b-q4_0               # HTML to Markdown conversion 1.5B-q4_K_M
+	# pre llama3.2 but trying new vision models
+	hermes3                      # fine tuned llama 3.1 8B 128K context
+	hermes3:70b                  # fine tuned llama 3.1 q4 128K Context
+	smollm                       # small language models on device
+	smollm:135m                  # 135m is small
+	smollm:1.7b                  # deprecated by smollm2
+	deepseek-v2.5                # 236B is way too big for a 64GB machine
+	nemotron                     # nvidia llama 3.1 but performs well
+	nemotron:latest              # nvidia llama 3.1 obsolete soon
+	nemotron:70b                 # nvidia tuned llama 3.1
+	nemotron:70b-instruct-q4_K_M # nvidia tuned llama 3.1
+	# circa llama 3.1 models
+	solar-pro                             # single gpu model
+	solar-pro:latest                      # 22b comparable to llama 3.1 70b 4k context
+	solar-pro:22b                         # 22b comparable to llama 3.1 70b 4k context
+	solar-pro:22b-preview-instruct-q4_K_M # 22b comparable to llama 3.1 70b 4k context
+	llama3.1                              # deprecated
+	llama3.1:8b-text-q4_0                 # text tuned model poor results
 	# models pre-llama3.1
 	bge-large:335m # tokens to embeddings
 	mistral-nemo
@@ -534,7 +536,6 @@ if $INCLUDE_OLD; then
 	log_verbose "Include old models"
 	MODEL_LIST+=("${MODEL_OLD[@]}")
 fi
-log_verbose "Action $ACTION on ${MODEL_LIST[*]}"
 
 # usage: ollama_action [ pull | rm  | ls] [ models...]
 ollama_action() {
@@ -550,10 +551,13 @@ ollama_action() {
 	done
 }
 
-if pgrep ollama >/dev/null; then
+if ! pgrep ollama >/dev/null; then
+	log_warning "ollama not running"
+else
 	log_verbose "$ACTION on ${MODEL_LIST[*]}"
 	ollama_action "$ACTION" "${MODEL_LIST[@]}"
 
+	log_verbose "testing to remove obsolete models (Remove_OBSOLETE=$REMOVE_OBSOLETE)"
 	if $REMOVE_OBSOLETE; then
 		log_verbose "Removing deprecated models ${MODEL_REMOVE[*]}"
 		ollama_action rm "${MODEL_REMOVE[@]}"
@@ -613,12 +617,6 @@ log_verbose "To add Groq to OPen-webui Lower Left > Admin Panel > Settings > Con
 log_verbose "Click on + on he right and add URL https://api.groq.com/openai/v1 and your GROQ key"
 # https://zohaib.me/extending-openwebui-using-pipelines/
 # log_verbose "https://github.com/open-webui/pipelines"
-log_verbose "To add Gemini, add functions or pipelines you need to run a docker and add it"
-log_verbose 'docker run -d -p 9099:9099 --add-host=host.docker.internal:host-gateway \ '
-log_verbose '-v pipelines:/app/pipelines --name pipelines --restart always \ '
-log_verbose "ghcr.io/open-webui/pipelines:main"
-log_verbose "or fork and submodule add git@githbu.com:open-webui/pipelines"
-log_verbose "pip install - requirements.txt && sh .start.sh"
 
 log_verbose "Installing the pipelines interface which allows compatible interfaces"
 log_verbose "See https://github.com/open-webui/pipelines"
