@@ -132,24 +132,19 @@ fi
 # https://github.com/github/hub
 # https://github.blog/2021-03-04-4-things-you-didnt-know-you-could-do-with-github-actions/
 # Git hub
-# act : run github actions locally
-# gh : official github cli
-# hub : deprecated and breaks git completions so do not use
-# nbdime: jupyter notebook diff and merge with git integration to git diff
-# https://scottbanwart.com/blog/2021/03/weekly-journal-10-asdf-pre-commit-gitlint/
-# gitlint - linting git commits
-# should use https://www.conventionalcommits.org/ format
-# feat(install-1password)!: add feature or breaking change vs. fix:
-# lazygit - git character full screen interface
+
 log_verbose "do not installed hub the completions inferior with git and it is deprecated"
 PACKAGE+=(
 
-	act
-	gh
-	gitlint
-	lazygit
-	nbdime
-	pre-commit
+	# act  # do not use does local run og fithub workflows
+	# feat(install-1password)!: add feature or breaking change vs. fix:
+	# hub : deprecated and breaks git completions so do not use
+	gh              # gh : official github cli
+	git-filter-repo # easy command with --invert-paths to remove from history
+	gitlint         # gitlint - linting git commits
+	lazygit         # lazygit - git character full screen interface
+	nbdime          # nbdime: jupyter notebook diff and merge
+	pre-commit      # pre-commit checks
 
 )
 

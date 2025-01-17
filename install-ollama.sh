@@ -28,7 +28,7 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvr:e:o:s:r:lfmu" opt; do
+while getopts "hdvr:e:os:r:lfmu" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -200,10 +200,13 @@ MODEL_HF+=(
 # 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 MODEL+=(
-	phi4                                # Microsoft Jan 7 2025
-	phi4:latest                         # synthetic, filtered 9.1GB
-	phi4:14b                            # 16K context length only
-	phi4:14b-q4_K_M                     # MMLU equals llama3.3:70b qwen2.5:72b
+	olmo2                               # Ai2 fully open model competitive
+	olmo2:latest                        # competitive iwth llama 3.1
+	olmo2:7b                            # November 26 2024 release
+	command-r7b                         # command-r7b is the default
+	command-r7b:latest                  # latest
+	command-r7b:7b                      # 7B
+	command-r7b:7b-12-2024-q4_K_M       # Dec 2024
 	dolphin3                            # llama3.1 8B tuned
 	dolphin3:latest                     # llama3.1 8B tuned
 	dolphin3:8b                         # llama3.1 8B tuned
@@ -338,9 +341,14 @@ MODEL+=(
 
 )
 #
-# these are models which are under 10B parameters
 log_verbose "loading all models over 9B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
+	olmo2:13b                           # AI2 fully open
+	olmo2:13b-1124-instruct-q4_K_M      # compets with llama 3.1
+	phi4                                # Microsoft Jan 7 2025
+	phi4:latest                         # synthetic, filtered 9.1GB
+	phi4:14b                            # 16K context length only
+	phi4:14b-q4_K_M                     # MMLU equals llama3.3:70b qwen2.5:72b
 	falcon3:10b                         # 7B parameters
 	falcon3:10b-instruct-q4_K_M         # 7B parameters
 	qwq                                 # like o1
