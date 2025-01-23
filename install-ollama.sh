@@ -31,29 +31,32 @@ export FLAGS="${FLAGS:-""}"
 while getopts "hdveos:rlfmu" opt; do
 	case "$opt" in
 	h)
-		cat <<-EOF
-			Installs Ollama models and removes obsolete or large ones
-			usage: $SCRIPTNAME [ flags ]
-			flags:
-				-h help
-				-d $(! $DEBUGGING || echo "no ")debugging
-				-v $(! $VERBOSE || echo "not ")verbose
-				-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (need 10GB+ RAM)
-				-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (need 40GB+ RAM)
-				-f $(! $INCLUDE_HF || echo "do not ")pull huggingface models
-				-e $(! $INCLUDE_EXTRA || echo "do not ")pull extra models if you have lots of disk (>2TB)
-				-o $(! $INCLUDE_OLD || echo "do not ")pull legacy old for comparisons (>2TB)
-				-r $(! $REMOVE_OBSOLETE || echo "do not ")pull obsolete models (>2TB)
-				-u $([[ $ACTION == pull ]] || echo "un")install models
-				-s storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
-				-a $(! $AUTOMATIC_BY_MEMORY || echo "do not ")automatically install models based on system memory
-					always install base and hugging face models
-					system memory > 32GB add medium models
-					system memory > 64GB add large models
+		cat <<EOF
 
-			example of manual: Uninstall large and medium models and hugging face models
-				$SCRIPTNAME -u -l -m -h
-		EOF
+Installs Ollama models and removes obsolete or large ones
+usage: $SCRIPTNAME [ flags ]
+flags:
+	-h help
+	-d $(! $DEBUGGING || echo "no ")debugging
+	-v $(! $VERBOSE || echo "not ")verbose
+	-a $(! $AUTOMATIC_BY_MEMORY || echo "do not ")automatically install models based on system memory
+		always install base and hugging face models
+		system memory > 32GB add medium models
+		system memory > 64GB add large models
+
+	-m $(! $INCLUDE_MEDIUM || echo "do not ")force pull larger then 10B+ parameters (even if you do not have 10GB RAM)
+	-l $(! $INCLUDE_LARGE || echo "do not ")force pull larger then 32B+ parameters (even if you do not have 40GB+ RAM)
+	-f $(! $INCLUDE_HF || echo "do not ")pull huggingface models
+	-e $(! $INCLUDE_EXTRA || echo "do not ")pull extra models if you have lots of disk (>2TB)
+	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
+	-r $(! $REMOVE_OBSOLETE || echo "do not ")remove obsolete models 
+	-u $([[ $ACTION == pull ]] || echo "un")install models
+
+	-s storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
+example of manual: Uninstall large and medium models and hugging face models
+	$SCRIPTNAME -u -l -m -h
+
+EOF
 		exit 0
 		;;
 	d)
@@ -201,33 +204,32 @@ MODEL_HF+=(
 # 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 MODEL+=(
-	olmo2                               # Ai2 fully open model competitive
-	olmo2:latest                        # competitive iwth llama 3.1
-	olmo2:7b                            # November 26 2024 release
-	command-r7b                         # command-r7b is the default
-	command-r7b:latest                  # latest
-	command-r7b:7b                      # 7B
-	command-r7b:7b-12-2024-q4_K_M       # Dec 2024
-	dolphin3                            # llama3.1 8B tuned
-	dolphin3:latest                     # llama3.1 8B tuned
-	dolphin3:8b                         # llama3.1 8B tuned
-	dolphin3:8b-llama3.1-q4_K_M         # llama3.1 8B tuned
-	smallthinker                        # Fine tuned Qwen2.5-b-instruct
-	smallthinker:latest                 # qwq used to generate 8K synthetic
-	smallthinker:3b                     # long sequence encourage CoT
-	smallthinker:3b-preview-q8_0        # open dataset
-	granite3.1-dense                    # IBM tool, RAG, code, translation
-	granite3.1-dense:latest             # IBM
-	granite3.1-dense:2b                 # RAG, code  generation, translation
-	granite3.1-dense:2b-instruct-q4_K_M # RAG, code  generation, translation
-	granite3.1-dense:8b                 # RAG, code  generation, translation
-	granite3.1-dense:8b-instruct-q4_K_M # RAG, code  generation, translation
-	granite3.1-moe                      # mixture of experts
-	granite3.1-moe:latest               # low latency model
-	granite3.1-moe:1b                   # low latency model
-	granite3.1-moe:1b-instruct-q4_K_M   # low latency model
-	granite3.1-moe:3b                   # larger model
-	granite3.1-moe:3b-instruct-q4_K_M   # larger model
+	deepseek-r1:latest                   # 7b reasoning model
+	deepseek-r1:7b                       # competitive to o1
+	deepseek-r1:7b-qwen-distill-q4_K_M   # competitive to o1
+	deepseek-r1:1.5b                     # small model
+	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
+	deepseek-r1:8b                       # llama distilled 8b
+	deepseek-r1:8b-llama-distill-q4_K_M  # q8b
+	olmo2                                # Ai2 fully open model competitive
+	olmo2:latest                         # competitive iwth llama 3.1
+	olmo2:7b                             # November 26 2024 release
+	command-r7b                          # command-r7b is the default
+	command-r7b:latest                   # latest
+	command-r7b:7b                       # 7B
+	command-r7b:7b-12-2024-q4_K_M        # Dec 2024
+	dolphin3                             # llama3.1 8B tuned
+	dolphin3:latest                      # llama3.1 8B tuned
+	dolphin3:8b                          # llama3.1 8B tuned
+	dolphin3:8b-llama3.1-q4_K_M          # llama3.1 8B tuned
+	smallthinker                         # Fine tuned Qwen2.5-b-instruct
+	smallthinker:latest                  # qwq used to generate 8K synthetic
+	smallthinker:3b                      # long sequence encourage CoT
+	smallthinker:3b-preview-q8_0         # open dataset
+	granite3.1-dense                     # IBM tool, RAG, code, translation
+	granite3.1-dense:latest              # IBM
+	granite3.1-dense:8b                  # RAG, code  generation, translation
+	granite3.1-dense:8b-instruct-q4_K_M  # RAG, code  generation, translation
 	falcon3
 	falcon3:latest             # latest from Abu Dhabi
 	falcon3:7b                 # 7B parameters
@@ -320,12 +322,6 @@ MODEL+=(
 	minicpm-v:8b                # mLLM visual too, ocr v2.6 ModelBest CN
 	minicpm-v:8b-2.6-q4_0       # mLLM visual too, ocr v2.6 ModelBest CN
 	# these models are pre llama3.1 and are very close to gone
-	gemma2                      # Google 9B Q4 5.4GB 8K context
-	gemma2:latest               # Google 9B Q4 5.4GB 8K context
-	gemma2:9b                   # Google 9B Q4 5.4GB 8K context
-	gemma2:9b-instruct-q4_0     # Google 9B Q4 5.4GB 8K context
-	gemma2:2b                   # Google 9B Q4 5.4GB 8K context
-	gemma2:2b-instruct-q4_0     # Google 9B Q4 5.4GB 8K context
 	bge-large                   # embedding model from BAAI
 	bge-large:335m              # embedding model from BAA
 	bge-large:335m-en-v1.5-fp16 # embedding model from BAA
@@ -334,6 +330,8 @@ MODEL+=(
 #
 log_verbose "loading all models over 9B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
+	deepseek-r1:14b                     # r1 comparable
+	deepseek-r1:14b-qwen-distill-q4_K_M # r1 comparable
 	olmo2:13b                           # AI2 fully open
 	olmo2:13b-1124-instruct-q4_K_M      # compets with llama 3.1
 	phi4                                # Microsoft Jan 7 2025
@@ -368,14 +366,14 @@ MODEL_MEDIUM+=(
 
 log_verbose "loading all models over 32B parameters, requires >64GB RAM"
 MODEL_LARGE+=(
-	llama3.3                            # same perforamnce as llama 3.1 405B
-	llama3.3:latest                     # 128K context
-	llama3.3:70b                        # 128K context
-	llama3.3:70b-instruct-q4_K_M        # 128K context
-	tulu3:70b                           # AI2 instruction following
-	tulu3:70b-q4_K_M                    # AI2 instruction following
-	llama3.2-vision:90b                 # vision works now
-	llama3.2-vision:90b-instruct-q4_K_M # vision works now
+	deepseek-r1:70b                      # disitlled lllama
+	deepseek-r1:70b-llama-distill-q4_K_M # llama based
+	llama3.3                             # same perforamnce as llama 3.1 405B
+	llama3.3:latest                      # 128K context
+	llama3.3:70b                         # 128K context
+	llama3.3:70b-instruct-q4_K_M         # 128K context
+	llama3.2-vision:90b                  # vision works now
+	llama3.2-vision:90b-instruct-q4_K_M  # vision works now
 	# these models are pre llama3.2 and are very close to gone
 	qwen2.5:72b # 128K context Alibaba 2024-09-16 7b
 )
@@ -431,6 +429,17 @@ MODEL_OLD+=(
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
+	# llama 3.2 models
+	granite3.1-dense:2b                 # do not need such a small model
+	granite3.1-dense:2b-instruct-q4_K_M # granite worse than llama
+	granite3.1-moe                      # mixture of experts
+	granite3.1-moe:latest               # low latency model
+	granite3.1-moe:1b                   # low latency model
+	granite3.1-moe:1b-instruct-q4_K_M   # low latency model
+	granite3.1-moe:3b                   # larger model
+	granite3.1-moe:3b-instruct-q4_K_M   # larger model
+	tulu3:70b                           # tulu3 is not much better than llama3 and takes speace
+	tulu3:70b-q4_K_M                    # AI2 instruction following
 	# succeeded by 3.1
 	granite3-dense                    # IBM tool, RAG, code, translation
 	granite3-dense:latest             # IBM
@@ -475,7 +484,13 @@ MODEL_REMOVE+=(
 	# models pre-llama3.1
 	bge-large:335m # tokens to embeddings
 	mistral-nemo
-	mistral-nemo:12b # 128k context 12b-instruct-2407-q4_0
+	mistral-nemo:12b        # 128k context 12b-instruct-2407-q4_0
+	gemma2                  # Google 9B Q4 5.4GB 8K context
+	gemma2:latest           # Google 9B Q4 5.4GB 8K context
+	gemma2:9b               # Google 9B Q4 5.4GB 8K context
+	gemma2:9b-instruct-q4_0 # Google 9B Q4 5.4GB 8K context
+	gemma2:2b               # Google 9B Q4 5.4GB 8K context
+	gemma2:2b-instruct-q4_0 # Google 9B Q4 5.4GB 8K context
 	firefunction-v2
 	firefunction-v2:70b
 	deepseek-coder-v2
