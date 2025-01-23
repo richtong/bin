@@ -152,16 +152,20 @@ fi
 
 log_verbose "install Jar for open-webui"
 TIKA_VERSION="${TIKA_VERSION:-2.9.2}"
-JAR_URL+=(
-	"https://dlcdn.apache.org/tika/$TIKA_VERSION/tika-server-standard-$TIKA_VERSION.jar"
+TIKA_JAR_FILE="${TIKA_JAR_FILE:-tika-server-standard-$TIKA_VERSION.jar}"
+TIKA_JAR_URL+=(
+	"https://dlcdn.apache.org/tika/$TIKA_VERSION/$TIKA_JAR_FILE"
 )
-JAR_PATH="${JAR_PATH:-$HOME/jar}"
+TIKA_JAR_DIR="${TIKA_JAR_DIR:-$HOME/jar}"
+TIKA_JAR_PATH="${TIKA_JAR_PATH:-$TIKA_JAR_DIR/$TIKA_JAR_FILE}"
 # usage: download_url url [dest_file [dest_dir [md5 [sha256]]]]
-for url in "${JAR_URL[@]}"; do
-	download_url "$url"
+for url in "${TIKA_JAR_URL[@]}"; do
+	download_url "$url" "$TIKA_JAR_PATH" "$TIKA_JAR_DIR"
 done
 
-for package in "${!PYTHON_PACKAGE[@]}"; do
+log_verbose "Installing ${PYTHON_PACKAGE[*]}"
+for package in "${PYTHON_PACKAGE[@]}"; do
+	log_verbose "pipx install $package"
 	pipx_install "$package"
 done
 if ! config_mark "$(config_profile_interactive)"; then
