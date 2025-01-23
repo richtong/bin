@@ -49,7 +49,7 @@ flags:
 	-f $(! $INCLUDE_HF || echo "do not ")pull huggingface models
 	-e $(! $INCLUDE_EXTRA || echo "do not ")pull extra models if you have lots of disk (>2TB)
 	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
-	-r $(! $REMOVE_OBSOLETE || echo "do not ")remove obsolete models 
+	-r $(! $REMOVE_OBSOLETE || echo "do not ")remove obsolete models
 	-u $([[ $ACTION == pull ]] || echo "un")install models
 
 	-s storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
@@ -147,30 +147,6 @@ MAS+=(
 )
 mas_install "${MAS[@]}"
 
-declare -A PYTHON_PACKAGE+=(
-	["open-webui"]=3.11 # include the required python version needs quotes to prevent reformat
-)
-# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
-#
-# Install Stabiliity Diffusion with DiffusionBee"
-# Download Chat GPT in menubar
-# Use brew install instead of
-#ARCH=x86
-#if mac_is_arm; then
-#ARCH=arm64
-#fi
-#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
-# no need for gp4all
-#download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
-
-for package in "${!PYTHON_PACKAGE[@]}"; do
-	pipx_install -p "${PYTHON_PACKAGE[$package]}" "$package"
-done
-if ! config_mark "$(config_profile_interactive)"; then
-	config_add "$(config_profile_interactive)" <<-EOF
-		if command -v open-webui > /dev/null; then open-webui --install-completion >/dev/null; fi
-	EOF
-fi
 # note things like neovim code companion will use the first model
 # that comes out of ollama list and this is the last one pulled, so this
 # pull order has the default at the bottom

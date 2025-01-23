@@ -66,18 +66,18 @@ PACKAGE+=(
 	# shell-gpt - cli including running shell commands (never use deprecated)
 	# vincelwt-chatgpt - ChatGPT in menubar (not using)
 	# appflowy        # project manager based on ai (don't ever use)
-	cursor          # pair programming using VScode, takes over the $(code)
-	diffusionbee    # diffusionbee - Stability diffusion on Mac
-	lm-studio       # lm-studio -  run different LLMs from Hugging Face locally
+	cursor       # pair programming using VScode, takes over the $(code)
+	diffusionbee # diffusionbee - Stability diffusion on Mac
+	# lm-studio       # lm-studio -  run different LLMs from Hugging Face locally (deprecated)
 	mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
 	parquet-cli     # command line opening parquet data files
 	cursor          # ai code editor that's based on code
 	zed             # yet another ai editor
-	jan             # grafical front-end for llama.cpp
-	tika            # Apache tika content extractor command line
-	ngrok           # local ssh gateway for open-webui
-	ffmpeg          # needed by open-webui
-	llama.cpp       # underlying server to ollama
+	# jan             # grafical front-end for llama.cpp (deprecate for ollama)
+	tika      # Apache tika content extractor command line
+	ngrok     # local ssh gateway for open-webui
+	ffmpeg    # needed by open-webui
+	llama.cpp # underlying server to ollama
 
 )
 package_install "${PACKAGE[@]}"
@@ -106,6 +106,30 @@ PYTHON_PACKAGE+=(
 #fi
 #download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
 pipx_install "${PYTHON_PACKAGE[@]}"
+
+declare -A PYTHON_PACKAGE_VERSIONED+=(
+	["open-webui"]=3.12 # include the required python version needs quotes to prevent reformat
+)
+# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
+#
+# Install Stabiliity Diffusion with DiffusionBee"
+# Download Chat GPT in menubar
+# Use brew install instead of
+#ARCH=x86
+#if mac_is_arm; then
+#ARCH=arm64
+#fi
+#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
+# no need for gp4all
+#download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
+for package in "${!PYTHON_PACKAGE_VERSIONED[@]}"; do
+	pipx_install -p "${PYTHON_PACKAGE_VERSIONED[$package]}" "$package"
+done
+if ! config_mark "$(config_profile_interactive)"; then
+	config_add "$(config_profile_interactive)" <<-EOF
+		if command -v open-webui > /dev/null; then open-webui --install-completion >/dev/null; fi
+	EOF
+fi
 
 # https://comfyorg.notion.site/ComfyUI-Desktop-User-Guide-1146d73d365080a49058e8d629772f0a#1486d73d3650800089f3fca8e5c94203
 log_verbose "Install Alpha version of ComfyUI Desktop"
@@ -138,7 +162,7 @@ for url in "${JAR_URL[@]}"; do
 done
 
 for package in "${!PYTHON_PACKAGE[@]}"; do
-	pipx_install -p "${PYTHON_PACKAGE[$package]}" "$package"
+	pipx_install "$package"
 done
 if ! config_mark "$(config_profile_interactive)"; then
 	config_add "$(config_profile_interactive)" <<-EOF
@@ -146,6 +170,7 @@ if ! config_mark "$(config_profile_interactive)"; then
 	EOF
 fi
 
+log_verbose "tne.ai Orion settings"
 if ! config_mark "$WS_DIR/git/src/.envrc"; then
 	config_add "$WS_DIR/git/src/.envrc" <<-'EOF'
 		# for open-webui and comy integratoin
