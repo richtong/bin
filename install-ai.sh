@@ -131,6 +131,18 @@ if ! config_mark "$(config_profile_interactive)"; then
 	EOF
 fi
 
+log_verbose "For TNE.ai only install VITE keys so put in $WS_DIR"
+# note that this allows each WS_DIR to have its own copy of open-webui
+# information
+if ! config_mark "$WS_DIR/git/src/.envrc"; then
+	config_add "$WS_DIR/git/src/.envrc" <<-'EOF'
+		[[ -v VITE_AWS_KEY ]] || export VITE_AWS_KEY="$AWS_ACCESS_KEY_ID"
+		[[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
+		[[ -v VITE_OPEN_API_KEY ]] || export VITE_OPEN_API_KEY="$OPENAI_API_KEY"
+		[[ -v DATA_DIR ]] || export DATA_DIR="$WS_DIR/data/open-webui/data"
+	EOF
+fi
+
 # https://comfyorg.notion.site/ComfyUI-Desktop-User-Guide-1146d73d365080a49058e8d629772f0a#1486d73d3650800089f3fca8e5c94203
 log_verbose "Install Alpha version of ComfyUI Desktop"
 download_url_open "https://download.comfy.org/mac/dmg/arm64"
