@@ -189,8 +189,10 @@ fi
 log_verbose "tne.ai Orion settings"
 if ! config_mark "$WS_DIR/git/src/.envrc"; then
 	config_add "$WS_DIR/git/src/.envrc" <<-'EOF'
-		# for open-webui and comy integratoin
+		# for open-webui and comfyui integration
 		[[ -v COMFYUI_BASE_URL ]] || COMFYUI_BASE_URL="https://localhost:8188"
+		[[ -v GOOGLE_DRIVE_API_KEY ]] || export "GOOGLE_DRIVE_API_KEY"="$(op item get "Google Drive and Picker API Key Dev" --fields "api key" --reveal)"
+		[[ -v GOOGLE_DRIVE_CLIENT_ID ]] || export "GOOGLE_DRIVE_CLIENT_ID"="$(op item get "Google OAuth Client ID Dev" --fields "client id" --reveal)"
 		# For tne.ai orion
 		[[ -v VITE_AWS_KEY ]] || export VITE_AWS_KEY="$AWS_ACCESS_KEY_ID"
 		[[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
