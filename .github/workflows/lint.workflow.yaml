@@ -2,10 +2,6 @@
 # https://docs.github.com/en/actions/guides/building-and-testing-python
 name: Python and Pre-commit
 
-# https://github.com/pre-commit/pre-commit/issues/3215
-# getting python 3.11.10 not found so set the default
-#
-
 # yamllint disable-line rule:truthy
 on:
   push:
@@ -15,6 +11,7 @@ on:
       - master
       - rich-*
   pull_request:
+  workflow_dispatch:
 
 jobs:
   python:
@@ -75,7 +72,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout action
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           lfs: true
           # submodules should be tested one at a time
