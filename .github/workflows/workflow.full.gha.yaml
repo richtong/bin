@@ -2,6 +2,10 @@
 # https://docs.github.com/en/actions/guides/building-and-testing-python
 name: Python and Pre-commit
 
+# https://github.com/pre-commit/pre-commit/issues/3215
+# getting python 3.11.10 not found so set the default
+#
+
 # yamllint disable-line rule:truthy
 on:
   push:
@@ -80,7 +84,7 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.12
       # # https://snapcraft.io/install/shfmt/ubuntu
       # Using snapd fails on act so instead use pre-commit
       # that does its own installation rather than needing shfmt

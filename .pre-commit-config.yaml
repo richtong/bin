@@ -12,15 +12,15 @@
 # need this so gitlint only runs during commit-msg
 # default_stages: [pre-commit, pre-push]
 # needed by v4.0
-default_stages: [commit, push]
+default_stages: [pre-commit, pre-push]
 default_language_version:
-  python: python3.11.10
+  python: python3.12
 # python regex https://www.programiz.com/python-programming/regex
 exclude: (^archive/|^user/|deprecated/)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     # only language independent hooks
-    rev: v4.3.0
+    rev: v5.0.0
     hooks:
       # allow up to 2MB files for jupyter notebooks
       - id: check-added-large-files
@@ -96,7 +96,7 @@ repos:
 
   # this is bettert han the jumanji version as it uses go to build
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.5.1-1
+    rev: v3.10.0-2
     hooks:
       - id: shfmt
         exclude: (.*\.zsh$|\.zprofile|\.zshrc)
@@ -110,7 +110,7 @@ repos:
 
   # replace markdownlint-cli with markdownlint-cli2 which is supposed to be faster
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.15.0
+    rev: v0.17.2
     hooks:
       - id: markdownlint-cli2
         # needs a pinned version
@@ -118,14 +118,14 @@ repos:
 
   # https://jorisroovers.com/gitlint/#using-gitlint-through-pre-commit
   - repo: https://github.com/jorisroovers/gitlint
-    rev: v0.18.0
+    rev: v0.19.1
     hooks:
       - id: gitlint
         stages: [commit-msg]
 
   # https://yamllint.readthedocs.io/en/stable/integration.html#integration-with-pre-commit
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.28.0
+    rev: v1.35.1
     hooks:
       - id: yamllint
         # use relaxed because .pre-commit-config has truthy value warning
@@ -188,7 +188,7 @@ repos:
   # black, flake8, and pydocstyle
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.6.2
+    rev: v0.9.3
     hooks:
       # Run the linter.
       - id: ruff
@@ -200,7 +200,7 @@ repos:
   # sync all notebooks with their corresponding markdown files
   # use ruff to format the python code and the version must match
   - repo: https://github.com/mwouts/jupytext
-    rev: v1.14.7
+    rev: v1.16.6
     hooks:
       - id: jupytext
         args: [--sync, --pipe, ruff]
@@ -228,7 +228,7 @@ repos:
 
   # lint Dockerfiles with hadolint
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.1-beta
+    rev: v2.13.1-beta
     hooks:
       # use if hadolint is local
       #- id: hadolint
