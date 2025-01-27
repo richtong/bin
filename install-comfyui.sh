@@ -5,7 +5,7 @@
 ## @author Rich Tong
 ## @returns 0 on success
 #
-#
+
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
@@ -13,20 +13,22 @@ VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 export FLAGS="${FLAGS:-""}"
 
+QUANTIZED_DOWNLOAD="${QUANTIZED_DOWNLOAD:-true}"
+
 OPTIND=1
-while getopts "hdvf" opt; do
+while getopts "hdvg" opt; do
 	case "$opt" in
 	h)
-		cat <<-EOF
-			Installs ComfyUI
-			usage: $SCRIPTNAME [ flags ]
-			flags:
-				   -h help
-				   -d $($DEBUGGING && echo "no ")debugging
-				   -v $($VERBOSE && echo "not ")verbose
-				   -f $($FORCE && echo "do not ")force install even $SCRIPTNAME exists
+		cat <<EOF
+Installs ComfyUI
+usage: $SCRIPTNAME [ flags ]
+flags:
+	-h help
+	-d $($DEBUGGING && echo "no ")debugging
+	-v $($VERBOSE && echo "not ")verbose
+	-g $($QUANTIZED_DOWNLOAD && echo "quantized GGUF " || echo "Half precision FP16 ") model download
+EOF
 
-		EOF
 		exit 0
 		;;
 	d)
@@ -40,9 +42,9 @@ while getopts "hdvf" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
-	f)
-		FORCE="$($FORCE && echo false || echo true)"
-		export FORCE
+	g)
+		QUANTIZED_DOWNLOAD="$($QUANTIZED_DOWNLOAD && echo false || echo true)"
+		export QUANTIZED_DOWNLOAD
 		;;
 	*)
 		echo "no flag -$opt"
@@ -58,6 +60,27 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 log_verbose "Install Alpha version of ComfyUI Desktop"
 download_url_open "https://download.comfy.org/mac/dmg/arm64"
 
+COMFYUI_PATH="${COMFYUI_PATH:-"$HOME/Documents/ComfyUI/"}"
+
+if ! $QUANTIZED_DOWNLOAD; then
+	HUNYUAN_GGUF_REPO="${HUNYUAN_FULL_REPO:-"calcuis/hunyuan-gguf"}"
+	declare -A HUNYUAN_GGUF_MODEL_TYPE
+	HUNYUAN_GGUF_MODEL_TYPE+=(
+		["hunyuan-video-t2v-720p-q4_0.gguf"]=unet
+		["clip_l.safetensors"]=text_encoders
+		["llava_llama3_fp8_scaled.safetensors"]=text_encoders
+		["hunyuan_video_vae_bf16.safetensors"]=vae
+	)
+	for model in "${HUNYUAN_GGUF_MODEL_TYPE[@]}"; do
+		huggingface-cli download "$HUNYUAN_GGUF_REPO" \
+			"$model" \
+			--local-dir "$COMFYUI_PATH/models/${HUNYUAN_MODEL_TYPE[$model]}"
+	done
+	log_exit "GGUF Quantized models pulled"
+fi
+
+log_verbose "Loading FP16 half precision models"
+REPO="Comfy-Org/HunyuanVideo_repackaged"
 declare -A HUNYUAN_MODEL_TYPE
 HUNYUAN_MODEL_TYPE+=(
 	["hunyuan_video_t2v_720p_bf16.safetensors"]=diffusion_models
@@ -65,9 +88,6 @@ HUNYUAN_MODEL_TYPE+=(
 	["llava_llama3_fp8_scaled.safetensors"]=clip
 	["hunyuan_video_vae_bf16.safetensors"]=vae
 )
-
-REPO="Comfy-Org/HunyuanVideo_repackaged"
-COMFYUI_PATH="${COMFYUI_PATH:-"$HOME/Documents/ComfyUI/"}"
 
 # note that huggingface-cli download will actually create an
 # exact copy of the download path
@@ -80,5 +100,3 @@ done
 
 log_verbose "since it creates split files, need to move them to the right spot"
 mv "$COMFYUI_PATH/split_files/"* "$COMFYUI_PATH/models"
-
-huggingface-cli download calcuis/hunyuan-gguf clip_l.safetensors --local-dir .
