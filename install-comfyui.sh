@@ -66,10 +66,12 @@ if ! $QUANTIZED_DOWNLOAD; then
 	HUNYUAN_GGUF_REPO="${HUNYUAN_FULL_REPO:-"calcuis/hunyuan-gguf"}"
 	declare -A HUNYUAN_GGUF_MODEL_TYPE
 	HUNYUAN_GGUF_MODEL_TYPE+=(
-		["hunyuan-video-t2v-720p-q4_0.gguf"]=unet
-		["clip_l.safetensors"]=text_encoders
-		["llava_llama3_fp8_scaled.safetensors"]=text_encoders
+		["hunyuan-video-t2v-720p-q4_k_m.gguf"]=unet # good tradeoff 4-bit
+		["hunyuan-video-t2v-720p-q8_0.gguf"]=unet   # quarter precision
+		["clip_l.safetensors"]=clip
+		["llava_llama3_fp8_scaled.safetensors"]=clip
 		["hunyuan_video_vae_bf16.safetensors"]=vae
+		["workflow-hunyuan-gguf.json"]=user/default/workflow
 	)
 	for model in "${HUNYUAN_GGUF_MODEL_TYPE[@]}"; do
 		huggingface-cli download "$HUNYUAN_GGUF_REPO" \
@@ -88,7 +90,6 @@ HUNYUAN_MODEL_TYPE+=(
 	["llava_llama3_fp8_scaled.safetensors"]=clip
 	["hunyuan_video_vae_bf16.safetensors"]=vae
 )
-
 # note that huggingface-cli download will actually create an
 # exact copy of the download path
 # so it will create the directoyr splitfiles/<type>/
