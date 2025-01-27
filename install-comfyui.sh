@@ -14,9 +14,10 @@ FORCE="${FORCE:-false}"
 export FLAGS="${FLAGS:-""}"
 
 QUANTIZED_DOWNLOAD="${QUANTIZED_DOWNLOAD:-true}"
+DRY_RUN="${DRY_RUN:-false}"
 
 OPTIND=1
-while getopts "hdvg" opt; do
+while getopts "hdvgn" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
@@ -27,6 +28,7 @@ flags:
 	-d $($DEBUGGING && echo "no ")debugging
 	-v $($VERBOSE && echo "not ")verbose
 	-g $($QUANTIZED_DOWNLOAD && echo "quantized GGUF " || echo "Half precision FP16 ") model download
+	-n $($DRY_RUN && echo "no ")dry run
 EOF
 
 		exit 0
@@ -46,6 +48,9 @@ EOF
 		QUANTIZED_DOWNLOAD="$($QUANTIZED_DOWNLOAD && echo false || echo true)"
 		export QUANTIZED_DOWNLOAD
 		;;
+	n)
+		DRY_RUN="$($DRY_RUN && echo false || echo true)"
+		;;
 	*)
 		echo "no flag -$opt"
 		;;
@@ -62,25 +67,31 @@ download_url_open "https://download.comfy.org/mac/dmg/arm64"
 
 COMFYUI_PATH="${COMFYUI_PATH:-"$HOME/Documents/ComfyUI/"}"
 
-if ! $QUANTIZED_DOWNLOAD; then
+# ["hunyuan-video-t2v-720p-q8_0.gguf"]=models/unet   # quarter precision
+if $QUANTIZED_DOWNLOAD; then
 	HUNYUAN_GGUF_REPO="${HUNYUAN_FULL_REPO:-"calcuis/hunyuan-gguf"}"
-	declare -A HUNYUAN_GGUF_MODEL_TYPE
-	HUNYUAN_GGUF_MODEL_TYPE+=(
-		["hunyuan-video-t2v-720p-q4_k_m.gguf"]=unet # good tradeoff 4-bit
-		["hunyuan-video-t2v-720p-q8_0.gguf"]=unet   # quarter precision
-		["clip_l.safetensors"]=clip
-		["llava_llama3_fp8_scaled.safetensors"]=clip
-		["hunyuan_video_vae_bf16.safetensors"]=vae
+	declare -A HUNYUAN_GGUF_PATH
+	HUNYUAN_GGUF_PATH+=(
+		["hunyuan-video-t2v-720p-q4_k_m.gguf"]=models/unet # good tradeoff 4-bit
+		["clip_l.safetensors"]=models/clip
+		["llava_llama3_fp8_scaled.safetensors"]=models/clip
+		["hunyuan_video_vae_bf16.safetensors"]=/models/vae
 		["workflow-hunyuan-gguf.json"]=user/default/workflow
 	)
-	for model in "${HUNYUAN_GGUF_MODEL_TYPE[@]}"; do
-		huggingface-cli download "$HUNYUAN_GGUF_REPO" \
-			"$model" \
-			--local-dir "$COMFYUI_PATH/models/${HUNYUAN_MODEL_TYPE[$model]}"
+	for file in "${!HUNYUAN_GGUF_PATH[@]}"; do
+		log_verbose "huggingface-cli download $HUNYUAN_GGUF_REPO \
+			$file \
+				--local-dir $COMFYUI_PATH/${HUNYUAN_GGUF_PATH[$file]}"
+		if ! $DRY_RUN; then
+			huggingface-cli download "$HUNYUAN_GGUF_REPO"
+			"$file" \
+				--local-dir "$COMFYUI_PATH/${HUNYUAN_GGUF_PATH[$file]}"
+		fi
 	done
 	log_exit "GGUF Quantized models pulled"
 fi
 
+# https://comfyanonymous.github.io/ComfyUI_examples/hunyuan_video/
 log_verbose "Loading FP16 half precision models"
 REPO="Comfy-Org/HunyuanVideo_repackaged"
 declare -A HUNYUAN_MODEL_TYPE
