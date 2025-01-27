@@ -211,6 +211,9 @@ fi
 log_verbose "install ollama models"
 "$BIN_DIR/install-ollama.sh"
 
+log_verbose "install comfyUI and models"
+"$BIN_DIR/install-comfyui.sh"
+
 # https://dashboard.ngrok.com/get-started/setup/macos
 log_verbose "configure ngrok as front-end to open-webui with make auth with the right ngrok 1Password item"
 

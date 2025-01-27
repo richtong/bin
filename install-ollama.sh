@@ -308,6 +308,8 @@ log_verbose "loading all models over 9B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
 	deepseek-r1:14b                     # r1 comparable
 	deepseek-r1:14b-qwen-distill-q4_K_M # r1 comparable
+	deepseek-r1:32b                     # r1 comparable
+	deepseek-r1:32b-qwen-distill-q4_K_M # r1 comparable
 	olmo2:13b                           # AI2 fully open
 	olmo2:13b-1124-instruct-q4_K_M      # compets with llama 3.1
 	phi4                                # Microsoft Jan 7 2025
