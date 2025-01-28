@@ -66,8 +66,9 @@ PACKAGE+=(
 	# shell-gpt - cli including running shell commands (never use deprecated)
 	# vincelwt-chatgpt - ChatGPT in menubar (not using)
 	# appflowy        # project manager based on ai (don't ever use)
-	cursor       # pair programming using VScode, takes over the $(code)
-	diffusionbee # diffusionbee - Stability diffusion on Mac
+	cursor          # pair programming using VScode, takes over the $(code)
+	diffusionbee    # diffusionbee - Stability diffusion on Mac
+	huggingface-cli # hf.co download files
 	# lm-studio       # lm-studio -  run different LLMs from Hugging Face locally (deprecated)
 	mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
 	parquet-cli     # command line opening parquet data files
