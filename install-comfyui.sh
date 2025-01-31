@@ -13,7 +13,7 @@ VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 export FLAGS="${FLAGS:-""}"
 
-QUANTIZED_DOWNLOAD="${QUANTIZED_DOWNLOAD:-true}"
+DIRECT_DOWNLOAD="${DIRECT_DOWNLOAD:-true}"
 DRY_RUN="${DRY_RUN:-false}"
 
 OPTIND=1
@@ -27,7 +27,7 @@ flags:
 	-h help
 	-d $($DEBUGGING && echo "no ")debugging
 	-v $($VERBOSE && echo "not ")verbose
-	-g $($QUANTIZED_DOWNLOAD && echo "quantized GGUF " || echo "Half precision FP16 ") model download
+	-g $($DIRECT_DOWNLOAD && echo "echo direct " || echo "moved ") file download
 	-n $($DRY_RUN && echo "no ")dry run
 EOF
 
@@ -45,8 +45,8 @@ EOF
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
 	g)
-		QUANTIZED_DOWNLOAD="$($QUANTIZED_DOWNLOAD && echo false || echo true)"
-		export QUANTIZED_DOWNLOAD
+		DIRECT_DOWNLOAD="$($DIRECT_DOWNLOAD && echo false || echo true)"
+		export DIRECT_DOWNLOAD
 		;;
 	n)
 		DRY_RUN="$($DRY_RUN && echo false || echo true)"
@@ -68,10 +68,23 @@ download_url_open "https://download.comfy.org/mac/dmg/arm64"
 COMFYUI_PATH="${COMFYUI_PATH:-"$HOME/Documents/ComfyUI"}"
 
 # ["hunyuan-video-t2v-720p-q8_0.gguf"]=models/unet   # quarter precision
-if $QUANTIZED_DOWNLOAD; then
-	HUNYUAN_GGUF_REPO="${HUNYUAN_FULL_REPO:-"calcuis/hunyuan-gguf"}"
-	declare -A HUNYUAN_GGUF_PATH
-	HUNYUAN_GGUF_PATH+=(
+if $DIRECT_DOWNLOAD; then
+	declare -A HF_REPO
+	HF_REPO+=(
+		["hunyuan-video-t2v-720p-bf16.gguf"]="calcuis/hunyuan-gguf"
+		["hunyuan-video-t2v-720p-q8_0.gguf"]="calcuis/hunyuan-gguf"
+		["hunyuan-video-t2v-720p-q4_0.gguf"]="calcuis/hunyuan-gguf"
+		["clip_l.safetensors"]="calcuis/hunyuan-gguf"
+		["llava_llama3_fp8_scaled.safetensors"]="calcuis/hunyuan-gguf"
+		["hunyuan_video_vae_bf16.safetensors"]="calcuis/hunyuan-gguf"
+		["workflow-hunyuan-gguf.json"]="calcuis/hunyuan-gguf"
+		["workflow-hunyuan-gguf.json"]="calcuis/hunyuan-gguf"
+		["janus-pro-1b"]="deepseek-ai/janus-pro-1b"
+		["janus-pro-7b"]="deepseek-ai/janus-pro-7b"
+	)
+
+	declare -A HF_PATH
+	HF_PATH+=(
 		# ["hunyuan-video-t2v-720p-q4_k_m.gguf"]=models/unet # good tradeoff 4-bit doesn't seem to work
 		["hunyuan-video-t2v-720p-bf16.gguf"]=models/unet # the original floating point 16-bit
 		["hunyuan-video-t2v-720p-q8_0.gguf"]=models/unet # good tradeoff 8-bit
@@ -80,20 +93,28 @@ if $QUANTIZED_DOWNLOAD; then
 		["llava_llama3_fp8_scaled.safetensors"]=models/clip
 		["hunyuan_video_vae_bf16.safetensors"]=/models/vae
 		["workflow-hunyuan-gguf.json"]=user/default/workflows
+		["workflow-hunyuan-gguf.json"]=user/default/workflows
+		["janus-pro-1b"]="models/janus-pro-1b"
+		["janus-pro-7b"]="models/janus-pro-7b"
 	)
-	for file in "${!HUNYUAN_GGUF_PATH[@]}"; do
-		log_verbose "huggingface-cli download $HUNYUAN_GGUF_REPO $file \
-				--local-dir $COMFYUI_PATH/${HUNYUAN_GGUF_PATH[$file]}"
+
+	for file in "${!HF_REPO[@]}"; do
+		log_verbose "huggingface-cli download ${HF_REPO[$file]} $file \
+				--local-dir $COMFYUI_PATH/${HF_PATH[$file]}"
 		if ! $DRY_RUN; then
-			huggingface-cli download "$HUNYUAN_GGUF_REPO" "$file" \
-				--local-dir "$COMFYUI_PATH/${HUNYUAN_GGUF_PATH[$file]}"
+			huggingface-cli download "${HF_REPO[$file]}" "$file" \
+				--local-dir "$COMFYUI_PATH/${HF_PATH[$file]}"
 		fi
 	done
-	log_exit "GGUF Quantized models pulled"
+	log_exit "HuggingFace files pulled"
+
+	# https://comfyui-wiki.com/en/tutorial/advanced/deepseek-janus-pro-workflow
+	download_url "https://comfyui-wiki.com/en/tutorial/advanced/deepseek-janus-pro-workflow" "$COMFYUI_PATH/workflows"
+	log_verbose "In Nodes manager download CY-Chenyue's ComfyUI-Janus-Pro"
 fi
 
 # https://comfyanonymous.github.io/ComfyUI_examples/hunyuan_video/
-log_verbose "Loading FP16 half precision models"
+log_verbose "Loading models that need to moved to final location"
 REPO="Comfy-Org/HunyuanVideo_repackaged"
 declare -A HUNYUAN_MODEL_TYPE
 HUNYUAN_MODEL_TYPE+=(
