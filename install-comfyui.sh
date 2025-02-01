@@ -83,8 +83,9 @@ if $DIRECT_DOWNLOAD; then
 		["janus-pro-7b"]="deepseek-ai/janus-pro-7b"
 	)
 
-	declare -A HF_PATH
-	HF_PATH+=(
+	# to download a single file
+	declare -A HF_DEST
+	HF_DEST+=(
 		# ["hunyuan-video-t2v-720p-q4_k_m.gguf"]=models/unet # good tradeoff 4-bit doesn't seem to work
 		["hunyuan-video-t2v-720p-bf16.gguf"]=models/unet # the original floating point 16-bit
 		["hunyuan-video-t2v-720p-q8_0.gguf"]=models/unet # good tradeoff 8-bit
@@ -98,12 +99,27 @@ if $DIRECT_DOWNLOAD; then
 		["janus-pro-7b"]="models/janus-pro-7b"
 	)
 
-	for file in "${!HF_REPO[@]}"; do
-		log_verbose "huggingface-cli download ${HF_REPO[$file]} $file \
-				--local-dir $COMFYUI_PATH/${HF_PATH[$file]}"
+	# do not download a file but leave blank for whole directory
+	declare -A HF_WHOLE_REPO
+	HF_WHOLE_REPO+=(
+		["janus-pro-1b"]=true
+		["janus-pro-7b"]=true
+	)
+
+	for path in "${!HF_REPO[@]}"; do
 		if ! $DRY_RUN; then
-			huggingface-cli download "${HF_REPO[$file]}" "$file" \
-				--local-dir "$COMFYUI_PATH/${HF_PATH[$file]}"
+			# do not quote the HF_DEST and HF_DIR references it will pick up
+			# which everyone is available
+
+			dest="$path"
+			if [[ -v HF_WHOLE_REPO[$path] ]]; then
+				# download whole repo no need for file path
+				# at the source
+				dest=""
+			fi
+			#shellcheck disable=SC2086
+			huggingface-cli download "${HF_REPO[$path]}" $dest \
+				--local-dir "$COMFYUI_PATH/${HF_DEST[$path]}"
 		fi
 	done
 	log_exit "HuggingFace files pulled"
