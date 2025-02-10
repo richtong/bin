@@ -19,7 +19,8 @@ DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-DIRENVRC="$XDG_CONFIG_HOME/direnv/direnvrc"
+DIRENV_CONFIG="${DIRENV_CONFIG:=$XDG_CONFIG_HOME/direnv}"
+DIRENVRC="${DIRENVRC:=$DIRENV_CONFIG/direnvrc}"
 
 # make the default an array needs a hack
 # https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
@@ -244,6 +245,14 @@ for LANG in "${!ASDF[@]}"; do
 	done
 done
 
+# shellcheck disable=SC2016
+ASDF_DATA_DIR="${ASDF_DATA_DIR:-'$HOME/.asdf'}"
+if ! config_mark; then
+	config_add <<-EOF
+		ASDF_DATA_DIR="$ASDF_DATA_DIR"
+	EOF
+fi
+
 source_profile
 
 # this is no longer needed run the asdf setup instead
@@ -324,6 +333,17 @@ EOF
 		fi
 	fi
 done
+
+log_warning "direnv using old asdf bash scripts that may change post asdf 0.16"
+# https://github.com/asdf-community/asdf-direnv/issues/194
+if ! config_mark "$DIRENV_CONFIG/lib/use_asdf.sh"; then
+	log_verbose "Overwrite $DIRENV_CONFIG/lib/use_asdf.sh"
+	config_add "$DIRENV_CONFIG/lib/use_asdf.sh" <'EOF'
+	use_asdf() {
+		source_env "$(asdf cmd direnv envrc "$@")"
+	}
+	EOF
+fi
 
 # https://github.com/direnv/direnv/wiki/Python#uv
 if ! config_mark "$DIRENVRC"; then
