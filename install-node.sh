@@ -14,7 +14,7 @@ DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 
-VERSION="${VERSION:-20}"
+NODE_VERSION="${NODE_VERSION:-22}"
 BREW="${BREW:-true}"
 
 OPTIND=1
@@ -91,7 +91,7 @@ if command -v node >/dev/null && vergte "$(node --version)" "v$VERSION"; then
 fi
 
 # make sure to purge the old installation
-package_uninstall nodejs
+package_uninstall node
 
 # regular node install works
 # This install node 0.1 and npm 1.1 on ubuntu 14.04 from standard repo
@@ -102,7 +102,13 @@ package_uninstall nodejs
 # curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
 # To get node 6.x with ES6 support and includes node-legacy now
 curl -sL "https://deb.nodesource.com/setup_${VERSION}.x" | sudo -E bash -
-package_install nodejs
+package_install "node@$NODE_VERSION"
+
+if ! config_mark; then
+	config_add <<-EOF
+		    if ! echo "\$PATH" | grep -q  "opt/node"; then PATH="/opt/homebrew/opt/node@$NODE_VERSION/bin:\$PATH"; fi
+	EOF
+fi
 
 if ! log_assert "[[ $(node -v) =~ ^v$VERSION ]]" "node installed to $VERSION"; then
 	exit $?

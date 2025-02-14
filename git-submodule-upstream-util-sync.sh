@@ -156,7 +156,7 @@ for repo in $REPOS; do
 		'git push "$UPSTREAM_REMOTE" "$dev_branch:$UPSTREAM_DEFAULT"'
 	)
 	# shellcheck disable=SC2086
-	util_cmd $DRY_RUN_ARG "${cmds[@]}"
+	util_git_cmd $DRY_RUN_ARG "${cmds[@]}"
 
 	if ! popd >/dev/null; then
 		log_error 3 "could not popd"

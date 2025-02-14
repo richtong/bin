@@ -163,6 +163,6 @@ CMDS+=(
 
 log_verbose "Is this a dry run arg is $DRY_RUN_ARG"
 # shellcheck disable=SC2086
-util_cmd $DRY_RUN_ARG "${CMDS[@]}"
+util_git_cmd $DRY_RUN_ARG "${CMDS[@]}"
 
 log_warning "look at .gitmodules and you can commit the changes"

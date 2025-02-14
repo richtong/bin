@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bashsdf p
 ## vim: set noet ts=4 sw=4:
 ##
 ## Install asdf and dotenv for language and tool management
@@ -155,12 +155,14 @@ package_install "${PACKAGE[@]}"
 # fi
 
 # https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
+log_warning "Not supported in 0.16
+	"
 declare -A ASDF+=(
 	[direnv]=${DIRENV_VERSION[@]}
-	[nodejs]=${NODE_VERSION[@]}
-	[python]=${PYTHON_VERSION[@]}
 	[java]=${JAVA_VERSION[@]}
+	[nodejs]=${NODE_VERSION[@]}
 	[ruby]=${RUBY_VERSION[@]}
+	[python]=${PYTHON_VERSION[@]}
 	[uv]=${UV_VERSION[@]}
 	[golang]=${GOLANG_VERSION[@]}
 	[pipx]=${PIPX_VERSION[@]}
@@ -175,6 +177,10 @@ log_verbose "ASDF indexes ${!ASDF[*]} and data ${ASDF[*]}"
 # shellcheck disable=SC2016
 declare -A ASDF_ENV+=(
 	[python]='CFLAGS="-I$(brew --prefix openssl)/include" LDFLAGS="-L$(brew --prefix openssl)/lib"'
+)
+
+declare -A ASDF_URL+=(
+	[direnv]='https://github.com/richtong/asdf-direnv'
 )
 
 log_warning "use oh-my-zsh asdf plugin to install paths"
@@ -204,13 +210,23 @@ fi
 # https://unix.stackexchange.com/questions/91943/is-there-a-way-to-list-all-indexes-ids-keys-on-a-bash-associative-array-vari
 log_verbose "Installing asdf plugins from ${ASDF[*]}"
 for LANG in "${!ASDF[@]}"; do
-	log_verbose "asdf language $LANG"
-	if ! asdf list "$LANG" >/dev/null; then
-		log_verbose "Install asdf plugin $LANG"
-		asdf plugin add "$LANG"
+	log_verbose "installing $LANG"
+	if ! asdf plugin list | grep -q "^$LANG" >/dev/null; then
+		if [[ $LANG == direnv ]]; then
+			log_verbose "Current direnv does not support asdf 0.16"
+			asdf plugin add "$LANG" git@github.com:richtong/asdf-direnv
+			continue
+		fi
+		log_verbose "asdf plugin add $LANG"
+		# shellcheck ignore=SC2086
+		if ! asdf plugin add "$LANG" ${ASDF_URL["$LANG"]}; then
+			log_verbose "asdf plugin add $LANG error $?"
+		fi
 	else
 		log_verbose "asdf plugin $LANG already installed so update it"
-		asdf plugin update "$LANG"
+		if ! asdf plugin update "$LANG"; then
+			log_verbose "asdf plugin update $LANG error $?"
+		fi
 	fi
 	INSTALLED="$(asdf list "$LANG" 2>&1 | sed 's/*//')"
 	log_verbose "Is $LANG has versions $INSTALLED installed already"
@@ -240,7 +256,7 @@ for LANG in "${!ASDF[@]}"; do
 			# does the global multiple times because there is no way to do double index
 			# so in effect the last version is the global
 			log_verbose running asdf global "$LANG" "$VERSION"
-			asdf global "$LANG" "$VERSION"
+			asdf set "$LANG" "$VERSION"
 		fi
 	done
 done
@@ -289,31 +305,22 @@ fi
 
 # this is a direnv pro tip but doesn't work so always add the asdf shims
 # if [[ -r $HOME/.asdf/bin && ! $PATH =~ .asdf/bin ]]; then PATH="$HOME/.asdf/bin:$PATH"; fi
+log_verbose "completions for zsh are plugins+=(asdf)"
 for shell_type in bash zsh; do
 	if ! config_mark "$(config_profile_nonexportable_$shell_type)"; then
 		log_verbose "Adding to $(config_profile_nonexportable_$shell_type)"
 		if [[ $shell_type == bash ]]; then
 			config_add "$(config_profile_nonexportable_$shell_type)" <<'EOF'
-if [[ -r "$(brew --prefix asdf)/libexec/asdf.sh" ]]; then
-	# shellcheck disable=SC1090,SC1091
-	source "$(brew --prefix asdf)/libexec/asdf.sh"
+			source <(asdf completion $shell_type)
+			eval "$(direnv hook $shell_type)"
 fi
 EOF
 		fi
 		log_verbose "direnv=${ASDF[direnv]}"
 		if [[ -n ${ASDF[direnv]} ]]; then
 			log_verbose "Adding asdf-direnv for $shell_type"
-			# We do not use the setup below instead we check for existance first
-			# asdf direnv setup --shell "$shell_type" --version "${ASDF[direnv]}"
-			config_add "$(config_profile_nonexportable_$shell_type)" <<EOF
-if command -v asdf >/dev/null && asdf current direnv > /dev/null; then
-	# shellcheck disable=SC1090,SC1091
-	export XDG_CONFIG_HOME="\${XDG_CONFIG_HOME:-\$HOME/.config}"
-	if [[ -r \$XDG_CONFIG_HOME/asdf-direnv/${shell_type}rc ]]; then
-		source "\$XDG_CONFIG_HOME/asdf-direnv/${shell_type}rc"
-	fi
-fi
-EOF
+			asdf cmd direnv setup --shell "$shell_type" --version "${ASDF[direnv]}"
+
 			# this is replaced by the direnv setup
 			#config_add <<-'EOF'
 			#    eval "$(asdf exec direnv hook bash)"
@@ -334,14 +341,9 @@ EOF
 	fi
 done
 
-log_warning "direnv using old asdf bash scripts that may change post asdf 0.16"
-# https://github.com/asdf-community/asdf-direnv/issues/194
-if ! config_mark "$DIRENV_CONFIG/lib/use_asdf.sh"; then
-	log_verbose "Overwrite $DIRENV_CONFIG/lib/use_asdf.sh"
-	config_add "$DIRENV_CONFIG/lib/use_asdf.sh" <'EOF'
-	use_asdf() {
-		source_env "$(asdf cmd direnv envrc "$@")"
-	}
+if ! config_mark; then
+	config_add <<-'EOF'
+		if [ -r "$HOME/.asdf/shims" ] && echo "$PATH" | grep -q ".asdf/shims"; then PATH="$HOME/.asdf/shims:$PATH"; fi
 	EOF
 fi
 

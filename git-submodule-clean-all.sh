@@ -72,10 +72,10 @@ PARENT_CMDS=(
 log_verbose "clean the parent repo"
 
 # shellcheck disable=SC2086
-util_cmd $DRY_RUN_FLAG "${CMDS[@]}"
+util_git_cmd $DRY_RUN_FLAG "${CMDS[@]}"
 # shellcheck disable=SC2086
-util_cmd $DRY_RUN_FLAG "${PARENT_CMDS[@]}"
+util_git_cmd $DRY_RUN_FLAG "${PARENT_CMDS[@]}"
 
 log_verbose "now clean the subdirectories"
 # shellcheck disable=SC2086
-util_cmd -s $DRY_RUN_FLAG "${CMDS[@]}"
+util_git_cmd -s $DRY_RUN_FLAG "${CMDS[@]}"

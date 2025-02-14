@@ -216,8 +216,8 @@ log_verbose "add the $WS_DIR paths assumes WS_DIR set by .envrc"
 if ! config_mark; then
 	config_add <<-'EOF'
 		if [ -z "$WS_DIR" ]; then WS_DIR="$HOME/ws"; fi
-		if ! echo "$PATH" | grep -q "$WS_DIR/src/bin"; then PATH=":$WS_DIR/src/bin:$PATH"; fi
-		if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then PATH=":$HOME/.local/bin:$PATH"; fi
+		if ! echo "$PATH" | grep -q "$WS_DIR/src/bin"; then PATH="$PATH:$WS_DIR/src/bin"; fi
+		if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then PATH="$PATH:$HOME/.local/bin"; fi
 	EOF
 fi
 

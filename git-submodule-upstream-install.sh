@@ -97,7 +97,7 @@ COMMANDS=(
 
 for repo in $REPOS; do
 	# shellcheck disable=SC2086
-	util_cmd $DRY_RUN_ARG "${COMMANDS[@]}"
+	util_git_cmd $DRY_RUN_ARG "${COMMANDS[@]}"
 done
 
 log_verbose "add remote default"

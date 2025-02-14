@@ -22,10 +22,9 @@ PIPENV="${PIPENV:-false}"
 POETRY="${POETRY:-true}"
 UV="${UV:-true}"
 
-NEW_PYTHON="${NEW_PYTHON:-@3.12}"
-# we normally don't need the oldest version
-OLD_PYTHON="${OLD_PYTHON:-@3.11}"
-PYTHON_VERSION="${PYTHON_VERSION:-$OLD_PYTHON}"
+NEW_PYTHON="${NEW_PYTHON:-@3.13}"
+OLD_PYTHON="${OLD_PYTHON:-@3.12}"
+PYTHON_VERSION="${PYTHON_VERSION:-$NEW_PYTHON}"
 PYENV="${PYENV:-false}"
 OPTIND=1
 # which user is the source of secrets
@@ -92,7 +91,6 @@ done
 if [[ -e $SCRIPT_DIR/include.sh ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-util.sh lib-config.sh lib-install.sh
 shift $((OPTIND - 1))
-# log_verbose "PATH=$PATH"
 
 # favor the brew packages vs pip
 # autocomplete will not install in brew so must be in an environment remove it as not used much
@@ -129,10 +127,11 @@ fi
 # cause the default paths to be put in before this path
 #source_profile
 #log_verbose "Pre PATH=$PATH"
-[[ $PATH =~ $(brew --prefix)/opt/python$PYTHON_VERSION/libexec/bin ]] || PATH="$(brew --prefix)/opt/python$PYTHON_VERSION/libexec/bin:$PATH"
-hash -r
-export PATH
-#log_verbose "PATH=$PATH"
+if ! config_mark; then
+	config_add <<-EOF
+		if ! $PATH | grep "python$PYTHON_VERSION/libexec/bin; then PATH="$PATH:$(brew --prefix)/opt/python$PYTHON_VERSION/libexec/bin"; fi
+	EOF
+fi
 
 if $POETRY; then
 	log_verbose "Poetry for per project directory installed"
@@ -142,17 +141,14 @@ if $PIPENV; then
 	PACKAGE+=(pipenv)
 	log_verbose "use pipenv per project directory pipenv install"
 fi
-
 if $PYENV; then
 	log_verbose "using pyenv"
 	"$SCRIPT_DIR/install-pyenv.sh"
 fi
-
 if $ANACONDA; then
 	log_verbose "use anaconda"
 	"$SCRIPT_DIR/install-conda.sh"
 fi
-
 if $UV; then
 	log_verbose "use uv"
 	PACKAGE+=(uv)
@@ -164,11 +160,6 @@ log_verbose "installing ${PACKAGE[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
-
-# log_verbose "black needs keg link"
-# brew link pydocstyle  # pydostyle no longer maintained
-# brew unlink black && brew link black  # using ruff instead
-#log_verbose "PATH=$PATH"
 
 for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	log_verbose "Install other python $version"
@@ -257,28 +248,18 @@ pipx_install "${PIPX_PACKAGE[@]}"
 # echo "\$PATH" | grep -q /opt/python$PYTHON_VERSION/libexec/bin || PATH="\$HOMEBREW_PREFIX/opt/python$PYTHON_VERSION/libexec/bin:\$PATH"
 # https://github.com/pypa/pipx/issues/330
 # completions are supposed to be installed by homebrew for pipx now except for zsh
+# do not alias brew direct link
+# log_verbose "adding to $profile alias python=python3 if python3 exists and python does not"
+# if ! command -v python >/dev/null && command -v python3 >/dev/null; then alias python=python3; fi
 log_verbose "checking profiles"
 for profile in "$(config_profile_nonexportable_zsh)" "$(config_profile_nonexportable_bash)"; do
 	log_verbose "checking $profile"
 	if ! config_mark "$profile"; then
-		log_verbose "adding to $profile alias python=python3 if python3 exists and python does not"
 		config_add "$profile" <<-EOF
 			# uncomment only if not using asdf
-			# if ! command -v python >/dev/null && command -v python3 >/dev/null; then alias python=python3; fi
 			if command -v pipx >/dev/null; then eval "\$(register-python-argcomplete pipx)"; fi
 		EOF
 	fi
 done
 
 log_verbose "User Site packages are in $(brew --prefix)/lib/python*/site-packages"
-
-# now put the completions in bashrc so subshells can find them like pipenv uses
-# the --completion is removed as of Nov 2021 so there is a new way
-#eval "$(pipenv --completion)"
-# https://github.com/pypa/pipenv/issues/4860
-# fixed as o July 2022 and this causes a long pause in ssh when in .bashrc
-#if $PIPENV && ! config_mark "$(config_profile_shell)"; then
-#    config_add "$(config_profile_shell)" <<-'EOF'
-#        eval "$(_PIPENV_COMPLETE=bash_source pipenv)"
-#    EOF
-#fi

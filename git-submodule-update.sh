@@ -2,8 +2,7 @@
 ## vim: set noet ts=4 sw=4:
 ##
 ##
-## Updates all the submodules from their origins
-## Then rebases the current local with the remotes
+## INitializes all git submodules to the default branch latest
 ##
 ##@author Rich Tong
 ##@returns 0 on success
@@ -23,22 +22,20 @@ DRY_RUN="${DRY_RUN:-""}"
 DRY_RUN_ARG="${DRY_RUN_ARG:-""}"
 DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvunfg:p:l:" opt; do
+while getopts "hdvnp:l:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Gets the organization ready for a commit to main by
-			Merge upstream changes from $UPSTREAM_ORG/$UPSTREAM_DEFAULT to origin/$ORIGIN_DEFAULT
-			Rebase current branches to origin/$MAIN and push the changes to origin/$MAIN
-			    usage: $SCRIPTNAME [ flags ]
-			    flags: -h help"
-					-d debug $($DEBUGGING && echo "off" || echo "on")
-					-v verbose $($VERBOSE && echo "off" || echo "on")
-					   -f force pushs (default: $FORCE_FLAG)
-					   -n dry run (default: $DRY_RUN_FLAG)
-					   -l Origin remote name (default: $ORIGIN_REMOTE)
-			           -p The path of the parent repo (default: $DEST_REPO_PATH)
-			    Note that repos cannot have white space in their names
+			Bootstraps all submodules to be at their macbinary 
+			This fails if there are commits not checked in so best for fresh installations
+				    usage: $SCRIPTNAME [ flags ]
+				    flags: -h help"
+				-d debug $($DEBUGGING && echo "off" || echo "on")
+				-v verbose $($VERBOSE && echo "off" || echo "on")
+				-n dry run (default: $DRY_RUN_FLAG)
+				-l Origin remote name (default: $ORIGIN_REMOTE)
+				-p The path of the root of submodules repo (default: $DEST_REPO_PATH)
+				    Note that repos cannot have white space in their names
 		EOF
 		exit 0
 		;;
@@ -128,12 +125,17 @@ fi
 CMDS=(
 	'git submodule update --init --recursive --rebase --remote'
 )
+#  old command which does a fetch pull and push
+# '"git fetch -p --all && git pull --ff-only && git push"'
+# shellcheck disable=SC2016
 FOREACH=(
-	'"git fetch -p --all && git pull --ff-only && git push"'
+	'git switch `git rev-parse --abbrev-ref origin/HEAD | cut -d / -f 2`'
 )
 # do not need expansion, the eval takes care of this
+log_verbose "running at parent"
 # shellcheck disable=SC2086
-util_cmd $DRY_RUN_ARG "${CMDS[@]}"
+util_git_cmd $DRY_RUN_ARG "${CMDS[@]}"
 
+log_verbose "sending foreach ${FOREACH[*]}"
 # shellcheck disable=SC2086
-util_cmd -s $DRY_RUN_ARG "${FOREACH[@]}"
+util_git_cmd -s $DRY_RUN_ARG "${FOREACH[@]}"
