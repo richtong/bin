@@ -130,6 +130,7 @@ CMDS=(
 # shellcheck disable=SC2016
 FOREACH=(
 	'git switch `git rev-parse --abbrev-ref origin/HEAD | cut -d / -f 2`'
+	'git pull --ff-only'
 )
 # do not need expansion, the eval takes care of this
 log_verbose "running at parent"
