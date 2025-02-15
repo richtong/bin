@@ -17,25 +17,24 @@ VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 ORIGIN_REMOTE="${ORIGIN_REMOTE:-origin}"
 DEST_REPO_PATH="${DEST_REPO_PATH:-"$PWD"}"
+DEST_REPOS=(bin lib app sys user)
 FORCE_FLAG="${FORCE_FLAG:-false}"
 DRY_RUN="${DRY_RUN:-""}"
 DRY_RUN_ARG="${DRY_RUN_ARG:-""}"
 DRY_RUN_FLAG="${DRY_RUN_FLAG:-false}"
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvnp:l:" opt; do
+while getopts "hdvnp:l:f" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Bootstraps all submodules to be at their macbinary 
-			This fails if there are commits not checked in so best for fresh installations
-				    usage: $SCRIPTNAME [ flags ]
+			Add submodules, update them to track their default branch and set commit to latest
+				    usage: $SCRIPTNAME [ flags ] [ repos... ]
 				    flags: -h help"
 				-d debug $($DEBUGGING && echo "off" || echo "on")
 				-v verbose $($VERBOSE && echo "off" || echo "on")
 				-n dry run (default: $DRY_RUN_FLAG)
 				-l Origin remote name (default: $ORIGIN_REMOTE)
-				-p The path of the root of submodules repo (default: $DEST_REPO_PATH)
-				    Note that repos cannot have white space in their names
+				-p The location of the mono repo (default: $DEST_REPO_PATH)
 		EOF
 		exit 0
 		;;
@@ -55,7 +54,7 @@ while getopts "hdvnp:l:" opt; do
 		;;
 	n)
 		DRY_RUN_FLAG=true
-		DRY_RUN_ARG="$opt"
+		DRY_RUN_ARG="-$opt"
 		;;
 	l)
 		ORIGIN_REMOTE="$OPTARG"
@@ -73,6 +72,10 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-util.sh
 
+if (($# > 1)); then
+	log_verbose "set submodules to update"
+	DEST_REPOS=("$@")
+fi
 DRY_RUN=""
 if $DRY_RUN_FLAG; then
 	DRY_RUN="echo"
@@ -84,15 +87,6 @@ if $FORCE_FLAG; then
 	# shellcheck disable=SC2034
 	# only appear unused but is used in the eval
 	FORCE="-f"
-fi
-
-if ! pushd "$DEST_REPO_PATH" >/dev/null; then
-	log_error 1 "no $DEST_REPO_PATH"
-fi
-
-log_verbose "in $PWD"
-if ! git_repo; then
-	log_error 2 "$PWD is not a git repo"
 fi
 
 # https://stackoverflow.com/questions/1979167/git-submodule-update
@@ -132,11 +126,25 @@ FOREACH=(
 	'git switch `git rev-parse --abbrev-ref origin/HEAD | cut -d / -f 2`'
 	'git pull --ff-only'
 )
-# do not need expansion, the eval takes care of this
-log_verbose "running at parent"
-# shellcheck disable=SC2086
-util_git_cmd $DRY_RUN_ARG "${CMDS[@]}"
 
-log_verbose "sending foreach ${FOREACH[*]}"
-# shellcheck disable=SC2086
-util_git_cmd -s $DRY_RUN_ARG "${FOREACH[@]}"
+if ! pushd "$DEST_REPO_PATH" >/dev/null; then
+	log_error 1 "no $DEST_REPO_PATH"
+fi
+log_verbose "in $PWD"
+if ! git_repo; then
+	log_error 2 "$PWD is not a git repo"
+fi
+log_verbose "cwd=$PWD"
+for module in "${DEST_REPOS[@]}"; do
+	if ! pushd "$module" >/dev/null; then
+		log_verbose "cwd=$PWD $module not found"
+		continue
+	fi
+	log_verbose "run cmds"
+	# shellcheck disable=SC2086
+	util_git_cmd $DRY_RUN_ARG "${CMDS[@]}"
+	log_verbose "run foreaah"
+	# shellcheck disable=SC2086
+	util_git_cmd -s $DRY_RUN_ARG "${FOREACH[@]}"
+	popd >/dev/null
+done
