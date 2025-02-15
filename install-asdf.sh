@@ -269,9 +269,6 @@ source_profile
 # EOF
 # fi
 
-# source_profile
->>>>>>> 48923ff (fix: install-asdf for 0.16)
-
 # this is no longer needed run the asdf setup instead
 # https://github.com/asdf-community/asdf-direnv
 #DIRENVRC="${DIRENVRC:-"$HOME/.config/direnv/direnvrc"}"
