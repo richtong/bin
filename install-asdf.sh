@@ -155,8 +155,6 @@ package_install "${PACKAGE[@]}"
 # fi
 
 # https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
-log_warning "Not supported in 0.16
-	"
 declare -A ASDF+=(
 	[direnv]=${DIRENV_VERSION[@]}
 	[java]=${JAVA_VERSION[@]}
@@ -210,37 +208,38 @@ fi
 # https://unix.stackexchange.com/questions/91943/is-there-a-way-to-list-all-indexes-ids-keys-on-a-bash-associative-array-vari
 log_verbose "Installing asdf plugins from ${ASDF[*]}"
 for LANG in "${!ASDF[@]}"; do
-	log_verbose "installing $LANG"
-	if ! asdf plugin list | grep -q "^$LANG" >/dev/null; then
-		if [[ $LANG == direnv ]]; then
-			log_verbose "Current direnv does not support asdf 0.16"
-			asdf plugin add "$LANG" git@github.com:richtong/asdf-direnv
-			continue
-		fi
-		log_verbose "asdf plugin add $LANG"
+	log_verbose "looking for $LANG"
+	# this command only work if you run it first
+	# asdf plugin list
+	if ! asdf plugin list | grep "$LANG"; then
 		# shellcheck disable=SC2086
-		if ! asdf plugin add "$LANG" ${ASDF_URL["$LANG"]}; then
+		log_verbose run: asdf plugin add "$LANG" ${ASDF_URL["$LANG"]:-}
+		# shellcheck disable=SC2086
+		if ! asdf plugin add "$LANG" ${ASDF_URL["$LANG"]:-}; then
 			log_verbose "asdf plugin add $LANG error $?"
 		fi
 	else
 		log_verbose "asdf plugin $LANG already installed so update it"
+		asdf plugin update "$LANG"
 		if ! asdf plugin update "$LANG"; then
 			log_verbose "asdf plugin update $LANG error $?"
 		fi
 	fi
-	INSTALLED="$(asdf list "$LANG" 2>&1 | sed 's/*//')"
-	log_verbose "Is $LANG has versions $INSTALLED installed already"
+	INSTALLED=
+	if asdf list "$LANG"; then
+		INSTALLED="$(asdf list "$LANG" 2>&1 | sed 's/*//')"
+		log_verbose "Is $LANG has versions $INSTALLED installed already"
+	fi
 
 	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
 	# note this word splits so versions cannot have spaces there seems to be no
 	# way to generate an array here
-	log_verbose "looking for version in \${ASDF[$LANG]}=${ASDF[$LANG]}"
 	for VERSION in ${ASDF[$LANG]}; do
-		log_verbose "Install $LANG version $VERSION"
+		log_verbose "looking for version $VERSION"
 		# remove the asterisk which means current selected
 		# shellcheck disable=SC2086
 
-		if [[ $INSTALLED =~ "No versions" || ! $VERSION =~ $INSTALLED ]]; then
+		if [[ ! -v INSTALLED || ! $INSTALLED =~ $VERSION ]]; then
 			# broken as of feb 2021 now fixed
 			#if in_os mac && ! mac_is_arm && [[ $p =~ python ]]; then
 			#    log_verbose "Current bug in asdf python install skipping"
@@ -254,14 +253,24 @@ for LANG in "${!ASDF[@]}"; do
 			# shellcheck disable=SC2086
 			eval ${ASDF_ENV[$LANG]:-} asdf install "$LANG" "$VERSION"
 			# does the global multiple times because there is no way to do double index
-			# so in effect the last version is the global
-			log_verbose running asdf global "$LANG" "$VERSION"
-			asdf set "$LANG" "$VERSION"
+			# so in effect the last version is the global do not set anything
+			# log_verbose  asdf set "$LANG" "$VERSION"
+			# asdf set "$LANG" "$VERSION"
 		fi
 	done
 done
 
 source_profile
+# shellcheck disable=SC2016
+# ASDF_DATA_DIR="${ASDF_DATA_DIR:-'$HOME/.asdf'}"
+# if ! config_mark; then
+# config_add <<-EOF
+# ASDF_DATA_DIR="$ASDF_DATA_DIR"
+# EOF
+# fi
+
+# source_profile
+>>>>>>> 48923ff (fix: install-asdf for 0.16)
 
 # this is no longer needed run the asdf setup instead
 # https://github.com/asdf-community/asdf-direnv
@@ -297,7 +306,7 @@ fi
 
 # this is a direnv pro tip but doesn't work so always add the asdf shims
 # if [[ -r $HOME/.asdf/bin && ! $PATH =~ .asdf/bin ]]; then PATH="$HOME/.asdf/bin:$PATH"; fi
-log_verbose "completions for zsh are plugins+=(asdf)"
+log_verbose "completions for zsh add plugins+=(asdf) to .zshrc"
 for shell_type in bash zsh; do
 	if ! config_mark "$(config_profile_nonexportable_$shell_type)"; then
 		log_verbose "Adding to $(config_profile_nonexportable_$shell_type)"
@@ -308,16 +317,12 @@ for shell_type in bash zsh; do
 fi
 EOF
 		fi
-		log_verbose "direnv=${ASDF[direnv]}"
+		log_verbose "adding shell setup for direnv version ${ASDF[direnv]}"
 		if [[ -n ${ASDF[direnv]} ]]; then
 			log_verbose "Adding asdf-direnv for $shell_type"
-			asdf cmd direnv setup --shell "$shell_type" --version "${ASDF[direnv]}"
-
-			# this is replaced by the direnv setup
-			#config_add <<-'EOF'
-			#    eval "$(asdf exec direnv hook bash)"
-			#    direnv() { asdf exec direnv "$@"; }
-			#EOF
+			if ! asdf cmd direnv setup --shell "$shell_type" --version "${ASDF[direnv]}"; then
+				log_verbose "direnv setup failed"
+			fi
 		fi
 		# https://github.com/halcyon/asdf-java#java_home
 		log_verbose "java=${ASDF[java]}"
@@ -346,17 +351,16 @@ fi
 if ! config_mark "$DIRENVRC"; then
 	log_verbose "Updating $DIRENVRC"
 	config_add "$DIRENVRC" <<-'EOF'
+
 		layout_uv() {
 		    if [[ -d ".venv" ]]; then
 		        VIRTUAL_ENV="$(pwd)/.venv"
 		    fi
-
 		    if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
 		        log_status "No virtual environment exists. Executing \`uv venv\` to create one."
 		        uv venv
 		        VIRTUAL_ENV="$(pwd)/.venv"
 		    fi
-
 		    PATH_add "$VIRTUAL_ENV/bin"
 		    export UV_ACTIVE=1  # or VENV_ACTIVE=1
 		    export VIRTUAL_ENV
@@ -364,7 +368,6 @@ if ! config_mark "$DIRENVRC"; then
 
 		layout_anaconda() {
 		  local ACTIVATE="${HOME}/miniconda3/bin/activate"
-
 		  if [ -n "$1" ]; then
 		    # Explicit environment name from layout command.
 		    local env_name="$1"
@@ -377,25 +380,23 @@ if ! config_mark "$DIRENVRC"; then
 		    exit 1;
 		  fi;
 		}
+
 		layout_poetry() {
 		    PYPROJECT_TOML="${PYPROJECT_TOML:-pyproject.toml}"
 		    if [[ ! -f "$PYPROJECT_TOML" ]]; then
 		        log_status "No pyproject.toml found. Executing \`poetry init\` to create a \`$PYPROJECT_TOML\` first."
 		        poetry init
 		    fi
-
 		    if [[ -d ".venv" ]]; then
 		        VIRTUAL_ENV="$(pwd)/.venv"
 		    else
 		        VIRTUAL_ENV=$(poetry env info --path 2>/dev/null ; true)
 		    fi
-
 		    if [[ -z $VIRTUAL_ENV || ! -d $VIRTUAL_ENV ]]; then
 		        log_status "No virtual environment exists. Executing \`poetry install\` to create one."
 		        poetry install
 		        VIRTUAL_ENV=$(poetry env info --path)
 		    fi
-
 		    PATH_add "$VIRTUAL_ENV/bin"
 		    export POETRY_ACTIVE=1  # or VENV_ACTIVE=1
 		    export VIRTUAL_ENV
@@ -404,4 +405,4 @@ if ! config_mark "$DIRENVRC"; then
 fi
 
 log_warning "To enable direnv in every directory with a .envrc run direnv allow there"
-log_warning "To set .tool-versions run asdf direnv local golang 1.23 do not use asdf local"
+log_warning "To set .tool-versions run asdf direnv set golang 1.23 do not use asdf set"
