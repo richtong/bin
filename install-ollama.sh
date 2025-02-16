@@ -13,11 +13,14 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
+INCLUDE_SMALL="${INCLUDE_SMALL:-false}"
 INCLUDE_MEDIUM="${INCLUDE_MEDIUM:-false}"
 INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
-INCLUDE_HF="${INCLUDE_HF:-true}"
+INCLUDE_HF="${INCLUDE_HF:-false}"
 INCLUDE_EXTRA="${INCLUDE_EXTRA:-false}"
 INCLUDE_OLD="${INCLUDE_OLD:-false}"
+FORCE="{${FORCE:-false}}"
+DISK_MAX="${DISK_MAX:-80}"
 
 REMOVE_OBSOLETE="${REMOVE_OBSOLETE:-true}"
 
@@ -28,12 +31,15 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdveos:rlfmu" opt; do
+while getopts "hdveox:rlfsmug" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
 
-Installs Ollama models and removes obsolete or large ones
+Installs Ollama models and removes obsolete or large ones.
+We do not pull modles if we have less than 20% disk free unless
+-f is set
+
 usage: $SCRIPTNAME [ flags ]
 flags:
 	-h help
@@ -44,15 +50,16 @@ flags:
 		system memory > 32GB add medium models
 		system memory > 64GB add large models
 
-	-m $(! $INCLUDE_MEDIUM || echo "do not ")force pull larger then 10B+ parameters (even if you do not have 10GB RAM)
-	-l $(! $INCLUDE_LARGE || echo "do not ")force pull larger then 32B+ parameters (even if you do not have 40GB+ RAM)
-	-f $(! $INCLUDE_HF || echo "do not ")pull huggingface models
+	-s $(! $INCLUDE_SMALL || echo "do not ")pull smaller then 3B+ parameters (even if you do not have 8GB RAM)
+	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 16GB RAM)
+	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 40GB+ RAM)
+	-g $(! $INCLUDE_HF || echo "do not ")pull huggingface models
 	-e $(! $INCLUDE_EXTRA || echo "do not ")pull extra models if you have lots of disk (>2TB)
 	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
 	-r $(! $REMOVE_OBSOLETE || echo "do not ")remove obsolete models
 	-u $([[ $ACTION == pull ]] || echo "un")install models
-
-	-s storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
+	-f $(! $FORCE || echo "do not")force pull even if disk larger than (default DISK_MAX=$DISK_MAX)
+	-x storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
 example of manual: Uninstall large and medium models and hugging face models
 	$SCRIPTNAME -u -l -m -h
 
@@ -179,133 +186,124 @@ MODEL_HF+=(
 # per word and you can see why Q4_K_M is the default, at the knee of the curve
 # 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
+log_verbose "Minimal Base models for machines that are 8GB"
 MODEL+=(
-	deepseek-r1:latest                   # 7b reasoning model
-	deepseek-r1:7b                       # competitive to o1
-	deepseek-r1:7b-qwen-distill-q4_K_M   # competitive to o1
+	deepscaler        # fintuned deepseek-r1-distilled-qwen beats 01-previe
+	deepscaler:latest # 8K synthetic
+	deepscaler:1.5b
+	deepscaler:1.5b-preview-fp16
 	deepseek-r1:1.5b                     # small model
 	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
-	deepseek-r1:8b                       # llama distilled 8b
-	deepseek-r1:8b-llama-distill-q4_K_M  # q8b
-	olmo2                                # Ai2 fully open model competitive
-	olmo2:latest                         # competitive iwth llama 3.1
-	olmo2:7b                             # November 26 2024 release
-	command-r7b                          # command-r7b is the default
-	command-r7b:latest                   # latest
-	command-r7b:7b                       # 7B
-	command-r7b:7b-12-2024-q4_K_M        # Dec 2024
-	dolphin3                             # llama3.1 8B tuned
-	dolphin3:latest                      # llama3.1 8B tuned
-	dolphin3:8b                          # llama3.1 8B tuned
-	dolphin3:8b-llama3.1-q4_K_M          # llama3.1 8B tuned
 	smallthinker                         # Fine tuned Qwen2.5-b-instruct
 	smallthinker:latest                  # qwq used to generate 8K synthetic
 	smallthinker:3b                      # long sequence encourage CoT
 	smallthinker:3b-preview-q8_0         # open dataset
-	granite3.1-dense                     # IBM tool, RAG, code, translation
-	granite3.1-dense:latest              # IBM
-	granite3.1-dense:8b                  # RAG, code  generation, translation
-	granite3.1-dense:8b-instruct-q4_K_M  # RAG, code  generation, translation
-	falcon3
-	falcon3:latest             # latest from Abu Dhabi
-	falcon3:7b                 # 7B parameters
-	falcon3:7b-instruct-q4_K_M # 7B parameters
-	falcon3:3b                 # 7B parameters
-	falcon3:3b-instruct-q4_K_M # 7B parameters
-	falcon3:1b                 # 7B parameters
+	falcon3:3b                           # 7B parameters
+	falcon3:3b-instruct-q4_K_M           # 7B parameters
+	falcon3:1b                           # 7B parameters
 	falcon3:1b-instruct-q8_0
-	granite-embedding # latest ibm embeddings
-	granite-embedding:latest
-	granite-embedding:30m
-	granite-embedding:30m-en
-	granite-embedding:278m
-	granite-embedding:278m-fp16
-	snowflake-arctic-embed2             # new embeddings
-	snowflake-arctic-embed2:latest      # new embeddings
-	snowflake-arctic-embed2:568m-l-fp16 # new embeddings
-	snowflake-arctic-embed2:568m        # new embeddings
-	marco-o1                            # Alibab open large reasoning
-	marco-o1:latest                     # Alibab open large reasoning
-	marco-o1:7b                         # 7b
-	marco-o1:7b-q4_K_M                  # q4_K_M
-	tulu3                               # AI2 instruction following
-	tulu3:latest                        # full open source data, code, recipes
-	tulu3:8b                            # 128 K content has 70B brother
-	tulu3:8b-q4_K_M                     # standard quantization
-	opencoder                           # completely open source
-	opencoder:latest                    # completely open source
-	opencoder:1.5b                      #  english and chinse
-	opencoder:1.5b-instruct-q4_K_M      #  english and chinse
-	opencoder:8b                        # reproducible
-	opencoder:8b-instruct-q4_K_M        # reproducible
-	smollm2                             # open source
-	smollm2:latest                      # open source
-	smollm2:135m-instruct-q4_K_M        # 135m is small
-	smollm2:1.7b                        # large is smarll
-	smollm2:1.7b-instruct-q4_K_M        # large is smarll
-	granite3-guardian                   # IBM prompt risk
-	granite3-guardian:latest            # IBM prompt risk
-	granite3-guardian:8b                #  prompt guard ibm
-	granite3-guardian:8b-q5_K_M         #  prompt guard ibm
-	granite3-guardian:2b                #  prompt guard ibm
-	granite3-guardian:2b-q8_0           #  prompt guard ibm
-	shieldgemma                         # google safety policies
-	shieldgemma:latest                  # google safety policies
-	shieldgemma:9b                      # safety of text prompts
-	shieldgemma:9b-q4_K_M               # safety of text prompts
-	shieldgemma:2b                      # safety of text prompts
-	shieldgemma:2b-q4_K_M               # safety of text prompts
-	llama-guard3                        # safety classification
-	llama-guard3:latest                 # safety classification
-	llama-guard3:8b                     # safety of prompts
-	llama-guard3:8b-q4_K_M              # safety of prompts
-	llama-guard3:1b                     # safety of prompts
-	llama-guard3:1b-q8_0                # safety of prompts
-	llama3.2                            # Meta 3.2-3B Q4 128 context
-	llama3.2:latest                     # Meta 3.2-3B Q4 128 context
-	llama3.2:3b                         # Meta 3.2-3B Q4 128 context 2GB
-	llama3.2:3b-instruct-q4_K_M         # Meta 3.2-3B Q4 128 context 2GB
-	llama3.2:1b                         # Meta 1B 128K context
-	llama3.2:1b-instruct-q8_0           # Meta 1B 128K context
-	qwen2.5-coder                       # Alibaba model
-	qwen2.5-coder:latest                # 128K Tuned for coding 7B
-	qwen2.5-coder:7b                    # 128K Tuned for coding 7B
-	qwen2.5-coder:7b-instruct           # 128K Tuned for coding 7B
-	qwen2.5-coder:7b-instruct-q4_K_M    # 128K Tuned for coding 7B
-	qwen2.5-coder:0.5b                  # 128K Tuned for coding 7B
-	qwen2.5-coder:0.5b-instruct         # 128K Tuned for coding 7B
-	qwen2.5-coder:0.5b-instruct-q8_0    # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b                  # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b-instruct         # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b-instruct         # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b-instruct-q4_K_M  # 128K Tuned for coding 7B
+	opencoder                          # completely open source
+	opencoder:latest                   # completely open source
+	opencoder:1.5b                     #  english and chinse
+	opencoder:1.5b-instruct-q4_K_M     #  english and chinse
+	smollm2                            # open source
+	smollm2:latest                     # open source
+	smollm2:135m-instruct-q4_K_M       # 135m is small
+	smollm2:1.7b                       # large is smarll
+	smollm2:1.7b-instruct-q4_K_M       # large is smarll
+	granite3-guardian:2b               #  prompt guard ibm
+	granite3-guardian:2b-q8_0          #  prompt guard ibm
+	shieldgemma:2b                     # safety of text prompts
+	shieldgemma:2b-q4_K_M              # safety of text prompts
+	llama-guard3:1b                    # safety of prompts
+	llama-guard3:1b-q8_0               # safety of prompts
+	llama3.2                           # Meta 3.2-3B Q4 128 context
+	llama3.2:latest                    # Meta 3.2-3B Q4 128 context
+	llama3.2:3b                        # Meta 3.2-3B Q4 128 context 2GB
+	llama3.2:3b-instruct-q4_K_M        # Meta 3.2-3B Q4 128 context 2GB
+	llama3.2:1b                        # Meta 1B 128K context
+	llama3.2:1b-instruct-q8_0          # Meta 1B 128K context
+	qwen2.5-coder:0.5b                 # 128K Tuned for coding 7B
+	qwen2.5-coder:0.5b-instruct        # 128K Tuned for coding 7B
+	qwen2.5-coder:0.5b-instruct-q8_0   # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b                 # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct        # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct        # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct-q4_K_M # 128K Tuned for coding 7B
 
 	# these models are pre llama3.2 and subject to deprecation
-	nemotron-mini:4b            # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	nemotron-mini:latest        # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	qwen2.5                     # the larger Alibab models
-	qwen2.5:latest              # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:7b                  # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:0.5b                # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:1.5b                # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:3b                  # 128K context Alibaba 2024-09-16 7b
-	bespoke-minicheck           # Fact check 7B q4_K_M UT Austin
-	bespoke-minicheck:latest    # Fact check 7B q4_K_M
-	bespoke-minicheck:7b        # Fact check 7B q4_K_M
-	bespoke-minicheck:7b-q4_K_M # Fact check 7B q4_K_M
-	minicpm-v                   # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:latest            # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:8b                # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:8b-2.6-q4_0       # mLLM visual too, ocr v2.6 ModelBest CN
+	nemotron-mini:4b     # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	nemotron-mini:latest # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	qwen2.5:0.5b         # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:1.5b         # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b           # 128K context Alibaba 2024-09-16 7b
 	# these models are pre llama3.1 and are very close to gone
 	bge-large                   # embedding model from BAAI
 	bge-large:335m              # embedding model from BAA
 	bge-large:335m-en-v1.5-fp16 # embedding model from BAA
 
 )
+
+log_verbose "loading all models over 3B parameters, requires 16GB of RAM"
+MODEL_SMALL=(
+	openthinker # resaonsing models based on deepseek-r1
+	openthinker:latest
+	openthinker:7b
+	openthinker:7b-q4_K_M
+	deepseek-r1:latest                  # 7b reasoning model
+	deepseek-r1:7b                      # competitive to o1
+	deepseek-r1:7b-qwen-distill-q4_K_M  # competitive to o1
+	deepseek-r1:8b                      # llama distilled 8b
+	deepseek-r1:8b-llama-distill-q4_K_M # q8b
+	dolphin3                            # llama3.1 8B tuned
+	dolphin3:latest                     # llama3.1 8B tuned
+	dolphin3:8b                         # llama3.1 8B tuned
+	dolphin3:8b-llama3.1-q4_K_M         # llama3.1 8B tuned
+	granite3.1-dense                    # IBM tool, RAG, code, translation
+	granite3.1-dense:latest             # IBM
+	granite3.1-dense:8b                 # RAG, code  generation, translation
+	granite3.1-dense:8b-instruct-q4_K_M # RAG, code  generation, translation
+	marco-o1                            # Alibab open large reasoning
+	marco-o1:latest                     # Alibab open large reasoning
+	marco-o1:7b                         # 7b
+	marco-o1:7b-q4_K_M                  # q4_K_M
+	opencoder:8b                        # reproducible
+	opencoder:8b-instruct-q4_K_M        # reproducible
+	granite3-guardian                   # IBM prompt risk
+	granite3-guardian:latest            # IBM prompt risk
+	granite3-guardian:8b                #  prompt guard ibm
+	granite3-guardian:8b-q5_K_M         #  prompt guard ibm
+	shieldgemma                         # google safety policies
+	shieldgemma:latest                  # google safety policies
+	shieldgemma:9b                      # safety of text prompts
+	shieldgemma:9b-q4_K_M               # safety of text prompts
+	llama-guard3                        # safety classification
+	llama-guard3:latest                 # safety classification
+	llama-guard3:8b                     # safety of prompts
+	llama-guard3:8b-q4_K_M              # safety of prompts
+	qwen2.5-coder                       # Alibaba model
+	qwen2.5-coder:latest                # 128K Tuned for coding 7B
+	qwen2.5-coder:7b                    # 128K Tuned for coding 7B
+	qwen2.5-coder:7b-instruct           # 128K Tuned for coding 7B
+	qwen2.5-coder:7b-instruct-q4_K_M    # 128K Tuned for coding 7B
+	qwen2.5                             # the larger Alibab models
+	qwen2.5:latest                      # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:7b                          # 128K context Alibaba 2024-09-16 7b
+	bespoke-minicheck                   # Fact check 7B q4_K_M UT Austin
+	bespoke-minicheck:latest            # Fact check 7B q4_K_M
+	bespoke-minicheck:7b                # Fact check 7B q4_K_M
+	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
+	minicpm-v                           # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:latest                    # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:8b                        # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:8b-2.6-q4_0               # mLLM visual too, ocr v2.6 ModelBest CN
+
+)
 #
 log_verbose "loading all models over 9B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
+	openthinker:32b                     # dereict from deepseek-r1
+	openthinker:b-q4_K_M                # fine tuned on openthoughts 114k dataset
 	deepseek-r1:14b                     # r1 comparable
 	deepseek-r1:14b-qwen-distill-q4_K_M # r1 comparable
 	deepseek-r1:32b                     # r1 comparable
@@ -326,8 +324,6 @@ MODEL_MEDIUM+=(
 	llama3.2-vision:latest              # should run in open-webui
 	llama3.2-vision:11b                 # vision works now
 	llama3.2-vision:11b-instruct-q4_K_M # vision works now
-	aya-expanse:32b                     # cohere model 128k content
-	aya-expanse:32b-q4_K_M              # cohere model 128k content
 	shieldgemma:27b                     # safety of text prompts
 	shieldgemma:27b-q4_K_M              # safety of text prompts
 	qwen2.5-coder:14b                   # 128K Tuned for coding 7B
@@ -356,41 +352,54 @@ MODEL_LARGE+=(
 	qwen2.5:72b # 128K context Alibaba 2024-09-16 7b
 )
 
-log_verbose "Extra modles if you have plenty of space"
+log_verbose "Extra models if you have plenty of space about to be obsolete"
 MODEL_EXTRA+=(
-	mixtral:8x7b                            # mistral moe (deprecated)
-	athene-v2                               # nexusflow based on qwen2.5
-	athene-v2:latest                        # code, math, log extraction
-	athene-v2:72b                           # code, math, log extraction
-	athene-v2:72b-q4_K_M                    # code, math, log extraction
-	mistral-small                           # on the bubble to remove
-	mistral-small:latest                    # v0.3 Mistral 22b-instruct-2409-q4_0
-	mistral-small:22b                       # v0.3 Mistral 22b-instruct-2409-q4_0
-	mistral-small:22b-instruct-2409-q4_0    # v0.3 Mistral 22b-instruct-2409-q4_0
-	reflection                              # some cheating on the model
-	reflection:latest                       # some cheating on the model
-	reflection:70b                          # some cheating on the model
-	reflection:70b-q4_0                     # some cheating on the model
-	mistral-large                           # Mistral flagship Large 2
-	mistral-large:latest                    # Mistral flagship
-	mistral-large:123b                      # Mistral flagship
-	mistral-large:123b-instruct-2411-q4_K_M # Mistral flagship
-	yi-coder                                # 9B model q4 128K context
-	yi-coder:latest                         # 9B model q4 128K context
-	yi-coder:9b                             # 9B model q4 128K context
-	yi-coder:9b-chat                        # 9B model q4 128K context
-	yi-coder:9b-chat-q4_0                   # 9B model q4 128K context
-	yi-coder:1.5b                           # 9B model q4 128K context
-	yi-coder:1.5b-chat                      # 9B model q4 128K context
-	yi-coder:1.5b-chat-q4_0                 # 9B model q4 128K context
-	phi3.5                                  # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:latest                           # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b                             # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b-mini-instruct-q4_0          # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	olmo2                         # Ai2 fully open model competitive
+	olmo2:latest                  # competitive iwth llama 3.1
+	olmo2:7b                      # November 26 2024 release
+	command-r7b                   # command-r7b is the default
+	command-r7b:latest            # latest
+	command-r7b:7b                # 7B
+	command-r7b:7b-12-2024-q4_K_M # Dec 2024
+	falcon3
+	falcon3:latest             # latest from Abu Dhabi
+	falcon3:7b                 # 7B parameters
+	falcon3:7b-instruct-q4_K_M # 7B parameters
+	granite-embedding          # latest ibm embeddings
+	granite-embedding:latest
+	granite-embedding:30m
+	granite-embedding:30m-en
+	granite-embedding:278m
+	granite-embedding:278m-fp16
+	snowflake-arctic-embed2              # new embeddings
+	snowflake-arctic-embed2:latest       # new embeddings
+	snowflake-arctic-embed2:568m-l-fp16  # new embeddings
+	snowflake-arctic-embed2:568m         # new embeddings
+	aya-expanse:32b                      # cohere model 128k content
+	aya-expanse:32b-q4_K_M               # cohere model 128k content
+	tulu3                                # AI2 instruction following
+	tulu3:latest                         # full open source data, code, recipes
+	tulu3:8b                             # 128 K content has 70B brother
+	tulu3:8b-q4_K_M                      # standard quantization
+	mixtral:8x7b                         # mistral moe (deprecated)
+	athene-v2                            # nexusflow based on qwen2.5
+	athene-v2:latest                     # code, math, log extraction
+	athene-v2:72b                        # code, math, log extraction
+	athene-v2:72b-q4_K_M                 # code, math, log extraction
+	mistral-small                        # on the bubble to remove
+	mistral-small:latest                 # v0.3 Mistral 22b-instruct-2409-q4_0
+	mistral-small:22b                    # v0.3 Mistral 22b-instruct-2409-q4_0
+	mistral-small:22b-instruct-2409-q4_0 # v0.3 Mistral 22b-instruct-2409-q4_0
+
 )
 
 # legacy models for comparison with modern ones
 MODEL_OLD+=(
+
+	phi3.5                         # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:latest                  # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b                    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b-mini-instruct-q4_0 # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	# early 2024 models
 	llama2:7b           # original llama2
 	llama2:13b          # 13b
@@ -453,12 +462,28 @@ MODEL_REMOVE+=(
 	nemotron:70b                 # nvidia tuned llama 3.1
 	nemotron:70b-instruct-q4_K_M # nvidia tuned llama 3.1
 	# circa llama 3.1 models
-	solar-pro                             # single gpu model
-	solar-pro:latest                      # 22b comparable to llama 3.1 70b 4k context
-	solar-pro:22b                         # 22b comparable to llama 3.1 70b 4k context
-	solar-pro:22b-preview-instruct-q4_K_M # 22b comparable to llama 3.1 70b 4k context
-	llama3.1                              # deprecated
-	llama3.1:8b-text-q4_0                 # text tuned model poor results
+	solar-pro                               # single gpu model
+	solar-pro:latest                        # 22b comparable to llama 3.1 70b 4k context
+	solar-pro:22b                           # 22b comparable to llama 3.1 70b 4k context
+	solar-pro:22b-preview-instruct-q4_K_M   # 22b comparable to llama 3.1 70b 4k context
+	reflection                              # some cheating on the model
+	reflection:latest                       # some cheating on the model
+	reflection:70b                          # some cheating on the model
+	reflection:70b-q4_0                     # some cheating on the model
+	mistral-large                           # Mistral flagship Large 2
+	mistral-large:latest                    # Mistral flagship
+	mistral-large:123b                      # Mistral flagship
+	mistral-large:123b-instruct-2411-q4_K_M # Mistral flagship
+	yi-coder                                # 9B model q4 128K context
+	yi-coder:latest                         # 9B model q4 128K context
+	yi-coder:9b                             # 9B model q4 128K context
+	yi-coder:9b-chat                        # 9B model q4 128K context
+	yi-coder:9b-chat-q4_0                   # 9B model q4 128K context
+	yi-coder:1.5b                           # 9B model q4 128K context
+	yi-coder:1.5b-chat                      # 9B model q4 128K context
+	yi-coder:1.5b-chat-q4_0                 # 9B model q4 128K context
+	llama3.1                                # deprecated
+	llama3.1:8b-text-q4_0                   # text tuned model poor results
 	# models pre-llama3.1
 	bge-large:335m # tokens to embeddings
 	mistral-nemo
@@ -504,8 +529,11 @@ if $AUTOMATIC_BY_MEMORY; then
 	$((MEMORY > 32)))
 		INCLUDE_MEDIUM=true
 		;&
+	$((MEMORY > 16)))
+		INCLUDE_SMALL=true
+		;&
 	esac
-	log_verbose "automatic sets INCLUDE_MEDIUM=$INCLUDE_MEDIUM INCLUDE_LARGE=$INCLUDE_LARGE"
+	log_verbose "automatic sets INCLUDE_MEDIUM=$INCLUDE_MEDIUM INCLUDE_LARGE=$INCLUDE_LARGE INCLUDE_SMALL=$INCLUDE_SMALL"
 fi
 
 MODEL_LIST=("${MODEL[@]}")
@@ -516,6 +544,10 @@ fi
 if $INCLUDE_MEDIUM; then
 	log_verbose "Include medium models"
 	MODEL_LIST+=("${MODEL_MEDIUM[@]}")
+fi
+if $INCLUDE_SMALL; then
+	log_verbose "Include small models"
+	MODEL_LIST+=("${MODEL_SMALL[@]}")
 fi
 if $INCLUDE_HF; then
 	log_verbose "Include HF models"
@@ -536,7 +568,14 @@ ollama_action() {
 	shift
 
 	for M in "$@"; do
+		# if the model isn't there and needs to be removed skip it
 		if [[ $action == rm ]] && ! ollama ls "$M" | cut -d ' ' -f 1 | grep -q "^$M$"; then
+			continue
+		fi
+		# if you want to pull but not enough room skip it unless forced
+		DISK_USED="$(df -k . | sed 1d | awk 'FNR == 1 {print $5}' | cut -f 1 -d "%")"
+		if ! $FORCE && [[ $action == pull ]] && ((DISK_USED > DISK_MAX)); then
+			log_verbose "cannot pull $M $DISK_USED% used at most $DISK_MAX% allowed"
 			continue
 		fi
 		log_verbose "$action model $M"
