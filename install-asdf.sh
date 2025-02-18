@@ -1,4 +1,4 @@
-#!/usr/bin/env bashsdf p
+#!/usr/bin/env bash
 ## vim: set noet ts=4 sw=4:
 ##
 ## Install asdf and dotenv for language and tool management
@@ -218,7 +218,7 @@ for LANG in "${!ASDF[@]}"; do
 			continue
 		fi
 		log_verbose "asdf plugin add $LANG"
-		# shellcheck ignore=SC2086
+		# shellcheck disable=SC2086
 		if ! asdf plugin add "$LANG" ${ASDF_URL["$LANG"]}; then
 			log_verbose "asdf plugin add $LANG error $?"
 		fi
@@ -260,14 +260,6 @@ for LANG in "${!ASDF[@]}"; do
 		fi
 	done
 done
-
-# shellcheck disable=SC2016
-ASDF_DATA_DIR="${ASDF_DATA_DIR:-'$HOME/.asdf'}"
-if ! config_mark; then
-	config_add <<-EOF
-		ASDF_DATA_DIR="$ASDF_DATA_DIR"
-	EOF
-fi
 
 source_profile
 
@@ -341,9 +333,12 @@ EOF
 	fi
 done
 
+# shellcheck disable=SC2016
+ASDF_DATA_DIR="${ASDF_DATA_DIR:-'$HOME/.asdf'}"
 if ! config_mark; then
 	config_add <<-'EOF'
-		if [ -r "$HOME/.asdf/shims" ] && echo "$PATH" | grep -q ".asdf/shims"; then PATH="$HOME/.asdf/shims:$PATH"; fi
+		export ASDF_DATA_DIR="${ASDF_DATA_DIR:-$HOME/.asdf}"
+		if [ -r "$ASDF_DATA_DIR/shims" ] && ! echo "$PATH" | grep -q "$ASDF_DATA_DIR/shims"; then PATH="$ASDF_DATA_DIR/shims:$PATH"; fi
 	EOF
 fi
 
