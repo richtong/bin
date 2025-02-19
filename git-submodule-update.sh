@@ -134,15 +134,16 @@ log_verbose "in $PWD"
 if ! git_repo; then
 	log_error 2 "$PWD is not a git repo"
 fi
-log_verbose "cwd=$PWD"
+log_verbose "running through DEST_REPO_PATH=${DEST_REPO_PATH[*]}"
 for module in "${DEST_REPOS[@]}"; do
+	log_verbose "module=$module"
 	if ! pushd "$module" >/dev/null; then
 		log_verbose "cwd=$PWD $module not found"
 		continue
 	fi
 	log_verbose "run cmds"
 	# shellcheck disable=SC2086
-	util_git_cmd $DRY_RUN_ARG "${CMDS[@]}"
+	util_git_cmd $DRY_RUN_ARG "${CMDS[@]}" "$module"
 	log_verbose "run foreaah"
 	# shellcheck disable=SC2086
 	util_git_cmd -s $DRY_RUN_ARG "${FOREACH[@]}"
