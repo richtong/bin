@@ -16,8 +16,8 @@ DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 ORIGIN_REMOTE="${ORIGIN_REMOTE:-origin}"
-DEST_REPO_PATH="${DEST_REPO_PATH:-"$WS_DIR/git/src"}"
-DEST_REPOS=(bin lib app sys user)
+DEST_REPO_SRC="${DEST_REPO_SRC:-"$WS_DIR/git/src"}"
+DEST_REPO=(bin lib app sys user)
 FORCE_FLAG="${FORCE_FLAG:-false}"
 DRY_RUN="${DRY_RUN:-""}"
 DRY_RUN_ARG="${DRY_RUN_ARG:-""}"
@@ -34,7 +34,7 @@ while getopts "hdvnp:l:f" opt; do
 				-v verbose $($VERBOSE && echo "off" || echo "on")
 				-n dry run (default: $DRY_RUN_FLAG)
 				-l Origin remote name (default: $ORIGIN_REMOTE)
-				-p The location of the mono repo (default: $DEST_REPO_PATH)
+				-p The location of the mono repo (default: $DEST_REPO_SRC)
 		EOF
 		exit 0
 		;;
@@ -60,7 +60,7 @@ while getopts "hdvnp:l:f" opt; do
 		ORIGIN_REMOTE="$OPTARG"
 		;;
 	p)
-		DEST_REPO_PATH="$OPTARG"
+		DEST_REPO_SRC="$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt"
@@ -74,7 +74,7 @@ source_lib lib-git.sh lib-util.sh
 
 if (($# > 1)); then
 	log_verbose "set submodules to update"
-	DEST_REPOS=("$@")
+	DEST_REPO=("$@")
 fi
 DRY_RUN=""
 if $DRY_RUN_FLAG; then
@@ -117,7 +117,7 @@ fi
 # we can use the --remote to pull from the main branch
 # Note that we are still running in detached mode so need to git switch
 CMDS=(
-	'git submodule update --init --recursive --rebase --remote'
+	'git submodule update --init --recursive --remote'
 )
 #  old command which does a fetch pull and push
 # '"git fetch -p --all && git pull --ff-only && git push"'
@@ -127,26 +127,21 @@ FOREACH=(
 	'git pull --ff-only'
 )
 
-if ! pushd "$DEST_REPO_PATH" >/dev/null; then
-	log_error 1 "no $DEST_REPO_PATH"
+if ! pushd "$DEST_REPO_SRC" >/dev/null; then
+	log_error 1 "no $DEST_REPO_SRC"
 fi
 log_verbose "in $PWD"
 if ! git_repo; then
 	log_error 2 "$PWD is not a git repo"
 fi
-log_verbose "running through DEST_REPO_PATH=${DEST_REPO_PATH[*]}"
-for repo in "${DEST_REPOS[@]}"; do
-	log_verbose "repo=$repo"
-	if ! pushd "$repo" >/dev/null; then
-		log_verbose "cwd=$PWD $repo not found"
-		continue
-	fi
-	log_verbose "run cmds"
-	# shellcheck disable=SC2086
-	util_git_cmd $DRY_RUN_ARG "${CMDS[@]}" "$repo"
-done
+
+# shellcheck disable=SC2086
+log_verbose running util_git_cmd $DRY_RUN_ARG "${CMDS[@]}" "${DEST_REPO[@]}"
+# shellcheck disable=SC2086
+util_git_cmd $DRY_RUN_ARG "${CMDS[@]}" "${DEST_REPO[@]}"
 
 log_verbose "run foreach against all repos"
-# shellcheck disable=SC2086
-util_git_cmd -s $DRY_RUN_ARG "${FOREACH[@]}"
-popd >/dev/null
+for cmd in "${FOREACH[@]}"; do
+	# shellcheck disable=SC2086
+	util_git_cmd -s $DRY_RUN_ARG "$cmd"
+done
