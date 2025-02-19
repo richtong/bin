@@ -19,7 +19,7 @@ INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
 INCLUDE_HF="${INCLUDE_HF:-false}"
 INCLUDE_EXTRA="${INCLUDE_EXTRA:-false}"
 INCLUDE_OLD="${INCLUDE_OLD:-false}"
-FORCE="{${FORCE:-false}}"
+FORCE="${FORCE:-false}"
 DISK_MAX="${DISK_MAX:-80}"
 
 REMOVE_OBSOLETE="${REMOVE_OBSOLETE:-true}"
@@ -303,7 +303,7 @@ MODEL_SMALL=(
 log_verbose "loading all models over 9B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
 	openthinker:32b                     # dereict from deepseek-r1
-	openthinker:b-q4_K_M                # fine tuned on openthoughts 114k dataset
+	openthinker:32b-q4_K_M              # fine tuned on openthoughts 114k dataset
 	deepseek-r1:14b                     # r1 comparable
 	deepseek-r1:14b-qwen-distill-q4_K_M # r1 comparable
 	deepseek-r1:32b                     # r1 comparable
