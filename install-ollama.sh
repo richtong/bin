@@ -574,7 +574,8 @@ ollama_action() {
 		fi
 		# if you want to pull but not enough room skip it unless forced
 		DISK_USED="$(df -k . | sed 1d | awk 'FNR == 1 {print $5}' | cut -f 1 -d "%")"
-		if ! $FORCE && [[ $action == pull ]] && ((DISK_USED > DISK_MAX)); then
+		log_verbose "pull test FORCE=$FORCE action=$action DISK_USED=$DISK_USED DISK_MAX=$DISK_MAX"
+		if $FORCE || [[ $action == pull ]] && ((DISK_USED > DISK_MAX)); then
 			log_verbose "cannot pull $M $DISK_USED% used at most $DISK_MAX% allowed"
 			continue
 		fi
