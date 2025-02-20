@@ -254,24 +254,28 @@ ENTRY+=(
 # do not use AWS_SECRET_ACCESS_KEY, use AWS_SECRET_ACCESS_KEY use aws ssologin
 declare -A OP_API_ITEM
 OP_API_ITEM=(
+	# [CIVITAI_TOKEN]="Civitai API Key Dev"
 	# [GITHUB_TOKEN]="GitHub Personal Access Token"
+	# [GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
 	# [LOCALSTACK_API_KEY]="LocalStack API Key"
 	# [SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
+	[ALIBABA_API_KEY]="Alibab Cloud API Key Dev"
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
 	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
-	[CIVITAI_TOKEN]="Civitai API Key Dev"
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
 	[DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
-	[GOOGLE_API_KEY]="Google Gemini API Key Dev"
-	[GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
 	[GOOGLE_AI_API_KEY]="Google Gemini API Key Dev" # used by zed
+	[GOOGLE_API_KEY]="Google Gemini API Key Dev"
 	[GROQ_API_KEY]="Groq API Key Dev"
 	[HF_TOKEN]="Hugging Face API Token Dev"
 	[MISTRAL_API_KEY]="Mistral API Key Dev"
 	[OPENAI_API_KEY]="OpenAI API Key Dev"
-	[OPENROUTER_API_KEY]="OpenRouter Key Dev"
+	[OPENROUTER_API_KEY]="OpenRouter API Key Dev"
+	[PERPLEXITY_API_KEY]="Perplexity API Key Dev"
 	[REPLICATE_API_KEY]="Replicate API Token Dev"
+	[SAMBANOVA_API_KEY]="Sambanova API Key Dev"
+	[STEPFUN_API_KEY]="StepFun API Key Dev"
 	[SLASHGPT_ENV_WEBPILOT_UID]="Webpilot UID Dev"
 	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
 
@@ -286,28 +290,33 @@ OP_API_ITEM=(
 # so auth token should be changed to when the plugin changes in 1password
 declare -A OP_API_FIELD
 OP_API_FIELD=(
-	# [GITHUB_TOKEN]=token
-	# [LOCALSTACK_API_KEY]="api key"
-	# [SUPERSET_SECRET_KEY]="api key"
+	[ALIBABA_API_KEY]="api key"
 	[ANTHROPIC_API_KEY]="api key"
 	[AWS_ACCESS_KEY_ID]="access key id"
 	[AWS_SECRET_ACCESS_KEY]="secret access key"
 	[CIVITAI_TOKEN]="api key"
 	[DEEPSEEK_API_KEY]="api key"
 	[DIGITALOCEAN_ACCESS_TOKEN]=token
-	[GOOGLE_API_KEY]="api key"
+	[GITHUB_TOKEN]=token
 	[GITHUB_TOKEN_CLASSIC]="personal access token"
 	[GOOGLE_AI_API_KEY]="api key"
+	[GOOGLE_API_KEY]="api key"
 	[GROQ_API_KEY]="api key"
 	[HF_TOKEN]="user access token"
+	[LOCALSTACK_API_KEY]="api key"
 	[MISTRAL_API_KEY]="api key"
 	[OPENAI_API_KEY]="api key"
 	[OPENROUTER_API_KEY]="key"
 	[REPLICATE_API_KEY]="api token"
+	[PERPLEXITY_API_KEY]="api key"
+	[SAMBANOVA_API_KEY]="api token"
+	[STEPFUN_API_KEY]="interface key"
 	[SLASHGPT_ENV_WEBPILOT_UID]=key
+	[SUPERSET_SECRET_KEY]="api key"
 	[WEBUI_SECRET_KEY]="secret key"
 
 )
+
 log_verbose "OP_API_FIELD:${OP_API_FIELD[*]}"
 log_verbose "OP_API_FIELD[AN]:${OP_API_FIELD[ANTHROPIC_API_KEY]}"
 # this creates a ./.op directory in the CWD so make sure we are at HOME
