@@ -66,13 +66,12 @@ PACKAGE+=(
 	# shell-gpt - cli including running shell commands (never use deprecated)
 	# vincelwt-chatgpt - ChatGPT in menubar (not using)
 	# appflowy        # project manager based on ai (don't ever use)
+	# lm-studio       # lm-studio -  run different LLMs from Hugging Face locally (deprecated)
 	cursor          # pair programming using VScode, takes over the $(code)
 	diffusionbee    # diffusionbee - Stability diffusion on Mac
 	huggingface-cli # hf.co download files
-	# lm-studio       # lm-studio -  run different LLMs from Hugging Face locally (deprecated)
 	mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
 	parquet-cli     # command line opening parquet data files
-	cursor          # ai code editor that's based on code
 	zed             # yet another ai editor
 	# jan             # grafical front-end for llama.cpp (deprecate for ollama)
 	tika      # Apache tika content extractor command line
@@ -151,30 +150,32 @@ download_url_open "https://download.comfy.org/mac/dmg/arm64"
 log_verbose "find open-interpreter models at https://docs.litellm.ai/docs/providers/"
 log_verbose "gemini-pro o1-mini claude-3-5-sonnetjj"
 
-mkdir -p "$CIVITAI_CLI_CONFIG_DIR"
-if ! config_mark "$CIVITAI_CLI_CONFIG_DIR/.env"; then
-	log_verbose "installing CivitAI cli"
-	config_add "$CIVITAI_CLI_CONFIG_DIR/.env" <<-EOF
-		# CIVITAI_TOKEN do a 1Password item get in .bash_profile
-		MODELS_DIR="$COMFYUI_USER_DIR/models"
-		OLLAMA_API_BASE=http://localhost:11434
-		# OLLAMA_API_BASE=http://host.docker.internal:11434
-		CIVITAI_BASE_URL=https://civitai.com
-	EOF
-fi
+# not needed use the comfyui installer
+# mkdir -p "$CIVITAI_CLI_CONFIG_DIR"
+# if ! config_mark "$CIVITAI_CLI_CONFIG_DIR/.env"; then
+# 	log_verbose "installing CivitAI cli"
+# 	config_add "$CIVITAI_CLI_CONFIG_DIR/.env" <<-EOF
+# 		# CIVITAI_TOKEN do a 1Password item get in .bash_profile
+# 		MODELS_DIR="$COMFYUI_USER_DIR/models"
+# 		OLLAMA_API_BASE=http://localhost:11434
+# 		# OLLAMA_API_BASE=http://host.docker.internal:11434
+# 		CIVITAI_BASE_URL=https://civitai.com
+# 	EOF
+# fi
 
-log_verbose "install Jar for open-webui"
-TIKA_VERSION="${TIKA_VERSION:-2.9.2}"
-TIKA_JAR_FILE="${TIKA_JAR_FILE:-tika-server-standard-$TIKA_VERSION.jar}"
-TIKA_JAR_URL+=(
-	"https://dlcdn.apache.org/tika/$TIKA_VERSION/$TIKA_JAR_FILE"
-)
-TIKA_JAR_DIR="${TIKA_JAR_DIR:-$HOME/jar}"
-TIKA_JAR_PATH="${TIKA_JAR_PATH:-$TIKA_JAR_DIR/$TIKA_JAR_FILE}"
-# usage: download_url url [dest_file [dest_dir [md5 [sha256]]]]
-for url in "${TIKA_JAR_URL[@]}"; do
-	download_url "$url" "$TIKA_JAR_PATH" "$TIKA_JAR_DIR"
-done
+# not needed with the brew installation
+# log_verbose "install Jar for open-webui"
+# TIKA_VERSION="${TIKA_VERSION:-2.9.2}"
+# TIKA_JAR_FILE="${TIKA_JAR_FILE:-tika-server-standard-$TIKA_VERSION.jar}"
+# TIKA_JAR_URL+=(
+# 	"https://dlcdn.apache.org/tika/$TIKA_VERSION/$TIKA_JAR_FILE"
+# )
+# TIKA_JAR_DIR="${TIKA_JAR_DIR:-$HOME/jar}"
+# TIKA_JAR_PATH="${TIKA_JAR_PATH:-$TIKA_JAR_DIR/$TIKA_JAR_FILE}"
+# # usage: download_url url [dest_file [dest_dir [md5 [sha256]]]]
+# for url in "${TIKA_JAR_URL[@]}"; do
+# 	download_url "$url" "$TIKA_JAR_PATH" "$TIKA_JAR_DIR"
+# done
 
 log_verbose "Installing ${PYTHON_PACKAGE[*]}"
 for package in "${PYTHON_PACKAGE[@]}"; do
@@ -214,6 +215,9 @@ log_verbose "install ollama models"
 
 log_verbose "install comfyUI and models"
 "$BIN_DIR/install-comfyui.sh"
+
+log_verbose "install Jupyter so open-webui can run code there"
+"$BIN_DIR/install-jupyter.sh"
 
 # https://dashboard.ngrok.com/get-started/setup/macos
 log_verbose "configure ngrok as front-end to open-webui with make auth with the right ngrok 1Password item"

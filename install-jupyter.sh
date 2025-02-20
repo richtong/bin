@@ -58,7 +58,7 @@ if ! in_os mac; then
 	log_exit "Mac only"
 fi
 
-brew_install jupyterlab
+pipx install jupyterlab
 # ipython is installed but needs to be linked
 # key link no longer needed
 #log_verbose "brew keg link jupyterlab and ipython"
@@ -102,7 +102,7 @@ PIP_PACKAGE=(
 
 )
 log_verbose "Installing python extensions ${PIP_PACKAGE[*]}"
-pip_install "${PIP_PACKAGE[@]}"
+pipx inject jupyterlab "${PIP_PACKAGE[@]}"
 
 INTEL_PACKAGE=(
 	'xeus-python>=0.8.6'
@@ -111,9 +111,9 @@ INTEL_PACKAGE=(
 	hdf5plugin
 )
 
-if mac_is_arm; then
+if ! mac_is_arm; then
 	log_verbose "Mac Intel only versions installed"
-	pip_install "${INTEL_PACKAGE[@]}"
+	pipx inject jupyterlab "${INTEL_PACKAGE[@]}"
 fi
 
 # https://github.com/jupyter/nbconvert
