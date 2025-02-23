@@ -13,11 +13,12 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
+INCLUDE_XSMALL="${INCLUDE_XSMALL:-false}"
 INCLUDE_SMALL="${INCLUDE_SMALL:-false}"
 INCLUDE_MEDIUM="${INCLUDE_MEDIUM:-false}"
 INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
 INCLUDE_HF="${INCLUDE_HF:-false}"
-INCLUDE_EXTRA="${INCLUDE_EXTRA:-false}"
+INCLUDE_XLARGE="${INCLUDE_XLARGE:-false}"
 INCLUDE_OLD="${INCLUDE_OLD:-false}"
 FORCE="${FORCE:-false}"
 DISK_MAX="${DISK_MAX:-80}"
@@ -31,7 +32,7 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdveox:rlfsmug" opt; do
+while getopts "hdveox:rlfsmugt" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
@@ -46,15 +47,12 @@ flags:
 	-d $(! $DEBUGGING || echo "no ")debugging
 	-v $(! $VERBOSE || echo "not ")verbose
 	-a $(! $AUTOMATIC_BY_MEMORY || echo "do not ")automatically install models based on system memory
-		always install base and hugging face models
-		system memory > 32GB add medium models
-		system memory > 64GB add large models
-
-	-s $(! $INCLUDE_SMALL || echo "do not ")pull smaller then 3B+ parameters (even if you do not have 8GB RAM)
-	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 16GB RAM)
-	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 40GB+ RAM)
+	-t $(! $INCLUDE_XSMALL || echo "do not ")pull smaller then 3B+ parameters (even if you do not have 8GB+ RAM)
+	-s $(! $INCLUDE_SMALL || echo "do not ")pull smaller then 7B+ parameters (even if you do not have 16GB+ RAM)
+	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 32GB+ RAM)
+	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
 	-g $(! $INCLUDE_HF || echo "do not ")pull huggingface models
-	-e $(! $INCLUDE_EXTRA || echo "do not ")pull extra models if you have lots of disk (>2TB)
+	-e $(! $INCLUDE_XLARGE || echo "do not ")pull extra models if you have lots of disk (>2TB)
 	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
 	-r $(! $REMOVE_OBSOLETE || echo "do not ")remove obsolete models
 	-u $([[ $ACTION == pull ]] || echo "un")install models
@@ -77,6 +75,16 @@ EOF
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
+	t)
+		# invert the variable when flag is set
+		INCLUDE_XSMALL="$($INCLUDE_XSMALL && echo false || echo true)"
+		export INCLUDE_XSMALL
+		;;
+	s)
+		# invert the variable when flag is set
+		INCLUDE_SMALL="$($INCLUDE_SMALL && echo false || echo true)"
+		export INCLUDE_SMALL
+		;;
 	m)
 		# invert the variable when flag is set
 		INCLUDE_MEDIUM="$($INCLUDE_MEDIUM && echo false || echo true)"
@@ -95,8 +103,8 @@ EOF
 		;;
 	e)
 		# invert action between pull and rm
-		INCLUDE_EXTRA="$($INCLUDE_EXTRA && echo false || echo true)"
-		export INCLUDE_EXTRA
+		INCLUDE_XLARGE="$($INCLUDE_XLARGE && echo false || echo true)"
+		export INCLUDE_XLARGE
 		;;
 	o)
 		# invert action between pull and rm
@@ -152,7 +160,10 @@ MAS+=(
 	6474268307 # Enchanted LLM Mac only selfhosted
 
 )
-mas_install "${MAS[@]}"
+
+if in_os mac; then
+	mas_install "${MAS[@]}"
+fi
 
 # note things like neovim code companion will use the first model
 # that comes out of ollama list and this is the last one pulled, so this
@@ -186,7 +197,7 @@ MODEL_HF+=(
 # per word and you can see why Q4_K_M is the default, at the knee of the curve
 # 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
-log_verbose "Minimal Base models for machines that are 8GB"
+log_verbose "Minimal Base 1-2B models for machines that <8GB" 
 MODEL+=(
 	deepscaler        # fintuned deepseek-r1-distilled-qwen beats 01-previe
 	deepscaler:latest # 8K synthetic
@@ -196,12 +207,6 @@ MODEL+=(
 	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
 	smallthinker                         # Fine tuned Qwen2.5-b-instruct
 	smallthinker:latest                  # qwq used to generate 8K synthetic
-	smallthinker:3b                      # long sequence encourage CoT
-	smallthinker:3b-preview-q8_0         # open dataset
-	falcon3:3b                           # 7B parameters
-	falcon3:3b-instruct-q4_K_M           # 7B parameters
-	falcon3:1b                           # 7B parameters
-	falcon3:1b-instruct-q8_0
 	opencoder                          # completely open source
 	opencoder:latest                   # completely open source
 	opencoder:1.5b                     #  english and chinse
@@ -217,10 +222,6 @@ MODEL+=(
 	shieldgemma:2b-q4_K_M              # safety of text prompts
 	llama-guard3:1b                    # safety of prompts
 	llama-guard3:1b-q8_0               # safety of prompts
-	llama3.2                           # Meta 3.2-3B Q4 128 context
-	llama3.2:latest                    # Meta 3.2-3B Q4 128 context
-	llama3.2:3b                        # Meta 3.2-3B Q4 128 context 2GB
-	llama3.2:3b-instruct-q4_K_M        # Meta 3.2-3B Q4 128 context 2GB
 	llama3.2:1b                        # Meta 1B 128K context
 	llama3.2:1b-instruct-q8_0          # Meta 1B 128K context
 	qwen2.5-coder:0.5b                 # 128K Tuned for coding 7B
@@ -232,11 +233,8 @@ MODEL+=(
 	qwen2.5-coder:1.5b-instruct-q4_K_M # 128K Tuned for coding 7B
 
 	# these models are pre llama3.2 and subject to deprecation
-	nemotron-mini:4b     # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	nemotron-mini:latest # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
 	qwen2.5:0.5b         # 128K context Alibaba 2024-09-16 7b
 	qwen2.5:1.5b         # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:3b           # 128K context Alibaba 2024-09-16 7b
 	# these models are pre llama3.1 and are very close to gone
 	bge-large                   # embedding model from BAAI
 	bge-large:335m              # embedding model from BAA
@@ -244,8 +242,23 @@ MODEL+=(
 
 )
 
-log_verbose "loading all models over 3B parameters, requires 16GB of RAM"
-MODEL_SMALL=(
+log_verbose "loading all models over 2-3B parameters, requires >4GB of RAM"
+MODEL_XSMALL+=(
+	smallthinker:3b                      # long sequence encourage CoT
+	smallthinker:3b-preview-q8_0         # open dataset
+	falcon3:3b                           # 7B parameters
+	falcon3:3b-instruct-q4_K_M           # 7B parameters
+	falcon3:1b                           # 7B parameters
+	falcon3:1b-instruct-q8_0
+	llama3.2                           # Meta 3.2-3B Q4 128 context
+	llama3.2:latest                    # Meta 3.2-3B Q4 128 context
+	llama3.2:3b                        # Meta 3.2-3B Q4 128 context 2GB
+	llama3.2:3b-instruct-q4_K_M        # Meta 3.2-3B Q4 128 context 2GB
+	qwen2.5:3b           # 128K context Alibaba 2024-09-16 7b
+)
+
+log_verbose "loading all models over 4-8B parameters, requires >8GB of RAM"
+MODEL_SMALL+=(
 	openthinker # resaonsing models based on deepseek-r1
 	openthinker:latest
 	openthinker:7b
@@ -293,6 +306,8 @@ MODEL_SMALL=(
 	bespoke-minicheck:latest            # Fact check 7B q4_K_M
 	bespoke-minicheck:7b                # Fact check 7B q4_K_M
 	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
+	nemotron-mini:4b     # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	nemotron-mini:latest # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
 	minicpm-v                           # mLLM visual too, ocr v2.6 ModelBest CN
 	minicpm-v:latest                    # mLLM visual too, ocr v2.6 ModelBest CN
 	minicpm-v:8b                        # mLLM visual too, ocr v2.6 ModelBest CN
@@ -300,7 +315,7 @@ MODEL_SMALL=(
 
 )
 #
-log_verbose "loading all models over 9B parameters, requires >16GB RAM"
+log_verbose "loading all models over 9B-32B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
 	openthinker:32b                     # dereict from deepseek-r1
 	openthinker:32b-q4_K_M              # fine tuned on openthoughts 114k dataset
@@ -338,7 +353,7 @@ MODEL_MEDIUM+=(
 
 )
 
-log_verbose "loading all models over 32B parameters, requires >64GB RAM"
+log_verbose "loading all models over >32B parameters, requires >64GB RAM"
 MODEL_LARGE+=(
 	deepseek-r1:70b                      # disitlled lllama
 	deepseek-r1:70b-llama-distill-q4_K_M # llama based
@@ -353,7 +368,7 @@ MODEL_LARGE+=(
 )
 
 log_verbose "Extra models if you have plenty of space about to be obsolete"
-MODEL_EXTRA+=(
+MODEL_XLARGE+=(
 	olmo2                         # Ai2 fully open model competitive
 	olmo2:latest                  # competitive iwth llama 3.1
 	olmo2:7b                      # November 26 2024 release
@@ -515,8 +530,8 @@ if $AUTOMATIC_BY_MEMORY; then
 	log_verbose "Automatic model load by memory"
 	# https://superuser.com/questions/197059/mac-os-x-sysctl-get-total-and-free-memory-size
 	# 2**30 is 1GB
-	MEMORY=$(($(sysctl -n hw.memsize) / 2 ** 30))
-	log_verbose "Memory size is $MEMORY"
+	MEMORY="$(util_gpu_memory)"
+	log_verbose "Memory size is ${MEMORY}GB"
 	# https://stackoverflow.com/questions/12614011/using-case-for-a-range-of-numbers-in-bash
 	# https://stackoverflow.com/questions/12010686/case-statement-fallthrough
 	# conditional arithmetic expressions return 1 if true and 0 if false
@@ -532,11 +547,18 @@ if $AUTOMATIC_BY_MEMORY; then
 	$((MEMORY > 16)))
 		INCLUDE_SMALL=true
 		;&
+	$((MEMORY > 8)))
+		INCLUDE_XSMALL=true
+		;&
 	esac
-	log_verbose "automatic sets INCLUDE_MEDIUM=$INCLUDE_MEDIUM INCLUDE_LARGE=$INCLUDE_LARGE INCLUDE_SMALL=$INCLUDE_SMALL"
+	log_verbose "automatic sets INCLUDE_MEDIUM=$INCLUDE_MEDIUM INCLUDE_LARGE=$INCLUDE_LARGE INCLUDE_SMALL=$INCLUDE_SMALL INCLUDE_XSMALL=$INCLUDE_XSMALL"
 fi
 
 MODEL_LIST=("${MODEL[@]}")
+if $INCLUDE_XLARGE; then
+	log_verbose "Include extra large models"
+	MODEL_LIST+=("${MODEL_XLARGE[@]}")
+fi
 if $INCLUDE_LARGE; then
 	log_verbose "Include large models"
 	MODEL_LIST+=("${MODEL_LARGE[@]}")
@@ -549,13 +571,13 @@ if $INCLUDE_SMALL; then
 	log_verbose "Include small models"
 	MODEL_LIST+=("${MODEL_SMALL[@]}")
 fi
+if $INCLUDE_XSMALL; then
+	log_verbose "Include extra small models"
+	MODEL_LIST+=("${MODEL_XSMALL[@]}")
+fi
 if $INCLUDE_HF; then
 	log_verbose "Include HF models"
 	MODEL_LIST+=("${MODEL_HF[@]}")
-fi
-if $INCLUDE_EXTRA; then
-	log_verbose "Include extra models for >2TB drives"
-	MODEL_LIST+=("${MODEL_EXTRA[@]}")
 fi
 if $INCLUDE_OLD; then
 	log_verbose "Include old models"
