@@ -13,10 +13,12 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
+
+INSTALL_DIR="${INSTALL_DIR:-"$WS_DIR/git/src/user/studio-demo"}"
 # this replace set -e by running exit on any error use for bashdb
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdv" opt; do
+while getopts "hdvi:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -26,7 +28,7 @@ while getopts "hdv" opt; do
 			    flags: -h help"
 				   -d $(! $DEBUGGING || echo "no ")debugging
 				   -v $(! $VERBOSE || echo "not ")verbose
-			           -r version number (default: $VERSION)
+				   -i Instllation directory (default: $INSTALL_DIR)
 		EOF
 		exit 0
 		;;
@@ -41,6 +43,9 @@ while getopts "hdv" opt; do
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		export VERBOSE=true
+		;;
+	i)
+		INSTALL_DIR="$OPTARG"
 		;;
 	*)
 		echo "not flag -$opt"
@@ -58,51 +63,78 @@ if ! in_os mac; then
 	log_exit "Mac only"
 fi
 
+# https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html
+# this does not work as the application directory is read only but install
+# anyway
 pipx install jupyterlab
-# ipython is installed but needs to be linked
-# key link no longer needed
-#log_verbose "brew keg link jupyterlab and ipython"
-#brew link ipython jupyterlab
-log_verbose "Installing into the bare environment use pipenv, conda or venv normally"
+log_verbose "Installing into user directory $INSTALL_DIR must be writable"
 hash -r
 
-# nbdime - Notebook diff and merge cli and jupyterlab command line interface
+# these are out of date and some not working
+# https://www.tabnine.com/blog/top-jupyterlab-extensions/
+# https://saturncloud.io/blog/top-33-jupyterlab-extensions-2024/
+# https://github.com/ml-tooling/best-of-jupyter?tab=readme-ov-file
+# https://jupyterlab-lsp.readthedocs.io/en/latest/Language%20Servers.html
 PIP_PACKAGE=(
-
 	aquirdturtle_collapsible_headings
-	black
-	blockdiagmagic
+	# blockdiagmagic
+	# "elyra[all]" # ai extenions did not pip install
+	bash_kernel
+	gather
 	graphviz
-	"ipydrawio[all]"
-	ipydrawio-export
-	ipywidgets
-	isort
-	jupyter-dash
+	# "ipydrawio[all]"
+	# ipydrawio-export
+	# ipywidgets
+	# isort  # replaced by ruff
+	# jupyter-dash  # replaced by jupyterlab-dash
 	jupyter_bokeh
 	jupyterhub
 	jupyterlab
+	jupyterlab-code-formatter
+	# jupyterlab-chart-editor  # no pip file
+	jupyterlab-execute-time
+	jupyterlab-dash
 	jupyterlab-git
-	jupyterlab-github
-	jupyterlab-hide-code
-	jupyterlab-spellchecker
-	jupyterlab-system-monitor
-	jupyterlab_code_formatter
-	jupyterlab_vim
-	jupyterlab_widgets
-	jupytext
-	nb-js-diagrammers
-	nbdime
-	nodejs
-	notebook
-	pillow
-	pivottablejs
+	# jupyterlab-github  # generation token not found
+	# jupyterlab-google-drive  # does not exist
+	# jupyterlab-hide-code
+	# jupyterlab-kite # Ai coding assistant out of business 2022
+	# jupyterlab-latex
+	# jupyterlab-lsp
+	# jupyterlab-spellchecker
+	# jupyterlab-system-monitor
+	# jupyterlab
+	# jupyterlab-spreadsheet
+	# jupyterlab-system-monitor
+	# jupyterlab_vim
+	# jupyterlab-theme-solarized-dark
+	# jupyterlab-toc  # archived
+	# jupyterlab_widgets
+	# jupytext
+	# "jupyverse[auth,jupyterlab]" # FastAPI server instead of jupyter-server BB
+	# nb-js-diagrammers
+	# lckr_jupyterlab_variableinspector
+	# nbdime # Notebook diff and merge cli and jupyterlab command line interface
+	# nbformat
+	# nodejs
+	# notebook
+	# pillow2
+	# pivottablejs
 	"python-lsp-server[all]"
-	'python-language-server[all]'
-	yapf
-
+	# 'python-language-server[all]'
+	ruff
+	spellchecker
+	# yapf
 )
+
 log_verbose "Installing python extensions ${PIP_PACKAGE[*]}"
 pipx inject jupyterlab "${PIP_PACKAGE[@]}"
+
+log_verbose "Assukming uv installation"
+if ! pushd "$INSTALL_DIR" >/dev/null; then
+	log_error 1 "no $INSTALL_DIR"
+fi
+uv add "${PIP_PACKAGE[@]}"
 
 INTEL_PACKAGE=(
 	'xeus-python>=0.8.6'
@@ -114,6 +146,8 @@ INTEL_PACKAGE=(
 if ! mac_is_arm; then
 	log_verbose "Mac Intel only versions installed"
 	pipx inject jupyterlab "${INTEL_PACKAGE[@]}"
+	uv add "${INTEL_PACKAGE[@]}"
+	uv run jupyter build
 fi
 
 # https://github.com/jupyter/nbconvert
@@ -183,3 +217,7 @@ log_verbose "use MyST for rendering to Sphinx or Jupyter Book"
 log_verbose "   jupytext --to md:myst, notebook.ipynb"
 log_verbose "sync from the last modified .ipynb or .md to the other"
 log_verbose "   jupytext -s notebook.ipynb"
+
+# https://github.com/jupyterlab/jupyterlab-github
+log_verbose "to enable github extension add an old PAT to your server.json"
+log_verbose "c.GitHubConfig.access_token ="
