@@ -119,6 +119,10 @@ EOF
 	u)
 		# invert action between pull and rm
 		ACTION="$([[ $ACTION == pull ]] && echo rm || echo pull)"
+		if [[ $ACTION == rm ]]; then
+			echo "Removing models you must specify the exact ones -a is off"
+			AUTOMATIC_BY_MEMORY=false
+		fi
 		export ACTION
 		;;
 	x)
@@ -317,34 +321,37 @@ MODEL_SMALL+=(
 #
 log_verbose "loading all models over 9B-32B parameters, requires >16GB RAM"
 MODEL_MEDIUM+=(
-	openthinker:32b                     # dereict from deepseek-r1
-	openthinker:32b-q4_K_M              # fine tuned on openthoughts 114k dataset
-	deepseek-r1:14b                     # r1 comparable
-	deepseek-r1:14b-qwen-distill-q4_K_M # r1 comparable
-	deepseek-r1:32b                     # r1 comparable
-	deepseek-r1:32b-qwen-distill-q4_K_M # r1 comparable
-	olmo2:13b                           # AI2 fully open
-	olmo2:13b-1124-instruct-q4_K_M      # compets with llama 3.1
-	phi4                                # Microsoft Jan 7 2025
-	phi4:latest                         # synthetic, filtered 9.1GB
-	phi4:14b                            # 16K context length only
-	phi4:14b-q4_K_M                     # MMLU equals llama3.3:70b qwen2.5:72b
-	falcon3:10b                         # 7B parameters
-	falcon3:10b-instruct-q4_K_M         # 7B parameters
-	qwq                                 # like o1
-	qwq:latest                          # like o1
-	qwq:32b                             # Alibaba advanced reasoning
-	qwq:32b-preview-q4_K_M              # Alibaba advanced reasoning
-	llama3.2-vision                     # should run in open-webui
-	llama3.2-vision:latest              # should run in open-webui
-	llama3.2-vision:11b                 # vision works now
-	llama3.2-vision:11b-instruct-q4_K_M # vision works now
-	shieldgemma:27b                     # safety of text prompts
-	shieldgemma:27b-q4_K_M              # safety of text prompts
-	qwen2.5-coder:14b                   # 128K Tuned for coding 7B
-	qwen2.5-coder:14b-instruct-q4_K_M   # 128K Tuned for coding 7B
-	qwen2.5-coder:32b                   # 128K Tuned for coding 7B
-	qwen2.5-coder:32b-instruct-q4_K_M   # 128K Tuned for coding 7B
+	openthinker:32b                        # dereict from deepseek-r1
+	openthinker:32b-q4_K_M                 # fine tuned on openthoughts 114k dataset
+	deepseek-r1:14b                        # r1 comparable
+	deepseek-r1:14b-qwen-distill-q4_K_M    # r1 comparable
+	deepseek-r1:32b                        # r1 comparable
+	deepseek-r1:32b-qwen-distill-q4_K_M    # r1 comparable
+	mistral-small                          # this is now the 2503 model
+	mistral-small:latest                   # now the 2501 model
+	mistral-small:24b-instruct-2501-q4_K_M # the latest model
+	olmo2:13b                              # AI2 fully open
+	olmo2:13b-1124-instruct-q4_K_M         # compets with llama 3.1
+	phi4                                   # Microsoft Jan 7 2025
+	phi4:latest                            # synthetic, filtered 9.1GB
+	phi4:14b                               # 16K context length only
+	phi4:14b-q4_K_M                        # MMLU equals llama3.3:70b qwen2.5:72b
+	falcon3:10b                            # 7B parameters
+	falcon3:10b-instruct-q4_K_M            # 7B parameters
+	qwq                                    # like o1
+	qwq:latest                             # like o1
+	qwq:32b                                # Alibaba advanced reasoning
+	qwq:32b-preview-q4_K_M                 # Alibaba advanced reasoning
+	llama3.2-vision                        # should run in open-webui
+	llama3.2-vision:latest                 # should run in open-webui
+	llama3.2-vision:11b                    # vision works now
+	llama3.2-vision:11b-instruct-q4_K_M    # vision works now
+	shieldgemma:27b                        # safety of text prompts
+	shieldgemma:27b-q4_K_M                 # safety of text prompts
+	qwen2.5-coder:14b                      # 128K Tuned for coding 7B
+	qwen2.5-coder:14b-instruct-q4_K_M      # 128K Tuned for coding 7B
+	qwen2.5-coder:32b                      # 128K Tuned for coding 7B
+	qwen2.5-coder:32b-instruct-q4_K_M      # 128K Tuned for coding 7B
 	# these models are pre llama3.2 and are very close to gone
 	qwen2.5:14b              # 128K context Alibaba 2024-09-16 7b
 	qwen2.5:32b              # 128K context Alibaba 2024-09-16 7b
@@ -355,8 +362,14 @@ MODEL_MEDIUM+=(
 
 log_verbose "loading all models over >32B parameters, requires >64GB RAM"
 MODEL_LARGE+=(
+	r1-1776                              # perplexity r1 model on latest data
+	r1-1776:latest                       # perplexity r1 model on latest data
+	r1-1776:70b-distill-llama-q4_K_M     # perplexity r1 model on latest data
+	r1-1776:70b                          # perplexity r1 model on latest data
 	deepseek-r1:70b                      # disitlled lllama
 	deepseek-r1:70b-llama-distill-q4_K_M # llama based
+	tulu3:70b                            # tulu3 is not much better than llama3 and takes speace
+	tulu3:70b-q4_K_M                     # AI2 instruction following
 	llama3.3                             # same perforamnce as llama 3.1 405B
 	llama3.3:latest                      # 128K context
 	llama3.3:70b                         # 128K context
@@ -386,31 +399,30 @@ MODEL_XLARGE+=(
 	granite-embedding:30m-en
 	granite-embedding:278m
 	granite-embedding:278m-fp16
-	snowflake-arctic-embed2              # new embeddings
-	snowflake-arctic-embed2:latest       # new embeddings
-	snowflake-arctic-embed2:568m-l-fp16  # new embeddings
-	snowflake-arctic-embed2:568m         # new embeddings
-	aya-expanse:32b                      # cohere model 128k content
-	aya-expanse:32b-q4_K_M               # cohere model 128k content
-	tulu3                                # AI2 instruction following
-	tulu3:latest                         # full open source data, code, recipes
-	tulu3:8b                             # 128 K content has 70B brother
-	tulu3:8b-q4_K_M                      # standard quantization
-	mixtral:8x7b                         # mistral moe (deprecated)
-	athene-v2                            # nexusflow based on qwen2.5
-	athene-v2:latest                     # code, math, log extraction
-	athene-v2:72b                        # code, math, log extraction
-	athene-v2:72b-q4_K_M                 # code, math, log extraction
-	mistral-small                        # on the bubble to remove
-	mistral-small:latest                 # v0.3 Mistral 22b-instruct-2409-q4_0
-	mistral-small:22b                    # v0.3 Mistral 22b-instruct-2409-q4_0
-	mistral-small:22b-instruct-2409-q4_0 # v0.3 Mistral 22b-instruct-2409-q4_0
+	sailor2:8b                          # qwen  tuned for se asian languages
+	sailor2:8b-chat-q4_K_M              # qwen  tuned for se asian languages
+	snowflake-arctic-embed2             # new embeddings
+	snowflake-arctic-embed2:latest      # new embeddings
+	snowflake-arctic-embed2:568m-l-fp16 # new embeddings
+	snowflake-arctic-embed2:568m        # new embeddings
+	aya-expanse:32b                     # cohere model 128k content
+	aya-expanse:32b-q4_K_M              # cohere model 128k content
+	tulu3                               # AI2 instruction following
+	tulu3:latest                        # full open source data, code, recipes
+	tulu3:8b                            # 128 K content has 70B brother
+	tulu3:8b-q4_K_M                     # standard quantization
+	mixtral:8x7b                        # mistral moe (deprecated)
+	athene-v2                           # nexusflow based on qwen2.5
+	athene-v2:latest                    # code, math, log extraction
+	athene-v2:72b                       # code, math, log extraction
+	athene-v2:72b-q4_K_M                # code, math, log extraction
 
 )
 
 # legacy models for comparison with modern ones
 MODEL_OLD+=(
 
+	phi3                           # the original
 	phi3.5                         # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	phi3.5:latest                  # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	phi3.5:3.8b                    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
@@ -432,16 +444,16 @@ MODEL_OLD+=(
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
 	# llama 3.2 models
-	granite3.1-dense:2b                 # do not need such a small model
-	granite3.1-dense:2b-instruct-q4_K_M # granite worse than llama
-	granite3.1-moe                      # mixture of experts
-	granite3.1-moe:latest               # low latency model
-	granite3.1-moe:1b                   # low latency model
-	granite3.1-moe:1b-instruct-q4_K_M   # low latency model
-	granite3.1-moe:3b                   # larger model
-	granite3.1-moe:3b-instruct-q4_K_M   # larger model
-	tulu3:70b                           # tulu3 is not much better than llama3 and takes speace
-	tulu3:70b-q4_K_M                    # AI2 instruction following
+	granite3.1-dense:2b                  # do not need such a small model
+	granite3.1-dense:2b-instruct-q4_K_M  # granite worse than llama
+	granite3.1-moe                       # mixture of experts
+	granite3.1-moe:latest                # low latency model
+	granite3.1-moe:1b                    # low latency model
+	granite3.1-moe:1b-instruct-q4_K_M    # low latency model
+	granite3.1-moe:3b                    # larger model
+	granite3.1-moe:3b-instruct-q4_K_M    # larger model
+	mistral-small:22b                    # v0.3 Mistral 22b-instruct-2409-q4_0
+	mistral-small:22b-instruct-2409-q4_0 # v0.3 Mistral 22b-instruct-2409-q4_0
 	# succeeded by 3.1
 	granite3-dense                    # IBM tool, RAG, code, translation
 	granite3-dense:latest             # IBM
