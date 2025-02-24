@@ -191,7 +191,7 @@ fi
 log_verbose "tne.ai Orion settings"
 if ! config_mark "$WS_DIR/git/src/.envrc"; then
 	config_add "$WS_DIR/git/src/.envrc" <<-'EOF'
-		# for open-webui and comfyui integration
+		# for open-webui and comfyui integration and tne ui
 		[[ -v COMFYUI_BASE_URL ]] || COMFYUI_BASE_URL="https://localhost:8188"
 		[[ -v GOOGLE_DRIVE_API_KEY ]] || export "GOOGLE_DRIVE_API_KEY"="$(op item get "Google Drive and Picker API Key Dev" --fields "api key" --reveal)"
 		[[ -v GOOGLE_DRIVE_CLIENT_ID ]] || export "GOOGLE_DRIVE_CLIENT_ID"="$(op item get "Google OAuth Client ID Dev" --fields "client id" --reveal)"
@@ -199,6 +199,8 @@ if ! config_mark "$WS_DIR/git/src/.envrc"; then
 		[[ -v VITE_AWS_KEY ]] || export VITE_AWS_KEY="$AWS_ACCESS_KEY_ID"
 		[[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
 		[[ -v VITE_OPEN_KEY ]] || export VITE_OPEN_KEY="$OPENAI_API_KEY"
+		[[ -v DATA_DIR ]] || export DATA_DIR="$WS_DIR/data/open-webui/data"
+		[[ -v MODEL_API_KEY ]] || export "MODEL_API_KEY"="$(op item get "Open WebUI Local API Key" --fields "api key" --reveal)"
 	EOF
 fi
 # note things like neovim code companion will use the first model
