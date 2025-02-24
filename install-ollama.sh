@@ -121,7 +121,7 @@ EOF
 		ACTION="$([[ $ACTION == pull ]] && echo rm || echo pull)"
 		export ACTION
 		;;
-	s)
+	x)
 		OLLAMA_MODELS="$OPTARG"
 		export OLLAMA_MODELS
 		;;
@@ -197,7 +197,7 @@ MODEL_HF+=(
 # per word and you can see why Q4_K_M is the default, at the knee of the curve
 # 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
-log_verbose "Minimal Base 1-2B models for machines that <8GB" 
+log_verbose "Minimal Base 1-2B models for machines that <8GB"
 MODEL+=(
 	deepscaler        # fintuned deepseek-r1-distilled-qwen beats 01-previe
 	deepscaler:latest # 8K synthetic
@@ -207,34 +207,34 @@ MODEL+=(
 	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
 	smallthinker                         # Fine tuned Qwen2.5-b-instruct
 	smallthinker:latest                  # qwq used to generate 8K synthetic
-	opencoder                          # completely open source
-	opencoder:latest                   # completely open source
-	opencoder:1.5b                     #  english and chinse
-	opencoder:1.5b-instruct-q4_K_M     #  english and chinse
-	smollm2                            # open source
-	smollm2:latest                     # open source
-	smollm2:135m-instruct-q4_K_M       # 135m is small
-	smollm2:1.7b                       # large is smarll
-	smollm2:1.7b-instruct-q4_K_M       # large is smarll
-	granite3-guardian:2b               #  prompt guard ibm
-	granite3-guardian:2b-q8_0          #  prompt guard ibm
-	shieldgemma:2b                     # safety of text prompts
-	shieldgemma:2b-q4_K_M              # safety of text prompts
-	llama-guard3:1b                    # safety of prompts
-	llama-guard3:1b-q8_0               # safety of prompts
-	llama3.2:1b                        # Meta 1B 128K context
-	llama3.2:1b-instruct-q8_0          # Meta 1B 128K context
-	qwen2.5-coder:0.5b                 # 128K Tuned for coding 7B
-	qwen2.5-coder:0.5b-instruct        # 128K Tuned for coding 7B
-	qwen2.5-coder:0.5b-instruct-q8_0   # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b                 # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b-instruct        # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b-instruct        # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b-instruct-q4_K_M # 128K Tuned for coding 7B
+	opencoder                            # completely open source
+	opencoder:latest                     # completely open source
+	opencoder:1.5b                       #  english and chinse
+	opencoder:1.5b-instruct-q4_K_M       #  english and chinse
+	smollm2                              # open source
+	smollm2:latest                       # open source
+	smollm2:135m-instruct-q4_K_M         # 135m is small
+	smollm2:1.7b                         # large is smarll
+	smollm2:1.7b-instruct-q4_K_M         # large is smarll
+	granite3-guardian:2b                 #  prompt guard ibm
+	granite3-guardian:2b-q8_0            #  prompt guard ibm
+	shieldgemma:2b                       # safety of text prompts
+	shieldgemma:2b-q4_K_M                # safety of text prompts
+	llama-guard3:1b                      # safety of prompts
+	llama-guard3:1b-q8_0                 # safety of prompts
+	llama3.2:1b                          # Meta 1B 128K context
+	llama3.2:1b-instruct-q8_0            # Meta 1B 128K context
+	qwen2.5-coder:0.5b                   # 128K Tuned for coding 7B
+	qwen2.5-coder:0.5b-instruct          # 128K Tuned for coding 7B
+	qwen2.5-coder:0.5b-instruct-q8_0     # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b                   # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct          # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct          # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct-q4_K_M   # 128K Tuned for coding 7B
 
 	# these models are pre llama3.2 and subject to deprecation
-	qwen2.5:0.5b         # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:1.5b         # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:0.5b # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:1.5b # 128K context Alibaba 2024-09-16 7b
 	# these models are pre llama3.1 and are very close to gone
 	bge-large                   # embedding model from BAAI
 	bge-large:335m              # embedding model from BAA
@@ -244,17 +244,17 @@ MODEL+=(
 
 log_verbose "loading all models over 2-3B parameters, requires >4GB of RAM"
 MODEL_XSMALL+=(
-	smallthinker:3b                      # long sequence encourage CoT
-	smallthinker:3b-preview-q8_0         # open dataset
-	falcon3:3b                           # 7B parameters
-	falcon3:3b-instruct-q4_K_M           # 7B parameters
-	falcon3:1b                           # 7B parameters
+	smallthinker:3b              # long sequence encourage CoT
+	smallthinker:3b-preview-q8_0 # open dataset
+	falcon3:3b                   # 7B parameters
+	falcon3:3b-instruct-q4_K_M   # 7B parameters
+	falcon3:1b                   # 7B parameters
 	falcon3:1b-instruct-q8_0
-	llama3.2                           # Meta 3.2-3B Q4 128 context
-	llama3.2:latest                    # Meta 3.2-3B Q4 128 context
-	llama3.2:3b                        # Meta 3.2-3B Q4 128 context 2GB
-	llama3.2:3b-instruct-q4_K_M        # Meta 3.2-3B Q4 128 context 2GB
-	qwen2.5:3b           # 128K context Alibaba 2024-09-16 7b
+	llama3.2                    # Meta 3.2-3B Q4 128 context
+	llama3.2:latest             # Meta 3.2-3B Q4 128 context
+	llama3.2:3b                 # Meta 3.2-3B Q4 128 context 2GB
+	llama3.2:3b-instruct-q4_K_M # Meta 3.2-3B Q4 128 context 2GB
+	qwen2.5:3b                  # 128K context Alibaba 2024-09-16 7b
 )
 
 log_verbose "loading all models over 4-8B parameters, requires >8GB of RAM"
@@ -306,8 +306,8 @@ MODEL_SMALL+=(
 	bespoke-minicheck:latest            # Fact check 7B q4_K_M
 	bespoke-minicheck:7b                # Fact check 7B q4_K_M
 	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
-	nemotron-mini:4b     # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	nemotron-mini:latest # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	nemotron-mini:4b                    # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	nemotron-mini:latest                # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
 	minicpm-v                           # mLLM visual too, ocr v2.6 ModelBest CN
 	minicpm-v:latest                    # mLLM visual too, ocr v2.6 ModelBest CN
 	minicpm-v:8b                        # mLLM visual too, ocr v2.6 ModelBest CN

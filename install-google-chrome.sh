@@ -65,13 +65,13 @@ elif in_os linux; then
 	# 	log_verbose "downloading package $DEB from $URL"
 	# 	deb_install "$DEB" "$URL"
 	# done
-	
+
 	# https://www.geeksforgeeks.org/how-to-install-chrome-in-ubuntu/
 	# https://www.ubuntuupdates.org/ppa/google_chrome
 	log_verbose "adding signing key"
 	mkdir -p /etc/apt/keyrings
-	if [[ ! -r /etc/apt/keyrings/google.asc ]]; then 
-		wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo tee /etc/apt/keyrings/google.asc > /dev/null
+	if [[ ! -r /etc/apt/keyrings/google.asc ]]; then
+		wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo tee /etc/apt/keyrings/google.asc >/dev/null
 	fi
 	if ! config_mark "/etc/apt/sources.list.d/google-chrome.list"; then
 		config_add "/etc/apt/sources.list.d/google-chrome.list" <<-'EOF'

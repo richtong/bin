@@ -60,9 +60,9 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 PACKAGE+=(
 	huggingface-cli # hf.co download files
 	parquet-cli     # command line opening parquet data files
-	tika      # Apache tika content extractor command line
-	ffmpeg    # needed by open-webui
-	llama.cpp # underlying server to ollama
+	tika            # Apache tika content extractor command line
+	ffmpeg          # needed by open-webui
+	llama.cpp       # underlying server to ollama
 
 )
 package_install "${PACKAGE[@]}"
@@ -87,8 +87,8 @@ if in_os mac; then
 		diffusionbee    # diffusionbee - Stability diffusion on Mac
 		mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
 		zed             # yet another ai editor
-		ngrok     # local ssh gateway for open-webui
-		)
+		ngrok           # local ssh gateway for open-webui
+	)
 	brew_install "${CASK[@]}"
 
 	MAS+=(
@@ -98,11 +98,10 @@ if in_os mac; then
 
 fi
 
-
 PYTHON_PACKAGE+=(
 
 	# civitai-models-manager # download image generation models use comfy instead
-	open-interpreter       # let's LLMs run code locally
+	open-interpreter # let's LLMs run code locally
 	open-webui
 
 )
@@ -116,8 +115,7 @@ declare -A PYTHON_PACKAGE_FLAG+=(
 )
 
 for package in "${PYTHON_PACKAGE[@]}"; do
-	log_verbose pipx_install ${PYTHON_PACKAGE_FLAG[$package]:-} "$package"
-	# shellcheck disable=SC2091
+	# shellcheck disable=SC2086
 	pipx_install ${PYTHON_PACKAGE_FLAG[$package]:-} "$package"
 done
 

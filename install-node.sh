@@ -68,7 +68,7 @@ shift $((OPTIND - 1))
 # package_install nodejs6 npm2
 log_verbose install brew
 PACKAGES+=(
-	node@$VERSION
+	"node@$VERSION"
 	pnpm # much faster npm
 	vite # the laltest in build tools long live webpack
 	yarn # an alternative npm from Facebook
@@ -102,5 +102,5 @@ if ! config_mark; then
 fi
 
 # if ! log_assert "[[ $(node -v) =~ ^v$VERSION ]]" "node installed to $VERSION"; then
-	# exit $?
+# exit $?
 # fi

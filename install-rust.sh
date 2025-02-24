@@ -61,7 +61,7 @@ else
 	# https://phoenixnap.com/kb/install-rust-ubuntu
 	PACKAGE+=(
 		rustc
-)
+	)
 fi
 
 log_verbose "Install ${PACKAGE[*]}"

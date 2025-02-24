@@ -167,7 +167,7 @@ PACKAGE+=(
 if in_os mac; then
 	PACKAGE+=(
 		mermaid-cli
-)
+	)
 fi
 
 package_install "${PACKAGE[@]}"
