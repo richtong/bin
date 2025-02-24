@@ -22,8 +22,8 @@ PIPENV="${PIPENV:-false}"
 POETRY="${POETRY:-true}"
 UV="${UV:-true}"
 
-NEW_PYTHON="${NEW_PYTHON:-@3.13}"
-OLD_PYTHON="${OLD_PYTHON:-@3.12}"
+NEW_PYTHON="${NEW_PYTHON:-@3.12}"
+OLD_PYTHON="${OLD_PYTHON:-@3.11}"
 PYTHON_VERSION="${PYTHON_VERSION:-$NEW_PYTHON}"
 PYENV="${PYENV:-false}"
 OPTIND=1
@@ -129,7 +129,7 @@ fi
 #log_verbose "Pre PATH=$PATH"
 if ! config_mark; then
 	config_add <<-EOF
-		if ! $PATH | grep "python$PYTHON_VERSION/libexec/bin; then PATH="$PATH:$(brew --prefix)/opt/python$PYTHON_VERSION/libexec/bin"; fi
+		command -v brew >/dev/null && if ! echo \$PATH | grep -q "python$PYTHON_VERSION/libexec/bin"; then PATH="\$PATH:\$(brew --prefix)/opt/python$PYTHON_VERSION/libexec/bin"; fi
 	EOF
 fi
 
@@ -166,21 +166,6 @@ for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	package_install "python$version"
 done
 
-# https://pipx.pypa.io/latest/installation/
-# pipx make sure it can change global and local paths
-log_verbose "ensurepath for globals"
-pipx ensurepath
-sudo pipx ensurepath --global
-
-# pipx creates python cli in venv with PATH links so use for real python apps
-# which need isolation, favor homebrew first then use pipx, if you wnat
-# an installation just in a venv use pip install.
-PIPX_PACKAGE+=(
-	argcomplete
-)
-log_verbose "installing ${PIPX_PACKAGE[*]}"
-pipx install "${PIPX_PACKAGE[@]}"
-
 # These should only be command line utilities, not packages for python compute
 # those packages should be installed in the venv system you are using
 
@@ -188,6 +173,9 @@ pipx install "${PIPX_PACKAGE[@]}"
 # these are onlyi available only as pip packages, we favor homebrew
 #if ! command -v brew; then
 #log_verbose "no homebrew so can install these packages but want everywhere so use pipx"
+# pipx creates python cli in venv with PATH links so use for real python apps
+# which need isolation, favor homebrew first then use pipx, if you wnat
+# an installation just in a venv use pip install.
 PIPX_PACKAGE+=(
 
 	# autocomplete
@@ -202,14 +190,24 @@ PIPX_PACKAGE+=(
 	# pytest-timeout
 	# pytest-xdist
 	# types-requests ## mypy needs this for checking
+	argcomplete
 
 )
-#fi
+
+log_warning "install-asdf.sh should come first so pipx version is defined"
+log_verbose "installing ${PIPX_PACKAGE[*]}"
+pipx install "${PIPX_PACKAGE[@]}"
 
 # https://pipx.pypa.io/latest/installation/
 # pipx make sure it can change global and local paths
+
+# https://pipx.pypa.io/latest/installation/
+# pipx make sure it can change global and local paths
+# a bug does not work on linux sudos improperly
 pipx ensurepath
-sudo pipx ensurepath --global
+if in_os mac; then
+	sudo pipx ensurepath --global
+fi
 
 if [[ $(command -v python) =~ "conda" ]]; then
 	log_warning "Anaconda is installed so pip packages will go into conda environment"
@@ -236,10 +234,6 @@ if [[ -n ${PYTHON_PACKAGE[*]} ]]; then
 	pip_install --upgrade "${PYTHON_PACKAGE[@]}"
 	# fi
 fi
-
-log_warning "install-asdf.sh should come first so pipx version is defined"
-log_verbose "installing ${PIPX_PACKAGE[*]}"
-pipx_install "${PIPX_PACKAGE[@]}"
 
 # we need it to be python and pip to work and not python3 and pip3 only
 # https://docs.brew.sh/Homebrew-and-Python

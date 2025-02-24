@@ -58,70 +58,72 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 # https://lobehub.com/blog/5-ollama-web-ui-recommendation
 
 PACKAGE+=(
-
-	# fig - command completion and dotfile manager (bought by Amazon and closed)
-	# gpt4all - lm-studio local runner (lm-studio now does this as well nicer us)
-	# macgpt - ChatGPT in menubar (pretty useless, deprecated)
-	# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
-	# shell-gpt - cli including running shell commands (never use deprecated)
-	# vincelwt-chatgpt - ChatGPT in menubar (not using)
-	# appflowy        # project manager based on ai (don't ever use)
-	# lm-studio       # lm-studio -  run different LLMs from Hugging Face locally (deprecated)
-	cursor          # pair programming using VScode, takes over the $(code)
-	diffusionbee    # diffusionbee - Stability diffusion on Mac
 	huggingface-cli # hf.co download files
-	mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
 	parquet-cli     # command line opening parquet data files
-	zed             # yet another ai editor
-	# jan             # grafical front-end for llama.cpp (deprecate for ollama)
 	tika      # Apache tika content extractor command line
-	ngrok     # local ssh gateway for open-webui
 	ffmpeg    # needed by open-webui
 	llama.cpp # underlying server to ollama
 
 )
 package_install "${PACKAGE[@]}"
+log_verbose "packages installed"
 
-MAS+=(
-	6474268307 # Enchanted LLM Mac only selfhosted
-)
-mas_install "${MAS[@]}"
+echo "util_os=$(util_os)"
+
+if in_os mac; then
+	log_verbose "Mac installs"
+
+	CASK+=(
+		# fig - command completion and dotfile manager (bought by Amazon and closed)
+		# gpt4all - lm-studio local runner (lm-studio now does this as well nicer us)
+		# macgpt - ChatGPT in menubar (pretty useless, deprecated)
+		# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
+		# shell-gpt - cli including running shell commands (never use deprecated)
+		# vincelwt-chatgpt - ChatGPT in menubar (not using)
+		# appflowy        # project manager based on ai (don't ever use)
+		# lm-studio       # lm-studio -  run different LLMs from Hugging Face locally (deprecated)
+		# jan             # grafical front-end for llama.cpp (deprecate for ollama)
+		cursor          # pair programming using VScode, takes over the $(code)
+		diffusionbee    # diffusionbee - Stability diffusion on Mac
+		mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
+		zed             # yet another ai editor
+		ngrok     # local ssh gateway for open-webui
+		)
+	brew_install "${CASK[@]}"
+
+	MAS+=(
+		6474268307 # Enchanted LLM Mac only selfhosted
+	)
+	mas_install "${MAS[@]}"
+
+fi
+
 
 PYTHON_PACKAGE+=(
 
-	civitai-models-manager # download image generation models
+	# civitai-models-manager # download image generation models use comfy instead
 	open-interpreter       # let's LLMs run code locally
+	open-webui
 
 )
+
 # No longer required I think
 # "open-interpreter[local]"
 # "open-interpreter[os]"
 
-# Install Stabiliity Diffusion with DiffusionBee"
-# Download Chat GPT in menubar
-# Use brew install instead of
-#ARCH=x86
-#if mac_is_arm; then
-#ARCH=arZZm64
-#fi
-#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
-pipx_install "${PYTHON_PACKAGE[@]}"
-
-declare -A PYTHON_PACKAGE_VERSIONED+=(
-	["open-webui"]=3.12 # include the required python version needs quotes to prevent reformat
+declare -A PYTHON_PACKAGE_FLAG+=(
+	["open-webui"]="-p 3.12" # include the required python version
 )
-# log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc"
-#
-# Install Stabiliity Diffusion with DiffusionBee"
-# Download Chat GPT in menubar
-# Use brew install instead of
-#ARCH=x86
-#if mac_is_arm; then
-#ARCH=arm64
-#fi
-#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
-# no need for gp4all
-#download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
+
+for package in "${PYTHON_PACKAGE[@]}"; do
+	log_verbose pipx_install ${PYTHON_PACKAGE_FLAG[$package]:-} "$package"
+	# shellcheck disable=SC2091
+	pipx_install ${PYTHON_PACKAGE_FLAG[$package]:-} "$package"
+done
+
+log_verbose "install current shell completion"
+open-webui --install-completion
+
 for package in "${!PYTHON_PACKAGE_VERSIONED[@]}"; do
 	pipx_install -p "${PYTHON_PACKAGE_VERSIONED[$package]}" "$package"
 done

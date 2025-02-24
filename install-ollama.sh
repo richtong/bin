@@ -628,30 +628,6 @@ if [[ -v OLLAMA_MODELS ]]; then
 	fi
 fi
 
-declare -A PYTHON_PACKAGE+=(
-	["open-webui"]=3.12 # include the required python version
-)
-# Install Stabiliity Diffusion with DiffusionBee"
-# Download Chat GPT in menubar
-# Use brew install instead of
-#ARCH=x86
-#if mac_is_arm; then
-#ARCH=arm64
-#fi
-#download_url_open "https://github.com/vincelwt/chatgpt-mac/releases/download/v0.0.5/ChatGPT-0.0.5-$ARCH.dmg"
-# if [[ -v poetry_active ]]; then
-# 	log_verbose "In poetry so add to the project"
-# 	log_warning "If you want in the system, you must exit poetry and rerun"
-# 	poetry add "${PYTHON_PACKAGE[@]}"
-# else
-for package in "${!PYTHON_PACKAGE[@]}"; do
-	pipx_install -p "${PYTHON_PACKAGE[$package]}" "$package"
-done
-# fi
-#
-log_verbose "install current shell completion"
-open-webui --install-completion
-
 PACKAGE+=(
 )
 

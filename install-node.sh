@@ -14,8 +14,7 @@ DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 
-NODE_VERSION="${NODE_VERSION:-22}"
-BREW="${BREW:-true}"
+VERSION="${VERSION:-22}"
 
 OPTIND=1
 while getopts "hdvfr:x" opt; do
@@ -51,10 +50,6 @@ EOF
 	r)
 		VERSION="$OPTARG"
 		;;
-	x)
-		BREW="$($BREW && echo false || echo true)"
-		export BREW
-		;;
 	*)
 		log_warning "invalid flag $opt"
 		;;
@@ -63,36 +58,30 @@ done
 
 # shellcheck disable=SC1090
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
-source_lib lib-install.sh lib-version-compare.sh lib-util.sh
+source_lib lib-install.sh lib-version-compare.sh lib-util.sh lib-config.sh
 shift $((OPTIND - 1))
 
-if $BREW; then
-	# Now assumes brew is in linux
-	# the old way was node 4.0, now using node 6
-	# package_install nodejs4 npm 2
-	# change from package to brew
-	# package_install nodejs6 npm2
-	log_verbose install brew
-	PACKAGES+=(
-		node
-		pnpm # much faster npm
-		vite # the laltest in build tools long live webpack
-		yarn # an alternative npm from Facebook
-		yarn-completion
+# Now assumes brew is in linux
+# the old way was node 4.0, now using node 6
+# package_install nodejs4 npm 2
+# change from package to brew
+# package_install nodejs6 npm2
+log_verbose install brew
+PACKAGES+=(
+	node@$VERSION
+	pnpm # much faster npm
+	vite # the laltest in build tools long live webpack
+	yarn # an alternative npm from Facebook
+	yarn-completion
+)
+package_install "${PACKAGES[@]}"
 
-	)
-	package_install "${PACKAGES[@]}"
-	log_exit "brew complete"
-fi
-
-if command -v node >/dev/null && vergte "$(node --version)" "v$VERSION"; then
-	log_verbose "have node $VERSION or higher no need to install over it"
-	exit
-fi
-
+# if command -v node >/dev/null && vergte "$(node --version)" "v$VERSION"; then
+# 	log_verbose "have node $VERSION or higher no need to install over it"
+# 	exit
+# fi
 # make sure to purge the old installation
-package_uninstall node
-
+# package_uninstall node
 # regular node install works
 # This install node 0.1 and npm 1.1 on ubuntu 14.04 from standard repo
 #package_install nodejs nodejs-legacy npm
@@ -101,15 +90,17 @@ package_uninstall node
 # https://github.com/nodesource/distributions#debinstall
 # curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
 # To get node 6.x with ES6 support and includes node-legacy now
-curl -sL "https://deb.nodesource.com/setup_${VERSION}.x" | sudo -E bash -
-package_install "node@$NODE_VERSION"
+# curl -sL "https://deb.nodesource.com/setup_${VERSION}.x" | sudo -E bash -
+# package_install "node@$NODE_VERSION"
 
+log_verbose "checking for profile path"
 if ! config_mark; then
+	log_verbose "adding profile"
 	config_add <<-EOF
-		    if ! echo "\$PATH" | grep -q  "opt/node"; then PATH="/opt/homebrew/opt/node@$NODE_VERSION/bin:\$PATH"; fi
+		command -v brew && if ! echo "\$PATH" | grep -q  "opt/node"; then PATH="$(brew --prefix)/opt/node@$VERSION/bin:\$PATH"; fi
 	EOF
 fi
 
-if ! log_assert "[[ $(node -v) =~ ^v$VERSION ]]" "node installed to $VERSION"; then
-	exit $?
-fi
+# if ! log_assert "[[ $(node -v) =~ ^v$VERSION ]]" "node installed to $VERSION"; then
+	# exit $?
+# fi

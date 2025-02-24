@@ -63,6 +63,9 @@ if ! in_os mac; then
 	log_exit "Mac only"
 fi
 
+# rust is required or at least cargo is
+"$SCRIPT_DIR/install-rust.sh"
+
 # https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html
 # this does not work as the application directory is read only but install
 # anyway
@@ -157,10 +160,15 @@ fi
 # https://pandoc.org/installing.html
 # mermaid-cli - install chromium in the background so beware
 log_verbose "Run mermaid to generate JPGs from .mermaid files"
-PACKAGE=(
-	mermaid-cli
+PACKAGE+=(
 	pandoc
 )
+
+if in_os mac; then
+	PACKAGE+=(
+		mermaid-cli
+)
+fi
 
 package_install "${PACKAGE[@]}"
 

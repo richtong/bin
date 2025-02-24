@@ -26,6 +26,7 @@ OP_API_VAULT="${OP_API_VAULT:-Private}"
 VERSION="${VERSION:-8}"
 DIRENV_PROFILE="${ENV_PROFILE:-false}"
 DIRENV_PATH="${DIRENV_PATH:-$HOME/.envrc}"
+SANDBOX="${SANDBOX:-false}"
 SHELL_PROFILE="${SHELL_PROFILE:-true}"
 SSH_CONFIG="${SSH_CONFIG:-"$HOME/.ssh/config"}"
 OPTIND=1
@@ -166,7 +167,7 @@ fi
 
 if in_os linux && linux_version ubuntu; then
 
-	if SANDBOX; then
+	if $SANDBOX; then
 		log_verbose "Install Linux graphical 1Password without cli or ssh-agent"
 		flatpak_install 1password
 		log_verbose "Also install the browser extensions manually"

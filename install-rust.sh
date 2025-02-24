@@ -53,9 +53,16 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
-PACKAGE+=(
-	rust
+if in_os mac; then
+	PACKAGE+=(
+		rust
+	)
+else
+	# https://phoenixnap.com/kb/install-rust-ubuntu
+	PACKAGE+=(
+		rustc
 )
+fi
 
 log_verbose "Install ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"

@@ -55,31 +55,34 @@ if in_os mac; then
 	package_install rectangle
 	log_warning "If using dotfiles, then symlink ~/Library/Preferences/com.knollsoft.Rectangle.plist"
 elif in_os linux && ! in_os docker; then
+	echo "linux desktop environment=$(desktop_environment)"
 	# if the two listed are not good enough try i3
 	# https://github.com/Airblader/i3/wiki/installation
 	#apt_repository_install ppa:regolith-linux/release
 	#package_install i3-gaps
 	log_verbose "checking and adding tiling window managers"
 	if [[ $(desktop_environment) =~ gnome ]]; then
-		# https://addons.mozilla.org/en-US/firefox/addon/gnome-shell-integration/
+		package_install i3-wm
 
+		# deprecating gtile
+		# https://addons.mozilla.org/en-US/firefox/addon/gnome-shell-integration/
 		# https://github.com/gTile/gTile
 		# https://wiki.gnome.org/Projects/GnomeShellIntegration
 		# https://bugs.launchpad.net/ubuntu/+source/chrome-gnome-shell/+bug/1983851
 		# chrome-gnome-shell is in Ubuntu 20.04 as version 10
 		# gnome-browser-connector is in Ubuntu 22.04 and higher as version 42,
 		# 43....
-		package_install chrome-gnome-shell gnome-tweaks
+		# package_install chrome-gnome-shell gnome-tweaks
 		#package_install gnome-browser-connector gnome-tweaks
 
-		log_verbose "gtile with SUPER-ENTER {hjkl}"
+		# log_verbose "gtile with SUPER-ENTER {hjkl}"
 		# https://www.omgubuntu.co.uk/best-gnome-shell-extensions
-		log_warning "Must manually install Gnome Tweaks"
-		util_web_open "https://extensions.gnome.org/extension/28/gtile/"
-		util_web_open "https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for-gnome/"
-		util_web_open "https://extensions.gnome.org/extension/517/caffeine/"
-		util_web_open "https://extensions.gnome.org/extension/3968/improved-workspace-indicator/"
-		util_web_open "https://extensions.gnome.org/extension/1162/emoji-selector/"
+		# log_warning "Must manually install Gnome Tweaks"
+		# util_web_open "https://extensions.gnome.org/extension/28/gtile/"
+		# util_web_open "https://extensions.gnome.org/extension/1723/wintile-windows-10-window-tiling-for-gnome/"
+		# util_web_open "https://extensions.gnome.org/extension/517/caffeine/"
+		# util_web_open "https://extensions.gnome.org/extension/3968/improved-workspace-indicator/"
+		# util_web_open "https://extensions.gnome.org/extension/1162/emoji-selector/"
 
 	elif [[ $(desktop_environment) =~ unity ]]; then
 		log_verbose "install Compiz Grid allows keyboard shortcuts to move windows around"

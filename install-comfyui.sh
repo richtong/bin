@@ -61,9 +61,15 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
-# https://comfyorg.notion.site/ComfyUI-Desktop-User-Guide-1146d73d365080a49058e8d629772f0a#1486d73d3650800089f3fca8e5c94203
 log_verbose "Install Alpha version of ComfyUI Desktop"
-download_url_open "https://download.comfy.org/mac/dmg/arm64"
+if in_os mac; then
+	# https://comfyorg.notion.site/ComfyUI-Desktop-User-Guide-1146d73d365080a49058e8d629772f0a#1486d73d3650800089f3fca8e5c94203
+	download_url_open "https://download.comfy.org/mac/dmg/arm64"
+elif in_os winodws; then
+	download_url_open "https://download.comfy.org/windows/nsis/x64"
+else
+	log_exit "no Linux version"
+fi
 
 COMFYUI_PATH="${COMFYUI_PATH:-"$HOME/Documents/ComfyUI"}"
 

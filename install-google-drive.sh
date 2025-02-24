@@ -43,13 +43,24 @@ source_lib lib-mac.sh lib-install.sh lib-util.sh
 
 if in_os mac; then
 	package_install google-drive
-elif in_os linux; then
-	log_warning "Go to user interface and Settings > Online Accounts > Google Accounts"
-	log_verbose "Install OCAML Fuse driver"
-	# https://support.shells.net/hc/en-us/articles/1500008874361-How-to-connect-to-Google-Drive-using-FUSE-filesystem-in-Your-Ubuntu-Shell
-	apt_repository_install "ppa:allessandro-strada/ppa"
-	package_install google-drive-ocamlfuse
-	google-drive-coamlfuse
-	mkdir -p "$HOME/Google Drive"
-	google-drive-ocamfuse "$HOME/Google Drive"
+	log_exit
 fi
+
+# gnome-online accounts give a file manager view but then GUIDs only
+package_install rclone gnome-online-accounts
+
+log_verbose "You will need to create a google client id and an oauth id"
+log_verbose "Put these into 1Password so you can find this"
+log_verbose "Run rclone config and enter the name as say app:"
+log_verbose "use rclone sync to put this into $WS_DIR/data"
+
+# deprecated for rclone
+# 	log_warning "Go to user interface and Settings > Online Accounts > Google Accounts"
+# 	log_verbose "Install OCAML Fuse driver"
+# 	# https://support.shells.net/hc/en-us/articles/1500008874361-How-to-connect-to-Google-Drive-using-FUSE-filesystem-in-Your-Ubuntu-Shell
+# 	apt_repository_install "ppa:allessandro-strada/ppa"
+# 	package_install google-drive-ocamlfuse
+# 	google-drive-coamlfuse
+# 	mkdir -p "$HOME/Google Drive"
+# 	google-drive-ocamfuse "$HOME/Google Drive"
+# fi
