@@ -145,6 +145,7 @@ PACKAGE+=(
 	lazygit         # lazygit - git character full screen interface
 	nbdime          # nbdime: jupyter notebook diff and merge
 	pre-commit      # pre-commit checks
+	# pyyaml  # I forgot why we need this disabled 10-24
 
 )
 
@@ -156,20 +157,21 @@ PACKAGE+=(
 package_install "${PACKAGE[@]}"
 
 # nbdime pyyaml virtualenv no long key only on ubuntu anyway
-if ! in_os mac; then
-	log_verbose "brew link virtualenv, pyyaml as they are keg-only"
+#if ! in_os mac; then
+#	log_verbose "brew link virtualenv, pyyaml as they are keg-only"
 	# virtualenv used by pre-commit
-	brew link nbdime pyyaml virtualenv
-fi
+#	brew link nbdime pyyaml virtualenv
+#fi
 
 pipx_install "${PYTHON_PACKAGE[@]}"
 
 log_verbose "check if authenticated"
 if ! gh auth status | grep -q "Logged in"; then
-	# need the workflow scope to allow edits of github actions
+	log_verbose " need the workflow scope to allow edits of github actions"
 	gh auth login -s workflow
 	gh config set git_protocol ssh
 fi
+log_verbose "authenticated"
 
 # https://dev.to/softprops/digitally-unmastered-the-github-cli-edition-1cc4
 # make it easy to set default-branch disable check as gh will interpret later
@@ -180,7 +182,7 @@ fi
 #	deprecated
 #gh default-branch main
 # https://stackoverflow.com/questions/74960450/change-default-branch-via-cli
-gh repo edit --default-branch main
+# gh repo edit --default-branch main
 
 # https://github.com/topics/gh-extension
 # gh-dash - dashboard

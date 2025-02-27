@@ -52,8 +52,6 @@ function that changes directories like cd, pushd and popd which is way messier.
 
 One solution is [autoenv](https://github.com/hyperupcall/autoenv) which requires
 more .autoenvrc files and .autoenv_leave files to work and it only works for the
-common ways like cd. autoenv does this for the common entries. This works by
-sourcing its activate.sh for every .bashrc creation.
 
 As a backup, direnv is set so that the default .envrc attempts to do this by
 seeing if there is a venv and then source activate which has the deactivate

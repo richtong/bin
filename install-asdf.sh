@@ -203,6 +203,9 @@ if ! config_mark "$HOME/.default-python-packages"; then
 		$(printf "%s\n" "${PIP_PACKAGE[@]}")
 	EOF
 fi
+log_verbose "Python is not pulled properly so rest --hard"
+pushd >/dev/null "$HOME/.asdf/plugins/python"
+git reset --hard origin/master
 
 # the ! means all keys of an array
 # https://unix.stackexchange.com/questions/91943/is-there-a-way-to-list-all-indexes-ids-keys-on-a-bash-associative-array-vari
@@ -311,7 +314,6 @@ for shell_type in bash zsh; do
 			config_add "$(config_profile_nonexportable_$shell_type)" <<'EOF'
 			source <(asdf completion $shell_type)
 			eval "$(direnv hook $shell_type)"
-fi
 EOF
 		fi
 		log_verbose "adding shell setup for direnv version ${ASDF[direnv]}"
