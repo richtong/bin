@@ -17,7 +17,7 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 
 VERBOSE="${VERBOSE:-false}"
 DEBUGGING="${DEBUGGING:-false}"
-ANACONDA="${ANACONDA:-false}"
+ANACONDA="${ANACONDA:-true}"
 PIPENV="${PIPENV:-false}"
 POETRY="${POETRY:-true}"
 UV="${UV:-true}"

@@ -93,25 +93,19 @@ elif ! command -v conda &>/dev/null; then
 	fi
 fi
 
-log_verbose "install conda into .zshrc"
-if ! config_mark "$(config_profile_interactive_zsh)"; then
-	config_add "$(config_profile_interactive_zsh)" <<-'EOF'
-		# >>> conda initialize >>>
-		# !! Contents within this block are managed by 'conda init' !!
-		__conda_setup="$('$HOME/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-		if [ $? -eq 0 ]; then
-			eval "$__conda_setup"
-		else
-			if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
-				. "$HOME/miniconda3/etc/profile.d/conda.sh"
-			else
-				export PATH="$HOME/miniconda3/bin:$PATH"
-			fi
-		fi
-		unset __conda_setup
-		# <<< conda initialize <<<
-	EOF
-fi
+log_verbose "install conda config for shells"
+for shell in bash zsh; do
+	conda init "$shell"
+done
+
+log_debug "turn conda on by default"
+for profile in "$(config_profile_nonexportable)" "$(config_profile_zsh)"; do
+	if ! config_mark "$profile"; then
+		config_add "$profile" <<-'EOF'
+			if command -v conda >/dev/null && [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
+		EOF
+	fi
+done
 
 log_verbose "source $(config_profile_interactive_bash) to make sure conda setup runs"
 source_profile "$(config_profile_interactive_bash)"
@@ -122,8 +116,6 @@ if ! $NOFORGE; then
 	conda config --env --set channel_priority strict
 fi
 
-# return true in case there are errors in the source
-conda init "$(basename "$SHELL")"
 log_verbose take all the updates
 
 # https://github.com/conda/conda/issues/9589
@@ -131,19 +123,6 @@ log_verbose take all the updates
 log_verbose get latest anaconda and packages
 conda update conda --all -y
 conda install "python=$PYTHON"
-
-log_debug "do not conda on by default"
-if ! config_mark "$(config_profile_nonexportable)"; then
-	config_add "$(config_profile_nonexportable)" <<-'EOF'
-		if command -v conda >/dev/null && [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
-	EOF
-fi
-
-if ! config_mark "$(config_profile_zsh)"; then
-	config_add "$(config_profile_zsh)" <<-'EOF'
-		if command -v conda >/dev/null; [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
-	EOF
-fi
 
 # log_warning "you should not install into base create your own environment"
 # if [[ -v CONDA_SHLVL ]] && ((CONDA_SHLVL > 0)); then
