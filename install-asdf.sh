@@ -26,8 +26,7 @@ DIRENVRC="${DIRENVRC:=$DIRENV_CONFIG/direnvrc}"
 # https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
 # https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
 # These versions should be kept in sync with .tool_versions in ./src, ./bin, ./lib and ./user/rich
-# Assumes the last item is the one to be set for global
-DEFAULT_NODE=(20.18.1 22.11.0)
+DEFAULT_NODE=(22.11.0 20.18.1)
 if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]:-${DEFAULT_NODE[@]}}"); fi
 
 DEFAULT_DIRENV=(2.35.0)
@@ -46,7 +45,7 @@ DEFAULT_RUBY=(3.3.4)
 if ((${#DEFAULT_RUBY[@]} > 0)); then RUBY_VERSION=("${RUBY_VERSION[@]:-${DEFAULT_RUBY[@]}}"); fi
 
 # UV is used with LazyVim
-DEFAULT_UV=(0.4.17)
+DEFAULT_UV=(0.6.3)
 if ((${#DEFAULT_UV[@]} > 0)); then UV_VERSION=("${UV_VERSION[@]:-${DEFAULT_UV[@]}}"); fi
 
 # Go used in Hugo
@@ -237,6 +236,8 @@ for LANG in "${!ASDF[@]}"; do
 	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
 	# note this word splits so versions cannot have spaces there seems to be no
 	# way to generate an array here
+	# go to home to set .tool-version
+	pushd "$HOME" >/dev/null
 	for VERSION in ${ASDF[$LANG]}; do
 		log_verbose "looking for version $VERSION"
 		# remove the asterisk which means current selected
@@ -257,10 +258,11 @@ for LANG in "${!ASDF[@]}"; do
 			eval ${ASDF_ENV[$LANG]:-} asdf install "$LANG" "$VERSION"
 			# does the global multiple times because there is no way to do double index
 			# so in effect the last version is the global do not set anything
-			# log_verbose  asdf set "$LANG" "$VERSION"
-			# asdf set "$LANG" "$VERSION"
+			log_verbose  asdf cmd direnv set "$LANG" "$VERSION"
+			asdf cmd direnv set "$LANG" "$VERSION"
 		fi
 	done
+	popd >/dev/null
 done
 
 source_profile
@@ -345,6 +347,9 @@ if ! config_mark; then
 		if [ -r "$ASDF_DATA_DIR/shims" ] && ! echo "$PATH" | grep -q "$ASDF_DATA_DIR/shims"; then PATH="$ASDF_DATA_DIR/shims:$PATH"; fi
 	EOF
 fi
+
+log_verbose "Set default version"
+pushd "$HOME" >/dev/null
 
 # https://github.com/direnv/direnv/wiki/Python#uv
 if ! config_mark "$DIRENVRC"; then

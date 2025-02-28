@@ -172,12 +172,20 @@ if in_os linux && linux_version ubuntu; then
 		flatpak_install 1password
 		log_verbose "Also install the browser extensions manually"
 	else
-		curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
-		echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list
-		sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
-		curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
-		sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
-		curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+		if [[ ! -e /usr/share/keyrings/1password-archive-keyring.gpg ]]; then
+			curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
+		fi
+		if ! grep -q "1passw0rd-archive-keyring" /etc/apt/sources.list.d/1password.list; then
+			echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list
+		fi
+		if [[ ! -e /etc/debsig/policies/AC2D62742012EA22/1password.pol ]]; then
+			sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
+			curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
+		fi
+		if [[ ! -e /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg ]]; then
+			sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
+			curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+		fi
 		sudo apt update && sudo apt install 1password
 	fi
 
@@ -457,9 +465,11 @@ git config --global gpg.format ssh
 log_verbose "add signing key"
 # FIX this only adds the first id_ed25519
 git config --global user.signingkey "$(op item get "GitHub SSH Key" --fields "public key" --reveal)"
-# log_verbose "add 1password as app"
-git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+if in_os mac; then
+	# log_verbose "add 1password as app"
+	git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+	git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+fi
 # a bug so do not enable
 log_verbose "enable signing"
 git config --global commit.gpgsign true
