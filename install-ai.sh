@@ -58,11 +58,13 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 # https://lobehub.com/blog/5-ollama-web-ui-recommendation
 
 PACKAGE+=(
+	ffmpeg          # needed by open-webui
 	huggingface-cli # hf.co download files
+	llama.cpp       # underlying server to ollama
+	ollama          # ollama - ollama local runner
+	ngrok           # local ssh gateway for open-webui
 	parquet-cli     # command line opening parquet data files
 	tika            # Apache tika content extractor command line
-	ffmpeg          # needed by open-webui
-	llama.cpp       # underlying server to ollama
 
 )
 package_install "${PACKAGE[@]}"
@@ -74,25 +76,27 @@ if in_os mac; then
 	log_verbose "Mac installs"
 
 	CASK+=(
+		# appflowy        # project manager based on ai (don't ever use)
 		# fig - command completion and dotfile manager (bought by Amazon and closed)
 		# gpt4all - lm-studio local runner (lm-studio now does this as well nicer us)
+		# jan             # grafical front-end for llama.cpp (deprecate for ollama)
+		# lm-studio       # lm-studio -  run different LLMs from Hugging Face locally (deprecated)
 		# macgpt - ChatGPT in menubar (pretty useless, deprecated)
+		# ollamac # ollamac is a mac app crashes on startup deprecated
 		# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
 		# shell-gpt - cli including running shell commands (never use deprecated)
 		# vincelwt-chatgpt - ChatGPT in menubar (not using)
-		# appflowy        # project manager based on ai (don't ever use)
-		# lm-studio       # lm-studio -  run different LLMs from Hugging Face locally (deprecated)
-		# jan             # grafical front-end for llama.cpp (deprecate for ollama)
 		cursor          # pair programming using VScode, takes over the $(code)
 		diffusionbee    # diffusionbee - Stability diffusion on Mac
 		mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
 		zed             # yet another ai editor
-		ngrok           # local ssh gateway for open-webui
+
 	)
 	brew_install "${CASK[@]}"
 
 	MAS+=(
 		6474268307 # Enchanted LLM Mac only selfhosted
+
 	)
 	mas_install "${MAS[@]}"
 

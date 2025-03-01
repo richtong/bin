@@ -17,8 +17,9 @@ INCLUDE_XSMALL="${INCLUDE_XSMALL:-false}"
 INCLUDE_SMALL="${INCLUDE_SMALL:-false}"
 INCLUDE_MEDIUM="${INCLUDE_MEDIUM:-false}"
 INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
-INCLUDE_HF="${INCLUDE_HF:-false}"
 INCLUDE_XLARGE="${INCLUDE_XLARGE:-false}"
+INCLUDE_GGUF="${INCLUDE_GGUF:-true}"
+INCLUDE_MLX="${INCLUDE_MLX:-false}"
 INCLUDE_OLD="${INCLUDE_OLD:-false}"
 FORCE="${FORCE:-false}"
 DISK_MAX="${DISK_MAX:-80}"
@@ -32,7 +33,7 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdveox:rlfsmugt" opt; do
+while getopts "hdveox:rlfsmugti" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
@@ -51,8 +52,9 @@ flags:
 	-s $(! $INCLUDE_SMALL || echo "do not ")pull smaller then 7B+ parameters (even if you do not have 16GB+ RAM)
 	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 32GB+ RAM)
 	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
-	-g $(! $INCLUDE_HF || echo "do not ")pull huggingface models
 	-e $(! $INCLUDE_XLARGE || echo "do not ")pull extra models if you have lots of disk (>2TB)
+	-g $(! $INCLUDE_GGUF || echo "do not ")pull huggingface models GGUF for Ollama
+	-i $(! $INCLUDE_MLX || echo "do not ")pull huggingface models GGUF for Ollama
 	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
 	-r $(! $REMOVE_OBSOLETE || echo "do not ")remove obsolete models
 	-u $([[ $ACTION == pull ]] || echo "un")install models
@@ -96,15 +98,20 @@ EOF
 		INCLUDE_LARGE="$($INCLUDE_LARGE && echo false || echo true)"
 		export INCLUDE_LARGE
 		;;
-	f)
-		# invert the variable when flag is set
-		INCLUDE_HF="$($INCLUDE_HF && echo false || echo true)"
-		export INCLUDE_HF
-		;;
 	e)
 		# invert action between pull and rm
 		INCLUDE_XLARGE="$($INCLUDE_XLARGE && echo false || echo true)"
 		export INCLUDE_XLARGE
+		;;
+	f)
+		# invert the variable when flag is set
+		INCLUDE_GGUF="$($INCLUDE_GGUF && echo false || echo true)"
+		export INCLUDE_GGUF
+		;;
+	i)
+		# invert the variable when flag is set
+		INCLUDE_MLX="$($INCLUDE_MLX && echo false || echo true)"
+		export INCLUDE_MLX
 		;;
 	o)
 		# invert action between pull and rm
@@ -144,31 +151,6 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 # https://lobehub.com/blog/5-ollama-web-ui-recommendation
 
-PACKAGE+=(
-
-	# fig - command completion and dotfile manager (bought by Amazon and closed)
-	# gpt4all - lm-studio local runner (lm-studio now does this as well nicer us)
-	# macgpt - ChatGPT in menubar (pretty useless, deprecated)
-	# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
-	# shell-gpt - cli including running shell commands (never use deprecated)
-	# vincelwt-chatgpt - ChatGPT in menubar (not using)
-	ollama # ollama - ollama local runner
-	# ollamac # ollamac is a mac app crashes on startup deprecated
-
-)
-
-package_install "${PACKAGE[@]}"
-
-MAS+=(
-
-	6474268307 # Enchanted LLM Mac only selfhosted
-
-)
-
-if in_os mac; then
-	mas_install "${MAS[@]}"
-fi
-
 # note things like neovim code companion will use the first model
 # that comes out of ollama list and this is the last one pulled, so this
 # pull order has the default at the bottom
@@ -180,10 +162,29 @@ fi
 
 # these are pre llama3.2 and subject to deprecation
 
-MODEL_HF+=(
-	hf.co/ICEPVP8977/Uncensored_gemma_2b                                 # make sure your hf enabled for shield tests
-	hf.co/mradermacher/Llama-3.2-3B-Instruct-Spatial-SQL-1.0-GGUF:Q4_K_S # sql model
-	hf.co/PurpleAILAB/SQL_Llama-3.2-3B-Instruct-uncensored_final-gguf    # living dangerously
+# https://huggingface.co/mlx-community?message=You%27ve%20joined%20MLX%20Community!
+# https://huggingface.co/models?library=mlx&sort=trending
+MODEL_MLX+=(
+	mlx-community/plamo-2-8b-4bit                           # PLaMO-13B Open source Japanese from PFN
+	mlx-community/Violet-Lyra-Gutenberg-4bit                # # merged models
+	mlx-community/Unsloth-DeepSeek-R1-Distill-Qwen-32B-4bit # 5B parameters
+	mlx-community/DeepSeek-R1-Distill-Qwen-32B-abliterated  # try this one
+	mlx-community/Qwen2.5-VL-72B-Instruct-4bit              # Visual input
+	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit        # compare with ollama
+	# mlx-community/DeepSeek-R1-4bit                          # 126B parameters
+	# mlx-community/perplexity-ai-r1-1776-4bit                # do not if it will fit
+
+)
+
+# https://huggingface.co/models?library=gguf&sort=trending
+MODEL_GGUF+=(
+	hf.co/lmstudio-community/olmOCR-7B-0225-preview-GGUF:Q4_K_M
+	hf.co/lmstudio-community/Qwen2-VL-7B-Instruct-GGUF
+	hf.co/HYEONii/Qwen2-VL-7B-Q4_K_M-GGUF:Q4_K_M
+	hf.co/bartowski/DeepSeek-R1-Distill-Qwen-32B-abliterated-GGUF
+	hf.co/LatitudeGames/Wayfarer-Large-70B-Llama-3.3-GGUF # Role play oriented
+	hf.co/bartowski/Qwen2-VL-72B-Instruct-GGUF:Q4_K_M
+
 )
 
 # These are kept in most recent first from https://ollama.com/search?o=newest
@@ -203,6 +204,8 @@ MODEL_HF+=(
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 log_verbose "Minimal Base 1-2B models for machines that <8GB"
 MODEL+=(
+	granite3.2:2b # reasoning model messages += []{role: control, content: thinking}]
+	granite3.2:2b-instruct-q4_K_M
 	deepscaler        # fintuned deepseek-r1-distilled-qwen beats 01-previe
 	deepscaler:latest # 8K synthetic
 	deepscaler:1.5b
@@ -263,6 +266,10 @@ MODEL_XSMALL+=(
 
 log_verbose "loading all models over 4-8B parameters, requires >8GB of RAM"
 MODEL_SMALL+=(
+	granite3.2 # thinking with message += [{ role: control, content: thinking}]
+	granite3.2:latest
+	granite3.2:8b
+	granite3.2:8b-instruct-q4_K_M
 	openthinker # resaonsing models based on deepseek-r1
 	openthinker:latest
 	openthinker:7b
@@ -276,10 +283,6 @@ MODEL_SMALL+=(
 	dolphin3:latest                     # llama3.1 8B tuned
 	dolphin3:8b                         # llama3.1 8B tuned
 	dolphin3:8b-llama3.1-q4_K_M         # llama3.1 8B tuned
-	granite3.1-dense                    # IBM tool, RAG, code, translation
-	granite3.1-dense:latest             # IBM
-	granite3.1-dense:8b                 # RAG, code  generation, translation
-	granite3.1-dense:8b-instruct-q4_K_M # RAG, code  generation, translation
 	marco-o1                            # Alibab open large reasoning
 	marco-o1:latest                     # Alibab open large reasoning
 	marco-o1:7b                         # 7b
@@ -444,6 +447,10 @@ MODEL_OLD+=(
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
 	# llama 3.2 models
+	granite3.1-dense                     # IBM tool, RAG, code, translation
+	granite3.1-dense:latest              # IBM
+	granite3.1-dense:8b                  # RAG, code  generation, translation
+	granite3.1-dense:8b-instruct-q4_K_M  # RAG, code  generation, translation
 	granite3.1-dense:2b                  # do not need such a small model
 	granite3.1-dense:2b-instruct-q4_K_M  # granite worse than llama
 	granite3.1-moe                       # mixture of experts
@@ -587,9 +594,9 @@ if $INCLUDE_XSMALL; then
 	log_verbose "Include extra small models"
 	MODEL_LIST+=("${MODEL_XSMALL[@]}")
 fi
-if $INCLUDE_HF; then
-	log_verbose "Include HF models"
-	MODEL_LIST+=("${MODEL_HF[@]}")
+if $INCLUDE_GGUF; then
+	log_verbose "Include HF GGUF models"
+	MODEL_LIST+=("${MODEL_GGUF[@]}")
 fi
 if $INCLUDE_OLD; then
 	log_verbose "Include old models"
@@ -618,6 +625,15 @@ ollama_action() {
 	done
 }
 
+if [[ -v OLLAMA_MODELS ]]; then
+	log_verbose "Changing default storage of models to $OLLAMA_MODELS"
+	if ! config_mark; then
+		config_add <<-EOF
+			if [ -z "\${OLLAMA_MODELS+x} ]; then OLLAMA_MODELS="$OLLAMA_MODELS"; fi
+		EOF
+	fi
+fi
+
 if ! pgrep ollama >/dev/null; then
 	log_warning "ollama not running"
 else
@@ -631,20 +647,10 @@ else
 	fi
 fi
 
-if [[ -v OLLAMA_MODELS ]]; then
-	log_verbose "Changing default storage of models to $OLLAMA_MODELS"
-	if ! config_mark; then
-		config_add <<-EOF
-			if [ -z "\${OLLAMA_MODELS+x} ]; then OLLAMA_MODELS="$OLLAMA_MODELS"; fi
-		EOF
-	fi
+if $INCLUDE_MLX; then
+	log_verbose "Include HF MLX models"
+	huggingface-cli download "${MODEL_MLX[@]}"
 fi
-
-PACKAGE+=(
-)
-
-log_verbose "installing ${PACKAGE[*]}"
-package_install "${PACKAGE[@]}"
 
 log_verbose "installing ollama environment variables to $WS_DIR/git/src/.envrc"
 if ! config_mark "$WS_DIR/git/src/.envrc"; then
