@@ -23,6 +23,7 @@ INCLUDE_MLX="${INCLUDE_MLX:-false}"
 INCLUDE_OLD="${INCLUDE_OLD:-false}"
 FORCE="${FORCE:-false}"
 DISK_MAX="${DISK_MAX:-80}"
+SHOW_SIZE="${SHOW_SIZE:-true}"
 
 REMOVE_OBSOLETE="${REMOVE_OBSOLETE:-true}"
 
@@ -33,7 +34,7 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdveox:rlfsmugti" opt; do
+while getopts "hdveox:rlfsmugtiz" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
@@ -44,22 +45,24 @@ We do not pull modles if we have less than 20% disk free unless
 
 usage: $SCRIPTNAME [ flags ]
 flags:
-	-h help
-	-d $(! $DEBUGGING || echo "no ")debugging
-	-v $(! $VERBOSE || echo "not ")verbose
 	-a $(! $AUTOMATIC_BY_MEMORY || echo "do not ")automatically install models based on system memory
-	-t $(! $INCLUDE_XSMALL || echo "do not ")pull smaller then 3B+ parameters (even if you do not have 8GB+ RAM)
-	-s $(! $INCLUDE_SMALL || echo "do not ")pull smaller then 7B+ parameters (even if you do not have 16GB+ RAM)
-	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 32GB+ RAM)
-	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
+	-d $(! $DEBUGGING || echo "no ")debugging
 	-e $(! $INCLUDE_XLARGE || echo "do not ")pull extra models if you have lots of disk (>2TB)
+	-f $(! $FORCE || echo "do not")force pull even if disk larger than (default DISK_MAX=$DISK_MAX)
 	-g $(! $INCLUDE_GGUF || echo "do not ")pull huggingface models GGUF for Ollama
+	-h help
 	-i $(! $INCLUDE_MLX || echo "do not ")pull huggingface models GGUF for Ollama
+	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
+	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 32GB+ RAM)
 	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
 	-r $(! $REMOVE_OBSOLETE || echo "do not ")remove obsolete models
+	-s $(! $INCLUDE_SMALL || echo "do not ")pull smaller then 7B+ parameters (even if you do not have 16GB+ RAM)
+	-t $(! $INCLUDE_XSMALL || echo "do not ")pull smaller then 3B+ parameters (even if you do not have 8GB+ RAM)
 	-u $([[ $ACTION == pull ]] || echo "un")install models
-	-f $(! $FORCE || echo "do not")force pull even if disk larger than (default DISK_MAX=$DISK_MAX)
+	-v $(! $VERBOSE || echo "not ")verbose
 	-x storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
+	-z $(! $SHOW_SIZE || echo "do not ")show size of the largest models
+
 example of manual: Uninstall large and medium models and hugging face models
 	$SCRIPTNAME -u -l -m -h
 
@@ -137,6 +140,10 @@ EOF
 		export OLLAMA_MODELS
 		;;
 
+	z)
+		SHOW_SIZE="$($SHOW_SIZE && echo false || echo true)"
+		export SHOW_SIZE
+		;;
 	*)
 		echo "no flag -$opt"
 		;;
@@ -171,8 +178,12 @@ MODEL_MLX+=(
 	mlx-community/DeepSeek-R1-Distill-Qwen-32B-abliterated  # try this one
 	mlx-community/Qwen2.5-VL-72B-Instruct-4bit              # Visual input
 	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit        # compare with ollama
-	# mlx-community/DeepSeek-R1-4bit                          # 126B parameters
-	# mlx-community/perplexity-ai-r1-1776-4bit                # do not if it will fit
+
+)
+
+MODEL_MLX_REMOVE+=(
+	mlx-community/DeepSeek-R1-4bit           # 126B parameters
+	mlx-community/perplexity-ai-r1-1776-4bit # do not if it will fit
 
 )
 
@@ -181,9 +192,6 @@ MODEL_GGUF+=(
 	hf.co/lmstudio-community/olmOCR-7B-0225-preview-GGUF:Q4_K_M
 	hf.co/lmstudio-community/Qwen2-VL-7B-Instruct-GGUF
 	hf.co/HYEONii/Qwen2-VL-7B-Q4_K_M-GGUF:Q4_K_M
-	hf.co/bartowski/DeepSeek-R1-Distill-Qwen-32B-abliterated-GGUF
-	hf.co/LatitudeGames/Wayfarer-Large-70B-Llama-3.3-GGUF # Role play oriented
-	hf.co/bartowski/Qwen2-VL-72B-Instruct-GGUF:Q4_K_M
 
 )
 
@@ -349,17 +357,13 @@ MODEL_MEDIUM+=(
 	llama3.2-vision:latest                 # should run in open-webui
 	llama3.2-vision:11b                    # vision works now
 	llama3.2-vision:11b-instruct-q4_K_M    # vision works now
-	shieldgemma:27b                        # safety of text prompts
-	shieldgemma:27b-q4_K_M                 # safety of text prompts
 	qwen2.5-coder:14b                      # 128K Tuned for coding 7B
 	qwen2.5-coder:14b-instruct-q4_K_M      # 128K Tuned for coding 7B
 	qwen2.5-coder:32b                      # 128K Tuned for coding 7B
 	qwen2.5-coder:32b-instruct-q4_K_M      # 128K Tuned for coding 7B
 	# these models are pre llama3.2 and are very close to gone
-	qwen2.5:14b              # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:32b              # 128K context Alibaba 2024-09-16 7b
-	gemma2:27b               # old but only Google model
-	gemma2:27b-instruct-q4_0 # old but only Google model
+	qwen2.5:14b # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:32b # 128K context Alibaba 2024-09-16 7b
 
 )
 
@@ -446,6 +450,10 @@ MODEL_OLD+=(
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
+	# GGUF models are too big
+	hf.co/bartowski/DeepSeek-R1-Distill-Qwen-32B-abliterated-GGUF
+	hf.co/LatitudeGames/Wayfarer-Large-70B-Llama-3.3-GGUF # Role play oriented
+	hf.co/bartowski/Qwen2-VL-72B-Instruct-GGUF:Q4_K_M
 	# llama 3.2 models
 	granite3.1-dense                     # IBM tool, RAG, code, translation
 	granite3.1-dense:latest              # IBM
@@ -521,13 +529,17 @@ MODEL_REMOVE+=(
 	# models pre-llama3.1
 	bge-large:335m # tokens to embeddings
 	mistral-nemo
-	mistral-nemo:12b        # 128k context 12b-instruct-2407-q4_0
-	gemma2                  # Google 9B Q4 5.4GB 8K context
-	gemma2:latest           # Google 9B Q4 5.4GB 8K context
-	gemma2:9b               # Google 9B Q4 5.4GB 8K context
-	gemma2:9b-instruct-q4_0 # Google 9B Q4 5.4GB 8K context
-	gemma2:2b               # Google 9B Q4 5.4GB 8K context
-	gemma2:2b-instruct-q4_0 # Google 9B Q4 5.4GB 8K context
+	mistral-nemo:12b         # 128k context 12b-instruct-2407-q4_0
+	shieldgemma:27b          # safety of text prompts
+	shieldgemma:27b-q4_K_M   # safety of text prompts
+	gemma2                   # Google 9B Q4 5.4GB 8K context
+	gemma2:latest            # Google 9B Q4 5.4GB 8K context
+	gemma2:9b                # Google 9B Q4 5.4GB 8K context
+	gemma2:9b-instruct-q4_0  # Google 9B Q4 5.4GB 8K context
+	gemma2:2b                # Google 9B Q4 5.4GB 8K context
+	gemma2:2b-instruct-q4_0  # Google 9B Q4 5.4GB 8K context
+	gemma2:27b               # old but only Google model
+	gemma2:27b-instruct-q4_0 # old but only Google model
 	firefunction-v2
 	firefunction-v2:70b
 	deepseek-coder-v2
@@ -607,21 +619,30 @@ fi
 ollama_action() {
 	local action="$1"
 	shift
+	log_verbose "ollama action action=$action models=$*"
+	if ! command -v ollama >/dev/null; then
+		return 0
+	fi
 
 	for M in "$@"; do
-		# if the model isn't there and needs to be removed skip it
-		if [[ $action == rm ]] && ! ollama ls "$M" | cut -d ' ' -f 1 | grep -q "^$M$"; then
-			continue
-		fi
 		# if you want to pull but not enough room skip it unless forced
-		DISK_USED="$(df -k . | sed 1d | awk 'FNR == 1 {print $5}' | cut -f 1 -d "%")"
-		log_verbose "pull test FORCE=$FORCE action=$action DISK_USED=$DISK_USED DISK_MAX=$DISK_MAX"
-		if $FORCE || [[ $action == pull ]] && ((DISK_USED > DISK_MAX)); then
-			log_verbose "cannot pull $M $DISK_USED% used at most $DISK_MAX% allowed"
-			continue
-		fi
 		log_verbose "$action model $M"
-		ollama "$action" "$M"
+		if [[ $action == rm ]]; then
+			if ! ollama ls "$M" | tail -n +2 | grep -q "^${M}[[:space:]]"; then
+				log_verbose "$M already removed"
+				continue
+			fi
+		elif [[ $action == pull ]]; then
+			DISK_USED="$(df -k . | sed 1d | awk 'FNR == 1 {print $5}' | cut -f 1 -d "%")"
+			log_verbose "ollama_action: FORCE=$FORCE action=$action DISK_USED=$DISK_USED DISK_MAX=$DISK_MAX"
+			if $FORCE || [[ $action == pull ]] && ((DISK_USED > DISK_MAX)); then
+				log_verbose "cannot pull $M $DISK_USED% used at most $DISK_MAX% allowed"
+				continue
+			fi
+		fi
+		if ! ollama "$action" "$M"; then
+			log_warning "failed $?"
+		fi
 	done
 }
 
@@ -637,17 +658,22 @@ fi
 if ! pgrep ollama >/dev/null; then
 	log_warning "ollama not running"
 else
-	log_verbose "$ACTION on ${MODEL_LIST[*]}"
-	ollama_action "$ACTION" "${MODEL_LIST[@]}"
-
 	log_verbose "testing to remove obsolete models (Remove_OBSOLETE=$REMOVE_OBSOLETE)"
 	if $REMOVE_OBSOLETE; then
 		log_verbose "Removing deprecated models ${MODEL_REMOVE[*]}"
 		ollama_action rm "${MODEL_REMOVE[@]}"
 	fi
+
+	log_verbose "$ACTION on ${MODEL_LIST[*]}"
+	ollama_action "$ACTION" "${MODEL_LIST[@]}"
+
 fi
 
 if $INCLUDE_MLX; then
+
+	if $REMOVE_OBSOLETE; then
+		huggingface-cli delete-cache
+	fi
 	log_verbose "Include HF MLX models"
 	huggingface-cli download "${MODEL_MLX[@]}"
 fi
@@ -669,3 +695,15 @@ log_verbose "Click on + on he right and add URL https://api.groq.com/openai/v1 a
 
 log_verbose "Installing the pipelines interface which allows compatible interfaces"
 log_verbose "See https://github.com/open-webui/pipelines"
+
+if $SHOW_SIZE; then
+	log_verbose "Ollama.com models"
+	for size in GB MB; do
+		ollama ls | grep "$size" | sort -nruk 3
+	done
+	log_verbose "Ollama models from Huggingface cache"
+	huggingface-cli scan-cache | tail -n +3 | sort -unk 3
+	log_verbose "Exo MLX models"
+	du -sh "${EXO_HOME:-"$HOME/cache/exo/downloads"}"/* | sort -n
+
+fi

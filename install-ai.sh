@@ -58,13 +58,13 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 # https://lobehub.com/blog/5-ollama-web-ui-recommendation
 
 PACKAGE+=(
-	ffmpeg          # needed by open-webui
-	huggingface-cli # hf.co download files
-	llama.cpp       # underlying server to ollama
-	ollama          # ollama - ollama local runner
-	ngrok           # local ssh gateway for open-webui
-	parquet-cli     # command line opening parquet data files
-	tika            # Apache tika content extractor command line
+	# huggingface-cli # hf.co download files use huggingface_hub instead
+	ffmpeg      # needed by open-webui
+	llama.cpp   # underlying server to ollama
+	ngrok       # local ssh gateway for open-webui
+	ollama      # ollama - ollama local runner
+	parquet-cli # command line opening parquet data files
+	tika        # Apache tika content extractor command line
 
 )
 package_install "${PACKAGE[@]}"
@@ -107,6 +107,9 @@ PYTHON_PACKAGE+=(
 	# civitai-models-manager # download image generation models use comfy instead
 	open-interpreter # let's LLMs run code locally
 	open-webui
+	"huggingface_hub[cli]"
+	mlx
+	mlx_lm
 
 )
 
@@ -144,6 +147,7 @@ if ! config_mark "$WS_DIR/git/src/.envrc"; then
 		[[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
 		[[ -v VITE_OPEN_API_KEY ]] || export VITE_OPEN_API_KEY="$OPENAI_API_KEY"
 		[[ -v DATA_DIR ]] || export DATA_DIR="$WS_DIR/data/open-webui/data"
+		[[ -v JUPYTERLAB_TOKEN ]] || export "JUPYTERLAB_TOKEN"="$(op item get "JupyterLab Local Token Dev" --fields "token" --reveal)"
 	EOF
 fi
 
