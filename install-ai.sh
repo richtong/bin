@@ -220,8 +220,8 @@ fi
 # no need for gp4all
 #download_url_open "https://gpt4all.io/installers/gpt4all-installer-darwin.dmg"
 
-log_verbose "install ollama models"
-"$BIN_DIR/install-ollama.sh"
+log_verbose "install models"
+"$BIN_DIR/install-models.sh"
 
 log_verbose "install comfyUI and models"
 "$BIN_DIR/install-comfyui.sh"
