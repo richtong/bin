@@ -98,15 +98,6 @@ for shell in bash zsh; do
 	conda init "$shell"
 done
 
-log_debug "turn conda on by default"
-for profile in "$(config_profile_nonexportable)" "$(config_profile_zsh)"; do
-	if ! config_mark "$profile"; then
-		config_add "$profile" <<-'EOF'
-			if command -v conda >/dev/null && [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
-		EOF
-	fi
-done
-
 log_verbose "source $(config_profile_interactive_bash) to make sure conda setup runs"
 source_profile "$(config_profile_interactive_bash)"
 log_verbose "source successful"
@@ -129,3 +120,13 @@ conda install "python=$PYTHON"
 # 	log_warning "currently in conda so deactivate"
 # 	conda deactivate
 # fi
+
+# this should run last
+log_debug "turn conda on by default"
+for profile in "$(config_profile_nonexportable)" "$(config_profile_zsh)"; do
+	if ! config_mark "$profile"; then
+		config_add "$profile" <<-'EOF'
+			if command -v conda >/dev/null && [[ -v CONDA_SHLVL ]] && (( CONDA_SHLVL > 0 )); then conda deactivate; fi
+		EOF
+	fi
+done

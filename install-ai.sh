@@ -207,7 +207,7 @@ if ! config_mark "$WS_DIR/git/src/.envrc"; then
 		[[ -v VITE_AWS_KEY ]] || export VITE_AWS_KEY="$AWS_ACCESS_KEY_ID"
 		[[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
 		[[ -v VITE_OPEN_KEY ]] || export VITE_OPEN_KEY="$OPENAI_API_KEY"
-		[[ -v DATA_DIR ]] || export DATA_DIR="$WS_DIR/data/open-webui/data"
+		[[ -v VITE_ENDPOINT ]] || export VITE_ENDPOINT="https://wahook.dev.tne.ai"
 		[[ -v MODEL_API_KEY ]] || export "MODEL_API_KEY"="$(op item get "Open WebUI Local API Key" --fields "api key" --reveal)"
 	EOF
 fi

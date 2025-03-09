@@ -172,18 +172,18 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 # https://huggingface.co/mlx-community?message=You%27ve%20joined%20MLX%20Community!
 # https://huggingface.co/models?library=mlx&sort=trending
 MODEL_MLX+=(
-	mlx-community/plamo-2-8b-4bit                           # PLaMO-13B Open source Japanese from PFN
-	mlx-community/Violet-Lyra-Gutenberg-4bit                # # merged models
-	mlx-community/Unsloth-DeepSeek-R1-Distill-Qwen-32B-4bit # 5B parameters
-	mlx-community/DeepSeek-R1-Distill-Qwen-32B-abliterated  # try this one
-	mlx-community/Qwen2.5-VL-72B-Instruct-4bit              # Visual input
-	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit        # compare with ollama
+	mlx-community/plamo-2-8b-4bit                          # PLaMO-13B Open source Japanese from PFN
+	mlx-community/Violet-Lyra-Gutenberg-4bit               # # merged models
+	mlx-community/DeepSeek-R1-Distill-Qwen-32B-abliterated # try this one
+	mlx-community/Qwen2.5-VL-72B-Instruct-4bit             # Visual input
+	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit       # compare with ollama
 
 )
 
 MODEL_MLX_REMOVE+=(
-	mlx-community/DeepSeek-R1-4bit           # 126B parameters
-	mlx-community/perplexity-ai-r1-1776-4bit # do not if it will fit
+	mlx-community/Unsloth-DeepSeek-R1-Distill-Qwen-32B-4bit # 5B parameters
+	mlx-community/DeepSeek-R1-4bit                          # 126B parameters
+	mlx-community/perplexity-ai-r1-1776-4bit                # do not if it will fit
 
 )
 
@@ -191,6 +191,11 @@ MODEL_MLX_REMOVE+=(
 MODEL_GGUF+=(
 	hf.co/lmstudio-community/olmOCR-7B-0225-preview-GGUF:Q4_K_M
 	hf.co/lmstudio-community/Qwen2-VL-7B-Instruct-GGUF
+
+)
+
+# these models do not load in ollama for some reason, maybe they are sharded
+MODEL_GGUF_REMOVE+=(
 	hf.co/HYEONii/Qwen2-VL-7B-Q4_K_M-GGUF:Q4_K_M
 
 )
@@ -210,10 +215,16 @@ MODEL_GGUF+=(
 # per word and you can see why Q4_K_M is the default, at the knee of the curve
 # 7B | F16 | Q2_K | Q3_K_M | Q4_K_M | Q5_K_M | Q6_K
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
-log_verbose "Minimal Base 1-2B models for machines that <8GB"
+log_verbose "Minimal Base <=2B models for machines that <=4GB GPU Memory"
 MODEL+=(
+	granite3.2 # 2b vision model
+	granite3.2:latest
 	granite3.2:2b # reasoning model messages += []{role: control, content: thinking}]
 	granite3.2:2b-instruct-q4_K_M
+	granite3.2-vision
+	granite3.2-vision:latest
+	granite3.2-vision:2b
+	granite3.2-vision:2b-4_K_M
 	deepscaler        # fintuned deepseek-r1-distilled-qwen beats 01-previe
 	deepscaler:latest # 8K synthetic
 	deepscaler:1.5b
@@ -246,18 +257,13 @@ MODEL+=(
 	qwen2.5-coder:1.5b-instruct          # 128K Tuned for coding 7B
 	qwen2.5-coder:1.5b-instruct          # 128K Tuned for coding 7B
 	qwen2.5-coder:1.5b-instruct-q4_K_M   # 128K Tuned for coding 7B
-
 	# these models are pre llama3.2 and subject to deprecation
 	qwen2.5:0.5b # 128K context Alibaba 2024-09-16 7b
 	qwen2.5:1.5b # 128K context Alibaba 2024-09-16 7b
-	# these models are pre llama3.1 and are very close to gone
-	bge-large                   # embedding model from BAAI
-	bge-large:335m              # embedding model from BAA
-	bge-large:335m-en-v1.5-fp16 # embedding model from BAA
 
 )
 
-log_verbose "loading all models over 2-3B parameters, requires >4GB of RAM"
+log_verbose "loading all models >=3B parameters, requires >=8GB of RAM"
 MODEL_XSMALL+=(
 	smallthinker:3b              # long sequence encourage CoT
 	smallthinker:3b-preview-q8_0 # open dataset
@@ -272,23 +278,26 @@ MODEL_XSMALL+=(
 	qwen2.5:3b                  # 128K context Alibaba 2024-09-16 7b
 )
 
-log_verbose "loading all models over 4-8B parameters, requires >8GB of RAM"
+log_verbose "loading all models 4-8B parameters, requires >=16GB of RAM"
 MODEL_SMALL+=(
+	phi4-mini      # latest from Microsoft
+	phi4-mini:3.8b # tool calling
+	phi4-mini:3.8b-q4_K_M
 	granite3.2 # thinking with message += [{ role: control, content: thinking}]
 	granite3.2:latest
 	granite3.2:8b
 	granite3.2:8b-instruct-q4_K_M
-	openthinker # resaonsing models based on deepseek-r1
-	openthinker:latest
+	openthinker        # resaonsing models based on deepseek-r1
+	openthinker:latest # not tool calling
 	openthinker:7b
 	openthinker:7b-q4_K_M
 	deepseek-r1:latest                  # 7b reasoning model
-	deepseek-r1:7b                      # competitive to o1
+	deepseek-r1:7b                      # not tool calling
 	deepseek-r1:7b-qwen-distill-q4_K_M  # competitive to o1
 	deepseek-r1:8b                      # llama distilled 8b
 	deepseek-r1:8b-llama-distill-q4_K_M # q8b
 	dolphin3                            # llama3.1 8B tuned
-	dolphin3:latest                     # llama3.1 8B tuned
+	dolphin3:latest                     # no tool calling
 	dolphin3:8b                         # llama3.1 8B tuned
 	dolphin3:8b-llama3.1-q4_K_M         # llama3.1 8B tuned
 	marco-o1                            # Alibab open large reasoning
@@ -297,9 +306,16 @@ MODEL_SMALL+=(
 	marco-o1:7b-q4_K_M                  # q4_K_M
 	opencoder:8b                        # reproducible
 	opencoder:8b-instruct-q4_K_M        # reproducible
+	tulu3                               # AI2 instruction following
+	tulu3:latest                        # full open source data, code, recipes
+	tulu3:8b                            # 128 K content has 70B brother
+	tulu3:8b-q4_K_M                     # standard quantization
+	olmo2                               # Ai2 fully open model competitive
+	olmo2:latest                        # competitive iwth llama 3.1
+	olmo2:7b                            # November 26 2024 release
 	granite3-guardian                   # IBM prompt risk
 	granite3-guardian:latest            # IBM prompt risk
-	granite3-guardian:8b                #  prompt guard ibm
+	granite3-guardian:8b                #  prompt guard
 	granite3-guardian:8b-q5_K_M         #  prompt guard ibm
 	shieldgemma                         # google safety policies
 	shieldgemma:latest                  # google safety policies
@@ -330,8 +346,12 @@ MODEL_SMALL+=(
 
 )
 #
-log_verbose "loading all models over 9B-32B parameters, requires >16GB RAM"
+log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
+	qwq                                    # like o1
+	qwq:latest                             # like o1
+	qwq:32b                                # Alibaba advanced reasoning
+	qwq:32b-preview-q4_K_M                 # Alibaba advanced reasoning
 	openthinker:32b                        # dereict from deepseek-r1
 	openthinker:32b-q4_K_M                 # fine tuned on openthoughts 114k dataset
 	deepseek-r1:14b                        # r1 comparable
@@ -341,18 +361,14 @@ MODEL_MEDIUM+=(
 	mistral-small                          # this is now the 2503 model
 	mistral-small:latest                   # now the 2501 model
 	mistral-small:24b-instruct-2501-q4_K_M # the latest model
-	olmo2:13b                              # AI2 fully open
+	olmo2:13b                              # AI2 fully open no tools
 	olmo2:13b-1124-instruct-q4_K_M         # compets with llama 3.1
 	phi4                                   # Microsoft Jan 7 2025
 	phi4:latest                            # synthetic, filtered 9.1GB
 	phi4:14b                               # 16K context length only
-	phi4:14b-q4_K_M                        # MMLU equals llama3.3:70b qwen2.5:72b
+	phi4:14b-q4_K_M                        # no tool calling
 	falcon3:10b                            # 7B parameters
 	falcon3:10b-instruct-q4_K_M            # 7B parameters
-	qwq                                    # like o1
-	qwq:latest                             # like o1
-	qwq:32b                                # Alibaba advanced reasoning
-	qwq:32b-preview-q4_K_M                 # Alibaba advanced reasoning
 	llama3.2-vision                        # should run in open-webui
 	llama3.2-vision:latest                 # should run in open-webui
 	llama3.2-vision:11b                    # vision works now
@@ -367,7 +383,7 @@ MODEL_MEDIUM+=(
 
 )
 
-log_verbose "loading all models over >32B parameters, requires >64GB RAM"
+log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
 	r1-1776                              # perplexity r1 model on latest data
 	r1-1776:latest                       # perplexity r1 model on latest data
@@ -387,43 +403,10 @@ MODEL_LARGE+=(
 	qwen2.5:72b # 128K context Alibaba 2024-09-16 7b
 )
 
-log_verbose "Extra models if you have plenty of space about to be obsolete"
+log_verbose "Extra models over 100B parameters, requires >=600GB"
 MODEL_XLARGE+=(
-	olmo2                         # Ai2 fully open model competitive
-	olmo2:latest                  # competitive iwth llama 3.1
-	olmo2:7b                      # November 26 2024 release
-	command-r7b                   # command-r7b is the default
-	command-r7b:latest            # latest
-	command-r7b:7b                # 7B
-	command-r7b:7b-12-2024-q4_K_M # Dec 2024
-	falcon3
-	falcon3:latest             # latest from Abu Dhabi
-	falcon3:7b                 # 7B parameters
-	falcon3:7b-instruct-q4_K_M # 7B parameters
-	granite-embedding          # latest ibm embeddings
-	granite-embedding:latest
-	granite-embedding:30m
-	granite-embedding:30m-en
-	granite-embedding:278m
-	granite-embedding:278m-fp16
-	sailor2:8b                          # qwen  tuned for se asian languages
-	sailor2:8b-chat-q4_K_M              # qwen  tuned for se asian languages
-	snowflake-arctic-embed2             # new embeddings
-	snowflake-arctic-embed2:latest      # new embeddings
-	snowflake-arctic-embed2:568m-l-fp16 # new embeddings
-	snowflake-arctic-embed2:568m        # new embeddings
-	aya-expanse:32b                     # cohere model 128k content
-	aya-expanse:32b-q4_K_M              # cohere model 128k content
-	tulu3                               # AI2 instruction following
-	tulu3:latest                        # full open source data, code, recipes
-	tulu3:8b                            # 128 K content has 70B brother
-	tulu3:8b-q4_K_M                     # standard quantization
-	mixtral:8x7b                        # mistral moe (deprecated)
-	athene-v2                           # nexusflow based on qwen2.5
-	athene-v2:latest                    # code, math, log extraction
-	athene-v2:72b                       # code, math, log extraction
-	athene-v2:72b-q4_K_M                # code, math, log extraction
-
+	deepseek-r1
+	r1-1776
 )
 
 # legacy models for comparison with modern ones
@@ -454,6 +437,33 @@ MODEL_REMOVE+=(
 	hf.co/bartowski/DeepSeek-R1-Distill-Qwen-32B-abliterated-GGUF
 	hf.co/LatitudeGames/Wayfarer-Large-70B-Llama-3.3-GGUF # Role play oriented
 	hf.co/bartowski/Qwen2-VL-72B-Instruct-GGUF:Q4_K_M
+	command-r7b                   # command-r7b is the default
+	command-r7b:latest            # latest tool calling
+	command-r7b:7b                # 7B
+	command-r7b:7b-12-2024-q4_K_M # Dec 2024
+	falcon3
+	falcon3:latest             # latest from Abu Dhabi
+	falcon3:7b                 # 7B parameters
+	falcon3:7b-instruct-q4_K_M # 7B parameters
+	granite-embedding          # latest ibm embeddings
+	granite-embedding:latest
+	granite-embedding:30m
+	granite-embedding:30m-en
+	granite-embedding:278m
+	granite-embedding:278m-fp16
+	sailor2:8b                          # qwen  tuned for se asian languages
+	sailor2:8b-chat-q4_K_M              # qwen  tuned for se asian languages
+	snowflake-arctic-embed2             # new embeddings
+	snowflake-arctic-embed2:latest      # new embeddings
+	snowflake-arctic-embed2:568m-l-fp16 # new embeddings
+	snowflake-arctic-embed2:568m        # new embeddings
+	aya-expanse:32b                     # cohere model 128k content
+	aya-expanse:32b-q4_K_M              # cohere model 128k content
+	mixtral:8x7b                        # mistral moe (deprecated)
+	athene-v2                           # nexusflow based on qwen2.5
+	athene-v2:latest                    # code, math, log extraction
+	athene-v2:72b                       # code, math, log extraction
+	athene-v2:72b-q4_K_M                # code, math, log extraction
 	# llama 3.2 models
 	granite3.1-dense                     # IBM tool, RAG, code, translation
 	granite3.1-dense:latest              # IBM
@@ -554,6 +564,9 @@ MODEL_REMOVE+=(
 	command-r-plus:104b-q2_K # 39GB Q2 with 128K context for enterprise
 	command-r:35b            # 128K context 35b 19GB
 	mixtral
+	bge-large                   # embedding model from BAAI
+	bge-large:335m              # embedding model from BAA
+	bge-large:335m-en-v1.5-fp16 # embedding model from BAA
 
 )
 
@@ -569,16 +582,19 @@ if $AUTOMATIC_BY_MEMORY; then
 	# shellcheck disable=SC2194
 	# the memory needs cascade down so start with the highest number first
 	case 1 in
-	$((MEMORY > 64)))
+	$((MEMORY >= 600)))
+		INCLUDE_XLARGE=true
+		;&
+	$((MEMORY >= 64)))
 		INCLUDE_LARGE=true
 		;&
-	$((MEMORY > 32)))
+	$((MEMORY >= 32)))
 		INCLUDE_MEDIUM=true
 		;&
-	$((MEMORY > 16)))
+	$((MEMORY >= 16)))
 		INCLUDE_SMALL=true
 		;&
-	$((MEMORY > 8)))
+	$((MEMORY >= 8)))
 		INCLUDE_XSMALL=true
 		;&
 	esac
@@ -661,7 +677,7 @@ else
 	log_verbose "testing to remove obsolete models (Remove_OBSOLETE=$REMOVE_OBSOLETE)"
 	if $REMOVE_OBSOLETE; then
 		log_verbose "Removing deprecated models ${MODEL_REMOVE[*]}"
-		ollama_action rm "${MODEL_REMOVE[@]}"
+		ollama_action rm "${MODEL_REMOVE[@]}" "${MODEL_GGUF_REMOVE[@]}"
 	fi
 
 	log_verbose "$ACTION on ${MODEL_LIST[*]}"
@@ -672,6 +688,7 @@ fi
 if $INCLUDE_MLX; then
 
 	if $REMOVE_OBSOLETE; then
+		log_verbose "Manually remove ${MODEL_MLX_REMOVE[*]}"
 		huggingface-cli delete-cache
 	fi
 	log_verbose "Include HF MLX models"
