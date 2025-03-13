@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# vim: set noet ts=4 sw=4:
+#
+## @author Rich Tong
+## @returns 0 on success
+#
+#
+set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
+FORCE="${FORCE:-false}"
+export FLAGS="${FLAGS:-""}"
+
+OPTIND=1
+while getopts "hdvf" opt; do
+	case "$opt" in
+	h)
+		cat <<-EOF
+			Installs Exo and Tailscale
+			usage: $SCRIPTNAME [ flags ]
+			flags:
+				   -h help
+				   -d $($DEBUGGING && echo "no ")debugging
+				   -v $($VERBOSE && echo "not ")verbose
+				   -f $($FORCE && echo "do not ")force install even $SCRIPTNAME exists
+
+		EOF
+		exit 0
+		;;
+	d)
+		# invert the variable when flag is set
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
+		;&
+	v)
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
+		# add the -v which works for many commands
+		if $VERBOSE; then export FLAGS+=" -v "; fi
+		;;
+	f)
+		FORCE="$($FORCE && echo false || echo true)"
+		export FORCE
+		;;
+	*)
+		echo "no flag -$opt"
+		;;
+	esac
+done
+shift $((OPTIND - 1))
+# shellcheck disable=SC1091
+if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
+source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
+
+log_verbose "You need to git clone exo-labs/exo and run this at the root of that directory"
+
+if ! config_mark ".envrc"; then
+	config_add ".envrc" <<-'EOF'
+		    [[ -v TAILSCALE_API_KEY ]] || export "TAILSCALE_API_KEY"="$(op item get "Tailscale API Key Dev" --fields "api access token" --reveal)"
+				[[ -v TAILSCALE_TAILNET ]] || export "TAILSCALE_TAILNET"="$(op item get "Tailscale API Key Dev" --fields "tailnet" --reveal)"
+	EOF
+fi

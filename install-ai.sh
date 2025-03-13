@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-## vim: set noet ts=4 sw=4:
+## nstvim: set noet ts=4 sw=4:
 ##
 ## install desktop AI tools like ChatGPT and Stability Diffusion
 ##
@@ -138,19 +138,6 @@ if ! config_mark "$(config_profile_interactive)"; then
 	EOF
 fi
 
-log_verbose "For TNE.ai only install VITE keys so put in $WS_DIR"
-# note that this allows each WS_DIR to have its own copy of open-webui
-# information
-if ! config_mark "$WS_DIR/git/src/.envrc"; then
-	config_add "$WS_DIR/git/src/.envrc" <<-'EOF'
-		[[ -v VITE_AWS_KEY ]] || export VITE_AWS_KEY="$AWS_ACCESS_KEY_ID"
-		[[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
-		[[ -v VITE_OPEN_API_KEY ]] || export VITE_OPEN_API_KEY="$OPENAI_API_KEY"
-		[[ -v DATA_DIR ]] || export DATA_DIR="$WS_DIR/data/open-webui/data"
-		[[ -v JUPYTERLAB_TOKEN ]] || export "JUPYTERLAB_TOKEN"="$(op item get "JupyterLab Local Token Dev" --fields "token" --reveal)"
-	EOF
-fi
-
 # https://comfyorg.notion.site/ComfyUI-Desktop-User-Guide-1146d73d365080a49058e8d629772f0a#1486d73d3650800089f3fca8e5c94203
 log_verbose "Install Alpha version of ComfyUI Desktop"
 download_url_open "https://download.comfy.org/mac/dmg/arm64"
@@ -206,9 +193,14 @@ if ! config_mark "$WS_DIR/git/src/.envrc"; then
 		# For tne.ai orion
 		[[ -v VITE_AWS_KEY ]] || export VITE_AWS_KEY="$AWS_ACCESS_KEY_ID"
 		[[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
-		[[ -v VITE_OPEN_KEY ]] || export VITE_OPEN_KEY="$OPENAI_API_KEY"
+		[[ -v VITE_OPEN_API_KEY ]] || export VITE_OPEN_API_KEY="$OPENAI_API_KEY"
 		[[ -v VITE_ENDPOINT ]] || export VITE_ENDPOINT="https://wahook.dev.tne.ai"
 		[[ -v MODEL_API_KEY ]] || export "MODEL_API_KEY"="$(op item get "Open WebUI Local API Key" --fields "api key" --reveal)"
+
+		    # for tailscale networking to exo and Jupyterlab access by open-webui
+		[[ -v DATA_DIR ]] || export DATA_DIR="$WS_DIR/data/open-webui/data"
+		[[ -v JUPYTERLAB_TOKEN ]] || export "JUPYTERLAB_TOKEN"="$(op item get "JupyterLab Local Token Dev" --fields "token" --reveal)"
+		    # this expires every 90 days
 	EOF
 fi
 # note things like neovim code companion will use the first model
@@ -228,6 +220,9 @@ log_verbose "install comfyUI and models"
 
 log_verbose "install Jupyter so open-webui can run code there"
 "$BIN_DIR/install-jupyter.sh"
+
+# log_verbose "install tailscale for exo networking"
+# "$BIN_DIR/install-tailscale.sh"
 
 # https://dashboard.ngrok.com/get-started/setup/macos
 log_verbose "configure ngrok as front-end to open-webui with make auth with the right ngrok 1Password item"

@@ -55,10 +55,7 @@ if in_os mac; then
 	log_verbose "Enable 100.100.100.100 for Magic DNS on current ethernet connection"
 	networksetup -setdns "$ACTIVE" 100.100.100.100
 
-elif
-
-	in_os linux
-then
+elif in_os linux; then
 
 	# https://tailscale.com/kb/1031/install-linux/
 	log_verbose "Install on linux just the command line"

@@ -25,7 +25,8 @@ FORCE="${FORCE:-false}"
 DISK_MAX="${DISK_MAX:-80}"
 SHOW_SIZE="${SHOW_SIZE:-true}"
 
-REMOVE_OBSOLETE="${REMOVE_OBSOLETE:-true}"
+# remove obsolete and old models
+REMOVE_OBSOLETE_AND_OLD="${REMOVE_OBSOLETE_AND_OLD:-true}"
 
 AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
 # if set to false will remove/uninstall models
@@ -55,7 +56,7 @@ flags:
 	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
 	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 32GB+ RAM)
 	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
-	-r $(! $REMOVE_OBSOLETE || echo "do not ")remove obsolete models
+	-r $(! $REMOVE_OBSOLETE_AND_OLD || echo "do not ")remove obsolete (and old models if -o not set)
 	-s $(! $INCLUDE_SMALL || echo "do not ")pull smaller then 7B+ parameters (even if you do not have 16GB+ RAM)
 	-t $(! $INCLUDE_XSMALL || echo "do not ")pull smaller then 3B+ parameters (even if you do not have 8GB+ RAM)
 	-u $([[ $ACTION == pull ]] || echo "un")install models
@@ -123,8 +124,8 @@ EOF
 		;;
 	r)
 		# invert action between pull and rm
-		REMOVE_OBSOLETE="$($REMOVE_OBSOLETE && echo false || echo true)"
-		export REMOVE_OBSOLETE
+		REMOVE_OBSOLETE_AND_OLD="$($REMOVE_OBSOLETE_AND_OLD && echo false || echo true)"
+		export REMOVE_OBSOLETE_AND_OLD
 		;;
 	u)
 		# invert action between pull and rm
@@ -206,7 +207,6 @@ MODEL_GGUF_REMOVE+=(
 # https://github.com/ggerganov/llama.cpp/pull/1684
 # https://en.wikipedia.org/wiki/Perplexity
 # Perplexity of 247 means for each word, you have 247 guesses
-# Typically a q6 model is with 0.1% of the original fp16 model
 # K quantization so Q4_K is type 1 auanitzation with 8 blocks using 4.5bpw
 # q4 - 4 bit quantization of original floating point 16-bit model
 # S, M or L - Small, Medium, Large which tellls you what Q you are
@@ -217,6 +217,8 @@ MODEL_GGUF_REMOVE+=(
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 log_verbose "Minimal Base <=2B models for machines that <=4GB GPU Memory"
 MODEL+=(
+	gemma3:1b
+	gemma3:1b-it-fp16
 	granite3.2 # 2b vision model
 	granite3.2:latest
 	granite3.2:2b # reasoning model messages += []{role: control, content: thinking}]
@@ -263,8 +265,14 @@ MODEL+=(
 
 )
 
-log_verbose "loading all models >=3B parameters, requires >=8GB of RAM"
+log_verbose "loading all models <=4B parameters, requires >=8GB of RAM"
 MODEL_XSMALL+=(
+	gemma3 # vision model
+	gemma3:latest
+	gemma3:4b
+	phi4-mini      # latest from Microsoft
+	phi4-mini:3.8b # tool calling
+	phi4-mini:3.8b-q4_K_M
 	smallthinker:3b              # long sequence encourage CoT
 	smallthinker:3b-preview-q8_0 # open dataset
 	falcon3:3b                   # 7B parameters
@@ -278,11 +286,8 @@ MODEL_XSMALL+=(
 	qwen2.5:3b                  # 128K context Alibaba 2024-09-16 7b
 )
 
-log_verbose "loading all models 4-8B parameters, requires >=16GB of RAM"
+log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
 MODEL_SMALL+=(
-	phi4-mini      # latest from Microsoft
-	phi4-mini:3.8b # tool calling
-	phi4-mini:3.8b-q4_K_M
 	granite3.2 # thinking with message += [{ role: control, content: thinking}]
 	granite3.2:latest
 	granite3.2:8b
@@ -348,6 +353,8 @@ MODEL_SMALL+=(
 #
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
+	gemma3:12b                             # 12B
+	gemma3:27b                             # 27B
 	qwq                                    # like o1
 	qwq:latest                             # like o1
 	qwq:32b                                # Alibaba advanced reasoning
@@ -418,17 +425,25 @@ MODEL_OLD+=(
 	phi3.5:3.8b                    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	phi3.5:3.8b-mini-instruct-q4_0 # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	# early 2024 models
-	llama2:7b           # original llama2
-	llama2:13b          # 13b
-	orca-mini:3b        # Microsoft Research
-	falcon:7b           # abu dahbi TII
-	mistral:7b          # v0.3 of original Mistral
-	starcoder:1b        # another fined tuned model
-	yi:6b               # yi 1.5
-	deepseek-coder:6.7b # first deepseek
-	orca2:7b            # Microsoft
-	phi:2.7b            # phi-2
-	qwen:7b             ## Qwen 1.5
+	llama2:7b                # original llama2
+	llama2:13b               # 13b
+	gemma2                   # Google 9B Q4 5.4GB 8K context
+	gemma2:latest            # Google 9B Q4 5.4GB 8K context
+	gemma2:9b                # Google 9B Q4 5.4GB 8K context
+	gemma2:9b-instruct-q4_0  # Google 9B Q4 5.4GB 8K context
+	gemma2:2b                # Google 9B Q4 5.4GB 8K context
+	gemma2:2b-instruct-q4_0  # Google 9B Q4 5.4GB 8K context
+	gemma2:27b               # old but only Google model
+	gemma2:27b-instruct-q4_0 # old but only Google model
+	orca-mini:3b             # Microsoft Research
+	falcon:7b                # abu dahbi TII
+	mistral:7b               # v0.3 of original Mistral
+	starcoder:1b             # another fined tuned model
+	yi:6b                    # yi 1.5
+	deepseek-coder:6.7b      # first deepseek
+	orca2:7b                 # Microsoft
+	phi:2.7b                 # phi-2
+	qwen:7b                  ## Qwen 1.5
 )
 
 # move the deprecated models here to make sure to delete them
@@ -539,17 +554,9 @@ MODEL_REMOVE+=(
 	# models pre-llama3.1
 	bge-large:335m # tokens to embeddings
 	mistral-nemo
-	mistral-nemo:12b         # 128k context 12b-instruct-2407-q4_0
-	shieldgemma:27b          # safety of text prompts
-	shieldgemma:27b-q4_K_M   # safety of text prompts
-	gemma2                   # Google 9B Q4 5.4GB 8K context
-	gemma2:latest            # Google 9B Q4 5.4GB 8K context
-	gemma2:9b                # Google 9B Q4 5.4GB 8K context
-	gemma2:9b-instruct-q4_0  # Google 9B Q4 5.4GB 8K context
-	gemma2:2b                # Google 9B Q4 5.4GB 8K context
-	gemma2:2b-instruct-q4_0  # Google 9B Q4 5.4GB 8K context
-	gemma2:27b               # old but only Google model
-	gemma2:27b-instruct-q4_0 # old but only Google model
+	mistral-nemo:12b       # 128k context 12b-instruct-2407-q4_0
+	shieldgemma:27b        # safety of text prompts
+	shieldgemma:27b-q4_K_M # safety of text prompts
 	firefunction-v2
 	firefunction-v2:70b
 	deepseek-coder-v2
@@ -582,7 +589,7 @@ if $AUTOMATIC_BY_MEMORY; then
 	# shellcheck disable=SC2194
 	# the memory needs cascade down so start with the highest number first
 	case 1 in
-	$((MEMORY >= 600)))
+	$((MEMORY >= 512)))
 		INCLUDE_XLARGE=true
 		;&
 	$((MEMORY >= 64)))
@@ -674,10 +681,13 @@ fi
 if ! pgrep ollama >/dev/null; then
 	log_warning "ollama not running"
 else
-	log_verbose "testing to remove obsolete models (Remove_OBSOLETE=$REMOVE_OBSOLETE)"
-	if $REMOVE_OBSOLETE; then
+	log_verbose "testing to remove obsolete models (Remove_OBSOLETE=$REMOVE_OBSOLETE_AND_OLD)"
+	if $REMOVE_OBSOLETE_AND_OLD; then
 		log_verbose "Removing deprecated models ${MODEL_REMOVE[*]}"
 		ollama_action rm "${MODEL_REMOVE[@]}" "${MODEL_GGUF_REMOVE[@]}"
+		if ! $INCLUDE_OLD; then
+			ollama_action rm "${MODEL_OLD[@]}"
+		fi
 	fi
 
 	log_verbose "$ACTION on ${MODEL_LIST[*]}"
@@ -687,7 +697,7 @@ fi
 
 if $INCLUDE_MLX; then
 
-	if $REMOVE_OBSOLETE; then
+	if $REMOVE_OBSOLETE_AND_OLD; then
 		log_verbose "Manually remove ${MODEL_MLX_REMOVE[*]}"
 		huggingface-cli delete-cache
 	fi
