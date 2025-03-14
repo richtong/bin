@@ -202,9 +202,6 @@ if ! config_mark "$HOME/.default-python-packages"; then
 		$(printf "%s\n" "${PIP_PACKAGE[@]}")
 	EOF
 fi
-log_verbose "Python is not pulled properly so rest --hard"
-pushd >/dev/null "$HOME/.asdf/plugins/python"
-git reset --hard origin/master
 
 # the ! means all keys of an array
 # https://unix.stackexchange.com/questions/91943/is-there-a-way-to-list-all-indexes-ids-keys-on-a-bash-associative-array-vari
@@ -258,12 +255,16 @@ for LANG in "${!ASDF[@]}"; do
 			eval ${ASDF_ENV[$LANG]:-} asdf install "$LANG" "$VERSION"
 			# does the global multiple times because there is no way to do double index
 			# so in effect the last version is the global do not set anything
-			log_verbose  asdf cmd direnv set "$LANG" "$VERSION"
+			log_verbose asdf cmd direnv set "$LANG" "$VERSION"
 			asdf cmd direnv set "$LANG" "$VERSION"
 		fi
 	done
 	popd >/dev/null
 done
+
+log_verbose "Python is not pulled properly so reset --hard"
+pushd >/dev/null "$HOME/.asdf/plugins/python"
+git reset --hard origin/master
 
 source_profile
 # shellcheck disable=SC2016
