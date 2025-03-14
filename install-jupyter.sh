@@ -191,8 +191,9 @@ log_verbose "needed install if needed for pdfs"
 #fi
 
 # https://nbdime.readthedocs.io/en/latest/extensions.html
-log_verbose "Enable git to use nbdime to diff notebooks"
-nbdime config-git --enable --global
+# no longer works
+# log_verbose "Enable git to use nbdime to diff notebooks"
+# nbdime config-git --enable --global
 # nbdime extenstions enabled at install
 #nddime extensions --enable
 
