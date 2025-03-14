@@ -12,23 +12,24 @@ set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 
 CIVITAI_CLI_CONFIG_DIR="${CIVITAI_CLI_CONFIG_DIR:-"$HOME/.config/civit-cli-manager"}"
 COMFYUI_USER_DIR="${COMFYUI_USER_DIR:-"$HOME/ComfyUI"}"
+EXTRAS="${EXTRAS:-false}"
 
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-
-while getopts "hdvr:e:s:" opt; do
+while getopts "hdvx" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
-			Installs AI Tools including Stability Diffusion and ChatGPT, ComfyUI, CivitAI cli
+			Installs AI Tools including Ollama, Open WebUI
 			usage: $SCRIPTNAME [ flags ]
 			flags:
 				   -h help
 				   -d $(! $DEBUGGING || echo "no ")debugging
 				   -v $(! $VERBOSE || echo "not ")verbose
+			           -x $(! $EXTRAS || echo "no ")extras like Comfy etc
 		EOF
 		exit 0
 		;;
@@ -42,6 +43,9 @@ while getopts "hdvr:e:s:" opt; do
 		export VERBOSE
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
+		;;
+	x)
+		EXTRAS="$($EXTRAS && echo false || echo true)"
 		;;
 	*)
 		echo "no flag -$opt"
@@ -59,14 +63,20 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 PACKAGE+=(
 	# huggingface-cli # hf.co download files use huggingface_hub instead
-	ffmpeg      # needed by open-webui
-	llama.cpp   # underlying server to ollama
-	ngrok       # local ssh gateway for open-webui
-	ollama      # ollama - ollama local runner
-	parquet-cli # command line opening parquet data files
-	tika        # Apache tika content extractor command line
+	ffmpeg    # needed by open-webui
+	llama.cpp # underlying server to ollama
+	ollama    # ollama - ollama local runner
+	tika      # Apache tika content extractor command line
 
 )
+
+if $EXTRAS; then
+	PACKAGE+=(
+		ngrok       # local ssh gateway for open-webui
+		parquet-cli # command line opening parquet data files
+	)
+fi
+
 package_install "${PACKAGE[@]}"
 log_verbose "packages installed"
 
@@ -86,32 +96,44 @@ if in_os mac; then
 		# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
 		# shell-gpt - cli including running shell commands (never use deprecated)
 		# vincelwt-chatgpt - ChatGPT in menubar (not using)
-		cursor          # pair programming using VScode, takes over the $(code)
-		diffusionbee    # diffusionbee - Stability diffusion on Mac
-		mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
-		zed             # yet another ai editor
-
+		diffusionbee # diffusionbee - Stability diffusion on Mac
 	)
+
+	if $EXTRAS; then
+		CASK+=(
+			cursor          # pair programming using VScode, takes over the $(code)
+			mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
+			zed             # yet another ai editor
+		)
+	fi
 	brew_install "${CASK[@]}"
 
 	MAS+=(
-		6474268307 # Enchanted LLM Mac only selfhosted
-
 	)
+
+	if $EXTRAS; then
+		MAS+=(
+			6474268307 # Enchanted LLM Mac only selfhosted
+		)
+	fi
+
 	mas_install "${MAS[@]}"
 
 fi
 
 PYTHON_PACKAGE+=(
-
-	# civitai-models-manager # download image generation models use comfy instead
-	open-interpreter # let's LLMs run code locally
 	open-webui
-	"huggingface_hub[cli]"
-	mlx
-	mlx_lm
-
 )
+
+if $EXTRAS; then
+	PYTHON_PACKAGE+=(
+		# civitai-models-manager # download image generation models use comfy instead
+		open-interpreter # let's LLMs run code locally
+		"huggingface_hub[cli]"
+		mlx
+		mlx_lm
+	)
+fi
 
 # No longer required I think
 # "open-interpreter[local]"
@@ -138,12 +160,13 @@ if ! config_mark "$(config_profile_interactive)"; then
 	EOF
 fi
 
-# https://comfyorg.notion.site/ComfyUI-Desktop-User-Guide-1146d73d365080a49058e8d629772f0a#1486d73d3650800089f3fca8e5c94203
-log_verbose "Install Alpha version of ComfyUI Desktop"
-download_url_open "https://download.comfy.org/mac/dmg/arm64"
+if $EXTRAS; then
+	# https://comfyorg.notion.site/ComfyUI-Desktop-User-Guide-1146d73d365080a49058e8d629772f0a#1486d73d3650800089f3fca8e5c94203
+	log_verbose "Install Alpha version of ComfyUI Desktop"
+	download_url_open "https://download.comfy.org/mac/dmg/arm64"
 
-log_verbose "find open-interpreter models at https://docs.litellm.ai/docs/providers/"
-log_verbose "gemini-pro o1-mini claude-3-5-sonnetjj"
+	log_verbose "find open-interpreter models at https://docs.litellm.ai/docs/providers/"
+	log_verbose "gemini-pro o1-mini claude-3-5-sonnet"
 
 # not needed use the comfyui installer
 # mkdir -p "$CIVITAI_CLI_CONFIG_DIR"
@@ -171,6 +194,7 @@ log_verbose "gemini-pro o1-mini claude-3-5-sonnetjj"
 # for url in "${TIKA_JAR_URL[@]}"; do
 # 	download_url "$url" "$TIKA_JAR_PATH" "$TIKA_JAR_DIR"
 # done
+fi
 
 log_verbose "Installing ${PYTHON_PACKAGE[*]}"
 for package in "${PYTHON_PACKAGE[@]}"; do
@@ -215,8 +239,8 @@ fi
 log_verbose "install models"
 "$BIN_DIR/install-models.sh"
 
-log_verbose "install comfyUI and models"
-"$BIN_DIR/install-comfyui.sh"
+# log_verbose "install comfyUI and models"
+# "$BIN_DIR/install-comfyui.sh"
 
 log_verbose "install Jupyter so open-webui can run code there"
 "$BIN_DIR/install-jupyter.sh"

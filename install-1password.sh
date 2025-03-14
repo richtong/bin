@@ -469,7 +469,7 @@ log_verbose "add signing key"
 git config --global user.signingkey "$(op item get "GitHub SSH Key" --fields "public key" --reveal)"
 if in_os mac; then
 	# log_verbose "add 1password as app"
-	git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+	# git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 	git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 fi
 # a bug so do not enable

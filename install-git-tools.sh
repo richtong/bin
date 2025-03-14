@@ -159,7 +159,7 @@ package_install "${PACKAGE[@]}"
 # nbdime pyyaml virtualenv no long key only on ubuntu anyway
 #if ! in_os mac; then
 #	log_verbose "brew link virtualenv, pyyaml as they are keg-only"
-	# virtualenv used by pre-commit
+# virtualenv used by pre-commit
 #	brew link nbdime pyyaml virtualenv
 #fi
 
@@ -235,4 +235,4 @@ git config --global init.defaultBranch main
 
 # https://nbdime.readthedocs.io/en/latest/
 # https://nbdime.readthedocs.io/en/latest/vcs.html
-nbdime config-git --enable --system
+# nbdime config-git --enable --system
