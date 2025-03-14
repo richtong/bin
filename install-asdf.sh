@@ -229,12 +229,22 @@ for LANG in "${!ASDF[@]}"; do
 		INSTALLED="$(asdf list "$LANG" 2>&1 | sed 's/*//')"
 		log_verbose "Is $LANG has versions $INSTALLED installed already"
 	fi
+done
 
+if [[ -e "$HOME/.asdf/plugins/python" ]]; then
+	log_verbose "Python is not pulled properly so reset --hard"
+	pushd >/dev/null "$HOME/.asdf/plugins/python"
+	git reset --hard origin/master
+fi
+
+log_verbose "setting versions for plugins in ${ASDF[*]} in $HOME"
+pushd "$HOME" >/dev/null
+for LANG in "${!ASDF[@]}"; do
 	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
 	# note this word splits so versions cannot have spaces there seems to be no
 	# way to generate an array here
 	# go to home to set .tool-version
-	pushd "$HOME" >/dev/null
+	# Now that direnv is installed we go through again and set the languages
 	for VERSION in ${ASDF[$LANG]}; do
 		log_verbose "looking for version $VERSION"
 		# remove the asterisk which means current selected
@@ -259,12 +269,8 @@ for LANG in "${!ASDF[@]}"; do
 			asdf cmd direnv set "$LANG" "$VERSION"
 		fi
 	done
-	popd >/dev/null
 done
-
-log_verbose "Python is not pulled properly so reset --hard"
-pushd >/dev/null "$HOME/.asdf/plugins/python"
-git reset --hard origin/master
+popd >/dev/null
 
 source_profile
 # shellcheck disable=SC2016
