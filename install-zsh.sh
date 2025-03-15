@@ -87,7 +87,7 @@ log_verbose "Install Package ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
 
 log_verbose "The F*ck requires special install"
-./install-thefuck.sh
+"$BIN_DIR/./install-thefuck.sh"
 
 log_verbose "Adding OMZ plugins"
 log_verbose "Pygment syntax highlighter must be linked"
