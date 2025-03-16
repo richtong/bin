@@ -112,6 +112,31 @@ PACKAGE+=(
 
 )
 
+if in_os linux; then
+	APT_PACKAGE+=(
+		make
+		build-essential
+		libssl-dev
+		zlib1g-dev
+		libbz2-dev
+		libreadline-dev
+		libsqlite3-dev
+		wget
+		curl
+		llvm
+		libncursesw5-dev
+		xz-utils
+		tk-dev
+		libxml2-dev
+		libxmlsec1-dev
+		libffi-dev
+		liblzma-dev
+	)
+
+	log_verbose "Linux installs ${APT_PACKAGE[*]}"
+	apt_install "${APT_PACKAGE[@]}"
+fi
+
 if [[ -v PYTHON_VERSION ]]; then
 	log_verbose "will install $PYTHON_VERSION"
 	PACKAGE+=("python$PYTHON_VERSION")
@@ -160,6 +185,7 @@ log_verbose "installing ${PACKAGE[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
+
 
 for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	log_verbose "Install other python $version"

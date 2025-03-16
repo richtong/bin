@@ -32,8 +32,8 @@ if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]:-${DEFAULT
 # DEFAULT_DIRENV=(2.35.0)
 # if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
 
-# Python 3.11.8 has to be built so use a lower version as of Mar 2024
-DEFAULT_PYTHON=(3.11.10 3.12.9)
+# 3.11.10 will not build on ubuntu
+DEFAULT_PYTHON=(3.11.8 3.12.9)
 if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]:-${DEFAULT_PYTHON[@]}}"); fi
 
 # openjdk18 is Java 8 for Unifi.app no longer needed, 23 for tika
