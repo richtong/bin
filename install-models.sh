@@ -708,8 +708,8 @@ fi
 log_verbose "installing ollama environment variables to $WS_DIR/git/src/.envrc"
 if ! config_mark "$WS_DIR/git/src/.envrc"; then
 	config_add "$WS_DIR/git/src/.envrc" <<-EOF
-		export OLLAMA_KV_CACHE_TYPE=q4_0
-		export OLLAMA_FLASH_ATTENTION=1
+		[[ -v OLLAMA_KV_CACHE_TYPE ]] || export OLLAMA_KV_CACHE_TYPE=q4_0
+		[[ -v OLLAMA_FLASH_ATTENTION ]] || export OLLAMA_FLASH_ATTENTION=1
 	EOF
 fi
 # log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc

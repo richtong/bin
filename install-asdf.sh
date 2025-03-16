@@ -22,15 +22,15 @@ XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 DIRENV_CONFIG="${DIRENV_CONFIG:=$XDG_CONFIG_HOME/direnv}"
 DIRENVRC="${DIRENVRC:=$DIRENV_CONFIG/direnvrc}"
 
-# make the default an array needs a hack
 # https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
 # https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
 # These versions should be kept in sync with .tool_versions in ./src, ./bin, ./lib and ./user/rich
-DEFAULT_NODE=(22.12.0 20.18.1)
+# the default version is the last one in the list
+DEFAULT_NODE=(20.18.1 22.12.0)
 if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]:-${DEFAULT_NODE[@]}}"); fi
 
-DEFAULT_DIRENV=(2.35.0)
-if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
+# DEFAULT_DIRENV=(2.35.0)
+# if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
 
 # Python 3.11.8 has to be built so use a lower version as of Mar 2024
 DEFAULT_PYTHON=(3.11.10 3.12.9)
@@ -73,7 +73,7 @@ while getopts "hdvn:e:p:j:r:u:" opt; do
 				You can use a quote string to install more than one version
 				So -p "3.10.1 3.11.4" works
 				-p Python version (default: ${PYTHON_VERSION[*]})
-				-e Direnv version (default: ${DIRENV_VERSION[*]})
+				# -e Direnv version (default: ${DIRENV_VERSION[*]})
 				-n Node.js version (default: ${NODE_VERSION[*]})
 				-j Java version (default: ${JAVA_VERSION[*]})
 				-r Ruby version (default: ${RUBY_VERSION[*]})
@@ -97,9 +97,9 @@ while getopts "hdvn:e:p:j:r:u:" opt; do
 		# https://unix.stackexchange.com/questions/763312/how-to-ignore-control-characters-when-execute-read-in-bash
 		read -ra PYTHON_VERSION <<<"$OPTARG"
 		;;
-	e)
-		read -ra DIRENV_VERSION <<<"$OPTARG"
-		;;
+	# e)
+	# 	read -ra DIRENV_VERSION <<<"$OPTARG"
+	# 	;;
 	n)
 		read -ra NODE_VERSION <<<"$OPTARG"
 		;;
@@ -155,7 +155,7 @@ package_install "${PACKAGE[@]}"
 
 # https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
 declare -A ASDF+=(
-	[direnv]=${DIRENV_VERSION[@]}
+	# [direnv]=${DIRENV_VERSION[@]}
 	[java]=${JAVA_VERSION[@]}
 	[nodejs]=${NODE_VERSION[@]}
 	[ruby]=${RUBY_VERSION[@]}
@@ -263,10 +263,9 @@ for LANG in "${!ASDF[@]}"; do
 			# note we use {:-} since not all ASDF_ENVs are set
 			# shellcheck disable=SC2086
 			eval ${ASDF_ENV[$LANG]:-} asdf install "$LANG" "$VERSION"
-			# does the global multiple times because there is no way to do double index
 			# so in effect the last version is the global do not set anything
-			log_verbose asdf cmd direnv set "$LANG" "$VERSION"
-			asdf cmd direnv set "$LANG" "$VERSION"
+			log_verbose "asdf set in $HOME $LANG to $VERSION"
+			asdf set -u "$LANG" "$VERSION"
 		fi
 	done
 done
@@ -416,6 +415,5 @@ if ! config_mark "$DIRENVRC"; then
 fi
 
 log_warning "To enable direnv in every directory with a .envrc run direnv allow there"
-
 
 log_warning "To set .tool-versions run asdf direnv set golang 1.23 do not use asdf set"
