@@ -135,24 +135,6 @@ PACKAGE+=(
 )
 package_install "${PACKAGE[@]}"
 
-#  this linking does not work to fix asdf install python issues
-# https://github.com/pyenv/pyenv/issues/950
-# but retaining the code in case it's needed
-# if [[ ! -e $HOMEBREW_PREFIX/bin/gcc ]]; then
-# 	log_verbose "link gcc keg only"
-# 	if ! pushd "$HOMEBREW_PREFIX/bin" >/dev/null; then
-# 		log_exit 1 "no $HOMEBREW_PREFIX/bin"
-# 	fi
-# 	log_verbose "In $HOMEBREW_PREFIX/bin"
-# 	GCC_WITH_VERSION="$(brew info gcc | grep -o "gcc/[0-9]*" | tr / -)"
-# 	if [[ ! -e $GCC_WITH_VERSION ]]; then
-# 		log_exit 2 "no $GCC_WITH_VERSION"
-# 	fi
-# 	log_verbose "linking $GCC_WITH_VERSION to gcc"
-# 	ln -s "$GCC_WITH_VERSION" gcc
-# 	popd >/dev/null
-# fi
-
 # https://stackoverflow.com/questions/28725333/looping-over-pairs-of-values-in-bash
 declare -A ASDF+=(
 	# [direnv]=${DIRENV_VERSION[@]}
@@ -237,7 +219,12 @@ if [[ -e "$HOME/.asdf/plugins/python" ]]; then
 	git reset --hard origin/master
 fi
 
-log_verbose "setting versions for plugins in ${ASDF[*]} in $HOME"
+log_verbose "installing and setting versions for plugins in ${ASDF[*]} in $HOME"
+#  https://github.com/pyenv/pyenv/issues/2823
+if in_os linux; then
+	log_verbose "unlink for python"
+	brew unlink pkgconfig
+fi
 pushd "$HOME" >/dev/null
 for LANG in "${!ASDF[@]}"; do
 	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
@@ -269,6 +256,9 @@ for LANG in "${!ASDF[@]}"; do
 		fi
 	done
 done
+if in_os linux; then
+	brew link pkgconfig
+fi
 popd >/dev/null
 
 source_profile
