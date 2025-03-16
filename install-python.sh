@@ -113,6 +113,8 @@ PACKAGE+=(
 )
 
 if in_os linux; then
+	# https://github.com/asdf-community/asdf-python/issues/119
+	# needed to build python
 	APT_PACKAGE+=(
 		make
 		build-essential
