@@ -26,14 +26,14 @@ DIRENVRC="${DIRENVRC:=$DIRENV_CONFIG/direnvrc}"
 # https://stackoverflow.com/questions/27554957/how-to-set-the-default-value-of-a-variable-as-an-array
 # https://unix.stackexchange.com/questions/10898/write-default-array-to-variable-in-bash
 # These versions should be kept in sync with .tool_versions in ./src, ./bin, ./lib and ./user/rich
-DEFAULT_NODE=(22.11.0 20.18.1)
+DEFAULT_NODE=(22.12.0 20.18.1)
 if ((${#DEFAULT_NODE[@]} > 0)); then NODE_VERSION=("${NODE_VERSION[@]:-${DEFAULT_NODE[@]}}"); fi
 
 DEFAULT_DIRENV=(2.35.0)
 if ((${#DEFAULT_DIRENV[@]} > 0)); then DIRENV_VERSION=("${DIRENV_VERSION[@]:-${DEFAULT_DIRENV[@]}}"); fi
 
 # Python 3.11.8 has to be built so use a lower version as of Mar 2024
-DEFAULT_PYTHON=(3.11.10 3.12.7)
+DEFAULT_PYTHON=(3.11.10 3.12.9)
 if ((${#DEFAULT_PYTHON[@]} > 0)); then PYTHON_VERSION=("${PYTHON_VERSION[@]:-${DEFAULT_PYTHON[@]}}"); fi
 
 # openjdk18 is Java 8 for Unifi.app no longer needed, 23 for tika
@@ -45,11 +45,11 @@ DEFAULT_RUBY=(3.3.4)
 if ((${#DEFAULT_RUBY[@]} > 0)); then RUBY_VERSION=("${RUBY_VERSION[@]:-${DEFAULT_RUBY[@]}}"); fi
 
 # UV is used with LazyVim
-DEFAULT_UV=(0.6.3)
+DEFAULT_UV=(0.6.3 0.6.6)
 if ((${#DEFAULT_UV[@]} > 0)); then UV_VERSION=("${UV_VERSION[@]:-${DEFAULT_UV[@]}}"); fi
 
 # Go used in Hugo
-DEFAULT_GOLANG=(1.23.2)
+DEFAULT_GOLANG=(1.23.2 1.24.0)
 if ((${#DEFAULT_GOLANG[@]} > 0)); then GOLANG_VERSION=("${GOLANG_VERSION[@]:-${DEFAULT_GOLANG[@]}}"); fi
 
 # Go used in Vite
@@ -416,4 +416,6 @@ if ! config_mark "$DIRENVRC"; then
 fi
 
 log_warning "To enable direnv in every directory with a .envrc run direnv allow there"
+
+
 log_warning "To set .tool-versions run asdf direnv set golang 1.23 do not use asdf set"

@@ -730,7 +730,9 @@ if $SHOW_SIZE; then
 	done
 	log_verbose "Ollama models from Huggingface cache"
 	huggingface-cli scan-cache | tail -n +3 | sort -unk 3
-	log_verbose "Exo MLX models"
-	du -sh "${EXO_HOME:-"$HOME/.cache/exo/downloads"}"/* | sort -n
-
+	EXO_HOME="${EXO_HOME:-"$HOME/.cache/exo/downloads"}"
+	if [[ -d $EXO_HOME ]]; then
+		log_verbose "Exo MLX models"
+		du -sh "${EXO_HOME:-"$HOME/.cache/exo/downloads"}"/* | sort -n
+	fi
 fi
