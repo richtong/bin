@@ -276,18 +276,19 @@ source_profile
 #    EOF
 #fi
 
-ENVRC="${ENVRC:-"$HOME/.envrc"}"
-if ! config_mark "$ENVRC"; then
-	log_verbose "Adding $ENVRC"
-	# allow if direnv exists
-	if command -v direnv >/dev/null; then
-		direnv allow "$ENVRC"
-	fi
-	log_verbose "Adding to $ENVRC"
-	config_add "$ENVRC" <<-'EOF'
-		use asdf
-	EOF
-fi
+# no longer use ASDF-direnv
+# ENVRC="${ENVRC:-"$HOME/.envrc"}"
+# if ! config_mark "$ENVRC"; then
+# 	log_verbose "Adding $ENVRC"
+# 	# allow if direnv exists
+# 	if command -v direnv >/dev/null; then
+# 		direnv allow "$ENVRC"
+# 	fi
+# 	log_verbose "Adding to $ENVRC"
+# 	config_add "$ENVRC" <<-'EOF'
+# 		use asdf
+# 	EOF
+# fi
 
 if ! config_mark "$HOME/.asdfrc"; then
 	log_verbose "Adding to $$HOME/.asdfrc"
@@ -308,13 +309,16 @@ for shell_type in bash zsh; do
 			eval "$(direnv hook $shell_type)"
 EOF
 		fi
-		log_verbose "adding shell setup for direnv version ${ASDF[direnv]}"
-		if [[ -n ${ASDF[direnv]} ]]; then
-			log_verbose "Adding asdf-direnv for $shell_type"
-			if ! asdf cmd direnv setup --shell "$shell_type" --version "${ASDF[direnv]}"; then
-				log_verbose "direnv setup failed"
-			fi
-		fi
+
+		# asdf-direnv deprecated
+		# log_verbose "adding shell setup for direnv version ${ASDF[direnv]}"
+		# if [[ -n ${ASDF[direnv]} ]]; then
+		# 	log_verbose "Adding asdf-direnv for $shell_type"
+		# 	if ! asdf cmd direnv setup --shell "$shell_type" --version "${ASDF[direnv]}"; then
+		# 		log_verbose "direnv setup failed"
+		# 	fi
+		# fi
+
 		# https://github.com/halcyon/asdf-java#java_home
 		log_verbose "java=${ASDF[java]}"
 		if [[ -n ${ASDF[java]} ]]; then
