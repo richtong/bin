@@ -29,6 +29,8 @@ DIRENV_PATH="${DIRENV_PATH:-$HOME/.envrc}"
 SANDBOX="${SANDBOX:-false}"
 SHELL_PROFILE="${SHELL_PROFILE:-true}"
 SSH_CONFIG="${SSH_CONFIG:-"$HOME/.ssh/config"}"
+SSH_SIGNING_KEY="${SSH_SIGNING_KEY:-false}"
+
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
@@ -459,19 +461,22 @@ if ! config_mark "$SSH_CONFIG"; then
 	EOF
 fi
 
-# https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
-log_verbose "use ssh key for signing commits"
-git config --global gpg.format ssh
-# disable because op returns a double quoted string
-# shellcheck disable=SC2046
-log_verbose "add signing key"
-# FIX this only adds the first id_ed25519
-git config --global user.signingkey "$(op item get "GitHub SSH Key" --fields "public key" --reveal)"
-if in_os mac; then
-	# log_verbose "add 1password as app"
-	# git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-	git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+if $SSH_SIGNING_KEY; then
+	# This signing not working for ubuntu
+	# https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key
+	log_verbose "use ssh key for signing commits"
+	git config --global gpg.format ssh
+	# disable because op returns a double quoted string
+	# shellcheck disable=SC2046
+	log_verbose "add signing key"
+	# FIX this only adds the first id_ed25519
+	git config --global user.signingkey "$(op item get "GitHub SSH Key" --fields "public key" --reveal)"
+	if in_os mac; then
+		# log_verbose "add 1password as app"
+		# git config --global 'gpg "ssh".program' "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+		git config --global gpg.ssh.program "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+	fi
+	# a bug so do not enable
+	log_verbose "enable signing"
+	git config --global commit.gpgsign true
 fi
-# a bug so do not enable
-log_verbose "enable signing"
-git config --global commit.gpgsign true
