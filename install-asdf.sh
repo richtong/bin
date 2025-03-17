@@ -188,6 +188,13 @@ fi
 # the ! means all keys of an array
 # https://unix.stackexchange.com/questions/91943/is-there-a-way-to-list-all-indexes-ids-keys-on-a-bash-associative-array-vari
 log_verbose "Installing asdf plugins from ${ASDF[*]}"
+log_verbose "setting versions for plugins in ${ASDF[*]} in $HOME"
+#  https://github.com/pyenv/pyenv/issues/2823
+if in_os linux; then
+	log_verbose "unlink for python"
+	brew unlink pkgconfig
+fi
+pushd "$HOME" >/dev/null
 for LANG in "${!ASDF[@]}"; do
 	log_verbose "looking for $LANG"
 	# this command only work if you run it first
@@ -211,22 +218,6 @@ for LANG in "${!ASDF[@]}"; do
 		INSTALLED="$(asdf list "$LANG" 2>&1 | sed 's/*//')"
 		log_verbose "Is $LANG has versions $INSTALLED installed already"
 	fi
-done
-
-if [[ -e "$HOME/.asdf/plugins/python" ]]; then
-	log_verbose "Python is not pulled properly so reset --hard"
-	pushd >/dev/null "$HOME/.asdf/plugins/python"
-	git reset --hard origin/master
-fi
-
-log_verbose "installing and setting versions for plugins in ${ASDF[*]} in $HOME"
-#  https://github.com/pyenv/pyenv/issues/2823
-if in_os linux; then
-	log_verbose "unlink for python"
-	brew unlink pkgconfig
-fi
-pushd "$HOME" >/dev/null
-for LANG in "${!ASDF[@]}"; do
 	# note you cannot array index you can only enumerate so ${ASDF[$LANG][-1]} does not work
 	# note this word splits so versions cannot have spaces there seems to be no
 	# way to generate an array here
@@ -236,16 +227,13 @@ for LANG in "${!ASDF[@]}"; do
 		log_verbose "looking for version $VERSION"
 		# remove the asterisk which means current selected
 		# shellcheck disable=SC2086
-
 		if [[ ! -v INSTALLED || ! $INSTALLED =~ $VERSION ]]; then
 			# broken as of feb 2021 now fixed
 			#if in_os mac && ! mac_is_arm && [[ $p =~ python ]]; then
 			#    log_verbose "Current bug in asdf python install skipping"
 			#    continue
 			#fi
-
 			log_verbose try eval ${ASDF_ENV[$LANG]:-} asdf install "$LANG" "$VERSION"
-
 			# python needs an environment set so add it as needed with eval
 			# note we use {:-} since not all ASDF_ENVs are set
 			# shellcheck disable=SC2086
@@ -260,6 +248,12 @@ if in_os linux; then
 	brew link pkgconfig
 fi
 popd >/dev/null
+
+if [[ -e "$HOME/.asdf/plugins/python" ]]; then
+	log_verbose "Python is not pulled properly so reset --hard"
+	pushd >/dev/null "$HOME/.asdf/plugins/python"
+	git reset --hard origin/master
+fi
 
 source_profile
 # shellcheck disable=SC2016

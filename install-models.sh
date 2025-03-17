@@ -392,6 +392,10 @@ MODEL_MEDIUM+=(
 
 log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
+	command-a                            # 111b parameters
+	command-a:latest                     # tools
+	command-a:111b                       # open weights 23 languages
+	command-a:111b-03-2025-q4_K_M        # 256K token context
 	r1-1776                              # perplexity r1 model on latest data
 	r1-1776:latest                       # perplexity r1 model on latest data
 	r1-1776:70b-distill-llama-q4_K_M     # perplexity r1 model on latest data
