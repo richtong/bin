@@ -97,7 +97,9 @@ log_verbose "checking for profile path"
 if ! config_mark; then
 	log_verbose "adding profile"
 	config_add <<-EOF
-		command -v brew && if ! echo "\$PATH" | grep -q  "opt/node"; then PATH="$(brew --prefix)/opt/node@$VERSION/bin:\$PATH"; fi
+		command -v brew >/dev/null && \
+		      if ! echo "\$PATH" | grep -q  "opt/node"; then \
+		        PATH="\$(brew --prefix)/opt/node@$VERSION/bin:\$PATH"; fi
 	EOF
 fi
 
