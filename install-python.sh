@@ -109,6 +109,7 @@ PACKAGE+=(
 	python-argcomplete # argument parser
 	ruff               # fast linter replaces flake8, pydocstyle, black
 	tox                # tox - python test runner for different versions of python
+	pkgconfig		# pkgconfig used by asdf
 
 )
 

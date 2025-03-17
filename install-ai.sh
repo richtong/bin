@@ -140,7 +140,7 @@ fi
 # "open-interpreter[os]"
 
 declare -A PYTHON_PACKAGE_FLAG+=(
-	["open-webui"]="-p 3.12" # include the required python version
+	["open-webui"]="--python 3.12" # include the required python version
 )
 
 for package in "${PYTHON_PACKAGE[@]}"; do
@@ -151,9 +151,6 @@ done
 log_verbose "install current shell completion"
 open-webui --install-completion
 
-for package in "${!PYTHON_PACKAGE_VERSIONED[@]}"; do
-	pipx_install -p "${PYTHON_PACKAGE_VERSIONED[$package]}" "$package"
-done
 if ! config_mark "$(config_profile_interactive)"; then
 	config_add "$(config_profile_interactive)" <<-EOF
 		if command -v open-webui > /dev/null; then open-webui --install-completion >/dev/null; fi
