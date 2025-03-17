@@ -304,10 +304,10 @@ for shell_type in bash zsh; do
 	if ! config_mark "$(config_profile_nonexportable_$shell_type)"; then
 		log_verbose "Adding to $(config_profile_nonexportable_$shell_type)"
 		if [[ $shell_type == bash ]]; then
-			config_add "$(config_profile_nonexportable_$shell_type)" <<'EOF'
-			source <(asdf completion $shell_type)
-			eval "$(direnv hook $shell_type)"
-EOF
+			config_add "$(config_profile_nonexportable_$shell_type)" <<-EOF
+				source <(asdf completion $shell_type)
+				eval "\$(direnv hook $shell_type)"
+			EOF
 		fi
 
 		# asdf-direnv deprecated
