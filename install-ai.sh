@@ -140,10 +140,11 @@ fi
 # "open-interpreter[os]"
 
 declare -A PYTHON_PACKAGE_FLAG+=(
-	["open-webui"]="--python 3.12" # include the required python version
+	["open-webui"]="-p 3.12" # include the required python version
 )
 
 for package in "${PYTHON_PACKAGE[@]}"; do
+	log_verbose "pipx_install ${PYTHON_PACKAGE_FLAG[$package]:-} $package"
 	# shellcheck disable=SC2086
 	pipx_install ${PYTHON_PACKAGE_FLAG[$package]:-} "$package"
 done
@@ -193,11 +194,6 @@ if $EXTRAS; then
 # done
 fi
 
-log_verbose "Installing ${PYTHON_PACKAGE[*]}"
-for package in "${PYTHON_PACKAGE[@]}"; do
-	log_verbose "pipx install $package"
-	pipx_install "$package"
-done
 if ! config_mark "$(config_profile_interactive)"; then
 	config_add "$(config_profile_interactive)" <<-EOF
 		if command -v open-webui > /dev/null; then open-webui --install-completion >/dev/null; fi
