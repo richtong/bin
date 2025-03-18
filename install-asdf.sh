@@ -127,6 +127,7 @@ log_verbose "Install asdf core"
 log_verbose "Install asdf support including gcc if it has to build from source"
 
 PACKAGE+=(
+	autoenv # with asdf-direnv deprecated, if .env is there it sources it and .env.leave when you cd out
 	asdf
 	direnv
 	gawk
@@ -306,7 +307,10 @@ for shell_type in bash zsh; do
 		if [[ $shell_type == bash ]]; then
 			config_add "$(config_profile_nonexportable_$shell_type)" <<-EOF
 				source <(asdf completion $shell_type)
+				# shellcheck disable=SC1091
 				eval "\$(direnv hook $shell_type)"
+				# shellcheck disable=SC1091
+				source "\$(brew --prefix autoenv)/activate.sh"
 			EOF
 		fi
 
