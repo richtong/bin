@@ -105,11 +105,11 @@ log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 PLUGIN+=(
 	vi-mode # vi-mode overwrites ^r so it must come before fzf
 
-	1password         # opswd wraps the op command so opswd github will put your us
-	alias-finder      # if there is an alias for a command it suggests it
-	aliases           # acs shows all alias by group
-	asdf              # asdf - completions and also shims deprecated by asdf direnv
-	autoenv           # instead of source autoenv/activate.sh looks
+	1password    # opswd wraps the op command so opswd github will put your us
+	alias-finder # if there is an alias for a command it suggests it
+	aliases      # acs shows all alias by group
+	asdf         # asdf - completions and also shims deprecated by asdf direnv
+	# autoenv           # source autoenv/activate.sh deprecated use direnv instread
 	autojump          # autojump - j does a fuzzy search for a directory complements warp
 	aws               #completions
 	bgnotify          # baackground notify

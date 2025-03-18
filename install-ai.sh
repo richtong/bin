@@ -128,10 +128,12 @@ PYTHON_PACKAGE+=(
 if $EXTRAS; then
 	PYTHON_PACKAGE+=(
 		# civitai-models-manager # download image generation models use comfy instead
-		open-interpreter # let's LLMs run code locally
 		"huggingface_hub[cli]"
+		"litellm[proxy]" # litellm enables cost and routing
 		mlx
 		mlx_lm
+		open-interpreter # let's LLMs run code locally
+
 	)
 fi
 

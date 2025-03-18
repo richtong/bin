@@ -127,7 +127,7 @@ log_verbose "Install asdf core"
 log_verbose "Install asdf support including gcc if it has to build from source"
 
 PACKAGE+=(
-	autoenv # with asdf-direnv deprecated, if .env is there it sources it and .env.leave when you cd out
+	# autoenv # deprecated use direnv instead
 	asdf
 	direnv
 	gawk

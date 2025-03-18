@@ -172,19 +172,57 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 # https://huggingface.co/mlx-community?message=You%27ve%20joined%20MLX%20Community!
 # https://huggingface.co/models?library=mlx&sort=trending
+# <=2B
 MODEL_MLX+=(
-	mlx-community/plamo-2-8b-4bit                          # PLaMO-13B Open source Japanese from PFN
-	mlx-community/Violet-Lyra-Gutenberg-4bit               # # merged models
-	mlx-community/DeepSeek-R1-Distill-Qwen-32B-abliterated # try this one
-	mlx-community/Qwen2.5-VL-72B-Instruct-4bit             # Visual input
-	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit       # compare with ollama
+
+)
+
+# <=4B
+MODEL_MLX_XSMALL+=(
+
+)
+
+# <=8
+MODEL_MLX_SMALL+=(
+	mlx-community/OLMoE-1B-7B-0125-Instruct
+	mlx-community/UI-TARS-7B-SFT-4bit # Bytedance
+	mlx-community/DeepSeek-R1-Distill-Qwen-7B-4bit
+	mlx-community/Qwen2.5-VL-7B-Instruct-4bit
+	mlx-community/Molmo-7B-D-0924-4bit
+	mlx-community/OLMoE-1B-7B-0125-Instruct-4bit
+	mlx-community/olmOCR-7B-0225-preview-4bit
+)
+
+# <=32B
+MODEL_MLX_MEDIUM+=(
+	mlx-community/gemma-3-12b-pt-4bit
+	mlx-community/gemma-3-27b-pt-4bit
+	mlx-community/QwQ-32B-4bit
+	mlx-community/Mistral-Small-24B-Instruct-2501-4bit
+	mlx-community/DeepSeek-R1-Distill-Qwen-32B-4bit
+
+)
+# <=90B
+MODEL_MLX_LARGE+=(
+	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit
+	mlx-community/Qwen2.5-VL-72B-Instruct-4bit
+	mlx-community/Llama-3.3-70B-Instruct-4bit
+)
+MODEL_MLX_XLARGE+=(
 
 )
 
 MODEL_MLX_REMOVE+=(
-	mlx-community/Unsloth-DeepSeek-R1-Distill-Qwen-32B-4bit # 5B parameters
+	mlx-community--Qwen2.5-Coder-14B-Instruct-abliterated-4bit
 	mlx-community/DeepSeek-R1-4bit                          # 126B parameters
-	mlx-community/perplexity-ai-r1-1776-4bit                # do not if it will fit
+	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit        # compare with ollama
+	mlx-community/DeepSeek-R1-Distill-Qwen-32B-abliterated  # try this one
+	mlx-community/Qwen2.5-VL-72B-Instruct-4bit              # Visual input
+	mlx-community/Unsloth-DeepSeek-R1-Distill-Qwen-32B-4bit # 5B parameters
+	mlx-community/Violet-Lyra-Gutenberg-4bit                # # merged models
+	mlx-community/gemma-3-4b-pt-4bit
+	mlx-community/perplexity-ai-r1-1776-4bit # do not if it will fit
+	mlx-community/plamo-2-8b-4bit            # PLaMO-13B Open source Japanese from PFN
 
 )
 
@@ -233,17 +271,6 @@ MODEL+=(
 	deepscaler:1.5b-preview-fp16
 	deepseek-r1:1.5b                     # small model
 	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
-	smallthinker                         # Fine tuned Qwen2.5-b-instruct
-	smallthinker:latest                  # qwq used to generate 8K synthetic
-	opencoder                            # completely open source
-	opencoder:latest                     # completely open source
-	opencoder:1.5b                       #  english and chinse
-	opencoder:1.5b-instruct-q4_K_M       #  english and chinse
-	smollm2                              # open source
-	smollm2:latest                       # open source
-	smollm2:135m-instruct-q4_K_M         # 135m is small
-	smollm2:1.7b                         # large is smarll
-	smollm2:1.7b-instruct-q4_K_M         # large is smarll
 	granite3-guardian:2b                 #  prompt guard ibm
 	granite3-guardian:2b-q8_0            #  prompt guard ibm
 	shieldgemma:2b                       # safety of text prompts
@@ -273,17 +300,16 @@ MODEL_XSMALL+=(
 	phi4-mini      # latest from Microsoft
 	phi4-mini:3.8b # tool calling
 	phi4-mini:3.8b-q4_K_M
-	smallthinker:3b              # long sequence encourage CoT
-	smallthinker:3b-preview-q8_0 # open dataset
-	falcon3:3b                   # 7B parameters
-	falcon3:3b-instruct-q4_K_M   # 7B parameters
-	falcon3:1b                   # 7B parameters
+	falcon3:3b                 # 7B parameters
+	falcon3:3b-instruct-q4_K_M # 7B parameters
+	falcon3:1b                 # 7B parameters
 	falcon3:1b-instruct-q8_0
 	llama3.2                    # Meta 3.2-3B Q4 128 context
 	llama3.2:latest             # Meta 3.2-3B Q4 128 context
 	llama3.2:3b                 # Meta 3.2-3B Q4 128 context 2GB
 	llama3.2:3b-instruct-q4_K_M # Meta 3.2-3B Q4 128 context 2GB
 	qwen2.5:3b                  # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b-instruct-q4_K_M  # 128K context Alibaba 2024-09-16 7b
 )
 
 log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
@@ -305,27 +331,12 @@ MODEL_SMALL+=(
 	dolphin3:latest                     # no tool calling
 	dolphin3:8b                         # llama3.1 8B tuned
 	dolphin3:8b-llama3.1-q4_K_M         # llama3.1 8B tuned
-	marco-o1                            # Alibab open large reasoning
-	marco-o1:latest                     # Alibab open large reasoning
-	marco-o1:7b                         # 7b
-	marco-o1:7b-q4_K_M                  # q4_K_M
 	opencoder:8b                        # reproducible
 	opencoder:8b-instruct-q4_K_M        # reproducible
 	tulu3                               # AI2 instruction following
 	tulu3:latest                        # full open source data, code, recipes
 	tulu3:8b                            # 128 K content has 70B brother
 	tulu3:8b-q4_K_M                     # standard quantization
-	olmo2                               # Ai2 fully open model competitive
-	olmo2:latest                        # competitive iwth llama 3.1
-	olmo2:7b                            # November 26 2024 release
-	granite3-guardian                   # IBM prompt risk
-	granite3-guardian:latest            # IBM prompt risk
-	granite3-guardian:8b                #  prompt guard
-	granite3-guardian:8b-q5_K_M         #  prompt guard ibm
-	shieldgemma                         # google safety policies
-	shieldgemma:latest                  # google safety policies
-	shieldgemma:9b                      # safety of text prompts
-	shieldgemma:9b-q4_K_M               # safety of text prompts
 	llama-guard3                        # safety classification
 	llama-guard3:latest                 # safety classification
 	llama-guard3:8b                     # safety of prompts
@@ -342,12 +353,6 @@ MODEL_SMALL+=(
 	bespoke-minicheck:latest            # Fact check 7B q4_K_M
 	bespoke-minicheck:7b                # Fact check 7B q4_K_M
 	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
-	nemotron-mini:4b                    # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	nemotron-mini:latest                # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
-	minicpm-v                           # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:latest                    # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:8b                        # mLLM visual too, ocr v2.6 ModelBest CN
-	minicpm-v:8b-2.6-q4_0               # mLLM visual too, ocr v2.6 ModelBest CN
 
 )
 #
@@ -358,7 +363,7 @@ MODEL_MEDIUM+=(
 	qwq                                    # like o1
 	qwq:latest                             # like o1
 	qwq:32b                                # Alibaba advanced reasoning
-	qwq:32b-preview-q4_K_M                 # Alibaba advanced reasoning
+	qwq:32b-q4_K_M                         # this is the standard not the preview model
 	openthinker:32b                        # dereict from deepseek-r1
 	openthinker:32b-q4_K_M                 # fine tuned on openthoughts 114k dataset
 	deepseek-r1:14b                        # r1 comparable
@@ -374,8 +379,6 @@ MODEL_MEDIUM+=(
 	phi4:latest                            # synthetic, filtered 9.1GB
 	phi4:14b                               # 16K context length only
 	phi4:14b-q4_K_M                        # no tool calling
-	falcon3:10b                            # 7B parameters
-	falcon3:10b-instruct-q4_K_M            # 7B parameters
 	llama3.2-vision                        # should run in open-webui
 	llama3.2-vision:latest                 # should run in open-webui
 	llama3.2-vision:11b                    # vision works now
@@ -396,10 +399,6 @@ MODEL_LARGE+=(
 	command-a:latest                     # tools
 	command-a:111b                       # open weights 23 languages
 	command-a:111b-03-2025-q4_K_M        # 256K token context
-	r1-1776                              # perplexity r1 model on latest data
-	r1-1776:latest                       # perplexity r1 model on latest data
-	r1-1776:70b-distill-llama-q4_K_M     # perplexity r1 model on latest data
-	r1-1776:70b                          # perplexity r1 model on latest data
 	deepseek-r1:70b                      # disitlled lllama
 	deepseek-r1:70b-llama-distill-q4_K_M # llama based
 	tulu3:70b                            # tulu3 is not much better than llama3 and takes speace
@@ -417,17 +416,52 @@ MODEL_LARGE+=(
 log_verbose "Extra models over 100B parameters, requires >=600GB"
 MODEL_XLARGE+=(
 	deepseek-r1
-	r1-1776
 )
 
 # legacy models for comparison with modern ones
 MODEL_OLD+=(
 
-	phi3                           # the original
-	phi3.5                         # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:latest                  # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b                    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b-mini-instruct-q4_0 # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	r1-1776
+	r1-1776                          # perplexity r1 model on latest data
+	r1-1776:latest                   # perplexity r1 model on latest data
+	r1-1776:70b-distill-llama-q4_K_M # perplexity r1 model on latest data
+	r1-1776:70b                      # perplexity r1 model on latest data
+	smollm2                          # open source
+	smollm2:latest                   # open source
+	smollm2:135m-instruct-q4_K_M     # 135m is small
+	smollm2:1.7b                     # large is smarll
+	smollm2:1.7b-instruct-q4_K_M     # large is smarll
+	granite3-guardian                # IBM prompt risk
+	granite3-guardian:latest         # IBM prompt risk
+	granite3-guardian:8b             #  prompt guard
+	granite3-guardian:8b-q5_K_M      #  prompt guard ibm
+	shieldgemma                      # google safety policies
+	shieldgemma:latest               # google safety policies
+	shieldgemma:9b                   # safety of text prompts
+	shieldgemma:9b-q4_K_M            # safety of text prompts
+	smallthinker:3b                  # long sequence encourage CoT
+	smallthinker:3b-preview-q8_0     # open dataset
+	smallthinker                     # Fine tuned Qwen2.5-b-instruct
+	smallthinker:latest              # qwq used to generate 8K synthetic
+	marco-o1                         # Alibab open large reasoning
+	marco-o1:latest                  # Alibab open large reasoning
+	marco-o1:7b                      # 7b
+	marco-o1:7b-q4_K_M               # q4_K_M
+	opencoder                        # completely open source
+	opencoder:latest                 # completely open source
+	opencoder:1.5b                   #  english and chinse
+	opencoder:1.5b-instruct-q4_K_M   #  english and chinse
+	qwq:32b-preview-q4_K_M           # Alibaba advanced reasoning
+	olmo2                            # Ai2 fully open model competitive
+	olmo2:latest                     # competitive iwth llama 3.1
+	olmo2:7b                         # November 26 2024 release
+	falcon3:10b                      # 7B parameters
+	falcon3:10b-instruct-q4_K_M      # 7B parameters
+	phi3                             # the original
+	phi3.5                           # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:latest                    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b                      # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b-mini-instruct-q4_0   # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	# early 2024 models
 	llama2:7b                # original llama2
 	llama2:13b               # 13b
@@ -521,6 +555,12 @@ MODEL_REMOVE+=(
 	reader-lm:1.5b-q4_0               # HTML to Markdown conversion 1.5B-q4_K_M
 	reader-lm:0.5b                    # HTML to Markdown conversion 1.5B-q4_K_M
 	reader-lm:0.5b-q4_0               # HTML to Markdown conversion 1.5B-q4_K_M
+	nemotron-mini:4b                  # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	nemotron-mini:latest              # nVidia ropeplay, Q&A and function calling 4b-instruct-q4_K-M
+	minicpm-v                         # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:latest                  # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:8b                      # mLLM visual too, ocr v2.6 ModelBest CN
+	minicpm-v:8b-2.6-q4_0             # mLLM visual too, ocr v2.6 ModelBest CN
 	# pre llama3.2 but trying new vision models
 	hermes3                      # fine tuned llama 3.1 8B 128K context
 	hermes3:70b                  # fine tuned llama 3.1 q4 128K Context
@@ -616,22 +656,27 @@ MODEL_LIST=("${MODEL[@]}")
 if $INCLUDE_XLARGE; then
 	log_verbose "Include extra large models"
 	MODEL_LIST+=("${MODEL_XLARGE[@]}")
+	MODEL_MLX+=("${MODEL_MLX_XLARGE[@]}")
 fi
 if $INCLUDE_LARGE; then
 	log_verbose "Include large models"
 	MODEL_LIST+=("${MODEL_LARGE[@]}")
+	MODEL_MLX+=("${MODEL_MLX_LARGE[@]}")
 fi
 if $INCLUDE_MEDIUM; then
 	log_verbose "Include medium models"
 	MODEL_LIST+=("${MODEL_MEDIUM[@]}")
+	MODEL_MLX+=("${MODEL_MLX_MEDIUM[@]}")
 fi
 if $INCLUDE_SMALL; then
 	log_verbose "Include small models"
 	MODEL_LIST+=("${MODEL_SMALL[@]}")
+	MODEL_MLX+=("${MODEL_MLX_SMALL[@]}")
 fi
 if $INCLUDE_XSMALL; then
 	log_verbose "Include extra small models"
 	MODEL_LIST+=("${MODEL_XSMALL[@]}")
+	MODEL_MLX+=("${MODEL_MLX_XSMALL[@]}")
 fi
 if $INCLUDE_GGUF; then
 	log_verbose "Include HF GGUF models"
@@ -692,6 +737,10 @@ else
 		if ! $INCLUDE_OLD; then
 			ollama_action rm "${MODEL_OLD[@]}"
 		fi
+		if $REMOVE_OBSOLETE_AND_OLD; then
+			log_verbose "Manually remove ${MODEL_MLX_REMOVE[*]}"
+			huggingface-cli delete-cache
+		fi
 	fi
 
 	log_verbose "$ACTION on ${MODEL_LIST[*]}"
@@ -699,12 +748,8 @@ else
 
 fi
 
-if $INCLUDE_MLX; then
+if in_os mac && $INCLUDE_MLX; then
 
-	if $REMOVE_OBSOLETE_AND_OLD; then
-		log_verbose "Manually remove ${MODEL_MLX_REMOVE[*]}"
-		huggingface-cli delete-cache
-	fi
 	log_verbose "Include HF MLX models"
 	huggingface-cli download "${MODEL_MLX[@]}"
 fi
