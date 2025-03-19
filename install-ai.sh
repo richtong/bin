@@ -135,7 +135,16 @@ if $EXTRAS; then
 		open-interpreter # let's LLMs run code locally
 
 	)
+
+	NODE_PACKAGE+=(
+		@receptron/graphai_cli
+	)
 fi
+
+for package in "${NODE_PACKAGE[@]}"; do
+	log_verbose "npm_install $package"
+	npm_install -g "$package"
+done
 
 # No longer required I think
 # "open-interpreter[local]"

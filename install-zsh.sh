@@ -90,8 +90,8 @@ log_verbose "The F*ck requires special install"
 "$BIN_DIR/./install-thefuck.sh"
 
 log_verbose "Adding OMZ plugins"
-log_verbose "Pygment syntax highlighter must be linked"
-brew link pygments
+log_verbose "Pygment syntax highlighter must be linked so overwrite"
+brew link --overwrite pygments
 log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 
 # deprecated
