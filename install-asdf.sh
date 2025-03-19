@@ -145,7 +145,8 @@ declare -A ASDF+=(
 	[python]=${PYTHON_VERSION[@]}
 	[uv]=${UV_VERSION[@]}
 	[golang]=${GOLANG_VERSION[@]}
-	[pipx]=${PIPX_VERSION[@]}
+	# do not install pipx its not needed
+	# [pipx]=${PIPX_VERSION[@]}
 )
 
 log_verbose "ASDF indexes ${!ASDF[*]} and data ${ASDF[*]}"
