@@ -93,16 +93,23 @@ package_install "${PACKAGES[@]}"
 # curl -sL "https://deb.nodesource.com/setup_${VERSION}.x" | sudo -E bash -
 # package_install "node@$NODE_VERSION"
 
+# https://stackoverflow.com/questions/15054388/global-node-modules-not-installing-correctly-command-not-found
 log_verbose "checking for profile path"
 if ! config_mark; then
 	log_verbose "adding profile"
 	config_add <<-EOF
-		command -v brew >/dev/null && \
-		      if ! echo "\$PATH" | grep -q  "opt/node"; then \
+		if command -v brew >/dev/null && ! echo "\$PATH" | grep -q  "opt/node"; then \
 		        PATH="\$(brew --prefix)/opt/node@$VERSION/bin:\$PATH"; fi
 	EOF
 fi
 
-# if ! log_assert "[[ $(node -v) =~ ^v$VERSION ]]" "node installed to $VERSION"; then
-# exit $?
-# fi
+log_warning "npm install -g is not well defined depends on the node version running"
+for shell_type in bash zsh; do
+	if ! config_mark "$(config_profile_nonexportable_$shell_type)"; then
+		config_add "$(config_profile_nonexportable_$shell_type)" <<-'EOF'
+			if command -v npm >/dev/null && ! echo "$PATH" | grep -q "$(npm get prefix)/bin"; then
+			  PATH="$PATH:$(npm get prefix)/bin"
+			fi
+		EOF
+	fi
+done
