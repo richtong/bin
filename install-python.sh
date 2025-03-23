@@ -109,7 +109,7 @@ PACKAGE+=(
 	python-argcomplete # argument parser
 	ruff               # fast linter replaces flake8, pydocstyle, black
 	tox                # tox - python test runner for different versions of python
-	pkgconfig		# pkgconfig used by asdf
+	pkgconfig          # pkgconfig used by asdf
 
 )
 
@@ -188,7 +188,6 @@ log_verbose "installing ${PACKAGE[*]}"
 # packages are ok globbed
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
-
 
 for version in "$OLD_PYTHON" "$NEW_PYTHON"; do
 	log_verbose "Install other python $version"

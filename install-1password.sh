@@ -290,6 +290,7 @@ OP_API_ITEM=(
 	[STEPFUN_API_KEY]="StepFun API Key Dev"
 	[SLASHGPT_ENV_WEBPILOT_UID]="Webpilot UID Dev"
 	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
+	[WEBUI_API_KEY]="Open WebUI API Key Dev"
 
 )
 
@@ -327,6 +328,7 @@ OP_API_FIELD=(
 	[SLASHGPT_ENV_WEBPILOT_UID]=key
 	[SUPERSET_SECRET_KEY]="api key"
 	[WEBUI_SECRET_KEY]="secret key"
+	[WEBUI_API_KEY]="api key"
 
 )
 

@@ -63,10 +63,11 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 PACKAGE+=(
 	# huggingface-cli # hf.co download files use huggingface_hub instead
-	ffmpeg    # needed by open-webui
-	llama.cpp # underlying server to ollama
-	ollama    # ollama - ollama local runner
-	tika      # Apache tika content extractor command line
+	ffmpeg                # needed by open-webui
+	llama.cpp             # underlying server to ollama
+	ollama                # ollama - ollama local runner
+	tika                  # Apache tika content extractor command line
+	db-browser-for-sqlite # Edit the open-webui webui.db
 
 )
 
@@ -214,21 +215,28 @@ fi
 log_verbose "tne.ai Orion settings"
 if ! config_mark "$WS_DIR/git/src/.envrc"; then
 	config_add "$WS_DIR/git/src/.envrc" <<-'EOF'
-		# for open-webui and comfyui integration and tne ui
-		[[ -v COMFYUI_BASE_URL ]] || COMFYUI_BASE_URL="https://localhost:8188"
-		[[ -v GOOGLE_DRIVE_API_KEY ]] || export "GOOGLE_DRIVE_API_KEY"="$(op item get "Google Drive and Picker API Key Dev" --fields "api key" --reveal)"
-		[[ -v GOOGLE_DRIVE_CLIENT_ID ]] || export "GOOGLE_DRIVE_CLIENT_ID"="$(op item get "Google OAuth Client ID Dev" --fields "client id" --reveal)"
-		# For tne.ai orion
-		[[ -v VITE_AWS_KEY ]] || export VITE_AWS_KEY="$AWS_ACCESS_KEY_ID"
-		[[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
-		[[ -v VITE_OPEN_API_KEY ]] || export VITE_OPEN_API_KEY="$OPENAI_API_KEY"
-		[[ -v VITE_ENDPOINT ]] || export VITE_ENDPOINT="https://wahook.dev.tne.ai"
-		[[ -v MODEL_API_KEY ]] || export "MODEL_API_KEY"="$(op item get "Open WebUI Local API Key" --fields "api key" --reveal)"
+		  # for open-webui and comfyui integration and tne ui
+		  [[ -v COMFYUI_BASE_URL ]] || COMFYUI_BASE_URL="https://localhost:8188"
+		  [[ -v GOOGLE_DRIVE_API_KEY ]] || export "GOOGLE_DRIVE_API_KEY"="$(op item get "Google Drive and Picker API Key Dev" --fields "api key" --reveal)"
+		  [[ -v GOOGLE_DRIVE_CLIENT_ID ]] || export "GOOGLE_DRIVE_CLIENT_ID"="$(op item get "Google OAuth Client ID Dev" --fields "client id" --reveal)"
+		  # For tne.ai orion
+		  [[ -v VITE_AWS_KEY ]] || export VITE_AWS_KEY="$AWS_ACCESS_KEY_ID"
+		  [[ -v VITE_AWS_SECRET ]] || export VITE_AWS_SECRET="$AWS_SECRET_ACCESS_KEY"
+		  [[ -v VITE_OPEN_API_KEY ]] || export VITE_OPEN_API_KEY="$OPENAI_API_KEY"
+		  [[ -v VITE_ENDPOINT ]] || export VITE_ENDPOINT="https://wahook.dev.tne.ai"
+		  [[ -v WEBUI_SECRET_KEY ]] || export "WEBUI_SECRET_KEY"="$(op item get "Open WebUI Secret Key Dev" --fields "secret key" --vault "DevOps" --reveal)"
+		  [[ -v MODEL_API_KEY ]] || export "MODEL_API_KEY"="$(op item get "Open WebUI API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
+		  [[ -v JUPYTERLAB_TOKEN ]] || export "JUPYTERLAB_TOKEN"="$(op item get "JupyterLab Local Token Dev" --fields "token" --vault "DevOps" --reveal)"
+		  # for ./src/app
+		  [[ -v VITE_DB_HOST ]] || export "VITE_DB_HOST"="$(op item get "Supabase App-Whiskey" --fields "VITE_DB_HOST" --vault "DevOps" --reveal)"
+		  [[ -v VITE_DB_NAME ]] || export "VITE_DB_NAME"="$(op item get "Supabase App-Whiskey" --fields "VITE_DB_NAME" --vault "DevOps" --reveal)"
+		  [[ -v VITE_DB_USER ]] || export "VITE_DB_USER"="$(op item get "Supabase App-Whiskey" --fields "VITE_DB_USER" --vault "DevOps" --reveal)"
+		  [[ -v VITE_DB_PASSWORD ]] || export "VITE_DB_PASSWORD"="$(op item get "Supabase App-Whiskey" --fields "password" --vault "DevOps" --reveal)"
+		  [[ -v VITE_DB_PORT ]] || export "VITE_DB_PORT"="$(op item get "Supabase App-Whiskey" --fields "VITE_DB_PORT" --vault "DevOps" --reveal)"
+		  [[ -v VITE_DB_SSL ]] || export "VITE_DB_SSL"="$(op item get "Supabase App-Whiskey" --fields "VITE_DB_SSL" --vault "DevOps" --reveal)"
+		  [[ -v VITE_PORT ]] || export "VITE_PORT"="6573"
+		  [[ -v MODEL_API_URL ]] || export "MODEL_API_URL"="http://localhost:8081/api/chat/completions"
 
-		    # for tailscale networking to exo and Jupyterlab access by open-webui
-		[[ -v DATA_DIR ]] || export DATA_DIR="$WS_DIR/data/open-webui/data"
-		[[ -v JUPYTERLAB_TOKEN ]] || export "JUPYTERLAB_TOKEN"="$(op item get "JupyterLab Local Token Dev" --fields "token" --reveal)"
-		    # this expires every 90 days
 	EOF
 fi
 # note things like neovim code companion will use the first model
