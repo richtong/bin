@@ -24,10 +24,11 @@ OP_API_INIT="${OP_API_INIT:-false}"
 # OP_API_VAULT="${OP_API_VAULT:-DevOps}"
 OP_API_VAULT="${OP_API_VAULT:-Private}"
 VERSION="${VERSION:-8}"
-DIRENV_PROFILE="${ENV_PROFILE:-false}"
-DIRENV_PATH="${DIRENV_PATH:-$HOME/.envrc}"
+DIRENV_PROFILE="${ENV_PROFILE:-true}"
+DIRENV_PATH="${DIRENV_PATH:-$HOME/ws/git/src.envrc}"
 SANDBOX="${SANDBOX:-false}"
-SHELL_PROFILE="${SHELL_PROFILE:-true}"
+# only install in the GITHUB repo
+SHELL_PROFILE="${SHELL_PROFILE:-false}"
 SSH_CONFIG="${SSH_CONFIG:-"$HOME/.ssh/config"}"
 SSH_SIGNING_KEY="${SSH_SIGNING_KEY:-false}"
 
@@ -45,7 +46,7 @@ while getopts "hdvfr:e:oc:ns" opt; do
 				   -d $($DEBUGGING && echo "no ")debugging
 				   -v $($VERBOSE && echo "not ")verbose
 				   -f $($FORCE && echo "do not ")force install even is 1Password exists
-				   -n $(DIRENV_PROFILE && echo "no ")install variables in direnv (not recommended slow)
+				   -n $(DIRENV_PROFILE && echo "no ")install variables in direnv (slow but secure)
 				   -e install into .envrc for direnv if DIRENV is set (default: $DIRENV_PATH)
 				   -s $(SHELL_PROFILE && echo "no ")install variables in shell (recommended)
 

@@ -129,6 +129,7 @@ PYTHON_PACKAGE+=(
 if $EXTRAS; then
 	PYTHON_PACKAGE+=(
 		# civitai-models-manager # download image generation models use comfy instead
+		"crawl4ai[all]" # crwl https://tongfamily.com --deep-crawl bfs --max-pages 10
 		"huggingface_hub[cli]"
 		"litellm[proxy]" # litellm enables cost and routing
 		mlx
@@ -160,6 +161,19 @@ for package in "${PYTHON_PACKAGE[@]}"; do
 	# shellcheck disable=SC2086
 	pipx_install ${PYTHON_PACKAGE_FLAG[$package]:-} "$package"
 done
+
+if $EXTRAS; then
+	# https://docs.crawl4ai.com
+	crawl4ai-setup
+	crawl4ai-download-models
+	crawl4ai-doctor
+	log_verbose "yml: crwl https://tongfamily.com -C crawler.yml -f filter_bm25.yml"
+	log_verbose "     -e extract_[css|llm].yaml -s css_schema.json -o md-fit"
+	log_verbose "api tokens in $HOME/.crawl4ai/global.yml"
+	log_verbose "use ollama/llama3.2:1b in crwl https://tne.ai -q summarize"
+	log_verbose "crwl"
+
+fi
 
 log_verbose "install current shell completion"
 open-webui --install-completion
