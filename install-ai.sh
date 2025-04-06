@@ -129,12 +129,13 @@ PYTHON_PACKAGE+=(
 if $EXTRAS; then
 	PYTHON_PACKAGE+=(
 		# civitai-models-manager # download image generation models use comfy instead
-		"crawl4ai[all]" # crwl https://tongfamily.com --deep-crawl bfs --max-pages 10
-		"huggingface_hub[cli]"
-		"litellm[proxy]" # litellm enables cost and routing
-		mlx
-		mlx_lm
-		open-interpreter # let's LLMs run code locally
+		"crawl4ai[all]"        # crwl https://tongfamily.com --deep-crawl bfs --max-pages 10
+		"huggingface_hub[cli]" # download huggingface models
+		"litellm[proxy]"       # litellm enables cost and routing
+		mcpo                   # openAPI/swagger interface to mcp servers using claude-desktop.json
+		mlx                    # Apple silicon optimized LMM
+		mlx_lm                 # mlx_lm.server to serve mlx
+		open-interpreter       # let's LLMs run code locally
 
 	)
 

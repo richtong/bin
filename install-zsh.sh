@@ -102,9 +102,27 @@ log_verbose "Install fzf after vi-mode as the Ctrl-R conflict"
 # pipenv pcl is pipenv clean prun and psh and psy for sync
 # ubuntu
 # azure  # completions
-PLUGIN+=(
-	vi-mode # vi-mode overwrites ^r so it must come before fzf
 
+# # oh-my-zsh will utter it is in asdf so suppress the warning
+# these must be plugins and vi-mode must be before rg
+# zsh-navigation-tools as OMZP breaks history
+# vi-mode as OMZP keeps interactive history from showing up
+# These must stay as Oh my zsh plugins and not Zinit ones
+OMZ_PLUGIN+=(
+	vi-mode              #  must be before rg and if zinit then ^R list not shown
+	emoji                # generates an OMZP::emoji error
+	encode6              # generates an OMZP::encode6 error
+	git-escape-magic     # generates an OMZP::git-escape-magic error
+	macos                # generates an OMZP::macos error
+	rg                   # generates an OMZP::rg error
+	wd                   # generates an OMZP::wd error
+	zsh-navigation-tools # if OMZP causes history not found
+
+)
+
+# these can be zinit plugins
+PLUGIN+=(
+	vi-mode      # vi-mode overwrites ^r so it must come before fzf
 	1password    # opswd wraps the op command so opswd github will put your us
 	alias-finder # if there is an alias for a command it suggests it
 	aliases      # acs shows all alias by group
@@ -129,7 +147,6 @@ PLUGIN+=(
 	docker            # docker - completions and aliases like dbl for docker build
 	docker-compose    # docker-compose - completions and alias
 	doctl             # doctl - digital ocean command completions
-	emoji             # emoji - echo $emoji[mouse_face] works or juse Mac emojify to get :smile:
 	emoji-clock       # emoji-clock - emoji not characters for clock
 	encode64          # encode64 - alias like e64
 	extract           # extract - general file extract command
@@ -165,7 +182,6 @@ PLUGIN+=(
 	poetry-env # each entry and poetry shell starts
 	pre-commit # prc: pre-commit, prcr pre-commit run
 	python     # python py for python, pyfind for find *.py pygrep rand-quote ripgrep
-	rg         # rg - completions
 	rsync      # rsync - adda rsync-copy for -avz
 	rust       # completions
 	ssh        # host completion from ..ssh/config
@@ -178,7 +194,6 @@ PLUGIN+=(
 	tmuxinator # txs tmuxinator start
 	transfer
 	vscode               # vsc: code, vscg
-	wd                   # wd - warp directory do a wd add to add to a list of directories
 	web-search           # google - runs google from command line, bing, ddg
 	wp-cli               # Wordpress command line
 	xcode                # xcb: xcodebuild
@@ -187,6 +202,10 @@ PLUGIN+=(
 	zsh-navigation-tools # n-history, n-cd, n-kill
 
 )
+
+log_verbose "add OMZ:: for zinit to PLUGIN"
+PLUGIN=("${PLUGIN[@]/#/OMZ::}")
+log_verbose "Adding zinit ${PLUGIN[*]}"
 
 log_verbose "adding zinit plugins must be done early in installation"
 # https://gist.github.com/laggardkernel/4a4c4986ccdcaf47b91e8227f9868ded
@@ -201,13 +220,14 @@ if ! config_mark "$(config_profile_interactive_zsh)"; then
 		command -v compaudit >/dev/null && [[ \$(compaudit) ]] && compaudit | xargs chmod g-w,o-w
 		# plugins must be before the source on-my-zsh
 		plugins+=(
-			${PLUGIN[*]}
+			${OMZ_PLUGIN[*]}
 		)
 		# oh-my-zsh will utter it is in asdf so suppress the warning
 		source \$ZSH/oh-my-zsh.sh &> /dev/null
 		source "\$(brew --prefix)/opt/zinit/zinit.zsh"
 		# https://github.com/zdharma-continuum/zinit
 		zinit depth"1" wait for \
+			${PLUGIN[*]}
 			zsh-users/zsh-autosuggestions \
 			zsh-users/zsh-syntax-highlighting \
 			oldratlee/hacker-quotes \

@@ -79,23 +79,23 @@ if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-install.sh lib-util.sh lib-config.sh
 
 PACKAGE+=(
-	neovim
-	# used by LazyVim
-	fd       # better find used by LazyVim
-	luarocks # lua package manager
-	git
-	rg      # ripgrep searching
-	lazygit # git in nvim
+	# black             # python code formatter use ruff instead
 	# for none-ls which pretends it is null-ls in :checkhealth
 	# it let's non-LSP tools brdge in LSP to use telescope and trouble
-	prettier          # code formatter
-	black             # python code formatter
-	hadolint          # Dockerfile linter
-	markdownlint-cli2 # latest markdown linter
-	stylua            # lua formatter
-	shfmt             # bash formatter
 	# vimtex for Latex in LazyVim
 	biber
+	fd # better find used by LazyVim
+	git
+	hadolint          # Dockerfile linter
+	lazygit           # git in nvim
+	luarocks          # lua package manager
+	lynx              # web browser used by copilot-chat
+	markdownlint-cli2 # latest markdown linter
+	neovim            # used by LazyVim
+	prettier          # code formatter
+	rg                # ripgrep searching
+	shfmt             # bash formatter
+	stylua            # lua formatter
 )
 
 package_install "${PACKAGE[@]}"
@@ -127,6 +127,9 @@ RUBY_PACKAGE+=(
 	neovim
 )
 gem_install "${RUBY_PACKAGE[@]}"
+
+log_verbose "tiktoken for copilot-chat neovim plugin"
+luarocks install tiktoken_core
 
 log_verbose "if you are using Latex, then install the biblml"
 if command -v latex >/dev/null; then

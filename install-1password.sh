@@ -21,8 +21,9 @@ OP_API_INIT="${OP_API_INIT:-false}"
 # the default is a tne.ai account do not change OP_ACCOUNT which is the general default
 # but you should copy the keys into your private repo
 # OP_API_ACCOUNT="${OP_API_ACCOUNT:-63OLTT7NNJDFLOMAMAIDXWXYQM}"
-# OP_API_VAULT="${OP_API_VAULT:-DevOps}"
-OP_API_VAULT="${OP_API_VAULT:-Private}"
+OP_API_VAULT_DEFAULT="${OP_API_VAULT_DEFAULT:-DevOps}"
+OP_API_KEY_DEFAULT="${OP_API_KEY_DEFAULT:-"api key"}"
+# OP_API_VAULT="${OP_API_VAULT:-Private}"
 VERSION="${VERSION:-8}"
 DIRENV_PROFILE="${ENV_PROFILE:-true}"
 DIRENV_PATH="${DIRENV_PATH:-$HOME/ws/git/src.envrc}"
@@ -35,7 +36,7 @@ SSH_SIGNING_KEY="${SSH_SIGNING_KEY:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvfr:e:oc:ns" opt; do
+while getopts "hdvfr:e:oc:nsk:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -52,7 +53,8 @@ while getopts "hdvfr:e:oc:ns" opt; do
 
 				   -r 1Password version number (default: $VERSION)
 
-				   -c .envrc to use this vault (default: $OP_API_VAULT)
+				   -c 1Password default vault ($OP_API_VAULT_DEFAULT)
+				   -k 1Passsword default key ($OP_API_KEY_DEFAULT)
 				   -o $($OP_API_INIT && echo "No ")init for 1Password op plugins
 
 
@@ -146,7 +148,10 @@ while getopts "hdvfr:e:oc:ns" opt; do
 		DIRENV_PATH="$OPTARG"
 		;;
 	c)
-		OP_API_VAULT="$OPTARG"
+		OP_API_VAULT_DEFAULT="$OPTARG"
+		;;
+	k)
+		OP_API_KEY_DEFAULT="$OPTARG"
 		;;
 	n)
 		DIRENV_PROFILE="$($DIRENV_PROFILE && echo false || echo true)"
@@ -264,34 +269,33 @@ ENTRY+=(
 # need quotes for huggingface-cli because shfmt will
 # do not use github_token, use gh auth login
 # do not use AWS_SECRET_ACCESS_KEY, use AWS_SECRET_ACCESS_KEY use aws ssologin
-declare -A OP_API_ITEM
-OP_API_ITEM=(
-	# [CIVITAI_TOKEN]="Civitai API Key Dev"
-	# [GITHUB_TOKEN]="GitHub Personal Access Token"
-	# [GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
-	# [LOCALSTACK_API_KEY]="LocalStack API Key"
-	# [SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
-	# [DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
+declare -A OP_API_ITEM=(
 	[ALIBABA_API_KEY]="Alibaba Cloud API Key Dev"
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
 	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
+	# [CIVITAI_TOKEN]="Civitai API Key Dev"
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
+	# [DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
+	[GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
+	[GITHUB_TOKEN]="GitHub Personal Access Token"
 	[GOOGLE_AI_API_KEY]="Google Gemini API Key Dev" # used by zed
 	[GOOGLE_API_KEY]="Google Gemini API Key Dev"
 	[GROQ_API_KEY]="Groq API Key Dev"
 	[HF_TOKEN]="Hugging Face API Token Dev"
 	[LAMINI_API_TOKEN]="LAMINI API Token Dev"
+	# [LOCALSTACK_API_KEY]="LocalStack API Key"
 	[MISTRAL_API_KEY]="Mistral API Key Dev"
 	[OPENAI_API_KEY]="OpenAI API Key Dev"
 	[OPENROUTER_API_KEY]="OpenRouter API Key Dev"
 	[PERPLEXITY_API_KEY]="Perplexity API Key Dev"
 	[REPLICATE_API_KEY]="Replicate API Token Dev"
 	[SAMBANOVA_API_KEY]="Sambanova API Token Dev"
-	[STEPFUN_API_KEY]="StepFun API Key Dev"
 	[SLASHGPT_ENV_WEBPILOT_UID]="Webpilot UID Dev"
-	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
+	[STEPFUN_API_KEY]="StepFun API Key Dev"
+	[SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
 	[WEBUI_API_KEY]="Open WebUI API Key Dev"
+	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
 
 )
 
@@ -302,34 +306,35 @@ OP_API_ITEM=(
 # apply special fixup later to add the ID
 # note that Local stack is moving to auth tokens
 # so auth token should be changed to when the plugin changes in 1password
-declare -A OP_API_FIELD
-OP_API_FIELD=(
-	[ALIBABA_API_KEY]="api key"
-	[ANTHROPIC_API_KEY]="api key"
-	[AWS_ACCESS_KEY_ID]="access key id"
-	[AWS_SECRET_ACCESS_KEY]="secret access key"
-	[CIVITAI_TOKEN]="api key"
-	[DEEPSEEK_API_KEY]="api key"
-	[DIGITALOCEAN_ACCESS_TOKEN]=token
-	[GITHUB_TOKEN]=token
-	[GITHUB_TOKEN_CLASSIC]="personal access token"
-	[GOOGLE_AI_API_KEY]="api key"
-	[GOOGLE_API_KEY]="api key"
-	[GROQ_API_KEY]="api key"
-	[HF_TOKEN]="user access token"
-	[LAMINI_API_TOKEN]="api token"
-	[LOCALSTACK_API_KEY]="api key"
-	[MISTRAL_API_KEY]="api key"
-	[OPENAI_API_KEY]="api key"
-	[OPENROUTER_API_KEY]="key"
-	[REPLICATE_API_KEY]="api token"
-	[PERPLEXITY_API_KEY]="api key"
-	[SAMBANOVA_API_KEY]="api token"
-	[STEPFUN_API_KEY]="interface key"
-	[SLASHGPT_ENV_WEBPILOT_UID]=key
-	[SUPERSET_SECRET_KEY]="api key"
-	[WEBUI_SECRET_KEY]="secret key"
-	[WEBUI_API_KEY]="api key"
+# Which vault, the shared ones are in DevOps, personal in Private
+# Only exceptations are needed here if it is not in $OP_API_VAULT_DEFAULT
+declare -A OP_API_VAULT=(
+	[ALIBABA_API_KEY]="DevOps"
+	[ANTHROPIC_API_KEY]="DevOps"
+	[AWS_ACCESS_KEY_ID]="DevOps"
+	[AWS_SECRET_ACCESS_KEY]="DevOps"
+	# [CIVITAI_TOKEN]="Civitai API Key Dev"
+	[DEEPSEEK_API_KEY]="DevOps"
+	# [DIGITALOCEAN_ACCESS_TOKEN]="Private"
+	[GITHUB_TOKEN_CLASSIC]="Private"
+	[GITHUB_TOKEN]="DevOps"
+	[GOOGLE_AI_API_KEY]="DevOps" # used by zed
+	[GOOGLE_API_KEY]="DevOps"
+	[GROQ_API_KEY]="DevOps"
+	[HF_TOKEN]="DevOps"
+	[LAMINI_API_TOKEN]="DevOps"
+	# [LOCALSTACK_API_KEY]="Private"
+	[MISTRAL_API_KEY]="DevOps"
+	[OPENAI_API_KEY]="DevOps"
+	[OPENROUTER_API_KEY]="DevOps"
+	[PERPLEXITY_API_KEY]="DevOps"
+	[REPLICATE_API_KEY]="DevOps"
+	[SAMBANOVA_API_KEY]="DevOps"
+	[SLASHGPT_ENV_WEBPILOT_UID]="DevOps"
+	[STEPFUN_API_KEY]="DevOps"
+	[SUPERSET_SECRET_KEY]="DevOps"
+	[WEBUI_API_KEY]="DevOps"
+	[WEBUI_SECRET_KEY]="DevOps"
 
 )
 
@@ -386,7 +391,7 @@ fi
 		config_add "$profile_file" <<-EOF
 			[[ -v $op_api_index ]] || \\
 				export "$op_api_index"="\$(op item get "${OP_API_ITEM[$op_api_index]}" \\
-					--fields "${OP_API_FIELD[$op_api_index]}" --vault "$OP_API_VAULT" \\
+					--fields "${OP_API_FIELD[$op_api_index]:-$OP_API_KEY_DEFAULT}" --vault "${OP_API_VAULT[$op_api_index]:-$OPI_API_VAULT_DEFAULT}" \\
 					--reveal)"
 		EOF
 	done

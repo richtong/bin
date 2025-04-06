@@ -18,7 +18,9 @@ INCLUDE_SMALL="${INCLUDE_SMALL:-false}"
 INCLUDE_MEDIUM="${INCLUDE_MEDIUM:-false}"
 INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
 INCLUDE_XLARGE="${INCLUDE_XLARGE:-false}"
-INCLUDE_GGUF="${INCLUDE_GGUF:-true}"
+INCLUDE_TOOL="${INCLUDE_TOOL:-false}"
+INCLUDE_VISION="${INCLUDE_VISION:-false}"
+INCLUDE_GGUF="${INCLUDE_GGUF:-false}"
 INCLUDE_MLX="${INCLUDE_MLX:-false}"
 INCLUDE_OLD="${INCLUDE_OLD:-false}"
 FORCE="${FORCE:-false}"
@@ -53,6 +55,8 @@ flags:
 	-g $(! $INCLUDE_GGUF || echo "do not ")pull huggingface models GGUF for Ollama
 	-h help
 	-i $(! $INCLUDE_MLX || echo "do not ")pull huggingface models GGUF for Ollama
+	-i $(! $INCLUDE_TOOL || echo "do not ")pull Tool using models for ollama
+	-i $(! $INCLUDE_VISION || echo "do not ")pull Vision models for ollama
 	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
 	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 32GB+ RAM)
 	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
@@ -239,6 +243,27 @@ MODEL_GGUF_REMOVE+=(
 
 )
 
+# Tool using models https://ollama.com/search?c=tools&o=newest
+MODEL_TOOL+=(
+	command-a:111b
+	granite3.2-vision:2b
+	phi4-mini:3.8b
+	granite3.2:8b
+	command-r7b:7b # command-r7b is the default
+	llama3.3:70b
+	qwq:32b
+	athene-v2:72b
+)
+
+MODEL_VISION+=(
+	gemma3:27b
+	gemma3:12b
+	granite3.2-vision:2b
+	llama3.2-vision:11b
+	llama3.2-vision:90b
+	minicpm-v:8b
+)
+
 # These are kept in most recent first from https://ollama.com/search?o=newest
 # These models fit in 64GB and are less than 30B parameters
 # https://github.com/ggerganov/llama.cpp/discussions/2094
@@ -294,9 +319,12 @@ MODEL+=(
 
 log_verbose "loading all models <=4B parameters, requires >=8GB of RAM"
 MODEL_XSMALL+=(
+	exaone-deep:2.4b # LG AI
+	exaone-deep:2.4b-q4_K_M
 	gemma3 # vision model
 	gemma3:latest
 	gemma3:4b
+	gemma3:b-it-q4_K_M
 	phi4-mini      # latest from Microsoft
 	phi4-mini:3.8b # tool calling
 	phi4-mini:3.8b-q4_K_M
@@ -314,6 +342,8 @@ MODEL_XSMALL+=(
 
 log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
 MODEL_SMALL+=(
+	exaone-deep:7.8b # LG AI
+	exaone-deep:7.8b-q4_K_M
 	granite3.2 # thinking with message += [{ role: control, content: thinking}]
 	granite3.2:latest
 	granite3.2:8b
@@ -358,8 +388,12 @@ MODEL_SMALL+=(
 #
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
+	exaone-deep:32b # LG AI
+	exaone-deep:32b-q4_K_M
 	gemma3:12b                             # 12B
+	gemma3:12b-it-q4_K_M                   # 12B
 	gemma3:27b                             # 27B
+	gemma3:27b-it-q4_K_M                   # 12B
 	qwq                                    # like o1
 	qwq:latest                             # like o1
 	qwq:32b                                # Alibaba advanced reasoning
@@ -681,6 +715,14 @@ fi
 if $INCLUDE_GGUF; then
 	log_verbose "Include HF GGUF models"
 	MODEL_LIST+=("${MODEL_GGUF[@]}")
+fi
+if $INCLUDE_TOOL; then
+	log_verbose "Include old models"
+	MODEL_LIST+=("${MODEL_TOOL[@]}")
+fi
+if $INCLUDE_VISION; then
+	log_verbose "Include old models"
+	MODEL_LIST+=("${MODEL_VISION[@]}")
 fi
 if $INCLUDE_OLD; then
 	log_verbose "Include old models"
