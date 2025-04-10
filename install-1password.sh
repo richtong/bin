@@ -278,7 +278,7 @@ declare -A OP_API_ITEM=(
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
 	# [DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
 	[GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
-	[GITHUB_TOKEN]="GitHub Personal Access Token"
+	# [GITHUB_TOKEN]="GitHub Personal Access Token"
 	[GOOGLE_AI_API_KEY]="Google Gemini API Key Dev" # used by zed
 	[GOOGLE_API_KEY]="Google Gemini API Key Dev"
 	[GROQ_API_KEY]="Groq API Key Dev"
@@ -306,8 +306,40 @@ declare -A OP_API_ITEM=(
 # apply special fixup later to add the ID
 # note that Local stack is moving to auth tokens
 # so auth token should be changed to when the plugin changes in 1password
+declare -A OP_API_FIELD=(
+
+	[ALIBABA_API_KEY]="api key"
+	[ANTHROPIC_API_KEY]="api key"
+	[AWS_ACCESS_KEY_ID]="access key id"
+	[AWS_SECRET_ACCESS_KEY]="secret access key"
+	# [CIVITAI_TOKEN]="api key"
+	[DEEPSEEK_API_KEY]="api key"
+	# [DIGITALOCEAN_ACCESS_TOKEN]=token
+	[GITHUB_TOKEN_CLASSIC]="personal access token"
+	# [GITHUB_TOKEN]=token
+	[GOOGLE_AI_API_KEY]="api key"
+	[GOOGLE_API_KEY]="api key"
+	[GROQ_API_KEY]="api key"
+	[HF_TOKEN]="user access token"
+	[LAMINI_API_TOKEN]="api token"
+	# [LOCALSTACK_API_KEY]="api key"
+	[MISTRAL_API_KEY]="api key"
+	[OPENAI_API_KEY]="api key"
+	[OPENROUTER_API_KEY]="key"
+	[PERPLEXITY_API_KEY]="api key"
+	[REPLICATE_API_KEY]="api token"
+	[SAMBANOVA_API_KEY]="api token"
+	[SLASHGPT_ENV_WEBPILOT_UID]=key
+	[STEPFUN_API_KEY]="interface key"
+	[SUPERSET_SECRET_KEY]="api key"
+	[WEBUI_API_KEY]="api key"
+	[WEBUI_SECRET_KEY]="secret key"
+
+)
 # Which vault, the shared ones are in DevOps, personal in Private
 # Only exceptations are needed here if it is not in $OP_API_VAULT_DEFAULT
+# turn off github token as it confuses gh
+
 declare -A OP_API_VAULT=(
 	[ALIBABA_API_KEY]="DevOps"
 	[ANTHROPIC_API_KEY]="DevOps"
@@ -317,7 +349,7 @@ declare -A OP_API_VAULT=(
 	[DEEPSEEK_API_KEY]="DevOps"
 	# [DIGITALOCEAN_ACCESS_TOKEN]="Private"
 	[GITHUB_TOKEN_CLASSIC]="Private"
-	[GITHUB_TOKEN]="DevOps"
+	# [GITHUB_TOKEN]="DevOps"
 	[GOOGLE_AI_API_KEY]="DevOps" # used by zed
 	[GOOGLE_API_KEY]="DevOps"
 	[GROQ_API_KEY]="DevOps"
