@@ -302,6 +302,8 @@ fi
 # this is a direnv pro tip but doesn't work so always add the asdf shims
 # if [[ -r $HOME/.asdf/bin && ! $PATH =~ .asdf/bin ]]; then PATH="$HOME/.asdf/bin:$PATH"; fi
 log_verbose "completions for zsh add plugins+=(asdf) to .zshrc"
+# shellcheck disable=SC1091
+# source "\$(brew --prefix autoenv)/activate.sh"
 for shell_type in bash zsh; do
 	if ! config_mark "$(config_profile_nonexportable_$shell_type)"; then
 		log_verbose "Adding to $(config_profile_nonexportable_$shell_type)"
@@ -310,8 +312,6 @@ for shell_type in bash zsh; do
 				source <(asdf completion $shell_type)
 				# shellcheck disable=SC1091
 				eval "\$(direnv hook $shell_type)"
-				# shellcheck disable=SC1091
-				source "\$(brew --prefix autoenv)/activate.sh"
 			EOF
 		fi
 
