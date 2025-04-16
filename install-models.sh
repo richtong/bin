@@ -37,7 +37,7 @@ ACTION="${ACTION:-pull}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdveox:rlfsmugtiz" opt; do
+while getopts "hdveox:rlfsmugtizo" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
@@ -55,8 +55,8 @@ flags:
 	-g $(! $INCLUDE_GGUF || echo "do not ")pull huggingface models GGUF for Ollama
 	-h help
 	-i $(! $INCLUDE_MLX || echo "do not ")pull huggingface models GGUF for Ollama
-	-i $(! $INCLUDE_TOOL || echo "do not ")pull Tool using models for ollama
-	-i $(! $INCLUDE_VISION || echo "do not ")pull Vision models for ollama
+	-t $(! $INCLUDE_TOOL || echo "do not ")pull Tool using models for ollama
+	-o $(! $INCLUDE_VISION || echo "do not ")pull Vision models for ollama
 	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
 	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 32GB+ RAM)
 	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
@@ -85,6 +85,11 @@ EOF
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
+	f)
+		# invert the variable when flag is set
+		FORCE="$($FORCE && echo false || echo true)"
+		export FORCE
+		;;
 	t)
 		# invert the variable when flag is set
 		INCLUDE_XSMALL="$($INCLUDE_XSMALL && echo false || echo true)"
@@ -111,7 +116,7 @@ EOF
 		INCLUDE_XLARGE="$($INCLUDE_XLARGE && echo false || echo true)"
 		export INCLUDE_XLARGE
 		;;
-	f)
+	g)
 		# invert the variable when flag is set
 		INCLUDE_GGUF="$($INCLUDE_GGUF && echo false || echo true)"
 		export INCLUDE_GGUF
@@ -245,6 +250,8 @@ MODEL_GGUF_REMOVE+=(
 
 # Tool using models https://ollama.com/search?c=tools&o=newest
 MODEL_TOOL+=(
+	cogito:8b
+	mistral-small3.1:24b
 	command-a:111b
 	granite3.2-vision:2b
 	phi4-mini:3.8b
@@ -256,12 +263,12 @@ MODEL_TOOL+=(
 )
 
 MODEL_VISION+=(
+	mistral-small3.1:24b
 	gemma3:27b
 	gemma3:12b
 	granite3.2-vision:2b
 	llama3.2-vision:11b
 	llama3.2-vision:90b
-	minicpm-v:8b
 )
 
 # These are kept in most recent first from https://ollama.com/search?o=newest
@@ -280,6 +287,8 @@ MODEL_VISION+=(
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 log_verbose "Minimal Base <=2B models for machines that <=4GB GPU Memory"
 MODEL+=(
+	deepcoder:1.5b                # Agentica and Together AI
+	deepcoder:1.5b-preview-q4_K_M # fine tuned deepseek-r1-distilled
 	gemma3:1b
 	gemma3:1b-it-fp16
 	granite3.2 # 2b vision model
@@ -311,14 +320,13 @@ MODEL+=(
 	qwen2.5-coder:1.5b-instruct          # 128K Tuned for coding 7B
 	qwen2.5-coder:1.5b-instruct          # 128K Tuned for coding 7B
 	qwen2.5-coder:1.5b-instruct-q4_K_M   # 128K Tuned for coding 7B
-	# these models are pre llama3.2 and subject to deprecation
-	qwen2.5:0.5b # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:1.5b # 128K context Alibaba 2024-09-16 7b
 
 )
 
-log_verbose "loading all models <=4B parameters, requires >=8GB of RAM"
+log_verbose "loading all models >2B and <=4B parameters, requires >=8GB of RAM"
 MODEL_XSMALL+=(
+	cogito:3b # Deep Cogito tool too
+	cogito
 	exaone-deep:2.4b # LG AI
 	exaone-deep:2.4b-q4_K_M
 	gemma3 # vision model
@@ -336,12 +344,13 @@ MODEL_XSMALL+=(
 	llama3.2:latest             # Meta 3.2-3B Q4 128 context
 	llama3.2:3b                 # Meta 3.2-3B Q4 128 context 2GB
 	llama3.2:3b-instruct-q4_K_M # Meta 3.2-3B Q4 128 context 2GB
-	qwen2.5:3b                  # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:3b-instruct-q4_K_M  # 128K context Alibaba 2024-09-16 7b
 )
 
 log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
 MODEL_SMALL+=(
+	cogito           # set to reasoning with /set system ""Enable deep thinking subroutine."""
+	cogito:8b        # trained with Iterated Distillation and Amplification
+	cogito:latest    # 128K context, 30 lanugages
 	exaone-deep:7.8b # LG AI
 	exaone-deep:7.8b-q4_K_M
 	granite3.2 # thinking with message += [{ role: control, content: thinking}]
@@ -357,10 +366,6 @@ MODEL_SMALL+=(
 	deepseek-r1:7b-qwen-distill-q4_K_M  # competitive to o1
 	deepseek-r1:8b                      # llama distilled 8b
 	deepseek-r1:8b-llama-distill-q4_K_M # q8b
-	dolphin3                            # llama3.1 8B tuned
-	dolphin3:latest                     # no tool calling
-	dolphin3:8b                         # llama3.1 8B tuned
-	dolphin3:8b-llama3.1-q4_K_M         # llama3.1 8B tuned
 	opencoder:8b                        # reproducible
 	opencoder:8b-instruct-q4_K_M        # reproducible
 	tulu3                               # AI2 instruction following
@@ -376,9 +381,6 @@ MODEL_SMALL+=(
 	qwen2.5-coder:7b                    # 128K Tuned for coding 7B
 	qwen2.5-coder:7b-instruct           # 128K Tuned for coding 7B
 	qwen2.5-coder:7b-instruct-q4_K_M    # 128K Tuned for coding 7B
-	qwen2.5                             # the larger Alibab models
-	qwen2.5:latest                      # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:7b                          # 128K context Alibaba 2024-09-16 7b
 	bespoke-minicheck                   # Fact check 7B q4_K_M UT Austin
 	bespoke-minicheck:latest            # Fact check 7B q4_K_M
 	bespoke-minicheck:7b                # Fact check 7B q4_K_M
@@ -388,47 +390,61 @@ MODEL_SMALL+=(
 #
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
-	exaone-deep:32b # LG AI
+	deepcoder        #  Together AI and Agentica
+	deepcoder:latest # finetuned deepseek-r1-distilled-qwen
+	deepcoder:14b
+	deepcoder:14b-instruct-q4_K_M
+	mistral-small3.1        # tool and vision 128Kb
+	mistral-small3.1:latest # claims beats gemma3
+	mistral-small3.1:24b    # can run on 32GB Mac
+	mistral-small3.1:24b-instruct-q4_K_M
+	cogito:14b                        # Deep Cogito tool too
+	cogito:14b-v1-preview-qwen-q4_K-M # finetuned qwen
+	cogito:32b                        # Deep Cogito tool too
+	cogito:32b-v1-preview-qwen-q4_K-M # finetuned qwen
+	exaone-deep:32b                   # LG AI
 	exaone-deep:32b-q4_K_M
-	gemma3:12b                             # 12B
-	gemma3:12b-it-q4_K_M                   # 12B
-	gemma3:27b                             # 27B
-	gemma3:27b-it-q4_K_M                   # 12B
-	qwq                                    # like o1
-	qwq:latest                             # like o1
-	qwq:32b                                # Alibaba advanced reasoning
-	qwq:32b-q4_K_M                         # this is the standard not the preview model
-	openthinker:32b                        # dereict from deepseek-r1
-	openthinker:32b-q4_K_M                 # fine tuned on openthoughts 114k dataset
-	deepseek-r1:14b                        # r1 comparable
-	deepseek-r1:14b-qwen-distill-q4_K_M    # r1 comparable
-	deepseek-r1:32b                        # r1 comparable
-	deepseek-r1:32b-qwen-distill-q4_K_M    # r1 comparable
-	mistral-small                          # this is now the 2503 model
-	mistral-small:latest                   # now the 2501 model
-	mistral-small:24b-instruct-2501-q4_K_M # the latest model
-	olmo2:13b                              # AI2 fully open no tools
-	olmo2:13b-1124-instruct-q4_K_M         # compets with llama 3.1
-	phi4                                   # Microsoft Jan 7 2025
-	phi4:latest                            # synthetic, filtered 9.1GB
-	phi4:14b                               # 16K context length only
-	phi4:14b-q4_K_M                        # no tool calling
-	llama3.2-vision                        # should run in open-webui
-	llama3.2-vision:latest                 # should run in open-webui
-	llama3.2-vision:11b                    # vision works now
-	llama3.2-vision:11b-instruct-q4_K_M    # vision works now
-	qwen2.5-coder:14b                      # 128K Tuned for coding 7B
-	qwen2.5-coder:14b-instruct-q4_K_M      # 128K Tuned for coding 7B
-	qwen2.5-coder:32b                      # 128K Tuned for coding 7B
-	qwen2.5-coder:32b-instruct-q4_K_M      # 128K Tuned for coding 7B
-	# these models are pre llama3.2 and are very close to gone
-	qwen2.5:14b # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:32b # 128K context Alibaba 2024-09-16 7b
+	gemma3:12b                          # 12B
+	gemma3:12b-it-q4_K_M                # 12B
+	gemma3:27b                          # 27B
+	gemma3:27b-it-q4_K_M                # 12B
+	qwq                                 # like o1
+	qwq:latest                          # like o1
+	qwq:32b                             # Alibaba advanced reasoning
+	qwq:32b-q4_K_M                      # this is the standard not the preview model
+	openthinker:32b                     # dereict from deepseek-r1
+	openthinker:32b-q4_K_M              # fine tuned on openthoughts 114k dataset
+	deepseek-r1:14b                     # r1 comparable
+	deepseek-r1:14b-qwen-distill-q4_K_M # r1 comparable
+	deepseek-r1:32b                     # r1 comparable
+	deepseek-r1:32b-qwen-distill-q4_K_M # r1 comparable
+	olmo2:13b                           # AI2 fully open no tools
+	olmo2:13b-1124-instruct-q4_K_M      # compets with llama 3.1
+	phi4                                # Microsoft Jan 7 2025
+	phi4:latest                         # synthetic, filtered 9.1GB
+	phi4:14b                            # 16K context length only
+	phi4:14b-q4_K_M                     # no tool calling
+	llama3.2-vision                     # should run in open-webui
+	llama3.2-vision:latest              # should run in open-webui
+	llama3.2-vision:11b                 # vision works now
+	llama3.2-vision:11b-instruct-q4_K_M # vision works now
+	qwen2.5-coder:14b                   # 128K Tuned for coding 7B
+	qwen2.5-coder:14b-instruct-q4_K_M   # 128K Tuned for coding 7B
+	qwen2.5-coder:32b                   # 128K Tuned for coding 7B
+	qwen2.5-coder:32b-instruct-q4_K_M   # 128K Tuned for coding 7B
 
 )
 
-log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
+log_verbose "loading all models over >32B-110B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
+
+	aravhawk/llama4              # llama 4 scout
+	aravhawk/llama4:109b         # 17b x 16 experts
+	aravhawk/llama4:scout-q4_K_M # 10M token context
+	aravhawk/llama4:latest
+
+	cogito:70b                           # 128K context
+	cogito:70b:v1-preview-llama-q4_K-M   # finetuned llama
 	command-a                            # 111b parameters
 	command-a:latest                     # tools
 	command-a:111b                       # open weights 23 languages
@@ -443,18 +459,25 @@ MODEL_LARGE+=(
 	llama3.3:70b-instruct-q4_K_M         # 128K context
 	llama3.2-vision:90b                  # vision works now
 	llama3.2-vision:90b-instruct-q4_K_M  # vision works now
-	# these models are pre llama3.2 and are very close to gone
-	qwen2.5:72b # 128K context Alibaba 2024-09-16 7b
 )
 
-log_verbose "Extra models over 100B parameters, requires >=600GB"
+log_verbose "Extra models over 200B parameters, requires >=600GB"
 MODEL_XLARGE+=(
-	deepseek-r1
+	aravhawk/llama4:400b            # llama 4 scout
+	aravhawk/llama4:maverick-q4_K_M # 1M context
+	deepseek-r1                     # 641B
 )
 
 # legacy models for comparison with modern ones
 MODEL_OLD+=(
 
+	dolphin3                               # llama3.1 8B tuned
+	dolphin3:latest                        # no tool calling
+	dolphin3:8b                            # llama3.1 8B tuned
+	dolphin3:8b-llama3.1-q4_K_M            # llama3.1 8B tuned
+	mistral-small                          # this is now the 2503 model
+	mistral-small:latest                   # now the 2501 model
+	mistral-small:24b-instruct-2501-q4_K_M # the latest model
 	r1-1776
 	r1-1776                          # perplexity r1 model on latest data
 	r1-1776:latest                   # perplexity r1 model on latest data
@@ -486,9 +509,16 @@ MODEL_OLD+=(
 	opencoder:1.5b                   #  english and chinse
 	opencoder:1.5b-instruct-q4_K_M   #  english and chinse
 	qwq:32b-preview-q4_K_M           # Alibaba advanced reasoning
-	olmo2                            # Ai2 fully open model competitive
-	olmo2:latest                     # competitive iwth llama 3.1
-	olmo2:7b                         # November 26 2024 release
+	qwen2.5:0.5b                     # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:1.5b                     # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b                       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b-instruct-q4_K_M       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5                          # the larger Alibab models
+	qwen2.5:latest                   # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:7b                       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:14b                      # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:32b                      # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:72b                      # 128K context Alibaba 2024-09-16 7b
 	falcon3:10b                      # 7B parameters
 	falcon3:10b-instruct-q4_K_M      # 7B parameters
 	phi3                             # the original
@@ -516,6 +546,7 @@ MODEL_OLD+=(
 	orca2:7b                 # Microsoft
 	phi:2.7b                 # phi-2
 	qwen:7b                  ## Qwen 1.5
+	minicpm-v:8b
 )
 
 # move the deprecated models here to make sure to delete them
@@ -749,7 +780,7 @@ ollama_action() {
 		elif [[ $action == pull ]]; then
 			DISK_USED="$(df -k . | sed 1d | awk 'FNR == 1 {print $5}' | cut -f 1 -d "%")"
 			log_verbose "ollama_action: FORCE=$FORCE action=$action DISK_USED=$DISK_USED DISK_MAX=$DISK_MAX"
-			if $FORCE || [[ $action == pull ]] && ((DISK_USED > DISK_MAX)); then
+			if [[ $action == pull ]] && ! $FORCE && ((DISK_USED > DISK_MAX)); then
 				log_verbose "cannot pull $M $DISK_USED% used at most $DISK_MAX% allowed"
 				continue
 			fi
@@ -781,7 +812,7 @@ else
 		fi
 		if $REMOVE_OBSOLETE_AND_OLD; then
 			log_verbose "Manually remove ${MODEL_MLX_REMOVE[*]}"
-			huggingface-cli delete-cache
+			huggingface-cli delete-cache --disable-tui
 		fi
 	fi
 

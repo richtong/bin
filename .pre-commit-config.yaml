@@ -226,12 +226,14 @@ repos:
         files: \.ipynb$
         types: ["file"]
 
-  # lint Dockerfiles with hadolint
+  # lint Dockerfiles with hadolint only use if you need nektos
+  # - repo: https://github.com/hadolint/hadolint
+  # rev: v2.13.1-beta
+  # hooks:
+  # - id: hadolint-docker
+  # exclude: Dockerfile.dockerignore
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.13.1-beta
+    rev: v2.12.0
     hooks:
-      # use if hadolint is local
-      #- id: hadolint
-      # using docker container because necktos act will not homebrew install
-      - id: hadolint-docker
+      - id: hadolint
         exclude: Dockerfile.dockerignore
