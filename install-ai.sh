@@ -73,8 +73,11 @@ PACKAGE+=(
 
 if $EXTRAS; then
 	PACKAGE+=(
+		comfyui     # ComfyUI - local audio/video
 		ngrok       # local ssh gateway for open-webui
 		parquet-cli # command line opening parquet data files
+		zed         # yet another ai editor
+		claude      # Anthropic's Claude AI assistant
 	)
 fi
 
@@ -104,7 +107,6 @@ if in_os mac; then
 		CASK+=(
 			cursor          # pair programming using VScode, takes over the $(code)
 			mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
-			zed             # yet another ai editor
 		)
 	fi
 	brew_install "${CASK[@]}"
@@ -187,8 +189,9 @@ fi
 
 if $EXTRAS; then
 	# https://comfyorg.notion.site/ComfyUI-Desktop-User-Guide-1146d73d365080a49058e8d629772f0a#1486d73d3650800089f3fca8e5c94203
-	log_verbose "Install Alpha version of ComfyUI Desktop"
-	download_url_open "https://download.comfy.org/mac/dmg/arm64"
+	# replaced by brewinstall
+	# log_verbose "Install Alpha version of ComfyUI Desktop"
+	# download_url_open "https://download.comfy.org/mac/dmg/arm64"
 
 	log_verbose "find open-interpreter models at https://docs.litellm.ai/docs/providers/"
 	log_verbose "gemini-pro o1-mini claude-3-5-sonnet"

@@ -255,7 +255,7 @@ MODEL_TOOL+=(
 	command-a:111b
 	granite3.2-vision:2b
 	phi4-mini:3.8b
-	granite3.2:8b
+	granite3.3:8b
 	command-r7b:7b # command-r7b is the default
 	llama3.3:70b
 	qwq:32b
@@ -291,10 +291,7 @@ MODEL+=(
 	deepcoder:1.5b-preview-q4_K_M # fine tuned deepseek-r1-distilled
 	gemma3:1b
 	gemma3:1b-it-fp16
-	granite3.2 # 2b vision model
-	granite3.2:latest
-	granite3.2:2b # reasoning model messages += []{role: control, content: thinking}]
-	granite3.2:2b-instruct-q4_K_M
+	granite3.3:2b # reasoning model messages += []{role: control, content: thinking}]
 	granite3.2-vision
 	granite3.2-vision:latest
 	granite3.2-vision:2b
@@ -336,10 +333,6 @@ MODEL_XSMALL+=(
 	phi4-mini      # latest from Microsoft
 	phi4-mini:3.8b # tool calling
 	phi4-mini:3.8b-q4_K_M
-	falcon3:3b                 # 7B parameters
-	falcon3:3b-instruct-q4_K_M # 7B parameters
-	falcon3:1b                 # 7B parameters
-	falcon3:1b-instruct-q8_0
 	llama3.2                    # Meta 3.2-3B Q4 128 context
 	llama3.2:latest             # Meta 3.2-3B Q4 128 context
 	llama3.2:3b                 # Meta 3.2-3B Q4 128 context 2GB
@@ -354,9 +347,7 @@ MODEL_SMALL+=(
 	exaone-deep:7.8b # LG AI
 	exaone-deep:7.8b-q4_K_M
 	granite3.2 # thinking with message += [{ role: control, content: thinking}]
-	granite3.2:latest
 	granite3.2:8b
-	granite3.2:8b-instruct-q4_K_M
 	openthinker        # resaonsing models based on deepseek-r1
 	openthinker:latest # not tool calling
 	openthinker:7b
@@ -552,7 +543,14 @@ MODEL_OLD+=(
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
 	# GGUF models are too big
+	granite3.2 # 2b vision model
+	granite3.2:latest
+	granite3.2:2b # reasoning model messages += []{role: control, content: thinking}]
+	granite3.2:2b-instruct-q4_K_M
 	hf.co/bartowski/DeepSeek-R1-Distill-Qwen-32B-abliterated-GGUF
+	granite3.2:latest
+	granite3.2:8b
+	granite3.2:8b-instruct-q4_K_M
 	hf.co/LatitudeGames/Wayfarer-Large-70B-Llama-3.3-GGUF # Role play oriented
 	hf.co/bartowski/Qwen2-VL-72B-Instruct-GGUF:Q4_K_M
 	command-r7b                   # command-r7b is the default
@@ -563,7 +561,11 @@ MODEL_REMOVE+=(
 	falcon3:latest             # latest from Abu Dhabi
 	falcon3:7b                 # 7B parameters
 	falcon3:7b-instruct-q4_K_M # 7B parameters
-	granite-embedding          # latest ibm embeddings
+	falcon3:3b                 # 7B parameters
+	falcon3:3b-instruct-q4_K_M # 7B parameters
+	falcon3:1b                 # 7B parameters
+	falcon3:1b-instruct-q8_0
+	granite-embedding # latest ibm embeddings
 	granite-embedding:latest
 	granite-embedding:30m
 	granite-embedding:30m-en
