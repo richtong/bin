@@ -778,9 +778,9 @@ ollama_action() {
 				continue
 			fi
 		elif [[ $action == pull ]]; then
-			DISK_USED="$(df -k . | sed 1d | awk 'FNR == 1 {print $5}' | cut -f 1 -d "%")"
+			DISK_USED="$(util_disk_used)"
 			log_verbose "ollama_action: FORCE=$FORCE action=$action DISK_USED=$DISK_USED DISK_MAX=$DISK_MAX"
-			if [[ $action == pull ]] && ! $FORCE && ((DISK_USED > DISK_MAX)); then
+			if [[ $action == pull ]] && ((DISK_USED > DISK_MAX)) && ! $FORCE; then
 				log_verbose "cannot pull $M $DISK_USED% used at most $DISK_MAX% allowed"
 				continue
 			fi
