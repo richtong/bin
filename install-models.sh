@@ -433,7 +433,6 @@ MODEL_LARGE+=(
 	aravhawk/llama4:109b         # 17b x 16 experts
 	aravhawk/llama4:scout-q4_K_M # 10M token context
 	aravhawk/llama4:latest
-
 	cogito:70b                           # 128K context
 	cogito:70b:v1-preview-llama-q4_K-M   # finetuned llama
 	command-a                            # 111b parameters
