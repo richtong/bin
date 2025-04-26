@@ -83,7 +83,7 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
-brew install whisper-cli ffmpeg
+brew install whisper-cpp ffmpeg
 
 # ["hunyuan-video-t2v-720p-q8_0.gguf"]=models/unet   # quarter precision
 if ! $DOWNLOAD; then
