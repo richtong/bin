@@ -73,8 +73,10 @@ for file in "$@"; do
 		continue
 	fi
 
-	basename=$(basename "$file")
-	suffix="${basename##*.}"
+	base="${file%.*}"
+
+	suffix="${file##*.}"
+	log_verbose "base=$base suffix=$suffix"
 	# check if file is a video or audio file
 	if [[ ! $suffix =~ (mp4|mkv|avi|mov|mp3|wav) ]]; then
 		log_verbose "File $file is not a video or audio file"
@@ -88,10 +90,10 @@ for file in "$@"; do
 
 	# convert to wav if not already in wav format
 	if [[ $suffix != wav ]]; then
-		ffmpeg -i "$file" -vn -acodec pcm_s16le -ar 44100 -ac 2 "$basename.wav"
+		ffmpeg -i "$file" -vn -acodec pcm_s16le -ar 44100 -ac 2 "$base.wav"
 	fi
 
-	whisper-cli -m "$MODEL" -f "$basename.wav" --print-colors
-	whisper-cli -m "$TLDZ_MODEL" -tdrz -f "$basename.wav" --print-colors
+	whisper-cli -m "$MODEL_CACHE/$MODEL" -f "$base.wav" --print-colors
+	whisper-cli -m "$MODEL_CACHE/$TLDZ_MODEL" -tdrz -f "$base.wav" --print-colors
 
 done
