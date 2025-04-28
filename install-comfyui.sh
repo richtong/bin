@@ -17,7 +17,11 @@ DOWNLOAD="${DOWNLOAD:-true}"
 DRY_RUN="${DRY_RUN:-false}"
 FORCE="${FORCE:-false}"
 DISK_MAX="${DISK_MAX:-80}"
+# note do not use ~/Documents as iCloud Sync works there
 COMFYUI_PATH="${COMFYUI_PATH:-"$HOME/ComfyUI"}"
+# if you have workflows you want checked in change here
+COMFYUI_WORKSPACE="${COMFYUI_WORKSPACE:-"$WS_DIR/git/src/res/tne-comfyui-workflows/workflows"}"
+COMFYUI_WORKSPACE_DEST="${COMFYUI_WORKSPACE_DEST:-"$COMFYUI_PATH/user/default/workflows/common"}"
 
 OPTIND=1
 while getopts "hdvgnm:f" opt; do
@@ -286,7 +290,7 @@ for model in "${!HF_REPO[@]}"; do
 		huggingface-cli download "${HF_REPO[$model]}" "$src" --local-dir "$COMFYUI_PATH"
 		log_verbose "creates a path in $COMFYUI_PATH/$src so symlink to right place"
 		log_verbose "ln -s $COMFYUI_PATH/$src $COMFYUI_PATH/$dest_dir"
-		mkdir -p "$COMFYUI_PATH/$dest_dir"
+		mkdir -p "$(dirname "$COMFYUI_PATH/$dest_dir")"
 		ln -s "$COMFYUI_PATH/$src" "$COMFYUI_PATH/$dest_dir"
 
 	fi
@@ -302,6 +306,11 @@ for url in "${!DIRECT_DEST[@]}"; do
 	fi
 	download_url "$url" "$COMFYUI_PATH/${DIRECT_DEST[$url]}"
 done
+
+if [[ -d $COMFYUI_WORKSPACE ]] && [[ ! -e $COMFYUI_WORKSPACE_DEST ]]; then
+	log_verbose "Setting default workspace to $COMFYUI_WORKSPACE"
+	ln -s "$COMFYUI_WORKSPACE" "$COMFYUI_WORKSPACE_DEST"
+fi
 
 log_verbose "To finish Janus Pro Installation, download the Janus Pro Node in ComfyUI Manager"
 log_verbose "Get the Hidream I1 Workflow from the ComfyUI Workflow Templates"
