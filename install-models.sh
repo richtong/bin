@@ -13,60 +13,67 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
 
+INCLUDE_TOOL="${INCLUDE_TOOL:-false}"
+INCLUDE_VISION="${INCLUDE_VISION:-false}"
+INCLUDE_GGUF="${INCLUDE_GGUF:-false}"
+INCLUDE_MLX="${INCLUDE_MLX:-false}"
+EXO_HOME="${EXO_HOME:-"$HOME/.cache/exo/downloads"}"
+
+DRYRUN="${DRYRUN:-false}"
+FORCE="${FORCE:-false}"
+DISK_MAX="${DISK_MAX:-80}"
+SHOW_SIZE="${SHOW_SIZE:-true}"
+REMOVE_OBSOLETE_AND_OLD="${REMOVE_OBSOLETE_AND_OLD:-true}"
+AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
+ACTION="${ACTION:-pull}"
+
+INCLUDE_OLD="${INCLUDE_OLD:-false}"
 INCLUDE_XSMALL="${INCLUDE_XSMALL:-false}"
 INCLUDE_SMALL="${INCLUDE_SMALL:-false}"
 INCLUDE_MEDIUM="${INCLUDE_MEDIUM:-false}"
 INCLUDE_LARGE="${INCLUDE_LARGE:-false}"
 INCLUDE_XLARGE="${INCLUDE_XLARGE:-false}"
-INCLUDE_TOOL="${INCLUDE_TOOL:-false}"
-INCLUDE_VISION="${INCLUDE_VISION:-false}"
-INCLUDE_GGUF="${INCLUDE_GGUF:-false}"
-INCLUDE_MLX="${INCLUDE_MLX:-false}"
-INCLUDE_OLD="${INCLUDE_OLD:-false}"
-FORCE="${FORCE:-false}"
-DISK_MAX="${DISK_MAX:-80}"
-SHOW_SIZE="${SHOW_SIZE:-true}"
-
-# remove obsolete and old models
-REMOVE_OBSOLETE_AND_OLD="${REMOVE_OBSOLETE_AND_OLD:-true}"
-
-AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
-# if set to false will remove/uninstall models
-ACTION="${ACTION:-pull}"
+INCLUDE_MEGA="${INCLUDE_MEGA:-false}"
 
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdveox:rlfsmugtizo" opt; do
+while getopts "hdvgltsafnzrxu0123456" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
-
 Installs Ollama models and removes obsolete or large ones.
 We do not pull modles if we have less than 20% disk free unless
 -f is set
 
 usage: $SCRIPTNAME [ flags ]
 flags:
-	-a $(! $AUTOMATIC_BY_MEMORY || echo "do not ")automatically install models based on system memory
-	-d $(! $DEBUGGING || echo "no ")debugging
-	-e $(! $INCLUDE_XLARGE || echo "do not ")pull extra models if you have lots of disk (>2TB)
-	-f $(! $FORCE || echo "do not")force pull even if disk larger than (default DISK_MAX=$DISK_MAX)
-	-g $(! $INCLUDE_GGUF || echo "do not ")pull huggingface models GGUF for Ollama
 	-h help
-	-i $(! $INCLUDE_MLX || echo "do not ")pull huggingface models GGUF for Ollama
+	-v $(! $VERBOSE || echo "no ")verbose output
+	-d $(! $DEBUGGING || echo "no ")debugging
+
+	speciality models:
+	-g $(! $INCLUDE_GGUF || echo "do not ")pull huggingface models GGUF for Ollama
+	-l $(! $INCLUDE_MLX || echo "do not ")pull huggingface models GGUF for Ollama
 	-t $(! $INCLUDE_TOOL || echo "do not ")pull Tool using models for ollama
-	-o $(! $INCLUDE_VISION || echo "do not ")pull Vision models for ollama
-	-l $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
-	-m $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 32GB+ RAM)
-	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
-	-r $(! $REMOVE_OBSOLETE_AND_OLD || echo "do not ")remove obsolete (and old models if -o not set)
-	-s $(! $INCLUDE_SMALL || echo "do not ")pull smaller then 7B+ parameters (even if you do not have 16GB+ RAM)
-	-t $(! $INCLUDE_XSMALL || echo "do not ")pull smaller then 3B+ parameters (even if you do not have 8GB+ RAM)
-	-u $([[ $ACTION == pull ]] || echo "un")install models
-	-v $(! $VERBOSE || echo "not ")verbose
-	-x storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
+	-s $(! $INCLUDE_VISION || echo "do not ")pull Vision models for ollama
+
+	models install parameters
+	-a $(! $AUTOMATIC_BY_MEMORY || echo "do not ")automatically install models based on system memory
+	-f $(! $FORCE || echo "do not")force pull even if disk larger than (default DISK_MAX=$DISK_MAX)
+	-n $(! $DRYRUN || echo "do not")dry run the commands
 	-z $(! $SHOW_SIZE || echo "do not ")show size of the largest models
+	-r $(! $REMOVE_OBSOLETE_AND_OLD || echo "do not ")remove obsolete (and old models if -o not set)
+	-x storage location for models $([[ -v OLLAMA_MODELS ]] && echo default: "$OLLAMA_MODELS")
+	-u $([[ $ACTION == pull ]] || echo "un")install models
+
+	-o $(! $INCLUDE_OLD || echo "do not ")pull legacy models for comparisons
+	-5 $(! $INCLUDE_MEGA || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
+	-4 $(! $INCLUDE_XLARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
+	-3 $(! $INCLUDE_LARGE || echo "do not ")pull larger then 32B+ parameters (even if you do not have 64GB+ RAM)
+	-2 $(! $INCLUDE_MEDIUM || echo "do not ")pull larger then 10B+ parameters (even if you do not have 32GB+ RAM)
+	-1 $(! $INCLUDE_SMALL || echo "do not ")pull smaller then 7B+ parameters (even if you do not have 16GB+ RAM)
+	-0 $(! $INCLUDE_XSMALL || echo "do not ")pull smaller then 3B+ parameters (even if you do not have 8GB+ RAM)
 
 example of manual: Uninstall large and medium models and hugging face models
 	$SCRIPTNAME -u -l -m -h
@@ -75,85 +82,76 @@ EOF
 		exit 0
 		;;
 	d)
-		# invert the variable when flag is set
 		DEBUGGING="$($DEBUGGING && echo false || echo true)"
 		export DEBUGGING
 		;&
 	v)
 		VERBOSE="$($VERBOSE && echo false || echo true)"
 		export VERBOSE
-		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
 		;;
-	f)
-		# invert the variable when flag is set
-		FORCE="$($FORCE && echo false || echo true)"
-		export FORCE
+	g)
+		INCLUDE_GGUF="$($INCLUDE_GGUF && echo false || echo true)"
+		;;
+	l)
+		INCLUDE_MLX="$($INCLUDE_MLX && echo false || echo true)"
 		;;
 	t)
-		# invert the variable when flag is set
-		INCLUDE_XSMALL="$($INCLUDE_XSMALL && echo false || echo true)"
-		export INCLUDE_XSMALL
+		INCLUDE_TOOL="$($INCLUDE_TOOL && echo false || echo true)"
 		;;
 	s)
-		# invert the variable when flag is set
-		INCLUDE_SMALL="$($INCLUDE_SMALL && echo false || echo true)"
-		export INCLUDE_SMALL
-		;;
-	m)
-		# invert the variable when flag is set
-		INCLUDE_MEDIUM="$($INCLUDE_MEDIUM && echo false || echo true)"
-		export INCLUDE_MEDIUM
+		INCLUDE_VISION="$($INCLUDE_VISION && echo false || echo true)"
 		;;
 
-	l)
-		# invert the variable when flag is set
-		INCLUDE_LARGE="$($INCLUDE_LARGE && echo false || echo true)"
-		export INCLUDE_LARGE
+	a)
+		AUTOMATIC_BY_MEMORY="$($AUTOMATIC_BY_MEMORY && echo false || echo true)"
 		;;
-	e)
-		# invert action between pull and rm
-		INCLUDE_XLARGE="$($INCLUDE_XLARGE && echo false || echo true)"
-		export INCLUDE_XLARGE
+	f)
+		FORCE="$($FORCE && echo false || echo true)"
 		;;
-	g)
-		# invert the variable when flag is set
-		INCLUDE_GGUF="$($INCLUDE_GGUF && echo false || echo true)"
-		export INCLUDE_GGUF
+	n)
+		DRYRUN="$($DRYRUN && echo false || echo true)"
 		;;
-	i)
-		# invert the variable when flag is set
-		INCLUDE_MLX="$($INCLUDE_MLX && echo false || echo true)"
-		export INCLUDE_MLX
-		;;
-	o)
-		# invert action between pull and rm
-		INCLUDE_OLD="$($INCLUDE_OLD && echo false || echo true)"
-		export INCLUDE_OLD
+	z)
+		SHOW_SIZE="$($SHOW_SIZE && echo false || echo true)"
 		;;
 	r)
-		# invert action between pull and rm
 		REMOVE_OBSOLETE_AND_OLD="$($REMOVE_OBSOLETE_AND_OLD && echo false || echo true)"
-		export REMOVE_OBSOLETE_AND_OLD
+		;;
+	x)
+		OLLAMA_MODELS="$OPTARG"
 		;;
 	u)
-		# invert action between pull and rm
 		ACTION="$([[ $ACTION == pull ]] && echo rm || echo pull)"
 		if [[ $ACTION == rm ]]; then
 			echo "Removing models you must specify the exact ones -a is off"
 			AUTOMATIC_BY_MEMORY=false
 		fi
-		export ACTION
-		;;
-	x)
-		OLLAMA_MODELS="$OPTARG"
-		export OLLAMA_MODELS
 		;;
 
-	z)
-		SHOW_SIZE="$($SHOW_SIZE && echo false || echo true)"
-		export SHOW_SIZE
+	0)
+		INCLUDE_OLD="$($INCLUDE_OLD && echo false || echo true)"
 		;;
+	1)
+		INCLUDE_XSMALL="$($INCLUDE_XSMALL && echo false || echo true)"
+		;;
+	2)
+		INCLUDE_SMALL="$($INCLUDE_SMALL && echo false || echo true)"
+		;;
+	3)
+		INCLUDE_MEDIUM="$($INCLUDE_MEDIUM && echo false || echo true)"
+		;;
+
+	4)
+		INCLUDE_LARGE="$($INCLUDE_LARGE && echo false || echo true)"
+		;;
+	5)
+		INCLUDE_XLARGE="$($INCLUDE_XLARGE && echo false || echo true)"
+		;;
+	6)
+		INCLUDE_XLARGE="$($INCLUDE_XLARGE && echo false || echo true)"
+		;;
+
 	*)
 		echo "no flag -$opt"
 		;;
@@ -218,7 +216,8 @@ MODEL_MLX_LARGE+=(
 	mlx-community/Llama-3.3-70B-Instruct-4bit
 )
 MODEL_MLX_XLARGE+=(
-
+)
+MODEL_MLX_MEGA+=(
 )
 
 MODEL_MLX_REMOVE+=(
@@ -250,12 +249,12 @@ MODEL_GGUF_REMOVE+=(
 
 # Tool using models https://ollama.com/search?c=tools&o=newest
 MODEL_TOOL+=(
+	granite3.3:8b
 	cogito:8b
 	mistral-small3.1:24b
 	command-a:111b
 	granite3.2-vision:2b
 	phi4-mini:3.8b
-	granite3.3:8b
 	command-r7b:7b # command-r7b is the default
 	llama3.3:70b
 	qwq:32b
@@ -346,8 +345,9 @@ MODEL_SMALL+=(
 	cogito:latest    # 128K context, 30 lanugages
 	exaone-deep:7.8b # LG AI
 	exaone-deep:7.8b-q4_K_M
-	granite3.2 # thinking with message += [{ role: control, content: thinking}]
-	granite3.2:8b
+	granite3.3 # thinking with message += [{ role: control, content: thinking}]
+	granite3.3:latest
+	granite3.3:8b
 	openthinker        # resaonsing models based on deepseek-r1
 	openthinker:latest # not tool calling
 	openthinker:7b
@@ -371,7 +371,7 @@ MODEL_SMALL+=(
 	qwen2.5-coder:latest                # 128K Tuned for coding 7B
 	qwen2.5-coder:7b                    # 128K Tuned for coding 7B
 	qwen2.5-coder:7b-instruct           # 128K Tuned for coding 7B
-	qwen2.5-coder:7b-instruct-q4_K_M    # 128K Tuned for coding 7B
+	/qwen2.5-coder:7b-instruct-q4_K_M   # 128K Tuned for coding 7B
 	bespoke-minicheck                   # Fact check 7B q4_K_M UT Austin
 	bespoke-minicheck:latest            # Fact check 7B q4_K_M
 	bespoke-minicheck:7b                # Fact check 7B q4_K_M
@@ -381,8 +381,11 @@ MODEL_SMALL+=(
 #
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
-	deepcoder        #  Together AI and Agentica
-	deepcoder:latest # finetuned deepseek-r1-distilled-qwen
+	lsm03624/GLM-Z1-32B-0414-Q4_K_M # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
+	# sammcj/glm-4-32b-0414:qGLM6_k      # GLM-4 32K context chat tuned
+	JollyLlama/GLM-4-32B-0414-Q4_K_M # GLM-4 32K Q4
+	deepcoder                        #  Together AI and Agentica
+	deepcoder:latest                 # finetuned deepseek-r1-distilled-qwen
 	deepcoder:14b
 	deepcoder:14b-instruct-q4_K_M
 	mistral-small3.1        # tool and vision 128Kb
@@ -426,19 +429,11 @@ MODEL_MEDIUM+=(
 
 )
 
-log_verbose "loading all models over >32B-110B parameters, requires >=64GB RAM"
+log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
 
-	aravhawk/llama4              # llama 4 scout
-	aravhawk/llama4:109b         # 17b x 16 experts
-	aravhawk/llama4:scout-q4_K_M # 10M token context
-	aravhawk/llama4:latest
 	cogito:70b                           # 128K context
 	cogito:70b:v1-preview-llama-q4_K-M   # finetuned llama
-	command-a                            # 111b parameters
-	command-a:latest                     # tools
-	command-a:111b                       # open weights 23 languages
-	command-a:111b-03-2025-q4_K_M        # 256K token context
 	deepseek-r1:70b                      # disitlled lllama
 	deepseek-r1:70b-llama-distill-q4_K_M # llama based
 	tulu3:70b                            # tulu3 is not much better than llama3 and takes speace
@@ -451,8 +446,22 @@ MODEL_LARGE+=(
 	llama3.2-vision:90b-instruct-q4_K_M  # vision works now
 )
 
-log_verbose "Extra models over 200B parameters, requires >=600GB"
+log_verbose "Extra models over 100B parameters, requires >=128GB"
 MODEL_XLARGE+=(
+	aravhawk/llama4              # llama 4 scout
+	aravhawk/llama4:109b         # 17b x 16 experts
+	aravhawk/llama4:scout-q4_K_M # 10M token context
+	aravhawk/llama4:latest
+	command-a                       # 111b parameters
+	command-a:latest                # tools
+	command-a:111b                  # open weights 23 languages
+	command-a:111b-03-2025-q4_K_M   # 256K token context
+	aravhawk/llama4:400b            # llama 4 scout
+	aravhawk/llama4:maverick-q4_K_M # 1M context
+)
+
+log_verbose "Megalarge models over 400B parameters requires >=256GB"
+MODEL_MEGA+=(
 	aravhawk/llama4:400b            # llama 4 scout
 	aravhawk/llama4:maverick-q4_K_M # 1M context
 	deepseek-r1                     # 641B
@@ -719,6 +728,11 @@ if $AUTOMATIC_BY_MEMORY; then
 fi
 
 MODEL_LIST=("${MODEL[@]}")
+if $INCLUDE_MEGA; then
+	log_verbose "Include extra large models"
+	MODEL_LIST+=("${MODEL_MEGA[@]}")
+	MODEL_MLX+=("${MODEL_MLX_MEGA[@]}")
+fi
 if $INCLUDE_XLARGE; then
 	log_verbose "Include extra large models"
 	MODEL_LIST+=("${MODEL_XLARGE[@]}")
@@ -770,23 +784,23 @@ ollama_action() {
 		return 0
 	fi
 
-	for M in "$@"; do
+	for model in "$@"; do
 		# if you want to pull but not enough room skip it unless forced
-		log_verbose "$action model $M"
+		log_verbose "$action model $model"
 		if [[ $action == rm ]]; then
-			if ! ollama ls "$M" | tail -n +2 | grep -q "^${M}[[:space:]]"; then
-				log_verbose "$M already removed"
+			if ! ollama ls "$model" | tail -n +2 | grep -q "^${model}[[:space:]]"; then
+				log_verbose "$model already removed"
 				continue
 			fi
 		elif [[ $action == pull ]]; then
 			DISK_USED="$(util_disk_used)"
 			log_verbose "ollama_action: FORCE=$FORCE action=$action DISK_USED=$DISK_USED DISK_MAX=$DISK_MAX"
-			if [[ $action == pull ]] && ((DISK_USED > DISK_MAX)) && ! $FORCE; then
-				log_verbose "cannot pull $M $DISK_USED% used at most $DISK_MAX% allowed"
+			if $DRYRUN || [[ $action == pull ]] && ((DISK_USED > DISK_MAX)) && ! $FORCE; then
+				log_verbose "dry run or cannot pull $model $DISK_USED% used at most $DISK_MAX% allowed"
 				continue
 			fi
 		fi
-		if ! ollama "$action" "$M"; then
+		if ! ollama "$action" "$model"; then
 			log_warning "failed $?"
 		fi
 	done
@@ -808,12 +822,12 @@ else
 	if $REMOVE_OBSOLETE_AND_OLD; then
 		log_verbose "Removing deprecated models ${MODEL_REMOVE[*]}"
 		ollama_action rm "${MODEL_REMOVE[@]}" "${MODEL_GGUF_REMOVE[@]}"
-		if ! $INCLUDE_OLD; then
+		if ! $DRYRUN && $INCLUDE_OLD; then
 			ollama_action rm "${MODEL_OLD[@]}"
 		fi
-		if $REMOVE_OBSOLETE_AND_OLD; then
+		if ! $DRYRUN && $REMOVE_OBSOLETE_AND_OLD; then
 			log_verbose "Manually remove ${MODEL_MLX_REMOVE[*]}"
-			huggingface-cli delete-cache --disable-tui
+			huggingface-cli delete-cache
 		fi
 	fi
 
@@ -823,9 +837,10 @@ else
 fi
 
 if in_os mac && $INCLUDE_MLX; then
-
 	log_verbose "Include HF MLX models"
-	huggingface-cli download "${MODEL_MLX[@]}"
+	if ! $DRYRUN && ($FORCE || ((DISK_USED > DISK_MAX))); then
+		huggingface-cli download "${MODEL_MLX[@]}"
+	fi
 fi
 
 log_verbose "installing ollama environment variables to $WS_DIR/git/src/.envrc"
@@ -847,13 +862,14 @@ log_verbose "Installing the pipelines interface which allows compatible interfac
 log_verbose "See https://github.com/open-webui/pipelines"
 
 if $SHOW_SIZE; then
-	log_verbose "Ollama.com models"
+	log_verbose "Show local models and sizes"
+	log_verbose "Ollama models:"
 	for size in GB MB; do
 		ollama ls | grep "$size" | sort -nruk 3
 	done
-	log_verbose "Ollama models from Huggingface cache"
+	log_verbose "Huggingface cache models"
 	huggingface-cli scan-cache | tail -n +3 | sort -unk 3
-	EXO_HOME="${EXO_HOME:-"$HOME/.cache/exo/downloads"}"
+
 	if [[ -d $EXO_HOME ]]; then
 		log_verbose "Exo MLX models"
 		du -sh "${EXO_HOME:-"$HOME/.cache/exo/downloads"}"/* | sort -n

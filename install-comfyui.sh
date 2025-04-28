@@ -18,6 +18,7 @@ DRY_RUN="${DRY_RUN:-false}"
 FORCE="${FORCE:-false}"
 DISK_MAX="${DISK_MAX:-80}"
 COMFYUI_PATH="${COMFYUI_PATH:-"$HOME/Documents/ComfyUI"}"
+COMF
 
 OPTIND=1
 while getopts "hdvgnm:f" opt; do
