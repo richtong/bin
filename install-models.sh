@@ -221,7 +221,7 @@ MODEL_MLX_MEGA+=(
 )
 
 MODEL_MLX_REMOVE+=(
-	mlx-community--Qwen2.5-Coder-14B-Instruct-abliterated-4bit
+	mlx-community/Qwen2.5-Coder-14B-Instruct-abliterated-4bit
 	mlx-community/DeepSeek-R1-4bit                          # 126B parameters
 	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit        # compare with ollama
 	mlx-community/DeepSeek-R1-Distill-Qwen-32B-abliterated  # try this one
@@ -235,9 +235,10 @@ MODEL_MLX_REMOVE+=(
 )
 
 # https://huggingface.co/models?library=gguf&sort=trending
+# deprecate this for ollama.com available models
 MODEL_GGUF+=(
 	hf.co/lmstudio-community/olmOCR-7B-0225-preview-GGUF:Q4_K_M
-	hf.co/lmstudio-community/Qwen2-VL-7B-Instruct-GGUF
+	# hf.co/lmstudio-community/Qwen2-VL-7B-Instruct-GGUF
 
 )
 
@@ -249,6 +250,7 @@ MODEL_GGUF_REMOVE+=(
 
 # Tool using models https://ollama.com/search?c=tools&o=newest
 MODEL_TOOL+=(
+	qwen3:8b
 	granite3.3:8b
 	cogito:8b
 	mistral-small3.1:24b
@@ -268,6 +270,7 @@ MODEL_VISION+=(
 	granite3.2-vision:2b
 	llama3.2-vision:11b
 	llama3.2-vision:90b
+	packeting/Qwen2.5-VL-32B-Instruct
 )
 
 # These are kept in most recent first from https://ollama.com/search?o=newest
@@ -321,6 +324,10 @@ MODEL+=(
 
 log_verbose "loading all models >2B and <=4B parameters, requires >=8GB of RAM"
 MODEL_XSMALL+=(
+	qwen3:0.6b
+	qwen3:0.6b-q4_K_M
+	qwen3:1.7b
+	qwen3:1.7b-q4_K_M
 	cogito:3b # Deep Cogito tool too
 	cogito
 	exaone-deep:2.4b # LG AI
@@ -340,6 +347,11 @@ MODEL_XSMALL+=(
 
 log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
 MODEL_SMALL+=(
+	qwen3:4b
+	qwen3:4b-q4_K_M
+	qwen3
+	qwen3:8b
+	qwen3:8b-q4_K_M
 	cogito           # set to reasoning with /set system ""Enable deep thinking subroutine."""
 	cogito:8b        # trained with Iterated Distillation and Amplification
 	cogito:latest    # 128K context, 30 lanugages
@@ -367,11 +379,6 @@ MODEL_SMALL+=(
 	llama-guard3:latest                 # safety classification
 	llama-guard3:8b                     # safety of prompts
 	llama-guard3:8b-q4_K_M              # safety of prompts
-	qwen2.5-coder                       # Alibaba model
-	qwen2.5-coder:latest                # 128K Tuned for coding 7B
-	qwen2.5-coder:7b                    # 128K Tuned for coding 7B
-	qwen2.5-coder:7b-instruct           # 128K Tuned for coding 7B
-	/qwen2.5-coder:7b-instruct-q4_K_M   # 128K Tuned for coding 7B
 	bespoke-minicheck                   # Fact check 7B q4_K_M UT Austin
 	bespoke-minicheck:latest            # Fact check 7B q4_K_M
 	bespoke-minicheck:7b                # Fact check 7B q4_K_M
@@ -381,6 +388,12 @@ MODEL_SMALL+=(
 #
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
+	qwen3:14b
+	qwen3:14b-q4_K_M
+	qwen3:30b
+	qwen3:30b-q4_K_M
+	qwen3:32b
+	qwen3:32b-q4_K_M
 	lsm03624/GLM-Z1-32B-0414-Q4_K_M # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
 	# sammcj/glm-4-32b-0414:qGLM6_k      # GLM-4 32K context chat tuned
 	JollyLlama/GLM-4-32B-0414-Q4_K_M # GLM-4 32K Q4
@@ -422,16 +435,12 @@ MODEL_MEDIUM+=(
 	llama3.2-vision:latest              # should run in open-webui
 	llama3.2-vision:11b                 # vision works now
 	llama3.2-vision:11b-instruct-q4_K_M # vision works now
-	qwen2.5-coder:14b                   # 128K Tuned for coding 7B
-	qwen2.5-coder:14b-instruct-q4_K_M   # 128K Tuned for coding 7B
-	qwen2.5-coder:32b                   # 128K Tuned for coding 7B
-	qwen2.5-coder:32b-instruct-q4_K_M   # 128K Tuned for coding 7B
 
 )
 
 log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
-
+	packeting/Qwen2.5-VL-32B-Instruct    # this is a q8 model so won't fit in 32GB
 	cogito:70b                           # 128K context
 	cogito:70b:v1-preview-llama-q4_K-M   # finetuned llama
 	deepseek-r1:70b                      # disitlled lllama
@@ -462,6 +471,8 @@ MODEL_XLARGE+=(
 
 log_verbose "Megalarge models over 400B parameters requires >=256GB"
 MODEL_MEGA+=(
+	qwen3:235b
+	qwen3:235b-q4_K_M
 	aravhawk/llama4:400b            # llama 4 scout
 	aravhawk/llama4:maverick-q4_K_M # 1M context
 	deepseek-r1                     # 641B
@@ -478,53 +489,57 @@ MODEL_OLD+=(
 	mistral-small:latest                   # now the 2501 model
 	mistral-small:24b-instruct-2501-q4_K_M # the latest model
 	r1-1776
-	r1-1776                          # perplexity r1 model on latest data
-	r1-1776:latest                   # perplexity r1 model on latest data
-	r1-1776:70b-distill-llama-q4_K_M # perplexity r1 model on latest data
-	r1-1776:70b                      # perplexity r1 model on latest data
-	smollm2                          # open source
-	smollm2:latest                   # open source
-	smollm2:135m-instruct-q4_K_M     # 135m is small
-	smollm2:1.7b                     # large is smarll
-	smollm2:1.7b-instruct-q4_K_M     # large is smarll
-	granite3-guardian                # IBM prompt risk
-	granite3-guardian:latest         # IBM prompt risk
-	granite3-guardian:8b             #  prompt guard
-	granite3-guardian:8b-q5_K_M      #  prompt guard ibm
-	shieldgemma                      # google safety policies
-	shieldgemma:latest               # google safety policies
-	shieldgemma:9b                   # safety of text prompts
-	shieldgemma:9b-q4_K_M            # safety of text prompts
-	smallthinker:3b                  # long sequence encourage CoT
-	smallthinker:3b-preview-q8_0     # open dataset
-	smallthinker                     # Fine tuned Qwen2.5-b-instruct
-	smallthinker:latest              # qwq used to generate 8K synthetic
-	marco-o1                         # Alibab open large reasoning
-	marco-o1:latest                  # Alibab open large reasoning
-	marco-o1:7b                      # 7b
-	marco-o1:7b-q4_K_M               # q4_K_M
-	opencoder                        # completely open source
-	opencoder:latest                 # completely open source
-	opencoder:1.5b                   #  english and chinse
-	opencoder:1.5b-instruct-q4_K_M   #  english and chinse
-	qwq:32b-preview-q4_K_M           # Alibaba advanced reasoning
-	qwen2.5:0.5b                     # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:1.5b                     # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:3b                       # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:3b-instruct-q4_K_M       # 128K context Alibaba 2024-09-16 7b
-	qwen2.5                          # the larger Alibab models
-	qwen2.5:latest                   # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:7b                       # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:14b                      # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:32b                      # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:72b                      # 128K context Alibaba 2024-09-16 7b
-	falcon3:10b                      # 7B parameters
-	falcon3:10b-instruct-q4_K_M      # 7B parameters
-	phi3                             # the original
-	phi3.5                           # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:latest                    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b                      # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b-mini-instruct-q4_0   # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	r1-1776                           # perplexity r1 model on latest data
+	r1-1776:latest                    # perplexity r1 model on latest data
+	r1-1776:70b-distill-llama-q4_K_M  # perplexity r1 model on latest data
+	r1-1776:70b                       # perplexity r1 model on latest data
+	smollm2                           # open source
+	smollm2:latest                    # open source
+	smollm2:135m-instruct-q4_K_M      # 135m is small
+	smollm2:1.7b                      # large is smarll
+	smollm2:1.7b-instruct-q4_K_M      # large is smarll
+	granite3-guardian                 # IBM prompt risk
+	granite3-guardian:latest          # IBM prompt risk
+	granite3-guardian:8b              #  prompt guard
+	granite3-guardian:8b-q5_K_M       #  prompt guard ibm
+	shieldgemma                       # google safety policies
+	shieldgemma:latest                # google safety policies
+	shieldgemma:9b                    # safety of text prompts
+	shieldgemma:9b-q4_K_M             # safety of text prompts
+	smallthinker:3b                   # long sequence encourage CoT
+	smallthinker:3b-preview-q8_0      # open dataset
+	smallthinker                      # Fine tuned Qwen2.5-b-instruct
+	smallthinker:latest               # qwq used to generate 8K synthetic
+	marco-o1                          # Alibab open large reasoning
+	marco-o1:latest                   # Alibab open large reasoning
+	marco-o1:7b                       # 7b
+	marco-o1:7b-q4_K_M                # q4_K_M
+	opencoder                         # completely open source
+	opencoder:latest                  # completely open source
+	opencoder:1.5b                    #  english and chinse
+	opencoder:1.5b-instruct-q4_K_M    #  english and chinse
+	qwq:32b-preview-q4_K_M            # Alibaba advanced reasoning
+	qwen2.5:0.5b                      # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:1.5b                      # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b                        # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b-instruct-q4_K_M        # 128K context Alibaba 2024-09-16 7b
+	qwen2.5                           # the larger Alibab models
+	qwen2.5:latest                    # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:7b                        # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:14b                       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:32b                       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:72b                       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5-coder:14b                 # 128K Tuned for coding 7B
+	qwen2.5-coder:14b-instruct-q4_K_M # 128K Tuned for coding 7B
+	qwen2.5-coder:32b                 # 128K Tuned for coding 7B
+	qwen2.5-coder:32b-instruct-q4_K_M # 128K Tuned for coding 7B
+	falcon3:10b                       # 7B parameters
+	falcon3:10b-instruct-q4_K_M       # 7B parameters
+	phi3                              # the original
+	phi3.5                            # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:latest                     # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b                       # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:3.8b-mini-instruct-q4_0    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
 	# early 2024 models
 	llama2:7b                # original llama2
 	llama2:13b               # 13b
