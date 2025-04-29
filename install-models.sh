@@ -723,20 +723,20 @@ if $AUTOMATIC_BY_MEMORY; then
 	# shellcheck disable=SC2194
 	# the memory needs cascade down so start with the highest number first
 	case 1 in
-	$((MEMORY >= 512)))
-		INCLUDE_XLARGE=true
-		;&
-	$((MEMORY >= 64)))
-		INCLUDE_LARGE=true
-		;&
-	$((MEMORY >= 32)))
-		INCLUDE_MEDIUM=true
+	$((MEMORY >= 8)))
+		INCLUDE_XSMALL=true
 		;&
 	$((MEMORY >= 16)))
 		INCLUDE_SMALL=true
 		;&
-	$((MEMORY >= 8)))
-		INCLUDE_XSMALL=true
+	$((MEMORY >= 32)))
+		INCLUDE_MEDIUM=true
+		;&
+	$((MEMORY >= 64)))
+		INCLUDE_LARGE=true
+		;&
+	$((MEMORY >= 512)))
+		INCLUDE_XLARGE=true
 		;&
 	esac
 	log_verbose "automatic sets INCLUDE_MEDIUM=$INCLUDE_MEDIUM INCLUDE_LARGE=$INCLUDE_LARGE INCLUDE_SMALL=$INCLUDE_SMALL INCLUDE_XSMALL=$INCLUDE_XSMALL"
