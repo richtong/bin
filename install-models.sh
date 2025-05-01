@@ -722,57 +722,60 @@ if $AUTOMATIC_BY_MEMORY; then
 	# conditional arithmetic expressions return 1 if true and 0 if false
 	# shellcheck disable=SC2194
 	# the memory needs cascade down so start with the highest number first
-	case 1 in
-	$((MEMORY >= 8)))
+	# this case no longer works?
+	if ((MEMORY >= 8)); then
 		INCLUDE_XSMALL=true
-		;&
-	$((MEMORY >= 16)))
-		INCLUDE_SMALL=true
-		;&
-	$((MEMORY >= 32)))
-		INCLUDE_MEDIUM=true
-		;&
-	$((MEMORY >= 64)))
-		INCLUDE_LARGE=true
-		;&
-	$((MEMORY >= 512)))
-		INCLUDE_XLARGE=true
-		;&
-	esac
+		if ((MEMORY >= 16)); then
+			INCLUDE_SMALL=true
+			if ((MEMORY >= 32)); then
+				INCLUDE_MEDIUM=true
+				if ((MEMORY >= 64)); then
+					INCLUDE_LARGE=true
+					if ((MEMORY >= 512)); then
+						INCLUDE_XLARGE=true
+					fi
+				fi
+			fi
+		fi
+	fi
 	log_verbose "automatic sets INCLUDE_MEDIUM=$INCLUDE_MEDIUM INCLUDE_LARGE=$INCLUDE_LARGE INCLUDE_SMALL=$INCLUDE_SMALL INCLUDE_XSMALL=$INCLUDE_XSMALL"
 fi
 
+# tests are ordered so that the smallest models are added first to getopts
+# as many models as possible in
 MODEL_LIST=("${MODEL[@]}")
-if $INCLUDE_MEGA; then
-	log_verbose "Include extra large models"
-	MODEL_LIST+=("${MODEL_MEGA[@]}")
-	MODEL_MLX+=("${MODEL_MLX_MEGA[@]}")
-fi
-if $INCLUDE_XLARGE; then
-	log_verbose "Include extra large models"
-	MODEL_LIST+=("${MODEL_XLARGE[@]}")
-	MODEL_MLX+=("${MODEL_MLX_XLARGE[@]}")
-fi
-if $INCLUDE_LARGE; then
-	log_verbose "Include large models"
-	MODEL_LIST+=("${MODEL_LARGE[@]}")
-	MODEL_MLX+=("${MODEL_MLX_LARGE[@]}")
-fi
-if $INCLUDE_MEDIUM; then
-	log_verbose "Include medium models"
-	MODEL_LIST+=("${MODEL_MEDIUM[@]}")
-	MODEL_MLX+=("${MODEL_MLX_MEDIUM[@]}")
+if $INCLUDE_XSMALL; then
+	log_verbose "Include extra small models"
+	MODEL_LIST+=("${MODEL_XSMALL[@]}")
+	MODEL_MLX+=("${MODEL_MLX_XSMALL[@]}")
 fi
 if $INCLUDE_SMALL; then
 	log_verbose "Include small models"
 	MODEL_LIST+=("${MODEL_SMALL[@]}")
 	MODEL_MLX+=("${MODEL_MLX_SMALL[@]}")
 fi
-if $INCLUDE_XSMALL; then
-	log_verbose "Include extra small models"
-	MODEL_LIST+=("${MODEL_XSMALL[@]}")
-	MODEL_MLX+=("${MODEL_MLX_XSMALL[@]}")
+if $INCLUDE_MEDIUM; then
+	log_verbose "Include medium models"
+	MODEL_LIST+=("${MODEL_MEDIUM[@]}")
+	MODEL_MLX+=("${MODEL_MLX_MEDIUM[@]}")
 fi
+if $INCLUDE_LARGE; then
+	log_verbose "Include large models"
+	MODEL_LIST+=("${MODEL_LARGE[@]}")
+	MODEL_MLX+=("${MODEL_MLX_LARGE[@]}")
+fi
+if $INCLUDE_XLARGE; then
+	log_verbose "Include extra large models"
+	MODEL_LIST+=("${MODEL_XLARGE[@]}")
+	MODEL_MLX+=("${MODEL_MLX_XLARGE[@]}")
+fi
+if $INCLUDE_MEGA; then
+	log_verbose "Include extra large models"
+	MODEL_LIST+=("${MODEL_MEGA[@]}")
+	MODEL_MLX+=("${MODEL_MLX_MEGA[@]}")
+fi
+
+# now install speciality models
 if $INCLUDE_GGUF; then
 	log_verbose "Include HF GGUF models"
 	MODEL_LIST+=("${MODEL_GGUF[@]}")
