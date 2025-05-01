@@ -273,6 +273,49 @@ MODEL_VISION+=(
 	packeting/Qwen2.5-VL-32B-Instruct
 )
 
+# two new datasets how much memory does a model take and how much context do
+# they support. This uses fuzzy matching so you don't have to duplicate every
+# tag, it does long string matches
+declare -A MODEL_MEM+=(
+	["qwen3"]=5.2
+	["qwen3:0.6b"]=0.5
+	["qwen3:4b"]=2.6
+	["qwen3:8b"]=5.2
+	["qwen3:14b"]=9.3
+	["qwen3:30b"]=19
+	["qwen3:32b"]=20
+	["qwen3:235b"]=142
+	["granite3.3"]=4.9
+	["granite3.3:2b"]=1.5
+	["granite3.3:8b"]=4.9
+	["deepcoder"]=9
+	["deepcoder:14b"]=9
+	["deepcoder:1.5b"]=1.1
+	["mistral-small3.1"]=15
+	["mistral-small3.1:24b"]=15
+	["cogito"]=4.9
+	["cogito:8b"]=4.9
+	["cogito:4b"]=2.2
+	["cogito:14b"]=9
+	["cogito:32b"]=20
+	["cogito:70b"]=43
+	["exaone-deep"]=4.8
+	["exaone-deep:7.8b"]=4.8
+	["exaone-deep:2.4b"]=1.6
+	["exaone-deep:32b"]=19
+
+)
+
+# the context length maximum of models in 000s tokens
+declare -A MODEL_CONTEXT+=(
+	["qwen3"]=40
+	["granite3.3"]=128
+	["deepcoder"]=128
+	["cogito"]=128
+	["exaone-deep"]=32
+
+)
+
 # These are kept in most recent first from https://ollama.com/search?o=newest
 # These models fit in 64GB and are less than 30B parameters
 # https://github.com/ggerganov/llama.cpp/discussions/2094
@@ -312,13 +355,6 @@ MODEL+=(
 	llama-guard3:1b-q8_0                 # safety of prompts
 	llama3.2:1b                          # Meta 1B 128K context
 	llama3.2:1b-instruct-q8_0            # Meta 1B 128K context
-	qwen2.5-coder:0.5b                   # 128K Tuned for coding 7B
-	qwen2.5-coder:0.5b-instruct          # 128K Tuned for coding 7B
-	qwen2.5-coder:0.5b-instruct-q8_0     # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b                   # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b-instruct          # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b-instruct          # 128K Tuned for coding 7B
-	qwen2.5-coder:1.5b-instruct-q4_K_M   # 128K Tuned for coding 7B
 
 )
 
@@ -474,97 +510,15 @@ MODEL_MEGA+=(
 	deepseek-r1                     # 641B
 )
 
-# legacy models for comparison with modern ones
-MODEL_OLD+=(
-
-	qwq                                    # like o1
-	qwq:latest                             # like o1
-	qwq:32b                                # Alibaba advanced reasoning
-	qwq:32b-q4_K_M                         # this is the standard not the preview model
-	dolphin3                               # llama3.1 8B tuned
-	dolphin3:latest                        # no tool calling
-	dolphin3:8b                            # llama3.1 8B tuned
-	dolphin3:8b-llama3.1-q4_K_M            # llama3.1 8B tuned
-	mistral-small                          # this is now the 2503 model
-	mistral-small:latest                   # now the 2501 model
-	mistral-small:24b-instruct-2501-q4_K_M # the latest model
-	r1-1776
-	r1-1776                           # perplexity r1 model on latest data
-	r1-1776:latest                    # perplexity r1 model on latest data
-	r1-1776:70b-distill-llama-q4_K_M  # perplexity r1 model on latest data
-	r1-1776:70b                       # perplexity r1 model on latest data
-	smollm2                           # open source
-	smollm2:latest                    # open source
-	smollm2:135m-instruct-q4_K_M      # 135m is small
-	smollm2:1.7b                      # large is smarll
-	smollm2:1.7b-instruct-q4_K_M      # large is smarll
-	granite3-guardian                 # IBM prompt risk
-	granite3-guardian:latest          # IBM prompt risk
-	granite3-guardian:8b              #  prompt guard
-	granite3-guardian:8b-q5_K_M       #  prompt guard ibm
-	shieldgemma                       # google safety policies
-	shieldgemma:latest                # google safety policies
-	shieldgemma:9b                    # safety of text prompts
-	shieldgemma:9b-q4_K_M             # safety of text prompts
-	smallthinker:3b                   # long sequence encourage CoT
-	smallthinker:3b-preview-q8_0      # open dataset
-	smallthinker                      # Fine tuned Qwen2.5-b-instruct
-	smallthinker:latest               # qwq used to generate 8K synthetic
-	marco-o1                          # Alibab open large reasoning
-	marco-o1:latest                   # Alibab open large reasoning
-	marco-o1:7b                       # 7b
-	marco-o1:7b-q4_K_M                # q4_K_M
-	opencoder                         # completely open source
-	opencoder:latest                  # completely open source
-	opencoder:1.5b                    #  english and chinse
-	opencoder:1.5b-instruct-q4_K_M    #  english and chinse
-	qwq:32b-preview-q4_K_M            # Alibaba advanced reasoning
-	qwen2.5:0.5b                      # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:1.5b                      # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:3b                        # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:3b-instruct-q4_K_M        # 128K context Alibaba 2024-09-16 7b
-	qwen2.5                           # the larger Alibab models
-	qwen2.5:latest                    # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:7b                        # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:14b                       # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:32b                       # 128K context Alibaba 2024-09-16 7b
-	qwen2.5:72b                       # 128K context Alibaba 2024-09-16 7b
-	qwen2.5-coder:14b                 # 128K Tuned for coding 7B
-	qwen2.5-coder:14b-instruct-q4_K_M # 128K Tuned for coding 7B
-	qwen2.5-coder:32b                 # 128K Tuned for coding 7B
-	qwen2.5-coder:32b-instruct-q4_K_M # 128K Tuned for coding 7B
-	falcon3:10b                       # 7B parameters
-	falcon3:10b-instruct-q4_K_M       # 7B parameters
-	phi3                              # the original
-	phi3.5                            # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:latest                     # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b                       # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	phi3.5:3.8b-mini-instruct-q4_0    # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
-	# early 2024 models
-	llama2:7b                # original llama2
-	llama2:13b               # 13b
-	gemma2                   # Google 9B Q4 5.4GB 8K context
-	gemma2:latest            # Google 9B Q4 5.4GB 8K context
-	gemma2:9b                # Google 9B Q4 5.4GB 8K context
-	gemma2:9b-instruct-q4_0  # Google 9B Q4 5.4GB 8K context
-	gemma2:2b                # Google 9B Q4 5.4GB 8K context
-	gemma2:2b-instruct-q4_0  # Google 9B Q4 5.4GB 8K context
-	gemma2:27b               # old but only Google model
-	gemma2:27b-instruct-q4_0 # old but only Google model
-	orca-mini:3b             # Microsoft Research
-	falcon:7b                # abu dahbi TII
-	mistral:7b               # v0.3 of original Mistral
-	starcoder:1b             # another fined tuned model
-	yi:6b                    # yi 1.5
-	deepseek-coder:6.7b      # first deepseek
-	orca2:7b                 # Microsoft
-	phi:2.7b                 # phi-2
-	qwen:7b                  ## Qwen 1.5
-	minicpm-v:8b
-)
-
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
+	qwq:32b-q4_K_M              # this is the standard not the preview model
+	dolphin3                    # llama3.1 8B tuned
+	dolphin3:latest             # no tool calling
+	dolphin3:8b                 # llama3.1 8B tuned
+	dolphin3:8b-llama3.1-q4_K_M # llama3.1 8B tuned
+	qwq                         # like o1
+	qwq:latest                  # like o1
 	# GGUF models are too big
 	granite3.2 # 2b vision model
 	granite3.2:latest
@@ -705,10 +659,98 @@ MODEL_REMOVE+=(
 	command-r-plus:104b-q2_K # 39GB Q2 with 128K context for enterprise
 	command-r:35b            # 128K context 35b 19GB
 	mixtral
-	bge-large                   # embedding model from BAAI
-	bge-large:335m              # embedding model from BAA
-	bge-large:335m-en-v1.5-fp16 # embedding model from BAA
+	bge-large                              # embedding model from BAAI
+	bge-large:335m                         # embedding model from BAA
+	bge-large:335m-en-v1.5-fp16            # embedding model from BAA
+	mistral-small                          # this is now the 2503 model
+	mistral-small:latest                   # now the 2501 model
+	mistral-small:24b-instruct-2501-q4_K_M # the latest model
+	r1-1776
+	r1-1776                            # perplexity r1 model on latest data
+	r1-1776:latest                     # perplexity r1 model on latest data
+	r1-1776:70b-distill-llama-q4_K_M   # perplexity r1 model on latest data
+	r1-1776:70b                        # perplexity r1 model on latest data
+	smollm2                            # open source
+	smollm2:latest                     # open source
+	smollm2:135m-instruct-q4_K_M       # 135m is small
+	smollm2:1.7b                       # large is smarll
+	smollm2:1.7b-instruct-q4_K_M       # large is smarll
+	granite3-guardian                  # IBM prompt risk
+	granite3-guardian:latest           # IBM prompt risk
+	granite3-guardian:8b               #  prompt guard
+	granite3-guardian:8b-q5_K_M        #  prompt guard ibm
+	shieldgemma                        # google safety policies
+	shieldgemma:latest                 # google safety policies
+	shieldgemma:9b                     # safety of text prompts
+	shieldgemma:9b-q4_K_M              # safety of text prompts
+	smallthinker:3b                    # long sequence encourage CoT
+	smallthinker:3b-preview-q8_0       # open dataset
+	smallthinker                       # Fine tuned Qwen2.5-b-instruct
+	smallthinker:latest                # qwq used to generate 8K synthetic
+	marco-o1                           # Alibab open large reasoning
+	marco-o1:latest                    # Alibab open large reasoning
+	marco-o1:7b                        # 7b
+	marco-o1:7b-q4_K_M                 # q4_K_M
+	opencoder                          # completely open source
+	opencoder:latest                   # completely open source
+	opencoder:1.5b                     #  english and chinse
+	opencoder:1.5b-instruct-q4_K_M     #  english and chinse
+	qwq:32b-preview-q4_K_M             # Alibaba advanced reasoning
+	qwen2.5-coder:0.5b                 # 128K Tuned for coding 7B
+	qwen2.5-coder:0.5b-instruct        # 128K Tuned for coding 7B
+	qwen2.5-coder:0.5b-instruct-q8_0   # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b                 # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct        # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct        # 128K Tuned for coding 7B
+	qwen2.5-coder:1.5b-instruct-q4_K_M # 128K Tuned for coding 7B
+	qwen2.5:0.5b                       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:1.5b                       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b                         # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:3b-instruct-q4_K_M         # 128K context Alibaba 2024-09-16 7b
+	qwen2.5                            # the larger Alibab models
+	qwen2.5:latest                     # 128K context Alibaba 2024-09-16 7b
+	qwen2.5-coder:14b-instruct-q4_K_M  # 128K Tuned for coding 7B
+	qwen2.5-coder:32b-instruct-q4_K_M  # 128K Tuned for coding 7B
+	falcon3:10b-instruct-q4_K_M        # 7B parameters
+	phi3.5:3.8b-mini-instruct-q4_0     # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	gemma2:9b-instruct-q4_0            # Google 9B Q4 5.4GB 8K context
+	gemma2:2b                          # Google 9B Q4 5.4GB 8K context
+	gemma2:2b-instruct-q4_0            # Google 9B Q4 5.4GB 8K context
+	gemma2                             # Google 9B Q4 5.4GB 8K context
+	gemma2:latest                      # Google 9B Q4 5.4GB 8K context
+	phi3.5                             # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	phi3.5:latest                      # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	gemma2:27b-instruct-q4_0           # old but only Google model
+	qwen2.5:7b                         # 128K context Alibaba 2024-09-16 7b
+)
 
+# legacy models for comparison with modern ones
+MODEL_OLD+=(
+	qwq:32b # Alibaba advanced reasoning
+	mistral-small:24b
+	qwen2.5:14b       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:32b       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5:72b       # 128K context Alibaba 2024-09-16 7b
+	qwen2.5-coder:14b # 128K Tuned for coding 7B
+	qwen2.5-coder:32b # 128K Tuned for coding 7B
+	falcon3:10b       # 7B parameters
+	phi3              # the original
+	phi3.5:3.8b       # Microsoft 3.8B-instruct-q4_0 beaten by llama3.2?
+	# early 2024 models
+	llama2:7b           # original llama2
+	llama2:13b          # 13b
+	gemma2:9b           # Google 9B Q4 5.4GB 8K context
+	gemma2:27b          # old but only Google model
+	orca-mini:3b        # Microsoft Research
+	falcon:7b           # abu dahbi TII
+	mistral:7b          # v0.3 of original Mistral
+	starcoder:1b        # another fined tuned model
+	yi:6b               # yi 1.5
+	deepseek-coder:6.7b # first deepseek
+	orca2:7b            # Microsoft
+	phi:2.7b            # phi-2
+	qwen:7b             ## Qwen 1.5
+	minicpm-v:8b
 )
 
 if $AUTOMATIC_BY_MEMORY; then
