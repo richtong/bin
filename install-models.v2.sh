@@ -273,36 +273,40 @@ MODEL_VISION+=(
 	packeting/Qwen2.5-VL-32B-Instruct
 )
 
+MODEL_REASONING+=(
+	qwen:14b
+	qwen3:32b
+	qwen3:70b
+	deepseek-r1:14b
+	deepseek-r1:32b
+	deepseek-r1:70b
+)
+
 # two new datasets how much memory does a model take and how much context do
 # they support. This uses fuzzy matching so you don't have to duplicate every
 # tag, it does long string matches
 declare -A MODEL_MEM+=(
-	["qwen3"]=5.2
-	["qwen3:0.6b"]=0.5
-	["qwen3:4b"]=2.6
-	["qwen3:8b"]=5.2
-	["qwen3:14b"]=9.3
-	["qwen3:30b"]=19
-	["qwen3:32b"]=20
-	["qwen3:235b"]=142
-	["granite3.3"]=4.9
+	["qwen3:0.6b-q4_K_M"]=0.5
+	["qwen3:1.7b-q4_K_M"]=1.4
+	["qwen3:b-q4_K_M"]=2.6
+	["qwen3:b-q4_K_M"]=5.2
+	["qwen3:1b-q4_K_M"]=9.3
+	["qwen3:3b-q4_K_M"]=19
+	["qwen3:3b-q4_K_M"]=20
+	["qwen3:23b-q4_K_M"]=142
 	["granite3.3:2b"]=1.5
 	["granite3.3:8b"]=4.9
-	["deepcoder"]=9
-	["deepcoder:14b"]=9
-	["deepcoder:1.5b"]=1.1
-	["mistral-small3.1"]=15
-	["mistral-small3.1:24b"]=15
-	["cogito"]=4.9
-	["cogito:8b"]=4.9
-	["cogito:4b"]=2.2
-	["cogito:14b"]=9
-	["cogito:32b"]=20
-	["cogito:70b"]=43
-	["exaone-deep"]=4.8
-	["exaone-deep:7.8b"]=4.8
-	["exaone-deep:2.4b"]=1.6
-	["exaone-deep:32b"]=19
+	["deepcoder:14b-preview-q4_K_M"]=9
+	["deepcoder:1.b-preview-q4_K_M"]=1.1
+	["mistral-small3.1:24b-instruct-2503-q4_K_M"]=15
+	["cogito:3b-v1-preview-llama-q4_K_M"]=2.2
+	["cogito:8b-v1-preview-llama-q4_K_M"]=4.9
+	["cogito:14b-v1-preview-qwen-q4_K_M"]=9
+	["cogito:32b-v1-preview-qwen-q4_K_M"]=20
+	["cogito:b-v1-preview-llama-q4_K_M"]=43
+	["exaone-deep:2.4b-q4_K_M"]=1.6
+	["exaone-deep:7.8b-q4_K_M"]=4.8
+	["exaone-deep:32b-q4_K_M"]=19
 
 )
 
@@ -313,6 +317,7 @@ declare -A MODEL_CONTEXT+=(
 	["deepcoder"]=128
 	["cogito"]=128
 	["exaone-deep"]=32
+	["phi4-reasoning:14b-plus-q4_K_M"]=32
 
 )
 
@@ -332,158 +337,78 @@ declare -A MODEL_CONTEXT+=(
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 log_verbose "Minimal Base <=2B models for machines that <=4GB GPU Memory"
 MODEL+=(
-	deepcoder:1.5b                # Agentica and Together AI
 	deepcoder:1.5b-preview-q4_K_M # fine tuned deepseek-r1-distilled
-	gemma3:1b
 	gemma3:1b-it-fp16
 	granite3.3:2b # reasoning model messages += []{role: control, content: thinking}]
-	granite3.2-vision
-	granite3.2-vision:latest
-	granite3.2-vision:2b
 	granite3.2-vision:2b-4_K_M
-	deepscaler        # fintuned deepseek-r1-distilled-qwen beats 01-previe
-	deepscaler:latest # 8K synthetic
-	deepscaler:1.5b
 	deepscaler:1.5b-preview-fp16
-	deepseek-r1:1.5b                     # small model
 	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
-	granite3-guardian:2b                 #  prompt guard ibm
 	granite3-guardian:2b-q8_0            #  prompt guard ibm
-	shieldgemma:2b                       # safety of text prompts
 	shieldgemma:2b-q4_K_M                # safety of text prompts
-	llama-guard3:1b                      # safety of prompts
 	llama-guard3:1b-q8_0                 # safety of prompts
-	llama3.2:1b                          # Meta 1B 128K context
 	llama3.2:1b-instruct-q8_0            # Meta 1B 128K context
 
 )
 
 log_verbose "loading all models >2B and <=4B parameters, requires >=8GB of RAM"
 MODEL_XSMALL+=(
-	qwen3:0.6b
 	qwen3:0.6b-q4_K_M
-	qwen3:1.7b
 	qwen3:1.7b-q4_K_M
-	cogito:3b # Deep Cogito tool too
-	cogito
-	exaone-deep:2.4b # LG AI
+	cogito:3b-v1-preview-llama-q4_K_M # Deep Cogito tool too
 	exaone-deep:2.4b-q4_K_M
-	gemma3 # vision model
-	gemma3:latest
-	gemma3:4b
-	gemma3:b-it-q4_K_M
-	phi4-mini      # latest from Microsoft
-	phi4-mini:3.8b # tool calling
+	gemma3:4b-it-q4_K_M
 	phi4-mini:3.8b-q4_K_M
-	llama3.2                    # Meta 3.2-3B Q4 128 context
-	llama3.2:latest             # Meta 3.2-3B Q4 128 context
-	llama3.2:3b                 # Meta 3.2-3B Q4 128 context 2GB
 	llama3.2:3b-instruct-q4_K_M # Meta 3.2-3B Q4 128 context 2GB
 )
 
 log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
 MODEL_SMALL+=(
-	qwen3:4b
 	qwen3:4b-q4_K_M
-	qwen3
-	qwen3:8b
 	qwen3:8b-q4_K_M
-	cogito           # set to reasoning with /set system ""Enable deep thinking subroutine."""
-	cogito:8b        # trained with Iterated Distillation and Amplification
-	cogito:latest    # 128K context, 30 lanugages
-	exaone-deep:7.8b # LG AI
+	cogito:8b-v1-preview-llama-q4_K_M # trained with Iterated Distillation and Amplification
 	exaone-deep:7.8b-q4_K_M
-	granite3.3 # thinking with message += [{ role: control, content: thinking}]
-	granite3.3:latest
 	granite3.3:8b
-	openthinker        # resaonsing models based on deepseek-r1
-	openthinker:latest # not tool calling
-	openthinker:7b
 	openthinker:7b-q4_K_M
-	deepseek-r1:latest                  # 7b reasoning model
-	deepseek-r1:7b                      # not tool calling
 	deepseek-r1:7b-qwen-distill-q4_K_M  # competitive to o1
-	deepseek-r1:8b                      # llama distilled 8b
 	deepseek-r1:8b-llama-distill-q4_K_M # q8b
-	opencoder:8b                        # reproducible
 	opencoder:8b-instruct-q4_K_M        # reproducible
-	tulu3                               # AI2 instruction following
-	tulu3:latest                        # full open source data, code, recipes
-	tulu3:8b                            # 128 K content has 70B brother
 	tulu3:8b-q4_K_M                     # standard quantization
-	llama-guard3                        # safety classification
-	llama-guard3:latest                 # safety classification
-	llama-guard3:8b                     # safety of prompts
 	llama-guard3:8b-q4_K_M              # safety of prompts
-	bespoke-minicheck                   # Fact check 7B q4_K_M UT Austin
-	bespoke-minicheck:latest            # Fact check 7B q4_K_M
-	bespoke-minicheck:7b                # Fact check 7B q4_K_M
 	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
 
 )
 #
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
-	qwen3:14b
+	phi4-reasoning:14b-q4_K_M
 	qwen3:14b-q4_K_M
-	qwen3:30b
 	qwen3:30b-q4_K_M
-	qwen3:32b
 	qwen3:32b-q4_K_M
 	lsm03624/GLM-Z1-32B-0414-Q4_K_M # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
 	# sammcj/glm-4-32b-0414:qGLM6_k      # GLM-4 32K context chat tuned
 	JollyLlama/GLM-4-32B-0414-Q4_K_M # GLM-4 32K Q4
-	deepcoder                        #  Together AI and Agentica
-	deepcoder:latest                 # finetuned deepseek-r1-distilled-qwen
-	deepcoder:14b
 	deepcoder:14b-instruct-q4_K_M
-	mistral-small3.1        # tool and vision 128Kb
-	mistral-small3.1:latest # claims beats gemma3
-	mistral-small3.1:24b    # can run on 32GB Mac
 	mistral-small3.1:24b-instruct-q4_K_M
-	cogito:14b                        # Deep Cogito tool too
 	cogito:14b-v1-preview-qwen-q4_K-M # finetuned qwen
-	cogito:32b                        # Deep Cogito tool too
 	cogito:32b-v1-preview-qwen-q4_K-M # finetuned qwen
-	exaone-deep:32b                   # LG AI
 	exaone-deep:32b-q4_K_M
-	gemma3:12b                          # 12B
 	gemma3:12b-it-q4_K_M                # 12B
-	gemma3:27b                          # 27B
 	gemma3:27b-it-q4_K_M                # 12B
-	openthinker:32b                     # dereict from deepseek-r1
 	openthinker:32b-q4_K_M              # fine tuned on openthoughts 114k dataset
-	deepseek-r1:14b                     # r1 comparable
 	deepseek-r1:14b-qwen-distill-q4_K_M # r1 comparable
-	deepseek-r1:32b                     # r1 comparable
 	deepseek-r1:32b-qwen-distill-q4_K_M # r1 comparable
-	olmo2:13b                           # AI2 fully open no tools
 	olmo2:13b-1124-instruct-q4_K_M      # compets with llama 3.1
-	phi4                                # Microsoft Jan 7 2025
-	phi4:latest                         # synthetic, filtered 9.1GB
-	phi4:14b                            # 16K context length only
 	phi4:14b-q4_K_M                     # no tool calling
-	llama3.2-vision                     # should run in open-webui
-	llama3.2-vision:latest              # should run in open-webui
-	llama3.2-vision:11b                 # vision works now
 	llama3.2-vision:11b-instruct-q4_K_M # vision works now
-
 )
 
 log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
 	packeting/Qwen2.5-VL-32B-Instruct    # this is a q8 model so won't fit in 32GB
-	cogito:70b                           # 128K context
 	cogito:70b:v1-preview-llama-q4_K-M   # finetuned llama
-	deepseek-r1:70b                      # disitlled lllama
 	deepseek-r1:70b-llama-distill-q4_K_M # llama based
-	tulu3:70b                            # tulu3 is not much better than llama3 and takes speace
 	tulu3:70b-q4_K_M                     # AI2 instruction following
-	llama3.3                             # same perforamnce as llama 3.1 405B
-	llama3.3:latest                      # 128K context
-	llama3.3:70b                         # 128K context
 	llama3.3:70b-instruct-q4_K_M         # 128K context
-	llama3.2-vision:90b                  # vision works now
 	llama3.2-vision:90b-instruct-q4_K_M  # vision works now
 )
 
@@ -493,25 +418,57 @@ MODEL_XLARGE+=(
 	aravhawk/llama4:109b         # 17b x 16 experts
 	aravhawk/llama4:scout-q4_K_M # 10M token context
 	aravhawk/llama4:latest
-	command-a                       # 111b parameters
-	command-a:latest                # tools
-	command-a:111b                  # open weights 23 languages
-	command-a:111b-03-2025-q4_K_M   # 256K token context
-	aravhawk/llama4:400b            # llama 4 scout
-	aravhawk/llama4:maverick-q4_K_M # 1M context
+	command-a:111b-03-2025-q4_K_M # 256K token context
+	aravhawk/llama4:400b          # llama 4 scout
+	aravhawk/llama4:scout-q4_K_M  # 1M context
 )
 
 log_verbose "Megalarge models over 400B parameters requires >=256GB"
 MODEL_MEGA+=(
-	qwen3:235b
 	qwen3:235b-q4_K_M
 	aravhawk/llama4:400b            # llama 4 scout
 	aravhawk/llama4:maverick-q4_K_M # 1M context
-	deepseek-r1                     # 641B
+	deepseek-r1:671b-q4_K_M         # 641B
 )
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
+
+	deepcoder        #  Together AI and Agentica
+	deepcoder:latest # finetuned deepseek-r1-distilled-qwen
+	deepcoder:14b
+	mistral-small3.1        # tool and vision 128Kb
+	mistral-small3.1:latest # claims beats gemma3
+	mistral-small3.1:24b    # can run on 32GB Mac
+	cogito:14b              # Deep Cogito tool too
+	cogito:32b              # Deep Cogito tool too
+	exaone-deep:32b         # LG AI
+	gemma3:12b              # 12B
+	gemma3:27b              # 27B
+	openthinker:32b         # dereict from deepseek-r1
+	deepseek-r1:14b         # r1 comparable
+	deepseek-r1:32b         # r1 comparable
+	olmo2:13b               # AI2 fully open no tools
+	phi4                    # Microsoft Jan 7 2025
+	phi4:latest             # synthetic, filtered 9.1GB
+	phi4:14b                # 16K context length only
+	llama3.2-vision         # should run in open-webui
+	llama3.2-vision:latest  # should run in open-webui
+	llama3.2-vision:11b     # vision works now
+	tulu3:70b               # tulu3 is not much better than llama3 and takes speace
+	deepseek-r1:70b         # disitlled lllama
+	llama3.3                # same perforamnce as llama 3.1 405B
+	llama3.3:latest         # 128K context
+	llama3.3:70b            # 128K context
+	llama3.2-vision:90b     # vision works now
+	cogito:70b              # 128K context
+	command-a               # 111b parameters
+	command-a:latest        # tools
+	command-a:111b          # open weights 23 languages
+	qwen3:235b
+	qwen3:14b
+	qwen3:30b
+	qwen3:32b
 	qwq:32b-q4_K_M              # this is the standard not the preview model
 	dolphin3                    # llama3.1 8B tuned
 	dolphin3:latest             # no tool calling
@@ -853,12 +810,20 @@ ollama_action() {
 				continue
 			fi
 		elif [[ $action == pull ]]; then
+			log_verbose "pull: is there enough disk"
 			DISK_USED="$(util_disk_used)"
 			log_verbose "ollama_action: FORCE=$FORCE action=$action DISK_USED=$DISK_USED DISK_MAX=$DISK_MAX"
 			if $DRYRUN || [[ $action == pull ]] && ((DISK_USED > DISK_MAX)) && ! $FORCE; then
 				log_verbose "dry run or cannot pull $model $DISK_USED% used at most $DISK_MAX% allowed"
 				continue
 			fi
+			log_verbose "pull: will the model and desired content fit into memory"
+			MEMORY="${MEMORY:-$(util_gpu_memory)}"
+			log_verbose "MEMORY=$MEMORY"
+			MEMORY_FIXED="${MEMORY_FIXED:-0.2}"
+			MEMORY_AVAILABLE=$((MEMORY * (1 - MEMORY_FIXED)))
+			log_verbose "Looking for $model in the MODEL_MEM table"
+
 		fi
 		if ! ollama "$action" "$model"; then
 			log_warning "failed $?"
