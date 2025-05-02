@@ -6,7 +6,7 @@
 ## https://www.digitaltrends.com/computing/how-to-run-stable-diffusion-on-your-mac/
 #
 ## ##@author Rich Tong
-##@returns 0 on success
+##@redturns 0 on success
 #
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
@@ -191,13 +191,10 @@ MODEL_MLX_XSMALL+=(
 
 # <=8
 MODEL_MLX_SMALL+=(
-
 )
-
 # <=32B
 MODEL_MLX_MEDIUM+=(
 	mlx-community/Qwen3-30B-A3B-mixed-3-4bit
-
 )
 # <=90B
 MODEL_MLX_LARGE+=(
@@ -206,7 +203,6 @@ MODEL_MLX_XLARGE+=(
 )
 MODEL_MLX_MEGA+=(
 )
-
 MODEL_MLX_REMOVE+=(
 	mlx-community/DeepSeek-R1-Distill-Qwen-7B-4bit
 	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit
@@ -232,7 +228,6 @@ MODEL_MLX_REMOVE+=(
 	mlx-community/gemma-3-4b-pt-4bit
 	mlx-community/perplexity-ai-r1-1776-4bit # do not if it will fit
 	mlx-community/plamo-2-8b-4bit            # PLaMO-13B Open source Japanese from PFN
-
 )
 
 # https://huggingface.co/models?library=gguf&sort=trending
@@ -240,13 +235,12 @@ MODEL_MLX_REMOVE+=(
 MODEL_GGUF+=(
 	unsloth/Qwen3-30B-A3B-128K-GGUF
 )
-
 # these models do not load in ollama for some reason, maybe they are sharded
 MODEL_GGUF_REMOVE+=(
 	hf.co/lmstudio-community/Qwen2-VL-7B-Instruct-GGUF
+	hf.co/lmstudio-community/Qwen2-VL-7B-Instruct-GGUF:latest
 	hf.co/HYEONii/Qwen2-VL-7B-Q4_K_M-GGUF:Q4_K_M
 	hf.co/lmstudio-community/olmOCR-7B-0225-preview-GGUF:Q4_K_M
-
 )
 
 # Tool using models https://ollama.com/search?c=tools&o=newest
@@ -336,8 +330,8 @@ MODEL_MEDIUM+=(
 	qwen3:14b-q4_K_M
 	qwen3:30b-q4_K_M
 	qwen3:32b-q4_K_M
-	lsm03624/GLM-Z1-32B-0414-Q4_K_M  # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
-	JollyLlama/GLM-4-32B-0414-Q4_K_M # GLM-4 32K Q4
+	lsm03624/GLM-Z1-32B-0414-Q4_K_M   # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
+	rhundt/GLM-4-0414-32b-128k-Q4_K_M # Rope scaling 4x or 32K base
 	deepcoder:14b-instruct-q4_K_M
 	cogito:32b-v1-preview-qwen-q4_K-M # finetuned qwen
 	exaone-deep:32b-q4_K_M
@@ -354,7 +348,6 @@ MODEL_MEDIUM+=(
 
 log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
-	# packeting/Qwen2.5-VL-32B-Instruct    # this is a q8 model so won't fit in 32GB
 	cogito:70b:v1-preview-llama-q4_K-M   # finetuned llama
 	deepseek-r1:70b-llama-distill-q4_K_M # llama based
 	tulu3:70b-q4_K_M                     # AI2 instruction following
@@ -377,11 +370,11 @@ MODEL_MEGA+=(
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
-
-	deepseek-r1:latest # 7b reasoning model
-	deepseek-r1:7b     # not tool calling
-	deepseek-r1:8b     # llama distilled 8b
-	opencoder:8b       # reproducible
+	JollyLlama/GLM-4-32B-0414-Q4_K_M # GLM-4 32K Q4
+	deepseek-r1:latest               # 7b reasoning model
+	deepseek-r1:7b                   # not tool calling
+	deepseek-r1:8b                   # llama distilled 8b
+	opencoder:8b                     # reproducible
 	packeting/Qwen2.5-VL-32B-Instruct:latest
 	deepseek-r1:32b
 	opencoder:8b
@@ -395,17 +388,18 @@ MODEL_REMOVE+=(
 	gemma3:4b
 	exaone-deep:2.4b
 	cogito:3b
-	Drews54/llama3.2-vision-abliterated:latest ec34e9f37dbd 13 GB 3 weeks ago
-	bge-large:latest b3d71c928059 670 MB 8 weeks ago aravhawk/llama4:400b # llama 4 scout
-	aravhawk/llama4:maverick-q4_K_M                                       # 1M context
-	aravhawk/llama4:400b                                                  # llama 4 scout
-	aravhawk/llama4:maverick-q4_K_M                                       # 1M context
-	aravhawk/llama4:109b                                                  # 17b x 16 experts
-	aravhawk/llama4:scout-q4_K_M                                          # 10M token context
-	granite3-guardian:2b                                                  #  prompt guard ibm
-	deepseek-r1:1.5b                                                      # small model
-	shieldgemma:2b                                                        # safety of text prompts
-	llama-guard3:1b                                                       # safety of prompts
+	Drews54/llama3.2-vision-abliterated:latest
+	bge-large:latest b3d71c928059
+	aravhawk/llama4:400b            # llama 4 scout
+	aravhawk/llama4:maverick-q4_K_M # 1M context
+	aravhawk/llama4:400b            # llama 4 scout
+	aravhawk/llama4:maverick-q4_K_M # 1M context
+	aravhawk/llama4:109b            # 17b x 16 experts
+	aravhawk/llama4:scout-q4_K_M    # 10M token context
+	granite3-guardian:2b            #  prompt guard ibm
+	deepseek-r1:1.5b                # small model
+	shieldgemma:2b                  # safety of text prompts
+	llama-guard3:1b                 # safety of prompts
 	granite3.2-vision
 	granite3.2-vision:latest
 	granite3.2-vision:2b
@@ -754,8 +748,11 @@ if $AUTOMATIC_BY_MEMORY; then
 				INCLUDE_MEDIUM=true
 				if ((MEMORY >= 64)); then
 					INCLUDE_LARGE=true
-					if ((MEMORY >= 512)); then
+					if ((MEMORY >= 128)); then
 						INCLUDE_XLARGE=true
+						if ((MEMORY >= 256)); then
+							INCLUDE_MEGA=true
+						fi
 					fi
 				fi
 			fi
