@@ -6,7 +6,7 @@
 ## https://www.digitaltrends.com/computing/how-to-run-stable-diffusion-on-your-mac/
 #
 ## ##@author Rich Tong
-##@returns 0 on success
+##@redturns 0 on success
 #
 set -ueo pipefail && SCRIPTNAME="$(basename "${BASH_SOURCE[0]}")"
 SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
@@ -53,8 +53,8 @@ flags:
 	-d $(! $DEBUGGING || echo "no ")debugging
 
 	speciality models:
-	-g $(! $INCLUDE_GGUF || echo "do not ")pull huggingface models GGUF for Ollama
-	-l $(! $INCLUDE_MLX || echo "do not ")pull huggingface models GGUF for Ollama
+	-g $(! $INCLUDE_GGUF || echo "do not ")pull huggingface models GGUF for llama.cpp
+	-l $(! $INCLUDE_MLX || echo "do not ")pull huggingface models MLX for mlx.server
 	-t $(! $INCLUDE_TOOL || echo "do not ")pull Tool using models for ollama
 	-s $(! $INCLUDE_VISION || echo "do not ")pull Vision models for ollama
 
@@ -176,6 +176,20 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 # now sorted by date added from ollama as of 11-15-24
 
 # these are pre llama3.2 and subject to deprecation
+
+# https://huggingface.co/mlx-community?message=You%27ve%20joined%20MLX%20Community!
+# https://huggingface.co/models?library=mlx&sort=trending
+# <=2B
+MODEL_MLX+=(
+
+)
+
+# <=4B
+MODEL_MLX_XSMALL+=(
+
+)
+
+# <=8
 MODEL_MLX_SMALL+=(
 )
 # <=32B
@@ -229,181 +243,29 @@ MODEL_GGUF_REMOVE+=(
 	hf.co/lmstudio-community/olmOCR-7B-0225-preview-GGUF:Q4_K_M
 )
 
-MODEL_VISION+=(
-	mistral-small3.1:24b-instruct-2503-q4_K_M
-	gemma3:27b-it-q4_K_M
-	gemma3:12b-it-q4_K_M
-	granite3.2-vision:2b-q4_K_M
-	llama3.2-vision:11b-instruct-q4_K_M # vision works now
-	llama3.2-vision:90b-instruct-q4_K_M # vision works now
-)
-
 # Tool using models https://ollama.com/search?c=tools&o=newest
 MODEL_TOOL+=(
-	qwen3:0.6b-q4_K_M
-	qwen3:1.7b-q4_K_M
-	qwen3:1b-q4_K_M
-	qwen3:235b-q4_K_M
-	qwen3:30b-q4_K_M
-	qwen3:32b-q4_K_M
-	qwen3:3b-q4_K_M
-	qwen3:4b-q4_K_M
-	qwen3:8b-q4_K_M
-	granite3.3:2b
+	qwen3:8b
 	granite3.3:8b
-	mistral-small3.1:24b-instruct-2503-q4_K_M
-	cogito:14b-v1-preview-qwen-q4_K_M
-	cogito:32b-v1-preview-qwen-q4_K_M
-	cogito:3b-v1-preview-llama-q4_K_M
-	cogito:8b-v1-preview-llama-q4_K_M
-	cogito:70b-v1-preview-llama-q4_K_M
-	llama4:17b-maverick-128e-instruct-q4_K_M
-	llama4:17b-scout-16e-instruct-q4_K_M
-	command-a:111b-03-2025-q4_K_M
-	phi4-mini:3.8b-q4_K_M
-	llama3.3:70b-instruct-q4_K_M
+	cogito:8b
+	mistral-small3.1:24b
+	command-a:111b
+	granite3.2-vision:2b
+	phi4-mini:3.8b
+	command-r7b:7b # command-r7b is the default
+	llama3.3:70b
+	qwq:32b
+	athene-v2:72b
 )
 
-MODEL_REASONING+=(
-	qwen3:0.6b-q4_K_M
-	qwen3:1.7b-q4_K_M
-	qwen3:1b-q4_K_M
-	qwen3:235b-q4_K_M
-	qwen3:30b-q4_K_M
-	qwen3:32b-q4_K_M
-	qwen3:3b-q4_K_M
-	qwen3:4b-q4_K_M
-	qwen3:8b-q4_K_M
-	phi4-mini-reasoning:3.8b-q4_K_M
-	phi4-reasoning:14b-q4_K_M
-	phi4-reasoning:14b-plus-q4_K_M
-	cogito:14b-v1-preview-qwen-q4_K_M
-	cogito:32b-v1-preview-qwen-q4_K_M
-	cogito:3b-v1-preview-llama-q4_K_M
-	cogito:8b-v1-preview-llama-q4_K_M
-	cogito:70b-v1-preview-llama-q4_K_M
-	deepcoder:1.5b-preview-q4_K_M
-	deepcoder:14b-preview-q4_K_M
-	exaone-deep:2.4b-q4_K_M
-	exaone-deep:32b-q4_K_M
-	exaone-deep:7.8b-q4_K_M
-	deepscaler:1.5b-preview-fp16
-	openthinker:32b-q4_K_M
-	openthinker:7b-q4_K_M
-	deepseek-r1:1.5b-qwen-distill-q4_K_M
-	deepseek-r1:14b-qwen-distill-q4_K_M
-	deepseek-r1:32b-qwen-distill-q4_K_M
-	deepseek-r1:671b-q4_K_M
-	deepseek-r1:70b-llama-distill-q4_K_M
-	deepseek-r1:7b-qwen-distill-q4_K_M
-	deepseek-r1:8b-llama-distill-q4_K_M
-)
-
-# two new datasets how much memory does a model take and how much context do
-# they support. This uses fuzzy matching so you don't have to duplicate every
-# tag, it does long string matches
-declare -A MODEL_MEM+=(
-	["llama4:17b-maverick-128e-instruct-q4_K_M"]=67
-	["llama4:17b-scout-16e-instruct-q4_K_M"]=245
-	["phi4-mini:3.8b-q4_K_M"]=2.5
-	["phi4-mini-reasoning:3.8b-q4_K_M"]=3.2
-	["phi4-reasoning:14b-q4_K_M"]=11
-	["phi4-reasoning:14b-plus-q4_K_M"]=11
-	["phi4:14b-q4_K_M"]=9.1 # no tool calling
-	["qwen3:0.6b-q4_K_M"]=0.5
-	["qwen3:1.7b-q4_K_M"]=1.4
-	["qwen3:1b-q4_K_M"]=9.3
-	["qwen3:235b-q4_K_M"]=142
-	["qwen3:30b-q4_K_M"]=19
-	["qwen3:32b-q4_K_M"]=20
-	["qwen3:3b-q4_K_M"]=20
-	["qwen3:4b-q4_K_M"]=2.6
-	["qwen3:8b-q4_K_M"]=5.2
-	["gemma3:1b-it-q4_K_M"]=0.8
-	["gemma3:27b-it-q4_K_M"]=17
-	["gemma3:4b-it-q4_K_M"]=3.3
-	["deepcoder:1.5b-preview-q4_K_M"]=1.1
-	["deepcoder:14b-preview-q4_K_M"]=9
-	["deepscaler:1.5b-preview-fp16"]=3.6
-	["deepseek-r1:1.5b-qwen-distill-q4_K_M"]=1.1
-	["deepseek-r1:14b-qwen-distill-q4_K_M"]=9
-	["deepseek-r1:32b-qwen-distill-q4_K_M"]=20
-	["deepseek-r1:671b-q4_K_M"]=404
-	["deepseek-r1:70b-llama-distill-q4_K_M"]=43 # llama based
-	["deepseek-r1:7b-qwen-distill-q4_K_M"]=4.7  # competitive to o1
-	["deepseek-r1:8b-llama-distill-q4_K_M"]=4.9
-	["exaone-deep:2.4b-q4_K_M"]=1.6
-	["exaone-deep:32b-q4_K_M"]=19
-	["exaone-deep:7.8b-q4_K_M"]=4.8
-	["shieldgemma:2b-q4_K_M"]=1.7 # safety of text prompts
-	["tulu3:70b-q4_K_M"]=4.8      # AI2 instruction following
-	["tulu3:8b-q4_K_M"]=43        # standard quantization
-	["cogito:14b-v1-preview-qwen-q4_K_M"]=9
-	["cogito:32b-v1-preview-qwen-q4_K_M"]=20
-	["cogito:3b-v1-preview-llama-q4_K_M"]=2.2
-	["cogito:8b-v1-preview-llama-q4_K_M"]=4.9
-	["cogito:70b-v1-preview-llama-q4_K_M"]=43
-	["command-a:111b-03-2025-q4_K_M"]=67 # 256K token context
-	["gemma3:12b-it-q4_K_M"]=8.1
-	["granite3.2-vision:2b-q4_K_M"]=2.4
-	["granite3.3:2b"]=1.5
-	["granite3.3:8b"]=4.9
-	["JollyLlama/GLM-4-32B-0414-Q4_K_M"]=20 # GLM-4 32K Q4
-	["rhundt/GLM-4-0414-32b-128k-Q4_K_M"]=20
-	["llama-guard3:1b-q8_0"]=1.6                # safety of prompts
-	["llama-guard3:8b-q4_K_M"]=4.9              # safety of prompts
-	["llama3.2-vision:11b-instruct-q4_K_M"]=7.9 # vision works now
-	["llama3.2-vision:90b-instruct-q4_K_M"]=55  # vision works now
-	["llama3.3:70b-instruct-q4_K_M"]=43         # 128K context
-	["lsm03624/GLM-Z1-32B-0414-Q4_K_M"]=20      # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
-	["mistral-small3.1:24b-instruct-2503-q4_K_M"]=15
-	["olmo2:7b-1124-instruct-q4_K_M"]=4.5  # compets with llama 3.1
-	["olmo2:13b-1124-instruct-q4_K_M"]=8.4 # compets with llama 3.1
-	["opencoder:8b-instruct-q4_K_M"]=4.7   # reproducible
-	["openthinker:32b-q4_K_M"]=20          # fine tuned on openthoughts 114k dataset2
-	["openthinker:7b-q4_K_M"]=4.7
-	["bespoke-minicheck:7b-q4_K_M"]=4.7 # Fact check 7B q4_K_M
-)
-
-# the context length maximum of models in 000s tokens
-declare -A MODEL_CONTEXT+=(
-	["qwen3"]=40
-	["granite3.3"]=128
-	["deepcoder"]=128
-	["cogito"]=128
-	["deepseek-r1"]=128
-	["exaone-deep"]=32
-	["phi4-reasoning:14b-plus-q4_K_M"]=32
-	["gemma3"]=128
-	["gemma3:1b"]=32
-	["granite3.3"]=128
-	["granite3.2-vision"]=16
-	["deepscaler"]=128
-	["bestspoke-minicheck"]=32
-	["command-a"]=16
-	["llama-guard3"]=128
-	["llama3.2-vision"]=128
-	["llama3.3"]=128
-	["rhundt/GLM-4-0414-32b-128k-Q4_K_M"]=128 # Rope scaling 4x or 32K base
-	["lsm03624/GLM-Z1-32B-0414-Q4_K_M"]=32    # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
-	["olmo"]=4
-	["opencoder:1.5b"]=4
-	["opencoder:8b"]=8
-	["openthinker"]=32
-	["phi4:14b"]=16
-	["phi4-mini"]=4
-	["phi4-reasoning"]=32
-	["phi4-mini-reasoning"]=4
-	["shield-gemma"]=8
-	["tulu3"]=128
-	["default"]=16
-
-)
-
-# memory used  per 32K tokens
-declare -A MODEL_CONTEXT_MEM+=(
-	["gemma"]=12
-	["default"]=6
+MODEL_VISION+=(
+	mistral-small3.1:24b
+	gemma3:27b
+	gemma3:12b
+	granite3.2-vision:2b
+	llama3.2-vision:11b
+	llama3.2-vision:90b
+	packeting/Qwen2.5-VL-32B-Instruct
 )
 
 # These are kept in most recent first from https://ollama.com/search?o=newest
@@ -430,6 +292,7 @@ MODEL+=(
 	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
 	shieldgemma:2b-q4_K_M                # safety of text prompts
 	llama-guard3:1b-q8_0                 # safety of prompts
+
 )
 
 log_verbose "loading all models >2B and <=4B parameters, requires >=8GB of RAM"
@@ -441,7 +304,6 @@ MODEL_XSMALL+=(
 	exaone-deep:2.4b-q4_K_M
 	gemma3:4b-it-q4_K_M
 	phi4-mini:3.8b-q4_K_M
-	phi4-mini-reasoning:3.8-q4_K_M
 )
 
 log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
@@ -451,7 +313,6 @@ MODEL_SMALL+=(
 	cogito:8b-v1-preview-llama-q4_K-M # trained with Iterated Distillation and Amplification
 	exaone-deep:7.8b-q4_K_M
 	granite3.3:8b
-	olmo2:7b-1124-instruct-q4_K_M # compets with llama 3.1
 	openthinker:7b-q4_K_M
 	deepseek-r1:7b-qwen-distill-q4_K_M  # competitive to o1
 	deepseek-r1:8b-llama-distill-q4_K_M # q8b
@@ -459,6 +320,7 @@ MODEL_SMALL+=(
 	tulu3:8b-q4_K_M                     # standard quantization
 	llama-guard3:8b-q4_K_M              # safety of prompts
 	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
+
 )
 #
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
@@ -471,8 +333,6 @@ MODEL_MEDIUM+=(
 	lsm03624/GLM-Z1-32B-0414-Q4_K_M   # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
 	rhundt/GLM-4-0414-32b-128k-Q4_K_M # Rope scaling 4x or 32K base
 	deepcoder:14b-instruct-q4_K_M
-	mistral-small3.1:24b-instruct-2503-q4_K_M
-	cogito:14b-v1-preview-qwen-q4_K-M # finetuned qwen
 	cogito:32b-v1-preview-qwen-q4_K-M # finetuned qwen
 	exaone-deep:32b-q4_K_M
 	gemma3:12b-it-q4_K_M                # 12B
@@ -483,6 +343,7 @@ MODEL_MEDIUM+=(
 	olmo2:13b-1124-instruct-q4_K_M      # compets with llama 3.1
 	phi4:14b-q4_K_M                     # no tool calling
 	llama3.2-vision:11b-instruct-q4_K_M # vision works now
+
 )
 
 log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
@@ -509,8 +370,6 @@ MODEL_MEGA+=(
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
-
-	sammcj/glm-4-32b-0414            # Q6_K 32K context
 	JollyLlama/GLM-4-32B-0414-Q4_K_M # GLM-4 32K Q4
 	deepseek-r1:latest               # 7b reasoning model
 	deepseek-r1:7b                   # not tool calling
@@ -841,11 +700,10 @@ MODEL_REMOVE+=(
 	gemma2:2b-instruct-q4_0            # Google 9B Q4 5.4GB 8K context
 	gemma2:27b-instruct-q4_0           # old but only Google model
 )
+
 # legacy models for comparison with modern ones
 MODEL_OLD+=(
-	qwq:32b # Alibaba advanced reasoning
-	mistral-small:24b
-	qwen2.5:14b       # 128K context Alibaba 2024-09-16 7b
+	qwq:32b           # Alibaba advanced reasoning
 	qwen2.5:32b       # 128K context Alibaba 2024-09-16 7b
 	qwen2.5:72b       # 128K context Alibaba 2024-09-16 7b
 	qwen2.5-coder:14b # 128K Tuned for coding 7B
@@ -893,7 +751,7 @@ if $AUTOMATIC_BY_MEMORY; then
 					if ((MEMORY >= 128)); then
 						INCLUDE_XLARGE=true
 						if ((MEMORY >= 256)); then
-							INCLUDE_XLARGE=true
+							INCLUDE_MEGA=true
 						fi
 					fi
 				fi
@@ -973,50 +831,10 @@ ollama_action() {
 				continue
 			fi
 		elif [[ $action == pull ]]; then
-			log_verbose "pull: is there enough disk"
 			DISK_USED="$(util_disk_used)"
 			log_verbose "ollama_action: FORCE=$FORCE action=$action DISK_USED=$DISK_USED DISK_MAX=$DISK_MAX"
 			if $DRYRUN || [[ $action == pull ]] && ((DISK_USED > DISK_MAX)) && ! $FORCE; then
 				log_verbose "dry run or cannot pull $model $DISK_USED% used at most $DISK_MAX% allowed"
-				continue
-			fi
-			log_verbose "pull: will the model and desired content fit into memory"
-			MEMORY="${MEMORY:-$(util_gpu_memory)}"
-			MEMORY_FIXED=${MEMORY_FIXED:-0.2}
-			log_verbose "MEMORY=$MEMORY MEMORY_FIXED=$MEMORY_FIXED"
-			# bash is integer only math so use bc
-			MEMORY_AVAILABLE=$(bc <<<"$MEMORY * (1 - $MEMORY_FIXED)")
-			log_verbose "Looking for $model in the MODEL_MEM table if it fits in $MEMORY_AVAILABLE GB"
-			for item in "${!MODEL_MEM[@]}"; do
-				# log_verbose "looking for $item is a substring of $model"
-				# is item a substring of model
-				if [[ $model =~ $item ]]; then
-					model_mem="${MODEL_MEM[$item]}"
-					break
-				fi
-			done
-			log_verbose "model_mem=$model_mem"
-			model_context="${MODEL_CONTEXT[default]}"
-			for item in "${!MODEL_CONTEXT[@]}"; do
-				if [[ $model =~ $item ]]; then
-					model_context="${MODEL_CONTEXT[$item]}"
-					break
-				fi
-			done
-			log_verbose "model_context=$model_context"
-			model_context_mem="${MODEL_CONTEXT_MEM[default]}"
-			for item in "${!MODEL_CONTEXT_MEM[@]}"; do
-				if [[ model =~ $item ]]; then
-					model_context_mem="${MODEL_CONTEXT_MEM[$item]}"
-					break
-				fi
-			done
-			log_verbose "model_context_mem=$model_context_mem"
-			# model context use is per 32K tokens
-			mem_needed=$(bc <<<"$model_mem + $model_context * $model_context_mem / 32")
-			log_verbose "mem_needed=$mem_needed MEMORY_AVAILABLE=$MEMORY_AVAILABLE"
-			if [[ $(bc -l <<<"$mem_needed > $MEMORY_AVAILABLE") == 1 ]]; then
-				log_verbose "$model not enough memory for context $mem_needed > $MEMORY_AVAILABLE"
 				continue
 			fi
 		fi
@@ -1042,10 +860,10 @@ else
 	if $REMOVE_OBSOLETE_AND_OLD; then
 		log_verbose "Removing deprecated models ${MODEL_REMOVE[*]}"
 		ollama_action rm "${MODEL_REMOVE[@]}" "${MODEL_GGUF_REMOVE[@]}"
-		if ! $DRYRUN && $INCLUDE_OLD; then
+		if ! $DRYRUN; then
 			ollama_action rm "${MODEL_OLD[@]}"
 		fi
-		if ! $DRYRUN && $REMOVE_OBSOLETE_AND_OLD; then
+		if ! $DRYRUN; then
 			log_verbose "Manually remove ${MODEL_MLX_REMOVE[*]}"
 			huggingface-cli delete-cache
 		fi
