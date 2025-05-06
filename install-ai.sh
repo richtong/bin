@@ -63,21 +63,21 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 PACKAGE+=(
 	# huggingface-cli # hf.co download files use huggingface_hub instead
-	ffmpeg                # needed by open-webui
-	llama.cpp             # underlying server to ollama
-	ollama                # ollama - ollama local runner
-	tika                  # Apache tika content extractor command line
-	db-browser-for-sqlite # Edit the open-webui webui.db
+	llama.cpp # underlying server to ollama
+	ollama    # ollama - ollama local runner
 
 )
 
 if $EXTRAS; then
 	PACKAGE+=(
-		comfyui     # ComfyUI - local audio/video
-		ngrok       # local ssh gateway for open-webui
-		parquet-cli # command line opening parquet data files
-		zed         # yet another ai editor
-		claude      # Anthropic's Claude AI assistant
+		db-browser-for-sqlite # Edit the open-webui webui.db
+		ffmpeg                # needed by open-webui and whisper
+		tika                  # Apache tika content extractor command line
+		comfyui               # ComfyUI - local audio/video
+		ngrok                 # local ssh gateway for open-webui
+		parquet-cli           # command line opening parquet data files
+		zed                   # yet another ai editor
+		claude                # Anthropic's Claude AI assistant
 	)
 fi
 
@@ -100,13 +100,13 @@ if in_os mac; then
 		# poe - a chatbot aggregator by Quora, allows multiple chats (not using)
 		# shell-gpt - cli including running shell commands (never use deprecated)
 		# vincelwt-chatgpt - ChatGPT in menubar (not using)
-		diffusionbee # diffusionbee - Stability diffusion on Mac
 	)
 
 	if $EXTRAS; then
 		CASK+=(
 			cursor          # pair programming using VScode, takes over the $(code)
 			mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
+			diffusionbee    # diffusionbee - Stability diffusion on Mac
 		)
 	fi
 	brew_install "${CASK[@]}"
@@ -138,6 +138,8 @@ if $EXTRAS; then
 		mlx                    # Apple silicon optimized LMM
 		mlx_lm                 # mlx_lm.server to serve mlx
 		open-interpreter       # let's LLMs run code locally
+		"docling-serve[ui]"    # docling
+		kaggle                 # download kaggle data make sure
 
 	)
 
@@ -175,6 +177,8 @@ if $EXTRAS; then
 	log_verbose "api tokens in $HOME/.crawl4ai/global.yml"
 	log_verbose "use ollama/llama3.2:1b in crwl https://tne.ai -q summarize"
 	log_verbose "crwl"
+
+	log_verbose "Kaggle requires a kaggle.json downloaded from kaggle.com to ~/.kaggle"
 
 fi
 

@@ -261,12 +261,12 @@ for model in "${!HF_REPO[@]}"; do
 	log_verbose "installing path=$path model=$model"
 	log_verbose "dest=${HF_DEST[$model]}"
 	if [[ ! -v HF_SRC_PATH[$model] ]]; then
-		log_verbose "direct install: huggingface-cli download ${HF_REPO[$model]} $path --local-dir $COMFYUI_PATH/${HF_DEST[$model]}"
+		log_verbose "direct install: huggingface-cli download ${HF_REPO[$model]} $path --local-dir $COMFYUI_PATH/models/${HF_DEST[$model]}"
 		if ! $DRY_RUN; then
 			# if $dest is null, it just cpies the whole repo which we want for
 			# whole repo
 			#shellcheck disable=SC2086
-			huggingface-cli download "${HF_REPO[$model]}" $path --local-dir "$COMFYUI_PATH/${HF_DEST[$model]}"
+			huggingface-cli download "${HF_REPO[$model]}" $path --local-dir "$COMFYUI_PATH/models/${HF_DEST[$model]}"
 		fi
 	else
 		# we have a longer path like split_files/models or all_in_one
@@ -275,13 +275,13 @@ for model in "${!HF_REPO[@]}"; do
 		dest="$dest_dir/$model"
 
 		log_verbose "pathed install: model=$model, dest=$dest, src=$src, dest_dir=$dest_dir"
-		log_verbose "huggingface-cli download ${HF_REPO[$model]} $src --local-dir $COMFYUI_PATH"
+		log_verbose "huggingface-cli download ${HF_REPO[$model]} $src --local-dir $COMFYUI_PATH/models"
 		if $DRY_RUN; then
 			continue
 		fi
 
-		if [[ -e "$COMFYUI_PATH/$dest" ]]; then
-			log_verbose "$COMFYUI_PATH/$dest exists not overwriting"
+		if [[ -e "$COMFYUI_PATH/models/$dest" ]]; then
+			log_verbose "$COMFYUI_PATH/models/$dest exists not overwriting"
 			continue
 		fi
 		# if $dest is null, it just cpies the whole repo which we want for
@@ -289,9 +289,11 @@ for model in "${!HF_REPO[@]}"; do
 		#shellcheck disable=SC2086
 		huggingface-cli download "${HF_REPO[$model]}" "$src" --local-dir "$COMFYUI_PATH"
 		log_verbose "creates a path in $COMFYUI_PATH/$src so symlink to right place"
-		log_verbose "ln -s $COMFYUI_PATH/$src $COMFYUI_PATH/$dest_dir"
-		mkdir -p "$(dirname "$COMFYUI_PATH/$dest_dir")"
-		ln -s "$COMFYUI_PATH/$src" "$COMFYUI_PATH/$dest_dir"
+		log_verbose "ln -s $COMFYUI_PATH/models/$src $COMFYUI_PATH/models/$dest_dir"
+		mkdir -p "$(dirname "$COMFYUI_PATH/models/$dest_dir")"
+		pushd "$COMFYUI_PATH/models/$dest_dir" >/dev/null
+		ln -s "../$src" .
+		popd >/dev/null
 
 	fi
 

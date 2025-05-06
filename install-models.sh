@@ -23,8 +23,10 @@ DRYRUN="${DRYRUN:-false}"
 FORCE="${FORCE:-false}"
 DISK_MAX="${DISK_MAX:-80}"
 SHOW_SIZE="${SHOW_SIZE:-true}"
-REMOVE_OBSOLETE_AND_OLD="${REMOVE_OBSOLETE_AND_OLD:-true}"
+REMOVE_OBSOLETE_AND_OLD="${REMOVE_OBSOLETE_AND_OLD:-false}"
 AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
+# The Ollama default is leave 25% free
+MEMORY_RESERVED=${MEMORY_RESERVED:-0.2}
 ACTION="${ACTION:-pull}"
 
 INCLUDE_OLD="${INCLUDE_OLD:-false}"
@@ -38,7 +40,7 @@ INCLUDE_MEGA="${INCLUDE_MEGA:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
 
-while getopts "hdvgltsafnzrxu0123456" opt; do
+while getopts "hdvgltsafnzrexu0123456" opt; do
 	case "$opt" in
 	h)
 		cat <<EOF
@@ -60,6 +62,7 @@ flags:
 
 	models install parameters
 	-a $(! $AUTOMATIC_BY_MEMORY || echo "do not ")automatically install models based on system memory
+	-e Reserve memory for other processes (default: $((MEMORY_RESERVED * 100)))
 	-f $(! $FORCE || echo "do not")force pull even if disk larger than (default DISK_MAX=$DISK_MAX)
 	-n $(! $DRYRUN || echo "do not")dry run the commands
 	-z $(! $SHOW_SIZE || echo "do not ")show size of the largest models
@@ -105,6 +108,9 @@ EOF
 
 	a)
 		AUTOMATIC_BY_MEMORY="$($AUTOMATIC_BY_MEMORY && echo false || echo true)"
+		;;
+	e)
+		MEMORY_RESERVED="$OPTARG"
 		;;
 	f)
 		FORCE="$($FORCE && echo false || echo true)"
@@ -242,20 +248,19 @@ MODEL_VISION+=(
 MODEL_TOOL+=(
 	qwen3:0.6b-q4_K_M
 	qwen3:1.7b-q4_K_M
-	qwen3:1b-q4_K_M
-	qwen3:235b-q4_K_M
-	qwen3:30b-q4_K_M
-	qwen3:32b-q4_K_M
-	qwen3:3b-q4_K_M
 	qwen3:4b-q4_K_M
 	qwen3:8b-q4_K_M
+	qwen3:14b-q4_K_M
+	qwen3:30b-q4_K_M
+	qwen3:32b-q4_K_M
+	qwen3:235b-q4_K_M
 	granite3.3:2b
 	granite3.3:8b
 	mistral-small3.1:24b-instruct-2503-q4_K_M
-	cogito:14b-v1-preview-qwen-q4_K_M
-	cogito:32b-v1-preview-qwen-q4_K_M
 	cogito:3b-v1-preview-llama-q4_K_M
 	cogito:8b-v1-preview-llama-q4_K_M
+	cogito:14b-v1-preview-qwen-q4_K_M
+	cogito:32b-v1-preview-qwen-q4_K_M
 	cogito:70b-v1-preview-llama-q4_K_M
 	llama4:17b-maverick-128e-instruct-q4_K_M
 	llama4:17b-scout-16e-instruct-q4_K_M
@@ -267,20 +272,19 @@ MODEL_TOOL+=(
 MODEL_REASONING+=(
 	qwen3:0.6b-q4_K_M
 	qwen3:1.7b-q4_K_M
-	qwen3:1b-q4_K_M
-	qwen3:235b-q4_K_M
-	qwen3:30b-q4_K_M
-	qwen3:32b-q4_K_M
-	qwen3:3b-q4_K_M
 	qwen3:4b-q4_K_M
 	qwen3:8b-q4_K_M
+	qwen3:14b-q4_K_M
+	qwen3:30b-q4_K_M
+	qwen3:32b-q4_K_M
+	qwen3:235b-q4_K_M
 	phi4-mini-reasoning:3.8b-q4_K_M
 	phi4-reasoning:14b-q4_K_M
 	phi4-reasoning:14b-plus-q4_K_M
-	cogito:14b-v1-preview-qwen-q4_K_M
-	cogito:32b-v1-preview-qwen-q4_K_M
 	cogito:3b-v1-preview-llama-q4_K_M
 	cogito:8b-v1-preview-llama-q4_K_M
+	cogito:14b-v1-preview-qwen-q4_K_M
+	cogito:32b-v1-preview-qwen-q4_K_M
 	cogito:70b-v1-preview-llama-q4_K_M
 	deepcoder:1.5b-preview-q4_K_M
 	deepcoder:14b-preview-q4_K_M
@@ -294,7 +298,7 @@ MODEL_REASONING+=(
 	deepseek-r1:14b-qwen-distill-q4_K_M
 	deepseek-r1:32b-qwen-distill-q4_K_M
 	deepseek-r1:671b-q4_K_M
-	deepseek-r1:70b-llama-distill-q4_K_M
+	deepseek-r0:70b-llama-distill-q4_K_M
 	deepseek-r1:7b-qwen-distill-q4_K_M
 	deepseek-r1:8b-llama-distill-q4_K_M
 )
@@ -312,16 +316,16 @@ declare -A MODEL_MEM+=(
 	["phi4:14b-q4_K_M"]=9.1 # no tool calling
 	["qwen3:0.6b-q4_K_M"]=0.5
 	["qwen3:1.7b-q4_K_M"]=1.4
-	["qwen3:1b-q4_K_M"]=9.3
-	["qwen3:235b-q4_K_M"]=142
-	["qwen3:30b-q4_K_M"]=19
-	["qwen3:32b-q4_K_M"]=20
-	["qwen3:3b-q4_K_M"]=20
 	["qwen3:4b-q4_K_M"]=2.6
 	["qwen3:8b-q4_K_M"]=5.2
+	["qwen3:14b-q4_K_M"]=9.3
+	["qwen3:30b-q4_K_M"]=19
+	["qwen3:32b-q4_K_M"]=20
+	["qwen3:235b-q4_K_M"]=142
 	["gemma3:1b-it-q4_K_M"]=0.8
-	["gemma3:27b-it-q4_K_M"]=17
 	["gemma3:4b-it-q4_K_M"]=3.3
+	["gemma3:12b-it-q4_K_M"]=12.2
+	["gemma3:27b-it-q4_K_M"]=17
 	["deepcoder:1.5b-preview-q4_K_M"]=1.1
 	["deepcoder:14b-preview-q4_K_M"]=9
 	["deepscaler:1.5b-preview-fp16"]=3.6
@@ -397,7 +401,6 @@ declare -A MODEL_CONTEXT+=(
 	["shield-gemma"]=8
 	["tulu3"]=128
 	["default"]=16
-
 )
 
 # memory used  per 32K tokens
@@ -425,7 +428,7 @@ MODEL+=(
 	deepcoder:1.5b-preview-q4_K_M # fine tuned deepseek-r1-distilled
 	gemma3:1b-it-q4_K_M
 	granite3.3:2b # reasoning model messages += []{role: control, content: thinking}]
-	granite3.2-vision:2b-4_K_M
+	granite3.2-vision:2b-4q_K_M
 	deepscaler:1.5b-preview-fp16
 	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
 	shieldgemma:2b-q4_K_M                # safety of text prompts
@@ -460,7 +463,7 @@ MODEL_SMALL+=(
 	llama-guard3:8b-q4_K_M              # safety of prompts
 	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
 )
-#
+
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
 	phi4-reasoning:14b-q4_K_M
@@ -509,7 +512,6 @@ MODEL_MEGA+=(
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
-
 	sammcj/glm-4-32b-0414            # Q6_K 32K context
 	JollyLlama/GLM-4-32B-0414-Q4_K_M # GLM-4 32K Q4
 	deepseek-r1:latest               # 7b reasoning model
@@ -537,7 +539,7 @@ MODEL_REMOVE+=(
 	aravhawk/llama4:maverick-q4_K_M # 1M context
 	aravhawk/llama4:109b            # 17b x 16 experts
 	aravhawk/llama4:scout-q4_K_M    # 10M token context
-	granite3-guardian:2b            #  prompt guard ibm
+	gnieranite3-guardian:2b         #  prompt guard ibm
 	deepseek-r1:1.5b                # small model
 	shieldgemma:2b                  # safety of text prompts
 	llama-guard3:1b                 # safety of prompts
@@ -982,10 +984,9 @@ ollama_action() {
 			fi
 			log_verbose "pull: will the model and desired content fit into memory"
 			MEMORY="${MEMORY:-$(util_gpu_memory)}"
-			MEMORY_FIXED=${MEMORY_FIXED:-0.2}
-			log_verbose "MEMORY=$MEMORY MEMORY_FIXED=$MEMORY_FIXED"
+			log_verbose "MEMORY=$MEMORY MEMORY_RESERVED=$MEMORY_RESERVED"
 			# bash is integer only math so use bc
-			MEMORY_AVAILABLE=$(bc <<<"$MEMORY * (1 - $MEMORY_FIXED)")
+			MEMORY_AVAILABLE=$(bc <<<"$MEMORY * (1 - $MEMORY_RESERVED)")
 			log_verbose "Looking for $model in the MODEL_MEM table if it fits in $MEMORY_AVAILABLE GB"
 			for item in "${!MODEL_MEM[@]}"; do
 				# log_verbose "looking for $item is a substring of $model"
