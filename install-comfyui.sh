@@ -240,14 +240,14 @@ declare -A DIRECT_DEST+=(
 
 )
 
-for model in "${!HF_REPO[@]}"; do
+for item in "${!HF_REPO[@]}"; do
 	# do not quote the HF_DEST and HF_DIR references it will pick up
 	# which everyone is availablehttps://comfyui-wiki.com/en/tutorial/advanced/lumina-image-2
-	path="$model"
-	if [[ -v HF_WHOLE_REPO[$model] ]]; then
+	hf_src="$item"
+	if [[ -v HF_WHOLE_REPO[$item] ]]; then
 		# download whole repo no need for file path
 		# at the source
-		path=
+		hf_src=
 	fi
 
 	DISK_USED="$(util_disk_used)"
@@ -258,24 +258,23 @@ for model in "${!HF_REPO[@]}"; do
 
 	# note huggingface-cli is resumable and caches so we don't have to check if
 	# the file exists
-	log_verbose "installing path=$path model=$model"
-	log_verbose "dest=${HF_DEST[$model]}"
-	if [[ ! -v HF_SRC_PATH[$model] ]]; then
-		log_verbose "direct install: huggingface-cli download ${HF_REPO[$model]} $path --local-dir $COMFYUI_PATH/models/${HF_DEST[$model]}"
+	log_verbose "installing item=$item from hf_src=$hf_src"
+	if [[ ! -v HF_SRC_PATH[$item] ]]; then
+		log_verbose "direct install: hf_repo=${HF_REPO[$item]} hf_src=$hf_src cui=$COMFYUI_PATH local_dest=${HF_DEST[$item]}"
 		if ! $DRY_RUN; then
 			# if $dest is null, it just cpies the whole repo which we want for
 			# whole repo
 			#shellcheck disable=SC2086
-			huggingface-cli download "${HF_REPO[$model]}" $path --local-dir "$COMFYUI_PATH/models/${HF_DEST[$model]}"
+			huggingface-cli download "${HF_REPO[$item]}" $hf_src --local-dir "$COMFYUI_PATH/${HF_DEST[$item]}"
 		fi
 	else
-		# we have a longer path like split_files/models or all_in_one
-		src="${HF_SRC_PATH[$model]}/$model"
-		dest_dir="${HF_DEST[$model]}"
-		dest="$dest_dir/$model"
+		# HR_SRC_PATH[$item] exists so a complex apth
+		hf_src="${HF_SRC_PATH[$item]}/$item"
+		dest_dir="${HF_DEST[$item]}"
+		dest="$dest_dir/$item"
 
-		log_verbose "pathed install: model=$model, dest=$dest, src=$src, dest_dir=$dest_dir"
-		log_verbose "huggingface-cli download ${HF_REPO[$model]} $src --local-dir $COMFYUI_PATH/models"
+		log_verbose "pathed install: model=$item, hf_repo=${HF_REPO[$item]}, dest=$dest, src=$hf_src, dest_dir=$dest_dir"
+		log_verbose "huggingface-cli download ${HF_REPO[$item]} $hf_src --local-dir $COMFYUI_PATH"
 		if $DRY_RUN; then
 			continue
 		fi
@@ -287,13 +286,15 @@ for model in "${!HF_REPO[@]}"; do
 		# if $dest is null, it just cpies the whole repo which we want for
 		# whole repo
 		#shellcheck disable=SC2086
-		huggingface-cli download "${HF_REPO[$model]}" "$src" --local-dir "$COMFYUI_PATH"
-		log_verbose "creates a path in $COMFYUI_PATH/$src so symlink to right place"
-		log_verbose "ln -s $COMFYUI_PATH/models/$src $COMFYUI_PATH/models/$dest_dir"
-		mkdir -p "$(dirname "$COMFYUI_PATH/models/$dest_dir")"
-		pushd "$COMFYUI_PATH/models/$dest_dir" >/dev/null
-		ln -s "../$src" .
-		popd >/dev/null
+		huggingface-cli download "${HF_REPO[$item]}" "$hf_src" --local-dir "$COMFYUI_PATH"
+
+		log_verbose "symlink: from: $COMFYUI_PATH/$hf_src to:$dest"
+		if [[ ! -e $COMFYUI_PATH/$dest ]]; then
+			mkdir -p "$(dirname "$COMFYUI_PATH/$dest_dir")"
+			pushd "$COMFYUI_PATH/$dest_dir" >/dev/null
+			ln -s "../$hf_src" .
+			popd >/dev/null
+		fi
 
 	fi
 
