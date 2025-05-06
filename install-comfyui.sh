@@ -21,7 +21,7 @@ DISK_MAX="${DISK_MAX:-80}"
 COMFYUI_PATH="${COMFYUI_PATH:-"$HOME/ComfyUI"}"
 # if you have workflows you want checked in change here
 COMFYUI_WORKSPACE="${COMFYUI_WORKSPACE:-"$WS_DIR/git/src/res/tne-comfyui-workflows/workflows"}"
-COMFYUI_WORKSPACE_DEST="${COMFYUI_WORKSPACE_DEST:-"$COMFYUI_PATH/user/default/workflows/common"}"
+COMFYUI_WORKSPACE_DEST="${COMFYUI_WORKSPACE_DEST:-"$COMFYUI_PATH/user/default/workflows"}"
 
 OPTIND=1
 while getopts "hdvgnm:f" opt; do
@@ -147,7 +147,7 @@ declare -A HF_REPO+=(
 declare -A HF_SRC_PATH+=(
 	["clip_l.safetensors"]=split_files/text_encoders
 	["llava_llama3_fp8_scaled.safetensors"]="split_files/text_encoders"
-	["hunyuan_video_vae_bf16.safetensors"]=split_files/vae
+	# ["hunyuan_video_vae_bf16.safetensors"]=split_files/vae
 	["llava_llama3_vision.safetensors"]="split_files/clip_vision"
 	["hunyuan_video_t2v_720p_bf16.safetensors"]=split_files/diffusion_models
 	["hunyuan_video_image_to_video_720p_bf16.safetensors"]=split_files/diffusion_models
@@ -288,11 +288,12 @@ for item in "${!HF_REPO[@]}"; do
 		#shellcheck disable=SC2086
 		huggingface-cli download "${HF_REPO[$item]}" "$hf_src" --local-dir "$COMFYUI_PATH"
 
-		log_verbose "symlink: from: $COMFYUI_PATH/$hf_src to:$dest"
+		log_verbose "symlink: relative symlink from: $COMFYUI_PATH/$hf_src to:$dest"
 		if [[ ! -e $COMFYUI_PATH/$dest ]]; then
 			mkdir -p "$(dirname "$COMFYUI_PATH/$dest_dir")"
 			pushd "$COMFYUI_PATH/$dest_dir" >/dev/null
-			ln -s "../$hf_src" .
+			log_verbose ln -s "$(realpath --relative-to=. "$COMFYUI_PATH/$hf_src")" .
+			ln -s "$(realpath --relative-to=. "$COMFYUI_PATH/$hf_src")" .
 			popd >/dev/null
 		fi
 

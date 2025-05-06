@@ -251,7 +251,7 @@ MODEL_TOOL+=(
 	qwen3:4b-q4_K_M
 	qwen3:8b-q4_K_M
 	qwen3:14b-q4_K_M
-	qwen3:30b-q4_K_M
+	qwen3:30b-a3b_q4_K_M
 	qwen3:32b-q4_K_M
 	qwen3:235b-q4_K_M
 	granite3.3:2b
@@ -275,7 +275,7 @@ MODEL_REASONING+=(
 	qwen3:4b-q4_K_M
 	qwen3:8b-q4_K_M
 	qwen3:14b-q4_K_M
-	qwen3:30b-q4_K_M
+	qwen3:30b-a3b_q4_K_M # 3b active parameters moe
 	qwen3:32b-q4_K_M
 	qwen3:235b-q4_K_M
 	phi4-mini-reasoning:3.8b-q4_K_M
@@ -319,9 +319,11 @@ declare -A MODEL_MEM+=(
 	["qwen3:4b-q4_K_M"]=2.6
 	["qwen3:8b-q4_K_M"]=5.2
 	["qwen3:14b-q4_K_M"]=9.3
-	["qwen3:30b-q4_K_M"]=19
+	["qwen3:30b-a3b-q4_K_M"]=19
 	["qwen3:32b-q4_K_M"]=20
-	["qwen3:235b-q4_K_M"]=142
+	["qwen3-235b-a22b-128k:ud-q4_k_xl"]=134
+	["qwen3:235b-a22b-q4_K_M"]=142
+	["milkey/Qwen3-UD:235B-Q2_K_XL"]=88
 	["gemma3:1b-it-q4_K_M"]=0.8
 	["gemma3:4b-it-q4_K_M"]=3.3
 	["gemma3:12b-it-q4_K_M"]=12.2
@@ -372,6 +374,7 @@ declare -A MODEL_MEM+=(
 # the context length maximum of models in 000s tokens
 declare -A MODEL_CONTEXT+=(
 	["qwen3"]=40
+	["milkey/Qwen3-UD"]=40
 	["granite3.3"]=128
 	["deepcoder"]=128
 	["cogito"]=128
@@ -428,7 +431,7 @@ MODEL+=(
 	deepcoder:1.5b-preview-q4_K_M # fine tuned deepseek-r1-distilled
 	gemma3:1b-it-q4_K_M
 	granite3.3:2b # reasoning model messages += []{role: control, content: thinking}]
-	granite3.2-vision:2b-4q_K_M
+	granite3.2-vision:2b-q4_K_M
 	deepscaler:1.5b-preview-fp16
 	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
 	shieldgemma:2b-q4_K_M                # safety of text prompts
@@ -469,7 +472,7 @@ MODEL_MEDIUM+=(
 	phi4-reasoning:14b-q4_K_M
 	phi4-reasoning:14b-plus-q4_K_M
 	qwen3:14b-q4_K_M
-	qwen3:30b-q4_K_M
+	qwen3:30b-a3b-q4_K_M
 	qwen3:32b-q4_K_M
 	lsm03624/GLM-Z1-32B-0414-Q4_K_M   # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
 	rhundt/GLM-4-0414-32b-128k-Q4_K_M # Rope scaling 4x or 32K base
@@ -499,6 +502,7 @@ MODEL_LARGE+=(
 
 log_verbose "Extra models over 100B parameters, requires >=128GB"
 MODEL_XLARGE+=(
+	milkey/Qwen3-UD:235B-Q2_K_XL
 	llama4:17b-scout-16e-instruct-q4_K_M
 	command-a:111b-03-2025-q4_K_M # 256K token context
 )
@@ -506,7 +510,7 @@ MODEL_XLARGE+=(
 log_verbose "Megalarge models over 400B parameters requires >=256GB"
 MODEL_MEGA+=(
 	llama4:17b-maverick-128e-instruct-q4_K_M
-	qwen3:235b-q4_K_M
+	qwen3:235b-a22b-q4_K_M
 	deepseek-r1:641b-q4_K_M # 641B
 )
 
