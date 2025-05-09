@@ -297,6 +297,7 @@ declare -A OP_API_ITEM=(
 	[SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
 	[WEBUI_API_KEY]="Open WebUI API Key Dev"
 	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
+	[MCPO_API_KEY]="MCPO Server API Key Local"
 
 )
 
@@ -336,6 +337,7 @@ declare -A OP_API_FIELD=(
 	[SUPERSET_SECRET_KEY]="api key"
 	[WEBUI_API_KEY]="api key"
 	[WEBUI_SECRET_KEY]="secret key"
+	[MCPO_API_KEY]="api key"
 
 )
 # Which vault, the shared ones are in DevOps, personal in Private
@@ -370,6 +372,7 @@ declare -A OP_API_VAULT=(
 	[SUPERSET_SECRET_KEY]="DevOps"
 	[WEBUI_API_KEY]="DevOps"
 	[WEBUI_SECRET_KEY]="DevOps"
+	[MCPO_API_KEY]="DevOps"
 
 )
 
