@@ -303,6 +303,13 @@ MODEL_REASONING+=(
 	deepseek-r1:8b-llama-distill-q4_K_M
 )
 
+MODEL_MOE+=(
+	qwen3:30b-a3b-q4_K_M
+	milkey/Qwen3-UD:235B-Q2_K_XL
+	llama4:17b-maverick-128e-instruct-q4_K_M
+	llama4:17b-scout-16e-instruct-q4_K_M
+)
+
 # two new datasets how much memory does a model take and how much context do
 # they support. This uses fuzzy matching so you don't have to duplicate every
 # tag, it does long string matches
@@ -372,35 +379,37 @@ declare -A MODEL_MEM+=(
 )
 
 # the context length maximum of models in 000s tokens
+# for models that are close, put the more specfiic one first
+# search top most first
 declare -A MODEL_CONTEXT+=(
 	["qwen3"]=40
 	["milkey/Qwen3-UD"]=40
+	["granite3.2-vision"]=16
 	["granite3.3"]=128
 	["deepcoder"]=128
 	["cogito"]=128
 	["deepseek-r1"]=128
+	["deepseek"]=128
 	["exaone-deep"]=32
-	["phi4-reasoning:14b-plus-q4_K_M"]=32
-	["gemma3"]=128
 	["gemma3:1b"]=32
-	["granite3.3"]=128
-	["granite3.2-vision"]=16
+	["gemma3"]=128
 	["deepscaler"]=128
 	["bestspoke-minicheck"]=32
 	["command-a"]=16
 	["llama-guard3"]=128
 	["llama3.2-vision"]=128
 	["llama3.3"]=128
+	["mistral-small3.1"]=128
 	["rhundt/GLM-4-0414-32b-128k-Q4_K_M"]=128 # Rope scaling 4x or 32K base
 	["lsm03624/GLM-Z1-32B-0414-Q4_K_M"]=32    # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
 	["olmo"]=4
 	["opencoder:1.5b"]=4
 	["opencoder:8b"]=8
 	["openthinker"]=32
-	["phi4:14b"]=16
 	["phi4-mini"]=4
-	["phi4-reasoning"]=32
 	["phi4-mini-reasoning"]=4
+	["phi4-reasoning"]=32
+	["phi4"]=16
 	["shield-gemma"]=8
 	["tulu3"]=128
 	["default"]=16
