@@ -102,7 +102,7 @@ declare -A HF_REPO+=(
 	["workflow-hunyuan-gguf.json"]="calcuis/hunyuan-gguf"
 	["hunyuan-video-t2v-720p-bf16.gguf"]="calcuis/hunyuan-gguf"
 	["hunyuan-video-t2v-720p-q8_0.gguf"]="calcuis/hunyuan-gguf"
-	["hunyuan-video-t2v-720p-q4_0.gguf"]="calcuis/hunyuan-gguf"
+	# ["hunyuan-video-t2v-720p-q4_0.gguf"]="calcuis/hunyuan-gguf"
 
 	# Alibaba Hunyuan non-GF with BF16
 	# Already copied in the above but need to be in ./text_encoders
@@ -127,7 +127,7 @@ declare -A HF_REPO+=(
 	["clip_vision_h.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
 	["wan2.1_t2v_1.3B_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
 	["wan2.1_i2v_720p_14B_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
-	["wan2.1_i2v_480p_14B_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
+	# ["wan2.1_i2v_480p_14B_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
 
 	# https://comfyui-wiki.com/en/tutorial/advanced/lumina-image-2
 	["lumina_2.safetensors"]=Comfy-Org/Lumina_Image_2.0_Repackaged
@@ -140,7 +140,7 @@ declare -A HF_REPO+=(
 	# 50 steps high quality and slow
 	["hidream_i1_full_fp8.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
 	# 28 steps and faster
-	["hidream_i1_dev_fp8.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
+	# ["hidream_i1_dev_fp8.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
 
 )
 

@@ -236,6 +236,7 @@ MODEL_GGUF_REMOVE+=(
 )
 
 MODEL_VISION+=(
+	qwen2.5vl:32b-q4_K_M
 	mistral-small3.1:24b-instruct-2503-q4_K_M
 	gemma3:27b-it-q4_K_M
 	gemma3:12b-it-q4_K_M
@@ -264,7 +265,7 @@ MODEL_TOOL+=(
 	cogito:70b-v1-preview-llama-q4_K_M
 	llama4:17b-maverick-128e-instruct-q4_K_M
 	llama4:17b-scout-16e-instruct-q4_K_M
-	command-a:111b-03-2025-q4_K_M
+	# command-a:111b-03-2025-q4_K_M
 	phi4-mini:3.8b-q4_K_M
 	llama3.3:70b-instruct-q4_K_M
 )
@@ -314,6 +315,9 @@ MODEL_MOE+=(
 # they support. This uses fuzzy matching so you don't have to duplicate every
 # tag, it does long string matches
 declare -A MODEL_MEM+=(
+	["qwen2.5vl:7b-q4_K_M"]=6
+	["qwen2.5vl:32b-q4_K_M"]=38
+	["qwen2.5vl:72b-q4_K_M"]=71
 	["llama4:17b-maverick-128e-instruct-q4_K_M"]=67
 	["llama4:17b-scout-16e-instruct-q4_K_M"]=245
 	["phi4-mini:3.8b-q4_K_M"]=2.5
@@ -382,6 +386,7 @@ declare -A MODEL_MEM+=(
 # for models that are close, put the more specfiic one first
 # search top most first
 declare -A MODEL_CONTEXT+=(
+	["qwen2.5v"]=128
 	["qwen3"]=40
 	["milkey/Qwen3-UD"]=40
 	["granite3.2-vision"]=16
@@ -513,7 +518,7 @@ log_verbose "Extra models over 100B parameters, requires >=128GB"
 MODEL_XLARGE+=(
 	milkey/Qwen3-UD:235B-Q2_K_XL
 	llama4:17b-scout-16e-instruct-q4_K_M
-	command-a:111b-03-2025-q4_K_M # 256K token context
+	# command-a:111b-03-2025-q4_K_M # 256K token context
 )
 
 log_verbose "Megalarge models over 400B parameters requires >=256GB"
