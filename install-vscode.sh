@@ -71,7 +71,6 @@ package_install "${PACKAGE[@]}"
 # https://stackoverflow.com/questions/35929746/automatically-install-extensions-in-vs-code
 EXTENSION+=(
 
-	amazonwebservices.amazon-q-vscode
 	amazonwebservices.aws-toolkit-vscode
 	asvetliakov.vscode-neovim
 	charliermarsh.ruff
@@ -102,14 +101,14 @@ EXTENSION+=(
 	redhat.vscode-yaml
 	streetsidesoftware.code-spell-checker
 	timonwong.shellcheck
+	esbenp.prettier-vscode # code formatting
+	ms-python.python       # python prettry and debugger
+	timonwong.shellcheck
+	svelte.svelte-vscode
 
 )
 
-for E in "${EXTENSION[@]}"; do
-	log_verbose "Install $E"
-	codium --install-extension "$E"
-	code --install-extension "$E"
-done
+code_install "${EXTENSION[@]}"
 
 for S in "VSCodium" "Code"; do
 	SETTING="$HOME/Library/Application Support/$S/User/settings.json"

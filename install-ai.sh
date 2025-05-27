@@ -72,17 +72,33 @@ if $EXTRAS; then
 	PACKAGE+=(
 		db-browser-for-sqlite # Edit the open-webui webui.db
 		ffmpeg                # needed by open-webui and whisper
-		tika                  # Apache tika content extractor command line
-		comfyui               # ComfyUI - local audio/video
 		ngrok                 # local ssh gateway for open-webui
 		parquet-cli           # command line opening parquet data files
-		zed                   # yet another ai editor
-		claude                # Anthropic's Claude AI assistant
+		pearai
+		tika  # Apache tika content extractor command line
+		codex # openai cli tool
+
+	)
+
+	# https://stackoverflow.com/questions/34286515/how-to-install-visual-studio-code-extensions-from-command-line
+	VSCODE+=(
+		lee2py.aider-composer # connects to aider
+		nicepkg.aide-pro
+		continue.continue         # continue.dev ai coder
+		saoudrizwan.claude-dev    # Cline ai coder
+		formulahendry.code-runner # run C, and other langauages
+		eamodio.gitlens           # supercharge gito
+		mintlify.document         # documentation writer
+		asvetliakov.vscodaterial-icon-theme
+		amazonwebservices.amazon-q-vscode
+
 	)
 fi
 
 package_install "${PACKAGE[@]}"
 log_verbose "packages installed"
+
+code_install "${VSCODE[@]}"
 
 echo "util_os=$(util_os)"
 
@@ -104,9 +120,19 @@ if in_os mac; then
 
 	if $EXTRAS; then
 		CASK+=(
-			cursor          # pair programming using VScode, takes over the $(code)
-			mochi-diffusion # mochi-diffusion - Stability diffusion on Mac (haven't used)
-			diffusionbee    # diffusionbee - Stability diffusion on Mac
+			aider               # https://openalternative.co/alternatives/cursor
+			claude              # Anthropic's Claude AI assistant
+			codeedit            # Mac only code editor
+			cody                # Enterprise ai code assistant
+			comfyui             # ComfyUI - local audio/video
+			cursor              # pair programming using VScode, takes over the $(code)
+			diffusionbee        # diffusionbee - Stability diffusion on Mac
+			mochi-diffusion     # mochi-diffusion - Stability diffusion on Mac (haven't used)
+			tabbyml/tabby/tabby # tabby serve --device metal --model StarCoder-1B
+			void                # ai coder
+			warp                # ai-based shell
+			zed                 # yet another ai editor
+
 		)
 	fi
 	brew_install "${CASK[@]}"
@@ -188,6 +214,12 @@ open-webui --install-completion
 if ! config_mark "$(config_profile_interactive)"; then
 	config_add "$(config_profile_interactive)" <<-EOF
 		if command -v open-webui > /dev/null; then open-webui --install-completion >/dev/null; fi
+	EOF
+fi
+
+if ! config_mark "$(config_profile_nonexportable_zsh)"; then
+	config_add "$(config_profile_nonexportable_zsh)" <<-"EOF"
+		    [[ -e /Applications/Warp.app ]] && [[ "$-" == *i* ]] && printf 'P$f{"hook": "SourcedRcFileForWarp", "value": { "shell": "zsh", "uname": "Darwin" }}'
 	EOF
 fi
 
