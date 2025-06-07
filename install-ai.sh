@@ -171,6 +171,8 @@ if $EXTRAS; then
 
 	NODE_PACKAGE+=(
 		@receptron/graphai_cli
+		@anthropic-ai/claude-code # command line ai
+		playwrite
 	)
 fi
 

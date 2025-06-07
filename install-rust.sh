@@ -55,8 +55,13 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 if in_os mac; then
 	PACKAGE+=(
-		rust
+		rustup
 	)
+	if ! config_mark; then
+		config_add <<-'EOF'
+			echo "$PATH" | grep -q "rustup/bin" || PATH="$HOMEBREW/opt/rustup/bin:$PATH"
+		EOF
+	fi
 else
 	# https://phoenixnap.com/kb/install-rust-ubuntu
 	PACKAGE+=(

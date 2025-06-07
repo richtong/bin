@@ -227,7 +227,10 @@ log_verbose "install brew for linux and mac as common installer"
 log_verbose "install gnu with BASH=$BASH"
 "$SCRIPT_DIR/install-gnu.sh"
 
-"$SCRIPT_DIR/install-asdf.sh"
+"$SCRIPT_DIR/install-java.sh"
+
+# deprecating using asdf so now need a Java install
+# "$SCRIPT_DIR/install-asdf.sh"
 
 log_verbose "Install git and git tooling"
 package_install git
@@ -349,6 +352,7 @@ PACKAGES+=(
 
 	bashdb
 	curl
+	direnv # manage environment variables with .envrc
 	font-alegreya-sc
 	font-source-serif-pro
 	fzf

@@ -130,3 +130,17 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.aider*
+.env
+.env
+.env
+.env
+.env
+.env
+.env
+.env
+.env
+.env
+.env
+.env
+.env

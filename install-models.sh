@@ -18,12 +18,14 @@ INCLUDE_VISION="${INCLUDE_VISION:-false}"
 INCLUDE_GGUF="${INCLUDE_GGUF:-false}"
 INCLUDE_MLX="${INCLUDE_MLX:-false}"
 EXO_HOME="${EXO_HOME:-"$HOME/.cache/exo/downloads"}"
+OLLAMA_MODELS="${OLLAMA_MODELS:-"$HOME/.ollama/models"}"
+OLLAMA_API_BASE="${OLLAMA_API_BASE:-"http://localhost:11434"}"
 
 DRYRUN="${DRYRUN:-false}"
 FORCE="${FORCE:-false}"
 DISK_MAX="${DISK_MAX:-80}"
 SHOW_SIZE="${SHOW_SIZE:-true}"
-REMOVE_OBSOLETE_AND_OLD="${REMOVE_OBSOLETE_AND_OLD:-false}"
+REMOVE_OBSOLETE_AND_OLD="${REMOVE_OBSOLETE_AND_OLD:-true}"
 AUTOMATIC_BY_MEMORY="${AUTOMATIC_BY_MEMORY:-true}"
 # The Ollama default is leave 25% free
 MEMORY_RESERVED=${MEMORY_RESERVED:-0.2}
@@ -247,6 +249,7 @@ MODEL_VISION+=(
 
 # Tool using models https://ollama.com/search?c=tools&o=newest
 MODEL_TOOL+=(
+	devstral:24b-small-2505-q4_K_M
 	qwen3:0.6b-q4_K_M
 	qwen3:1.7b-q4_K_M
 	qwen3:4b-q4_K_M
@@ -315,6 +318,7 @@ MODEL_MOE+=(
 # they support. This uses fuzzy matching so you don't have to duplicate every
 # tag, it does long string matches
 declare -A MODEL_MEM+=(
+	["devstral:24b-small-2505-q4_K_M"]=14
 	["qwen2.5vl:7b-q4_K_M"]=6
 	["qwen2.5vl:32b-q4_K_M"]=38
 	["qwen2.5vl:72b-q4_K_M"]=71
@@ -386,7 +390,8 @@ declare -A MODEL_MEM+=(
 # for models that are close, put the more specfiic one first
 # search top most first
 declare -A MODEL_CONTEXT+=(
-	["qwen2.5v"]=128
+	["devstral"]=128
+	["qwen2.5vl"]=128
 	["qwen3"]=40
 	["milkey/Qwen3-UD"]=40
 	["granite3.2-vision"]=16
@@ -447,69 +452,58 @@ MODEL+=(
 	granite3.3:2b # reasoning model messages += []{role: control, content: thinking}]
 	granite3.2-vision:2b-q4_K_M
 	deepscaler:1.5b-preview-fp16
-	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
-	shieldgemma:2b-q4_K_M                # safety of text prompts
-	llama-guard3:1b-q8_0                 # safety of prompts
+	shieldgemma:2b-q4_K_M # safety of text prompts
+	llama-guard3:1b-q8_0  # safety of prompts
 )
 
 log_verbose "loading all models >2B and <=4B parameters, requires >=8GB of RAM"
 MODEL_XSMALL+=(
 	gemma3:4b-it-q4_K_M
-	exaone-deep:2.4b-q4_K_M # LG AI
 	qwen3:1.7b-q4_K_M
-	cogito:3b-v1-preview-llama-q4_K-M # Deep Cogito tool too
-	exaone-deep:2.4b-q4_K_M
-	gemma3:4b-it-q4_K_M
-	phi4-mini:3.8b-q4_K_M
-	phi4-mini-reasoning:3.8-q4_K_M
+	phi4-mini-reasoning:3.8b-q4_K_M
 )
 
 log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
 MODEL_SMALL+=(
+	qwen2.5vl:7b-q4_K_M # lateste aliababa vision model
 	qwen3:4b-q4_K_M
 	qwen3:8b-q4_K_M
-	cogito:8b-v1-preview-llama-q4_K-M # trained with Iterated Distillation and Amplification
 	exaone-deep:7.8b-q4_K_M
 	granite3.3:8b
-	olmo2:7b-1124-instruct-q4_K_M # compets with llama 3.1
 	openthinker:7b-q4_K_M
 	deepseek-r1:7b-qwen-distill-q4_K_M  # competitive to o1
 	deepseek-r1:8b-llama-distill-q4_K_M # q8b
-	opencoder:8b-instruct-q4_K_M        # reproducible
-	tulu3:8b-q4_K_M                     # standard quantization
 	llama-guard3:8b-q4_K_M              # safety of prompts
 	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
 )
 
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
-	phi4-reasoning:14b-q4_K_M
+	devstral:24b-small-2505-q4_K_M
+	qwen2.5vl:32b-q4_K_M
 	phi4-reasoning:14b-plus-q4_K_M
 	qwen3:14b-q4_K_M
 	qwen3:30b-a3b-q4_K_M
 	qwen3:32b-q4_K_M
 	lsm03624/GLM-Z1-32B-0414-Q4_K_M   # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
 	rhundt/GLM-4-0414-32b-128k-Q4_K_M # Rope scaling 4x or 32K base
-	deepcoder:14b-instruct-q4_K_M
+	deepcoder:14b-preview-q4_K_M
 	mistral-small3.1:24b-instruct-2503-q4_K_M
-	cogito:14b-v1-preview-qwen-q4_K-M # finetuned qwen
-	cogito:32b-v1-preview-qwen-q4_K-M # finetuned qwen
+	cogito:32b-v1-preview-qwen-q4_K_M # finetuned qwen
 	exaone-deep:32b-q4_K_M
 	gemma3:12b-it-q4_K_M                # 12B
 	gemma3:27b-it-q4_K_M                # 12B
 	openthinker:32b-q4_K_M              # fine tuned on openthoughts 114k dataset
 	deepseek-r1:14b-qwen-distill-q4_K_M # r1 comparable
 	deepseek-r1:32b-qwen-distill-q4_K_M # r1 comparable
-	olmo2:13b-1124-instruct-q4_K_M      # compets with llama 3.1
 	phi4:14b-q4_K_M                     # no tool calling
 	llama3.2-vision:11b-instruct-q4_K_M # vision works now
 )
 
 log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
-	cogito:70b:v1-preview-llama-q4_K-M   # finetuned llama
+	qwen2.5vl:72b-q4_K_M
 	deepseek-r1:70b-llama-distill-q4_K_M # llama based
-	tulu3:70b-q4_K_M                     # AI2 instruction following
 	llama3.3:70b-instruct-q4_K_M         # 128K context
 	llama3.2-vision:90b-instruct-q4_K_M  # vision works now
 )
@@ -530,6 +524,15 @@ MODEL_MEGA+=(
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
+	olmo2:7b-1124-instruct-q4_K_M        # compets with llama 3.1
+	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
+	opencoder:8b-instruct-q4_K_M         # reproducible
+	tulu3:8b-q4_K_M                      # standard quantization
+	exaone-deep:2.4b-q4_K_M
+	phi4-mini:3.8b-q4_K_M
+	olmo2:13b-1124-instruct-q4_K_M # compets with llama 3.1
+	phi4-reasoning:14b-q4_K_M
+	tulu3:70b-q4_K_M                 # AI2 instruction following
 	sammcj/glm-4-32b-0414            # Q6_K 32K context
 	JollyLlama/GLM-4-32B-0414-Q4_K_M # GLM-4 32K Q4
 	deepseek-r1:latest               # 7b reasoning model
@@ -543,12 +546,16 @@ MODEL_REMOVE+=(
 	deepseek-r1:7b
 	deepseek-r1:latest
 	granite3-guardian:2b-q8_0
+	cogito:3b-v1-preview-llama-q4_K_M # Deep Cogito tool too
 	cogito:8b
+	cogito:8b-v1-preview-llama-q4_K_M # trained with Iterated Distillation and Amplification
+	cogito:3b
+	cogito:14b-v1-preview-qwen-q4_K_M  # finetuned qwen
+	cogito:70b:v1-preview-llama-q4_K_M # finetuned llama
 	qwen3:latest
 	phi4-mini:latest
 	gemma3:4b
 	exaone-deep:2.4b
-	cogito:3b
 	Drews54/llama3.2-vision-abliterated:latest
 	bge-large:latest b3d71c928059
 	aravhawk/llama4:400b            # llama 4 scout
@@ -598,7 +605,7 @@ MODEL_REMOVE+=(
 	mistral-small3.1:24b              # can run on 32GB Mac
 	cogito:14b                        # Deep Cogito tool too
 	cogito:32b                        # Deep Cogito tool too
-	cogito:14b-v1-preview-qwen-q4_K-M # finetuned qwen
+	cogito:14b-v1-preview-qwen-q4_K_M # finetuned qwen
 	qwen3:14b
 	qwen3:32b
 	deepcoder        #  Together AI and Agentica
@@ -1049,7 +1056,8 @@ if [[ -v OLLAMA_MODELS ]]; then
 	log_verbose "Changing default storage of models to $OLLAMA_MODELS"
 	if ! config_mark; then
 		config_add <<-EOF
-			if [ -z "\${OLLAMA_MODELS+x} ]; then OLLAMA_MODELS="$OLLAMA_MODELS"; fi
+			if [ -z "\$OLLAMA_MODELS" ]; then export OLLAMA_MODELS=\"$OLLAMA_MODELS\"; fi
+			if [ -z "\${OLLAMA_API_BASE" ]; then export OLLAMA_API_BASE=\"$OLLAMA_API_BASE\"; fi
 		EOF
 	fi
 fi
@@ -1087,6 +1095,7 @@ if ! config_mark "$WS_DIR/git/src/.envrc"; then
 	config_add "$WS_DIR/git/src/.envrc" <<-EOF
 		[[ -v OLLAMA_KV_CACHE_TYPE ]] || export OLLAMA_KV_CACHE_TYPE=q4_0
 		[[ -v OLLAMA_FLASH_ATTENTION ]] || export OLLAMA_FLASH_ATTENTION=1
+		[[ -v OLLAMA_CONTEXT_LENGTH ]] || export OLLAMA_CONTEXT_LENGTH=131072
 	EOF
 fi
 # log_warning "shell-gpt requires OPENAI_API_KEY to be set or will store in ~/.config/shell_gpt/.sgptrc

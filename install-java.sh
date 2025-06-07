@@ -15,13 +15,21 @@ SCRIPT_DIR=${SCRIPT_DIR:=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}
 # this replace set -e by running exit on any error use for bashdb
 trap 'exit $?' ERR
 OPTIND=1
-JAVA_VERSION="${JAVA_VERSION:-8}"
+
+DEBUGGING="${DEBUGGING:-false}"
+VERBOSE="${VERBOSE:-false}"
+FORCE="${FORCE:-false}"
+
+JAVA_VERSION="${JAVA_VERSION:-11}"
 ASDF_JAVA="${ASDF_JAVA:-openjdk}"
 # adoptopenjdk deprecated move to temurin
 # https://github.com/AdoptOpenJDK/homebrew-openjdk
 # HOMEBREW_JAVA="${HOMEBREW_JAVA:-adoptopenjdk}"
 # TAP="${TAP:-"adoptopenjdk/openjdk"}"
-HOMEBREW_JAVA="${HOMEBREW_JAVA:-temurin@}"
+# thisis Intel only
+# HOMEBREW_JAVA="${HOMEBREW_JAVA:-temurin@}"
+# as of June 2025 this installs openjdk by default
+HOMEBREW_JAVA="${HOMEBREW_JAVA:-java@}"
 
 JENV="${JENV:-false}"
 export FLAGS="${FLAGS:-""}"
@@ -108,5 +116,14 @@ fi
 #    log_verbose "version 8 is is duplicated in $TAP so remove"
 #    brew untap "$TAP"
 #fi
-log_verbose installing "$HOMEBREW_JAVA$JAVA_VERSION"
-cask_install "$HOMEBREW_JAVA$JAVA_VERSION"
+
+# now just installs the default version
+log_verbose installing "$HOMEBREW_JAVA"
+brew_install "$HOMEBREW_JAVA"
+
+if ! config_mark; then
+	log_verbose "brew java is keg only so need to install it"
+	config_add <<-'EOF'
+		if ! echo "$PATH" | grep -q "openjdk/bin"; then PATH=":$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"; fi
+	EOF
+fi

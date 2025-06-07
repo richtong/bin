@@ -125,6 +125,7 @@ source_lib lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 log_verbose "Install asdf core"
 log_verbose "Install asdf support including gcc if it has to build from source"
+log_verbose "Must come before install-node or install-python so it takes precendence"
 
 PACKAGE+=(
 	# autoenv # deprecated use direnv instead

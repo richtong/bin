@@ -104,12 +104,14 @@ shift $((OPTIND - 1))
 # bandit             # check for security problems deprecated for ruff
 PACKAGE+=(
 
-	mypy               # mypy - python type checking
+	mypy       # mypy - python type checking
+	postgresql # postgresql - database
+	redis
 	pipx               # run python cli in venv
+	pkgconfig          # pkgconfig used by asdf
 	python-argcomplete # argument parser
 	ruff               # fast linter replaces flake8, pydocstyle, black
 	tox                # tox - python test runner for different versions of python
-	pkgconfig          # pkgconfig used by asdf
 
 )
 

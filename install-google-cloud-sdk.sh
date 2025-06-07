@@ -2,6 +2,7 @@
 # vi:set ts=4 sw=4 noet:
 ##
 ## Install Google Cloud SDK and major components
+## And install Googke Workspace Admin
 ## So that at the end you are ready to deploy against GCloud
 ## https://cloud.google.com/sdk/gcloud/reference/components/install
 ##
@@ -166,3 +167,13 @@ fi
 
 log_verbose "Turn off analytics reporting"
 gcloud config set disable_usage_reporting false
+
+log_verbose "install Google Workspace Admin Manager"
+bash <(curl -s -S -L https://gam-shortn.appspot.com/gam-install)
+
+if ! config_mark; then
+	log_verbose "configure the profile"
+	config_add <<-'EOF'
+		echo "$PATH" | grep -q "bin/gam7" || PATH="$HOME/bin/gam7:$PATH"
+	EOF
+fi
