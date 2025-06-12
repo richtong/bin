@@ -70,13 +70,14 @@ PACKAGE+=(
 
 if $EXTRAS; then
 	PACKAGE+=(
+		codex                 # openai cli tool
 		db-browser-for-sqlite # Edit the open-webui webui.db
 		ffmpeg                # needed by open-webui and whisper
+		loom                  # screen and demo recording
 		ngrok                 # local ssh gateway for open-webui
 		parquet-cli           # command line opening parquet data files
 		pearai
-		tika  # Apache tika content extractor command line
-		codex # openai cli tool
+		tika # Apache tika content extractor command line
 
 	)
 

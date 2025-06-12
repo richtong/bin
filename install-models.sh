@@ -258,6 +258,7 @@ MODEL_TOOL+=(
 	qwen3:30b-a3b_q4_K_M
 	qwen3:32b-q4_K_M
 	qwen3:235b-q4_K_M
+	JollyLlama/GLM-4-32B-0414-Q4_K_M
 	granite3.3:2b
 	granite3.3:8b
 	mistral-small3.1:24b-instruct-2503-q4_K_M
@@ -274,6 +275,7 @@ MODEL_TOOL+=(
 )
 
 MODEL_REASONING+=(
+	magistral:24b-small-2506-q4_K_M
 	qwen3:0.6b-q4_K_M
 	qwen3:1.7b-q4_K_M
 	qwen3:4b-q4_K_M
@@ -298,6 +300,7 @@ MODEL_REASONING+=(
 	deepscaler:1.5b-preview-fp16
 	openthinker:32b-q4_K_M
 	openthinker:7b-q4_K_M
+	JollyLlama/GLM-Z1-32B-0414-Q4_K_M
 	deepseek-r1:1.5b-qwen-distill-q4_K_M
 	deepseek-r1:14b-qwen-distill-q4_K_M
 	deepseek-r1:32b-qwen-distill-q4_K_M
@@ -318,6 +321,7 @@ MODEL_MOE+=(
 # they support. This uses fuzzy matching so you don't have to duplicate every
 # tag, it does long string matches
 declare -A MODEL_MEM+=(
+	["magistral:24b-small-2506-q4_K_M"]=14
 	["devstral:24b-small-2505-q4_K_M"]=14
 	["qwen2.5vl:7b-q4_K_M"]=6
 	["qwen2.5vl:32b-q4_K_M"]=38
@@ -390,6 +394,7 @@ declare -A MODEL_MEM+=(
 # for models that are close, put the more specfiic one first
 # search top most first
 declare -A MODEL_CONTEXT+=(
+	["magistral"]=39
 	["devstral"]=128
 	["qwen2.5vl"]=128
 	["qwen3"]=40
@@ -410,8 +415,10 @@ declare -A MODEL_CONTEXT+=(
 	["llama3.2-vision"]=128
 	["llama3.3"]=128
 	["mistral-small3.1"]=128
-	["rhundt/GLM-4-0414-32b-128k-Q4_K_M"]=128 # Rope scaling 4x or 32K base
+	["JollyLlama/GLM-4-32B-0414-Q4_K_M"]=32
+	["JollyLlama/GLM-Z1-32B-0414-Q4_K_M"]=32
 	["lsm03624/GLM-Z1-32B-0414-Q4_K_M"]=32    # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
+	["rhundt/GLM-4-0414-32b-128k-Q4_K_M"]=128 # Rope scaling 4x or 32K base
 	["olmo"]=4
 	["opencoder:1.5b"]=4
 	["opencoder:8b"]=8
@@ -470,7 +477,6 @@ MODEL_SMALL+=(
 	qwen3:8b-q4_K_M
 	exaone-deep:7.8b-q4_K_M
 	granite3.3:8b
-	openthinker:7b-q4_K_M
 	deepseek-r1:7b-qwen-distill-q4_K_M  # competitive to o1
 	deepseek-r1:8b-llama-distill-q4_K_M # q8b
 	llama-guard3:8b-q4_K_M              # safety of prompts
@@ -479,13 +485,15 @@ MODEL_SMALL+=(
 
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
+	magistral:24b-small-2506-q4_K_M
 	devstral:24b-small-2505-q4_K_M
 	qwen2.5vl:32b-q4_K_M
 	phi4-reasoning:14b-plus-q4_K_M
 	qwen3:14b-q4_K_M
 	qwen3:30b-a3b-q4_K_M
 	qwen3:32b-q4_K_M
-	lsm03624/GLM-Z1-32B-0414-Q4_K_M   # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
+	JollyLlama/GLM-4-32B-0414-Q4_K_M
+	JollyLlama/GLM-Z1-32B-0414-Q4_K_M
 	rhundt/GLM-4-0414-32b-128k-Q4_K_M # Rope scaling 4x or 32K base
 	deepcoder:14b-preview-q4_K_M
 	mistral-small3.1:24b-instruct-2503-q4_K_M
@@ -524,6 +532,8 @@ MODEL_MEGA+=(
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
+	openthinker:7b-q4_K_M                # return gibberish
+	lsm03624/GLM-Z1-32B-0414-Q4_K_M      # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
 	olmo2:7b-1124-instruct-q4_K_M        # compets with llama 3.1
 	deepseek-r1:1.5b-qwen-distill-q4_K_M # small model
 	opencoder:8b-instruct-q4_K_M         # reproducible
