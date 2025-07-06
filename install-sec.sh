@@ -64,4 +64,7 @@ PACKAGE+=(
 	hashcat
 )
 
+log_verbose "metasploit requires rosetta"
+softwareupdate --install-rosetta --agree-to-license
+
 package_install "${PACKAGE[@]}"

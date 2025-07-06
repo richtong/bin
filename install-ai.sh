@@ -63,21 +63,28 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
 PACKAGE+=(
 	# huggingface-cli # hf.co download files use huggingface_hub instead
-	llama.cpp # underlying server to ollama
-	ollama    # ollama - ollama local runner
+	aider                # https://openalternative.co/alternatives/cursor
+	claude               # Anthropic's Claude AI assistant
+	codex                # openai cli tool
+	cursor               # pair programming using VScode, takes over the $(code)
+	ffmpeg               # needed by open-webui and whisper
+	llama.cpp            # underlying server to ollama
+	loom                 # screen and demo recording
+	ollama               # ollama - ollama local runner
+	openaai/tap/opencode # opencode - codex and claude code
+	pearai               # powered by Roo Code auto routing by Y-Cominator
+	void                 # ai coder
+	warp                 # ai-based shell
+	zed                  # yet another ai editor
 
 )
 
 if $EXTRAS; then
 	PACKAGE+=(
-		codex                 # openai cli tool
 		db-browser-for-sqlite # Edit the open-webui webui.db
-		ffmpeg                # needed by open-webui and whisper
-		loom                  # screen and demo recording
 		ngrok                 # local ssh gateway for open-webui
 		parquet-cli           # command line opening parquet data files
-		pearai
-		tika # Apache tika content extractor command line
+		tika                  # Apache tika content extractor command line
 
 	)
 
@@ -121,18 +128,12 @@ if in_os mac; then
 
 	if $EXTRAS; then
 		CASK+=(
-			aider               # https://openalternative.co/alternatives/cursor
-			claude              # Anthropic's Claude AI assistant
 			codeedit            # Mac only code editor
 			cody                # Enterprise ai code assistant
 			comfyui             # ComfyUI - local audio/video
-			cursor              # pair programming using VScode, takes over the $(code)
 			diffusionbee        # diffusionbee - Stability diffusion on Mac
 			mochi-diffusion     # mochi-diffusion - Stability diffusion on Mac (haven't used)
 			tabbyml/tabby/tabby # tabby serve --device metal --model StarCoder-1B
-			void                # ai coder
-			warp                # ai-based shell
-			zed                 # yet another ai editor
 
 		)
 	fi
@@ -162,18 +163,22 @@ if $EXTRAS; then
 		"huggingface_hub[cli]" # download huggingface models
 		"litellm[proxy]"       # litellm enables cost and routing
 		mcpo                   # openAPI/swagger interface to mcp servers using claude-desktop.json
+		"mcp[cli]"             # cli for mcp for managing claude-desktop.json (not for roo code)
 		mlx                    # Apple silicon optimized LMM
 		mlx_lm                 # mlx_lm.server to serve mlx
 		open-interpreter       # let's LLMs run code locally
 		"docling-serve[ui]"    # docling
 		kaggle                 # download kaggle data make sure
+		camaofox               #
 
 	)
 
 	NODE_PACKAGE+=(
-		@receptron/graphai_cli
+		@receptron/graphai_cli    # graphAI command line interpreter
 		@anthropic-ai/claude-code # command line ai
-		playwrite
+		playwrite                 # browser automation🤽‍♂️
+		mulmocast                 # graphAI based multimedia presentation, podcast and video tool
+		@google/gemini-cli        # adding the gemini-cli
 	)
 fi
 
@@ -293,6 +298,240 @@ if ! config_mark "$WS_DIR/git/src/.envrc"; then
 		  [[ -v VITE_DB_SSL ]] || export "VITE_DB_SSL"="$(op item get "Supabase App-Whiskey" --fields "VITE_DB_SSL" --vault "DevOps" --reveal)"
 		  [[ -v VITE_PORT ]] || export "VITE_PORT"="6573"
 		  [[ -v MODEL_API_URL ]] || export "MODEL_API_URL"="http://localhost:8081/api/chat/completions"
+
+		      # open code
+		      [[ -v LOCAL_ENDPOINT ]] || export "LOCAL_ENDPOINT"="http://localhost:11434"
+
+		  # for mulmocast
+		  [[ -v DEFAULT_OPENAI_IMAGE_MODEL ]] || export "DEFAULT_OPENAI_IMAGE_MODEL"="gpt-image-1"
+		  [[ -v GOOGLE_PROJECT_ID ]] || export "GOOGLE_PROJECT_ID"="$(op item get "Google Project ID Dev" --fields "project id" --vault "DevOps" --reveal)"
+
+	EOF
+fi
+
+log_verbose "Install MCP protocols using and insert 1Password secrets"
+# note you do not need to insert these if you have them set by environment
+# variable
+# using cat with Heredoc to avoid quote salads
+MCP_SERVERS+=$(
+	cat <<-EOF
+		{
+		  "mcpServers": {
+		    "browserbase": {
+		      "command": "npx",
+		      "args": [
+		        "-y",
+		        "@browserbasehq/mcp"
+		      ],
+		      "env": {
+		        "BROWSERBASE_API_KEY": "$(op item get "Browserbase API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
+		        "BROWSERBASE_PROJECT_ID": "$(op item get "Browserbase Project ID Dev" --fields "project id" --vault "DevOps" --reveal)"
+		      },
+		      "alwaysAllow": [
+		        "load",
+		        "browserbase_navigate",
+		        "browserbase_click"
+		      ]
+		    },
+		    "arxiv": {
+		      "command": "pipx",
+		      "args": [
+		        "run",
+		        "arxiv-mcp-server",
+		        "--storage-path",
+		        "/Users/rich/.arxiv-mcp-server/papers"
+		      ],
+		      "disabled": false,
+		      "alwaysAllow": [
+		        "search_papers",
+		        "download_paper",
+		        "read_paper",
+		        "list_papers"
+		      ]
+		    },
+		    "brave-search": {
+		      "command": "npx",
+		      "args": [
+		        "-y",
+		        "@modelcontextprotocol/server-brave-search"
+		      ],
+		      "env": {
+		        "BRAVE_API_KEY": "$(op item get "Brave API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
+		      },
+		      "alwaysAllow": [
+		        "search",
+		        "brave_web_search"
+		      ]
+		    },
+		  "memory": {
+		      "command": "npx",
+		      "args": [
+		        "-y",
+		        "@modelcontextprotocol/server-memory"
+		      ],
+		      "env": {},
+		      "disabled": false,
+		      "alwaysAllow": [
+		        "memory_read",
+		        "memory_write",
+		        "memory_search",
+		        "read_graph"
+		      ]
+		    },
+		    "time": {
+		      "command": "uvx",
+		      "args": [
+		        "mcp-server-time",
+		        "--local-timezone=America/Los_Angeles"
+		      ],
+		      "env": {},
+		      "disabled": false,
+		      "alwaysAllow": [
+		        "get_current_time",
+		        "get_timezone"
+		      ]
+		    },
+		    "firecrawl": {
+		      "command": "npx",
+		      "args": [
+		        "-y",
+		        "firecrawl-mcp"
+		      ],
+		      "env": {
+		        "FIRECRAWL_API_KEY": "$(op item get "FireCrawl API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
+		      },
+		      "disabled": false,
+		      "alwaysAllow": [
+		        "firecrawl_map",
+		        "firecrawl_crawl",
+		        "firecrawl_check_crawl_status",
+		        "firecrawl_search",
+		        "firecrawl_extract",
+		        "firecrawl_deep_research",
+		        "firecrawl_generate_llmstxt",
+		        "firecrawl_scrape"
+		      ]
+		    },
+
+		        "github": {
+		          "command": "/opt/homebrew/bin/github-mcp-server",
+		          "args": [
+		            "stdio"
+		          ],
+		          "env": {
+		            "GITHUB_PERSONAL_ACCESS_TOKEN": "$(op item get "Github Personal Access Token Dev" --fields "personal access token" --vault "DevOps" --reveal)"
+		          },
+		          "alwaysAllow": [
+		            "get_file_contents",
+		            "search_code",
+		            "get_me",
+		            "list_notifications"
+		          ]
+		        },
+		        "time": {
+		          "command": "uvx",
+		          "args": [
+		            "mcp-server-time",
+		            "--local-timezone=America/Los_Angeles"
+		          ],
+		          "alwaysAllow": [
+		            "get_current_time"
+		          ]
+		        },
+		        "tavily": {
+		          "command": "npx",
+		          "args": [
+		            "-y",
+		            "tavily-mcp@0.2.3"
+		          ],
+		          "env": {
+		            "TAVILY_API_KEY": "$(op item get "Tavily API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
+		          },
+		          "alwaysAllow": [
+		            "tavily-search"
+		          ]
+		        },
+		        "google-maps": {
+		          "command": "npx",
+		          "args": [
+		            "-y",
+		            "@modelcontextprotocol/server-google-maps"
+		          ],
+		          "env": {
+		            "GOOGLE_MAPS_API_KEY": "$(op item get "Google Maps API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
+		          },
+		          "alwaysAllow": [
+		            "maps_reverse_geocode",
+		            "maps_geocode",
+		            "maps_search_places",
+		            "maps_place_details",
+		            "maps_distance_matrix",
+		            "maps_elevation",
+		            "maps_directions"
+		          ]
+		        },
+		            "exa": {
+		              "command": "npx",
+		              "args": [
+		                "-y",
+		                "mcp-remote",
+		                "https://mcp.exa.ai/mcp?exaApiKey=6a7fcca3-37d9-4b24-b921-2cfd0d705a1d"
+		              ]
+		            }
+
+		  }
+		}
+	EOF
+)
+
+# Note this uses brace expansion
+MCP_LOCATIONS+=(
+	# OpenWebUI MCPO server converts MCP to an OpenAI API Comaptible Server
+	"$HOME/.config/mcp/claude-desktop.json"
+	# Claude Code MCP servers
+	"$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+	# Roo Code, Cline, TNE Compass in VSCode or Code
+	"$HOME/Library/Application Support/{VSCodium,Code}/User/globalStorage/{rooveterinaryinc.roo-cline,tne-ai.tne-code,saoudrizwan.claude-dev}/settings/mcp_settings.json"
+)
+for config in "${MCP_LOCATIONS[@]}"; do
+	if ! config_mark "$config" "{ _comment: " "},"; then
+		config_add "$config" <<-EOF
+			    $MCP_SERVERS
+		EOF
+	fi
+done
+
+# https://github.com/opencode-ai/opencode
+if ! config_mark "$HOME/.opencode.json"; then
+	config_add "$HOME/.opencode.json" <<-EOF
+		      {
+		        $MCP_SERVERS,
+		        "agents": {
+		            "coder": {
+		              "model": "claude-4.0-sonnet",
+		              "maxTokens": 5000
+		            },
+		            "task": {
+		              "model": "claude-4.0-sonnet",
+		              "maxTokens": 5000
+		            },
+		            "title": {
+		              "model": "claude-4.0-sonnet",
+		              "maxTokens": 80
+		            }
+		          },
+		          "lsp": {
+		            "go": {
+		              "disabled": false,
+		              "command": "gopls"
+		            },
+		            "typescript": {
+		              "disabled": false,
+		              "command": "typescript-language-server",
+		              "args": ["--stdio"]
+		            }
+		          },
+		      }
 
 	EOF
 fi

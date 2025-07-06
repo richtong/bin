@@ -188,7 +188,6 @@ MODEL_MLX_SMALL+=(
 )
 # <=32B
 MODEL_MLX_MEDIUM+=(
-	mlx-community/Qwen3-30B-A3B-mixed-3-4bit
 )
 # <=90B
 MODEL_MLX_LARGE+=(
@@ -198,6 +197,7 @@ MODEL_MLX_XLARGE+=(
 MODEL_MLX_MEGA+=(
 )
 MODEL_MLX_REMOVE+=(
+	mlx-community/Qwen3-30B-A3B-mixed-3-4bit
 	mlx-community/DeepSeek-R1-Distill-Qwen-7B-4bit
 	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit
 	mlx-community/gemma-3-27b-pt-4bit
@@ -237,7 +237,15 @@ MODEL_GGUF_REMOVE+=(
 	hf.co/lmstudio-community/olmOCR-7B-0225-preview-GGUF:Q4_K_M
 )
 
+MODEL_AUDIO+=(
+	# https://developers.googleblog.com/en/introducing-gemma-3n-developer-guide/
+	gemma3n:e2b-it-q4_K_M # https://ai.google.dev/gemma/docs/gemma-3n 5B with 2B minimum
+	gemma3n:e4b-it-q4_K_M # Matformer and conditional parameter loading effective 4B actual 8B
+)
+
 MODEL_VISION+=(
+	gemma3n:e2b-it-q4_K_M # https://ai.google.dev/gemma/docs/gemma-3n 5B with 2B minimum
+	gemma3n:e4b-it-q4_K_M
 	qwen2.5vl:32b-q4_K_M
 	mistral-small3.1:24b-instruct-2503-q4_K_M
 	gemma3:27b-it-q4_K_M
@@ -321,6 +329,8 @@ MODEL_MOE+=(
 # they support. This uses fuzzy matching so you don't have to duplicate every
 # tag, it does long string matches
 declare -A MODEL_MEM+=(
+	["gemma3n:e2b-it-q4_K_M"]=5.6
+	["gemma3n:e4b-it-q4_K_M"]=7.5
 	["magistral:24b-small-2506-q4_K_M"]=14
 	["devstral:24b-small-2505-q4_K_M"]=14
 	["qwen2.5vl:7b-q4_K_M"]=6
@@ -394,6 +404,8 @@ declare -A MODEL_MEM+=(
 # for models that are close, put the more specfiic one first
 # search top most first
 declare -A MODEL_CONTEXT+=(
+	["gemma3n:e2b-it-q4_K_M"]=32
+	["gemma3n:e2b-it-q4_K_M"]=32
 	["magistral"]=39
 	["devstral"]=128
 	["qwen2.5vl"]=128
@@ -454,17 +466,16 @@ declare -A MODEL_CONTEXT_MEM+=(
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 log_verbose "Minimal Base <=2B models for machines that <=4GB GPU Memory"
 MODEL+=(
-	deepcoder:1.5b-preview-q4_K_M # fine tuned deepseek-r1-distilled
 	gemma3:1b-it-q4_K_M
+	gemma3n:e2b-it-q4_K_M
 	granite3.3:2b # reasoning model messages += []{role: control, content: thinking}]
 	granite3.2-vision:2b-q4_K_M
-	deepscaler:1.5b-preview-fp16
 	shieldgemma:2b-q4_K_M # safety of text prompts
-	llama-guard3:1b-q8_0  # safety of prompts
 )
 
 log_verbose "loading all models >2B and <=4B parameters, requires >=8GB of RAM"
 MODEL_XSMALL+=(
+	gemma3n:e2b-it-q4_K_M
 	gemma3:4b-it-q4_K_M
 	qwen3:1.7b-q4_K_M
 	phi4-mini-reasoning:3.8b-q4_K_M
@@ -477,10 +488,7 @@ MODEL_SMALL+=(
 	qwen3:8b-q4_K_M
 	exaone-deep:7.8b-q4_K_M
 	granite3.3:8b
-	deepseek-r1:7b-qwen-distill-q4_K_M  # competitive to o1
-	deepseek-r1:8b-llama-distill-q4_K_M # q8b
-	llama-guard3:8b-q4_K_M              # safety of prompts
-	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
+	deepseek-r1:7b-qwen-distill-q4_K_M # competitive to o1
 )
 
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
@@ -492,16 +500,14 @@ MODEL_MEDIUM+=(
 	qwen3:14b-q4_K_M
 	qwen3:30b-a3b-q4_K_M
 	qwen3:32b-q4_K_M
-	JollyLlama/GLM-4-32B-0414-Q4_K_M
-	JollyLlama/GLM-Z1-32B-0414-Q4_K_M
+	exaone-deep:32b-q4_K_M            # Korean need to use more
+	JollyLlama/GLM-Z1-32B-0414-Q4_K_M # zhipu model need to  use more
 	rhundt/GLM-4-0414-32b-128k-Q4_K_M # Rope scaling 4x or 32K base
 	deepcoder:14b-preview-q4_K_M
 	mistral-small3.1:24b-instruct-2503-q4_K_M
-	cogito:32b-v1-preview-qwen-q4_K_M # finetuned qwen
-	exaone-deep:32b-q4_K_M
+	cogito:32b-v1-preview-qwen-q4_K_M   # finetuned qwen
 	gemma3:12b-it-q4_K_M                # 12B
 	gemma3:27b-it-q4_K_M                # 12B
-	openthinker:32b-q4_K_M              # fine tuned on openthoughts 114k dataset
 	deepseek-r1:14b-qwen-distill-q4_K_M # r1 comparable
 	deepseek-r1:32b-qwen-distill-q4_K_M # r1 comparable
 	phi4:14b-q4_K_M                     # no tool calling
@@ -511,16 +517,11 @@ MODEL_MEDIUM+=(
 log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
 	qwen2.5vl:72b-q4_K_M
-	deepseek-r1:70b-llama-distill-q4_K_M # llama based
-	llama3.3:70b-instruct-q4_K_M         # 128K context
-	llama3.2-vision:90b-instruct-q4_K_M  # vision works now
 )
 
 log_verbose "Extra models over 100B parameters, requires >=128GB"
 MODEL_XLARGE+=(
-	milkey/Qwen3-UD:235B-Q2_K_XL
 	llama4:17b-scout-16e-instruct-q4_K_M
-	# command-a:111b-03-2025-q4_K_M # 256K token context
 )
 
 log_verbose "Megalarge models over 400B parameters requires >=256GB"
@@ -532,6 +533,17 @@ MODEL_MEGA+=(
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
+	milkey/Qwen3-UD:235B-Q2_K_XL         # too big and do not  use much
+	deepseek-r1:70b-llama-distill-q4_K_M # llama based
+	llama3.3:70b-instruct-q4_K_M         # 128K context
+	llama3.2-vision:90b-instruct-q4_K_M  # vision works now
+	llama-guard3:8b-q4_K_M               # safety of prompts
+	JollyLlama/GLM-4-32B-0414-Q4_K_M
+	deepseek-r1:8b-llama-distill-q4_K_M # q8b
+	bespoke-minicheck:7b-q4_K_M         # Fact check 7B q4_K_M
+	deepscaler:1.5b-preview-fp16
+	llama-guard3:1b-q8_0                 # safety of prompts
+	openthinker:32b-q4_K_M               # fine tuned on openthoughts 114k dataset
 	openthinker:7b-q4_K_M                # return gibberish
 	lsm03624/GLM-Z1-32B-0414-Q4_K_M      # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
 	olmo2:7b-1124-instruct-q4_K_M        # compets with llama 3.1
@@ -636,10 +648,11 @@ MODEL_REMOVE+=(
 	llama3.3:latest        # 128K context
 	llama3.3:70b           # 128K context
 	aravhawk/llama4:latest
-	aravhawk/llama4  # llama 4 scout
-	command-a        # 111b parameters
-	command-a:latest # tools
-	command-a:111b   # open weights 23 languages
+	aravhawk/llama4               # llama 4 scout
+	command-a                     # 111b parameters
+	command-a:latest              # tools
+	command-a:111b                # open weights 23 languages
+	command-a:111b-03-2025-q4_K_M # 256K token context
 	qwen3:235b
 	tulu3                    # AI2 instruction following
 	tulu3:latest             # full open source data, code, recipes

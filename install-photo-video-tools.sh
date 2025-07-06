@@ -72,7 +72,7 @@ set -u
 # exiftools - Read EXIF from files
 # gimp - 2D editor
 # handbrake - transcoding
-# hugin - panaramas
+# hugin - panaramas 2019 version for Mac does not run on Sequoia
 
 log_verbose "handbrake needs libdvdcss from el capitan on"
 PACKAGE+=(
@@ -97,7 +97,7 @@ fi
 APP+=(
 
 	gimp
-	hugin
+	# hugin  # deprecated 2019 version does not work on sequoia
 
 )
 
@@ -165,8 +165,9 @@ if [[ -v CAPTUREONE_GUID ]]; then
 	log_verbose "Drag Capture One and eject the Volume"
 fi
 
-log_warning "Cannot automatically install PTGui for Panaramas"
+log_warning "Cannot automatically install PTGui for Panoramas"
 log_warning "goto https://www.ptgui.com and type in registration to and set PTGUI_GUID"
+log_warning "Version 13 requires a USD 90 upgrade"
 if [[ -v PTGUI_GUID ]]; then
 	PTGUI_URL="${PTGUI_URL:-"https://www.ptgui.com/downloads/1218000/reg/mac105/standard/116185/$PTGUI_GUID/PTGui_$PTGUI_VERSION.dmg"}"
 	download_url_open "$PTGUI_URL"

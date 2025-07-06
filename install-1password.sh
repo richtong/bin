@@ -269,26 +269,31 @@ ENTRY+=(
 # need quotes for huggingface-cli because shfmt will
 # do not use github_token, use gh auth login
 # do not use AWS_SECRET_ACCESS_KEY, use AWS_SECRET_ACCESS_KEY use aws ssologin
-declare -A OP_API_ITEM=(
+declare -A OP_API_ITEM+=(
 	[ALIBABA_API_KEY]="Alibaba Cloud API Key Dev"
 	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
 	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
 	[BRAVE_SEARCH_API_KEY]="Brave Search API Key Dev"
-	[BROWSERLESS_API_KEY]="Browserless API Key Dev"
+	[BROWSERBASE_API_KEY]="Browser Base API Key Dev"
+	[BROWSERBASE_PROJECT_ID]="Browser Base API Key Dev"
+	[BROWSERLESS_API_TOKEN]="Browserless API Key Dev"
 	# [CIVITAI_TOKEN]="Civitai API Key Dev"
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
 	# [DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
+	[ELEVENLABS_API_KEY]="ElevenLabs API Key Dev"
 	[FIRECRAWL_API_KEY]="firecrawl API Key Dev"
 	[GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
 	# [GITHUB_TOKEN]="GitHub Personal Access Token"
-	[GOOGLE_AI_API_KEY]="Google Gemini API Key Dev" # used by zed
-	[GOOGLE_API_KEY]="Google Gemini API Key Dev"
+	# [GOOGLE_AI_API_KEY]="Google Gemini API Key Dev" # used by zed
 	[GEMINI_API_KEY]="Google Gemini API Key Dev" # used by aider
+	[GOOGLE_API_KEY]="Google Gemini API Key Dev"
+	[GOOGLE_MAPS_API_KEY]="Google Maps API Key Dev"
 	[GROQ_API_KEY]="Groq API Key Dev"
 	[HF_TOKEN]="Hugging Face API Token Dev"
 	[LAMINI_API_TOKEN]="LAMINI API Token Dev"
 	# [LOCALSTACK_API_KEY]="LocalStack API Key"
+	[MCPO_API_KEY]="MCPO Server API Key Local"
 	[MISTRAL_API_KEY]="Mistral API Key Dev"
 	[OPENAI_API_KEY]="OpenAI API Key Dev"
 	[OPENROUTER_API_KEY]="OpenRouter API Key Dev"
@@ -299,10 +304,19 @@ declare -A OP_API_ITEM=(
 	[SLASHGPT_ENV_WEBPILOT_UID]="Webpilot UID Dev"
 	[STEPFUN_API_KEY]="StepFun API Key Dev"
 	[SUPERSET_SECRET_KEY]="Apache Superset Secret Dev"
+	[TAVILY_API_KEY]="Taviliy API Key Dev"
+	[TINFOIL_API_KEY]="Tinfoil API Key Dev"
+	[UNBOUND_API_KEY]="Unbound API Key Dev"
 	[WEBUI_API_KEY]="Open WebUI API Key Dev"
 	[WEBUI_SECRET_KEY]="Open WebUI Secret Key Dev"
 	[MCPO_API_KEY]="MCPO Server API Key Local"
 
+)
+
+# A subscription check where you should not use the key but the subscription
+# for Anthropic because Max includes claude code for free
+declare -A OP_API_DISABLE+=(
+	[ANTHROPIC_API_KEY]="ANTHROPIC_MAX"
 )
 
 # the field where the token lives in the item
@@ -312,28 +326,32 @@ declare -A OP_API_ITEM=(
 # apply special fixup later to add the ID
 # note that Local stack is moving to auth tokens
 # so auth token should be changed to when the plugin changes in 1password
-declare -A OP_API_FIELD=(
+declare -A OP_API_FIELD+=(
 
 	[ALIBABA_API_KEY]="api key"
 	[ANTHROPIC_API_KEY]="api key"
 	[AWS_ACCESS_KEY_ID]="access key id"
 	[AWS_SECRET_ACCESS_KEY]="secret access key"
 	[BRAVE_SEARCH_API_KEY]="api	key"
-	[BROWSERLESS_API_KEY]="api key"
+	[BROWSERBASE_API_KEY]="api key"
+	[BROWSERBASE_PROJECT_ID]="project id"
+	[BROWSERLESS_API_TOKEN]="api key" # yes this is correct mulmocast names it token not key
 	# [CIVITAI_TOKEN]="api key"
 	[DEEPSEEK_API_KEY]="api key"
 	# [DIGITALOCEAN_ACCESS_TOKEN]=token
+	[ELEVENLABS_API_KEY]="api key"
 	[FIRECRAWL_API_KEY]="api key"
 	[GITHUB_TOKEN_CLASSIC]="personal access token"
 	# [GITHUB_TOKEN]=token
-	[GOOGLE_AI_API_KEY]="api key"
-	[GOOGLE_API_KEY]="api key"
 	[GEMINI_API_KEY]="api key"
+	[GOOGLE_AI_API_KEY]="api key"
+	[GOOGLE_MAPS_API_KEY]="api key"
 	[GROQ_API_KEY]="api key"
 	[HF_TOKEN]="user access token"
 	[LAMINI_API_TOKEN]="api token"
 	# [LOCALSTACK_API_KEY]="api key"
 	[MISTRAL_API_KEY]="api key"
+	[MCPO_API_KEY]="api key"
 	[OPENAI_API_KEY]="api key"
 	[OPENROUTER_API_KEY]="key"
 	[PERPLEXITY_API_KEY]="api key"
@@ -343,6 +361,9 @@ declare -A OP_API_FIELD=(
 	[SLASHGPT_ENV_WEBPILOT_UID]=key
 	[STEPFUN_API_KEY]="interface key"
 	[SUPERSET_SECRET_KEY]="api key"
+	[TAVILY_API_KEY]="api key"
+	[TINFOIL_API_KEY]="api key"
+	[UNBOUND_API_KEY]="api key"
 	[WEBUI_API_KEY]="api key"
 	[WEBUI_SECRET_KEY]="secret key"
 	[MCPO_API_KEY]="api key"
@@ -358,21 +379,26 @@ declare -A OP_API_VAULT=(
 	[AWS_ACCESS_KEY_ID]="DevOps"
 	[AWS_SECRET_ACCESS_KEY]="DevOps"
 	[BRAVE_SEARCH_API_KEY]="DevOps"
-	[BROWSERLESS_API_KEY]="DevOps"
+	[BROWSERBASE_API_KEY]="DevOps"
+	[BROWSERBASE_PROJECT_ID]="DevOps"
+	[BROWSERLESS_API_TOKEN]="DevOps"
 	# [CIVITAI_TOKEN]="Civitai API Key Dev"
 	[DEEPSEEK_API_KEY]="DevOps"
 	# [DIGITALOCEAN_ACCESS_TOKEN]="Private"
+	[ELEVENLABS_API_KEY]="DevOps"🤽‍♂️
 	[FIRECRAWL_API_KEY]="DevOps"
 	[GITHUB_TOKEN_CLASSIC]="Private"
 	# [GITHUB_TOKEN]="DevOps"
 	[GOOGLE_AI_API_KEY]="DevOps" # used by zed
-	[GOOGLE_API_KEY]="DevOps"
 	[GEMINI_API_KEY]="DevOps"
+	[GOOGLE_API_KEY]="DevOps"
+	[GOOGLE_MAPS_API_KEY]="DevOps"
 	[GROQ_API_KEY]="DevOps"
 	[HF_TOKEN]="DevOps"
 	[LAMINI_API_TOKEN]="DevOps"
-	# [LOCALSTACK_API_KEY]="Private"
+	# [LOCALSTACK_API_KEY]="Private"🤽‍♂️
 	[MISTRAL_API_KEY]="DevOps"
+	[MCPO_API_KEY]="DevOps"
 	[OPENAI_API_KEY]="DevOps"
 	[OPENROUTER_API_KEY]="DevOps"
 	[PERPLEXITY_API_KEY]="DevOps"
@@ -382,9 +408,11 @@ declare -A OP_API_VAULT=(
 	[SLASHGPT_ENV_WEBPILOT_UID]="DevOps"
 	[STEPFUN_API_KEY]="DevOps"
 	[SUPERSET_SECRET_KEY]="DevOps"
+	[TAVILY_API_KEY]="DevOps"
+	[TINFOIL_API_KEY]="DevOps"
+	[UNBOUND_API_KEY]="DevOps"
 	[WEBUI_API_KEY]="DevOps"
 	[WEBUI_SECRET_KEY]="DevOps"
-	[MCPO_API_KEY]="DevOps"
 
 )
 
@@ -438,12 +466,23 @@ fi
 		# .profile
 		# if you are going to use a shared vault then add this
 		#			--account "$OP_API_ACCOUNT"
+		disable_env="${OP_API_DISABLE[$op_api_index]}"
+		if [[ -n $disable_env ]]; then
+			config_add <<-EOF
+				if [[ -v $disable_env ]]; then
+			EOF
+		fi
 		config_add "$profile_file" <<-EOF
 			[[ -v $op_api_index ]] || \\
 				export "$op_api_index"="\$(op item get "${OP_API_ITEM[$op_api_index]}" \\
 					--fields "${OP_API_FIELD[$op_api_index]:-$OP_API_KEY_DEFAULT}" --vault "${OP_API_VAULT[$op_api_index]:-$OPI_API_VAULT_DEFAULT}" \\
 					--reveal)"
 		EOF
+		if [[ -n $disable_env ]]; then
+			config_add <<-EOF
+				fi
+			EOF
+		fi
 	done
 }
 

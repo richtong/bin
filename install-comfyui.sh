@@ -239,6 +239,16 @@ declare -A DIRECT_DEST+=(
 	["https://stable-diffusion-art.com/wp-content/uploads/2025/02/lumina-image-2.json"]=workflows
 
 )
+declare HF_REMOVE+=(
+	flux1-schnell-fp8.safetensors
+	Janus-Pro-1B
+	Janus-Pro-7B
+)
+
+for item in "${!HF_REMOVE[@]}"; do
+	log_verbose "Removing $item at ${HF_DEST[$item]}"
+	rm -rf "${HF_DEST[$item]}"
+done
 
 for item in "${!HF_REPO[@]}"; do
 	# do not quote the HF_DEST and HF_DIR references it will pick up
