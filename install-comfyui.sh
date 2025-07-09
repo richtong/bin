@@ -91,125 +91,107 @@ fi
 
 # https://comfyui-wiki.com/en/tutorial/advanced/flux1-comfyui-guide-workflow-and-examples
 declare -A HF_REPO+=(
-	# Flux.1-dev
-	["flux1-dev-fp8.safetensors"]=Comfy-Org/flux1-dev
-	["flux1-schnell-fp8.safetensors"]=Comfy-Org/flux1-schnell
 
-	# Alibaba Hunyuan Video GGUF
+	# https://docs.comfy.org/tutorials/video/cosmos/cosmos-predict2-video2world
+	["cosmos_predict2_14B_video2world_720p_16fps.safetensors"]=Comfy-Org/Cosmos_Predict2_repackaged
+	["cosmos_predict2_2B_video2world_480p_16fps.safetensors"]=Comfy-Org/Cosmos_Predict2_repackaged
+	["oldt5_xxl_fp8_e4m3fn_scaled.safetensors"]=comfyanonymous/cosmos_1.0_text_encoder_and_VAE_ComfyUI
+	["wan_2.1_vae.safetensors"]=Comfy-Org/Wan_2.1_ComfyUI_repackaged
+
+	# https://comfyui-wiki.com/en/tutorial/advanced/image/hidream/i1-t2i
+	# note fuzzy and not working
+	["ae.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
+	["clip_g_hidream.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
+	["clip_l_hidream.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
+	["hidream_i1_dev_fp8.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI  # 28 steps and faster
+	["hidream_i1_full_fp8.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI # 50 step
+	["llama_3.1_8b_instruct_fp8_scaled.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
+
+	# Alibaba Hunyuan Video GGUF -- old but have experience with it
 	["clip_l.safetensors"]="calcuis/hunyuan-gguf"
-	["llava_llama3_fp8_scaled.safetensors"]="calcuis/hunyuan-gguf"
 	["hunyuan_video_vae_bf16.safetensors"]="calcuis/hunyuan-gguf"
-	["workflow-hunyuan-gguf.json"]="calcuis/hunyuan-gguf"
 	["hunyuan-video-t2v-720p-bf16.gguf"]="calcuis/hunyuan-gguf"
+	# ["hunyuan-video-t2v-720p-q4_0.gguf"]="calcuis/hunyuan-gguf"  # this is very slow do not use
 	["hunyuan-video-t2v-720p-q8_0.gguf"]="calcuis/hunyuan-gguf"
-	# ["hunyuan-video-t2v-720p-q4_0.gguf"]="calcuis/hunyuan-gguf"
+	["llava_llama3_fp8_scaled.safetensors"]="calcuis/hunyuan-gguf"
+	["workflow-hunyuan-gguf.json"]="calcuis/hunyuan-gguf"
 
 	# Alibaba Hunyuan non-GF with BF16
 	# Already copied in the above but need to be in ./text_encoders
-	["clip_l.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"
-	["llava_llama3_fp8_scaled.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"
-	# hunyuan image to video models
-	["llava_llama3_vision.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"
-	# v1 model
-	["hunyuan_video_t2v_720p_bf16.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"
-	# v2 model concat (more true to original image)
-	["hunyuan_video_image_to_video_720p_bf16.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"
-	["hunyuan_video_v2_replace_image_to_video_720p_bf16.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"
+	# ["clip_l.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"
+	# ["hunyuan_video_image_to_video_720p_bf16.safetensors"]="Comfy-Org/HunyuanVideo_repackaged" # v2 model concat (more true to original image)
+	# ["hunyuan_video_t2v_720p_bf16.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"            # v1 model
+	# ["hunyuan_video_v2_replace_image_to_video_720p_bf16.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"
+	# ["llava_llama3_fp8_scaled.safetensors"]="Comfy-Org/HunyuanVideo_repackaged"
+	# ["llava_llama3_vision.safetensors"]="Comfy-Org/HunyuanVideo_repackaged" # hunyuan image to video models
 
 	# Deepseek Janus Pro
-	["Janus-Pro-1B"]="deepseek-ai/Janus-Pro-1B"
-	["Janus-Pro-7B"]="deepseek-ai/Janus-Pro-7B"
+	# ["Janus-Pro-1B"]="deepseek-ai/Janus-Pro-1B"
+	# ["Janus-Pro-7B"]="deepseek-ai/Janus-Pro-7B"
 
-	# Alibaba Wan 2.1
-	["umt5_xxl_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
-	["umt5_xxl_fp8_e4m3fn_scaled.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
-	["wan_2.1_vae.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
-	["clip_vision_h.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
-	["wan2.1_t2v_1.3B_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
-	["wan2.1_i2v_720p_14B_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
+	# Alibaba Wan 2.1  # replaced by VACE
+	# ["clip_vision_h.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
+	# ["umt5_xxl_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
+	# ["umt5_xxl_fp8_e4m3fn_scaled.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
+	# ["wan_2.1_vae.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
 	# ["wan2.1_i2v_480p_14B_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
+	# ["wan2.1_i2v_720p_14B_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
+	# ["wan2.1_t2v_1.3B_fp16.safetensors"]="Comfy-Org/Wan_2.1_ComfyUI_repackaged"
 
 	# https://comfyui-wiki.com/en/tutorial/advanced/lumina-image-2
-	["lumina_2.safetensors"]=Comfy-Org/Lumina_Image_2.0_Repackaged
+	# ["lumina_2.safetensors"]=Comfy-Org/Lumina_Image_2.0_Repackaged
 
-	# https://comfyui-wiki.com/en/tutorial/advanced/image/hidream/i1-t2i
-	["clip_l_hidream.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
-	["clip_g_hidream.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
-	["llama_3.1_8b_instruct_fp8_scaled.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
-	["ae.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
-	# 50 steps high quality and slow
-	["hidream_i1_full_fp8.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
-	# 28 steps and faster
-	# ["hidream_i1_dev_fp8.safetensors"]=Comfy-Org/HiDream-I1_ComfyUI
+	# Flux.1-dev retain for compatibility replaced by Kontext but this is not
+	# working on Mac
+	["flux1-dev-fp8.safetensors"]=Comfy-Org/flux1-dev
+	# ["flux1-schnell-fp8.safetensors"]=Comfy-Org/flux1-schnell  # poor quality
 
 )
 
+# needed for split_files
 declare -A HF_SRC_PATH+=(
-	["clip_l.safetensors"]=split_files/text_encoders
-	["llava_llama3_fp8_scaled.safetensors"]="split_files/text_encoders"
-	# ["hunyuan_video_vae_bf16.safetensors"]=split_files/vae
-	["llava_llama3_vision.safetensors"]="split_files/clip_vision"
-	["hunyuan_video_t2v_720p_bf16.safetensors"]=split_files/diffusion_models
-	["hunyuan_video_image_to_video_720p_bf16.safetensors"]=split_files/diffusion_models
-	["hunyuan_video_v2_replace_image_to_video_720p_bf16.safetensors"]=split_files/diffusion_models
-	["lumina_2.safetensors"]=all_in_one
+
+	# Cosmos
+	["oldt5_xxl_fp8_e4m3fn_scaled.safetensors"]=text_encoders
+	["wan_2.1_vae.safetensors"]=split_files/vae
+
+	# Hidream (not working)
+	["ae.safetensors"]=split_files/vae
+	["clip_g_hidream.safetensors"]=split_files/text_encoders
+	["clip_l_hidream.safetensors"]=split_files/text_encoders
+	["hidream_i1_dev_fp8.safetensors"]=split_files/diffusion_models
+	["hidream_i1_full_fp8.safetensors"]=split_files/diffusion_models
+	["llama_3.1_8b_instruct_fp8_scaled.safetensors"]=split_files/text_encoders
+
 	# alibaba wan2.1
+	["clip_vision_h.safetensors"]="split_files/clip_vision"
 	["umt5_xxl_fp16.safetensors"]="split_files/text_encoders"
 	["umt5_xxl_fp8_e4m3fn_scaled.safetensors"]="split_files/text_encoders"
 	["wan_2.1_vae.safetensors"]="split_files/vae"
-	["clip_vision_h.safetensors"]="split_files/clip_vision"
-	["wan2.1_t2v_1.3B_fp16.safetensors"]="split_files/diffusion_models"
-	["wan2.1_i2v_720p_14B_fp16.safetensors"]="split_files/diffusion_models"
 	["wan2.1_i2v_480p_14B_fp16.safetensors"]="split_files/diffusion_models"
+	["wan2.1_i2v_720p_14B_fp16.safetensors"]="split_files/diffusion_models"
+	["wan2.1_t2v_1.3B_fp16.safetensors"]="split_files/diffusion_models"
 
-	["clip_l_hidream.safetensors"]=split_files/text_encoders
-	["clip_g_hidream.safetensors"]=split_files/text_encoders
-	["llama_3.1_8b_instruct_fp8_scaled.safetensors"]=split_files/text_encoders
-	["ae.safetensors"]=split_files/vae
-	["hidream_i1_full_fp8.safetensors"]=split_files/diffusion_models
-	["hidream_i1_dev_fp8.safetensors"]=split_files/diffusion_models
+	# Alibaba Hunyuqn
+	["clip_l.safetensors"]=split_files/text_encoders
+	["hunyuan_video_image_to_video_720p_bf16.safetensors"]=split_files/diffusion_models
+	["hunyuan_video_t2v_720p_bf16.safetensors"]=split_files/diffusion_models
+	["hunyuan_video_v2_replace_image_to_video_720p_bf16.safetensors"]=split_files/diffusion_models
+	["hunyuan_video_vae_bf16.safetensors"]=split_files/vae
+	["llava_llama3_fp8_scaled.safetensors"]="split_files/text_encoders"
+	["llava_llama3_vision.safetensors"]="split_files/clip_vision"
+	["lumina_2.safetensors"]=all_in_one
 
 )
 
 # to download a single file
 declare -A HF_DEST+=(
-	["flux1-dev-fp8.safetensors"]=models/checkpoints
-	["flux1-schnell-fp8.safetensors"]=models/checkpoints
+	# cosmos location
+	["cosmos_predict2_14B_video2world_720p_16fps.safetensors"]=Comfy-Org/Cosmos_Predict2_repackaged
+	["cosmos_predict2_2B_video2world_480p_16fps.safetensors"]=Comfy-Org/Cosmos_Predict2_repackaged
+	["cosmos_predict2_2B_video2world_480p_16fps.safetensors"]=Comfy-Org/Cosmos_Predict2_repackaged
 
-	# common for gguf and for bf16 hunyaun video
-	["clip_l.safetensors"]=models/clip
-	["llava_llama3_fp8_scaled.safetensors"]=models/clip
-	["hunyuan_video_vae_bf16.safetensors"]=/models/vae
-
-	#  use the comfy ones instead
-	["workflow-hunyuan-gguf.json"]=user/default/workflows
-	# ["hunyuan-video-t2v-720p-q4_k_m.gguf"]=models/unet # quantized doesn't
-	["hunyuan-video-t2v-720p-bf16.gguf"]=models/unet             # gguf version
-	["hunyuan-video-t2v-720p-q8_0.gguf"]=models/unet             # good tradeoff 8-bit
-	["hunyuan-video-t2v-720p-q4_0.gguf"]=models/unet             # haven't tested
-	["hunyuan-video-t2v-720p-bf16.gguf"]=models/diffusion_models # the original floating point 16-bit
-
-	# original hunyuan
-	["clip_l.safetensors"]=models/clip
-	["llava_llama3_fp8_scaled.safetensors"]=models/clip
-	["hunyuan_video_vae_bf16.safetensors"]=models/vae
-	["hunyuan_video_t2v_720p_bf16.safetensors"]=models/diffusion_models
-	["llava_llama3_vision.safetensors"]="models/clip_vision"
-	["hunyuan_video_image_to_video_720p_bf16.safetensors"]=models/diffusion_models
-	["hunyuan_video_v2_replace_image_to_video_720p_bf16.safetensors"]=models/diffusion_models
-	["umt5_xxl_fp16.safetensors"]="models/text_encoders"
-	["umt5_xxl_fp8_e4m3fn_scaled.safetensors"]="models/text_encoders"
-	["wan_2.1_vae.safetensors"]="models/vae"
-	["clip_vision_h.safetensors"]="models/clip_vision"
-	["wan2.1_t2v_1.3B_fp16.safetensors"]="models/diffusion_models"
-	["wan2.1_i2v_720p_14B_fp16.safetensors"]="models/diffusion_models"
-	["wan2.1_i2v_480p_14B_fp16.safetensors"]="models/diffusion_models"
-
-	["Janus-Pro-1B"]="models/Janus-Pro/Janus-Pro-1B"
-	["Janus-Pro-7B"]="models/Janus-Pro/Janus-Pro-7B"
-
-	["lumina_2.safetensors"]=models/checkpoints
-
+	# Hidream
 	["clip_l_hidream.safetensors"]=models/text_encoders
 	["clip_g_hidream.safetensors"]=models/text_encoders
 	["llama_3.1_8b_instruct_fp8_scaled.safetensors"]=models/text_encoders
@@ -217,6 +199,43 @@ declare -A HF_DEST+=(
 	["hidream_i1_full_fp8.safetensors"]=models/diffusion_models
 	["hidream_i1_dev_fp8.safetensors"]=models/diffusion_models
 
+	# common for gguf and for bf16 hunyaun video
+	["clip_l.safetensors"]=models/clip
+	["llava_llama3_fp8_scaled.safetensors"]=models/clip
+	["hunyuan_video_vae_bf16.safetensors"]=/models/vae
+	#  use the comfy ones instead
+	["workflow-hunyuan-gguf.json"]=user/default/workflows
+	# ["hunyuan-video-t2v-720p-q4_k_m.gguf"]=models/unet # quantized doesn't
+	["hunyuan-video-t2v-720p-bf16.gguf"]=models/unet             # gguf version
+	["hunyuan-video-t2v-720p-q8_0.gguf"]=models/unet             # good tradeoff 8-bit
+	["hunyuan-video-t2v-720p-q4_0.gguf"]=models/unet             # haven't tested
+	["hunyuan-video-t2v-720p-bf16.gguf"]=models/diffusion_models # the original floating point 16-bit
+	# original hunyuan
+	["clip_l.safetensors"]=models/clip
+	["clip_vision_h.safetensors"]="models/clip_vision"
+	["hunyuan_video_image_to_video_720p_bf16.safetensors"]=models/diffusion_models
+	["hunyuan_video_t2v_720p_bf16.safetensors"]=models/diffusion_models
+	["hunyuan_video_v2_replace_image_to_video_720p_bf16.safetensors"]=models/diffusion_models
+	["hunyuan_video_vae_bf16.safetensors"]=models/vae
+	["llava_llama3_fp8_scaled.safetensors"]=models/clip
+	["llava_llama3_vision.safetensors"]="models/clip_vision"
+	["umt5_xxl_fp16.safetensors"]="models/text_encoders"
+	["umt5_xxl_fp8_e4m3fn_scaled.safetensors"]="models/text_encoders"
+	["wan_2.1_vae.safetensors"]="models/vae"
+	["wan2.1_i2v_480p_14B_fp16.safetensors"]="models/diffusion_models"
+	["wan2.1_i2v_720p_14B_fp16.safetensors"]="models/diffusion_models"
+	["wan2.1_t2v_1.3B_fp16.safetensors"]="models/diffusion_models"
+
+	# Deepseek Janus
+	["Janus-Pro-1B"]="models/Janus-Pro/Janus-Pro-1B"
+	["Janus-Pro-7B"]="models/Janus-Pro/Janus-Pro-7B"
+
+	# Lumina 2
+	["lumina_2.safetensors"]=models/checkpoints
+
+	# Flux goes into checkpoints
+	["flux1-dev-fp8.safetensors"]=models/checkpoints
+	["flux1-schnell-fp8.safetensors"]=models/checkpoints
 )
 
 # do not download a file but an entire directory
@@ -232,18 +251,33 @@ declare -A DIRECT_DEST+=(
 
 	["https://comfyui-wiki.com/en/tutorial/advanced/deepseek-Janus-Pro-workflow"]=workflows
 
-	# For comfyui checkpoints
-	["https://comfyui-wiki.com/en/tutorial/advanced/flux1-comfyui-guide-workflow-and-examples#:~:text=FP8%20Checkpoint%20ComfyUI-,workflow,-example"]=workflows
-	["https://comfyui-wiki.com/en/tutorial/advanced/flux1-comfyui-guide-workflow-and-examples#:~:text=Download%20Flux-,Schnell,-FP8%20Checkpoint%20ComfyUI"]=workflows
-
 	["https://stable-diffusion-art.com/wp-content/uploads/2025/02/lumina-image-2.json"]=workflows
 
 )
 declare HF_REMOVE+=(
-	flux1-schnell-fp8.safetensors
+
+	# obsolete older than March 2025
+	#
+	# Alibaba Wan 2.1  # replaced by VACE
+	clip_vision_h.safetensors
+	umt5_xxl_fp16.safetensors
+	umt5_xxl_fp8_e4m3fn_scaled.safetensors
+	wan_2.1_vae.safetensors
+	wan2.1_i2v_480p_14B_fp16.safetensors
+	wan2.1_i2v_720p_14B_fp16.safetensors
+	wan2.1_t2v_1.3B_fp16.safetensors
+
 	Janus-Pro-1B
 	Janus-Pro-7B
+	lumina_2.safetensors
+	flux1-schnell-fp8.safetensors
+
+	# too slow
+	hunyuan-video-t2v-720p-q4_0.gguf
+
 )
+
+log_exit "deprecated: use drop an image with the workflow in it or Workflow > Template; manually clean ./Comfy"
 
 for item in "${!HF_REMOVE[@]}"; do
 	log_verbose "Removing $item at ${HF_DEST[$item]}"
