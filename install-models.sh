@@ -255,6 +255,12 @@ MODEL_VISION+=(
 	llama3.2-vision:90b-instruct-q4_K_M # vision works now
 )
 
+MODEL_EMBEDDING+=(
+	nomic-embed-text
+	manutic/nomic-embed-code
+	mxbai-embed-large
+)
+
 # Tool using models https://ollama.com/search?c=tools&o=newest
 MODEL_TOOL+=(
 	devstral:24b-small-2505-q4_K_M
@@ -329,6 +335,9 @@ MODEL_MOE+=(
 # they support. This uses fuzzy matching so you don't have to duplicate every
 # tag, it does long string matches
 declare -A MODEL_MEM+=(
+	["mxbai-embed-large"]=0.67
+	["manutic/nomic-embed-code"]=7.5
+	["nomic-embed-text"]=0.274
 	["gemma3n:e2b-it-q4_K_M"]=5.6
 	["gemma3n:e4b-it-q4_K_M"]=7.5
 	["magistral:24b-small-2506-q4_K_M"]=14
@@ -404,6 +413,9 @@ declare -A MODEL_MEM+=(
 # for models that are close, put the more specfiic one first
 # search top most first
 declare -A MODEL_CONTEXT+=(
+	["mxbai-embed-large"]=0.512
+	["nomic-embed-text"]=2
+	["manutic/nomic-embed-code"]=32
 	["gemma3n:e2b-it-q4_K_M"]=32
 	["gemma3n:e2b-it-q4_K_M"]=32
 	["magistral"]=39
@@ -493,6 +505,9 @@ MODEL_SMALL+=(
 
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
+	nomic-embed-text         # 2k context for roo this fails with error
+	manutic/nomic-embed-code # for qdrant only there is no native version
+	mxbai-embed-large        # old but good only 0.5 context and still fails
 	magistral:24b-small-2506-q4_K_M
 	devstral:24b-small-2505-q4_K_M
 	qwen2.5vl:32b-q4_K_M
