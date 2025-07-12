@@ -107,7 +107,7 @@ log_verbose need to fix gnu-sed first because it is required by the lib-config.s
 package_install wdiff
 #fi
 
-package_install bash guile gpatch m4 make nano
+package_install bash guile gpatch m4 make nano proctools
 if ! mac_is_arm; then
 	log_verbose "gdb only on Intel Linux or Mac"
 	package_install gdb

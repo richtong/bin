@@ -419,7 +419,7 @@ MCP_SERVERS+=$(
 		            "stdio"
 		          ],
 		          "env": {
-		            "GITHUB_PERSONAL_ACCESS_TOKEN": "$(op item get "Github Personal Access Token Dev" --fields "personal access token" --vault "DevOps" --reveal)"
+		            "GITHUB_PERSONAL_ACCESS_TOKEN": "$(op item get "GitHub Personal Access Token Dev" --fields "token" --vault "DevOps" --reveal)"
 		          },
 		          "alwaysAllow": [
 		            "get_file_contents",
@@ -461,24 +461,46 @@ MCP_SERVERS+=$(
 		            "GOOGLE_MAPS_API_KEY": "$(op item get "Google Maps API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
 		          },
 		          "alwaysAllow": [
-		            "maps_reverse_geocode",
-		            "maps_geocode",
-		            "maps_search_places",
-		            "maps_place_details",
-		            "maps_distance_matrix",
-		            "maps_elevation",
-		            "maps_directions"
-		          ]
-		        },
-		            "exa": {
-		              "command": "npx",
+		                  "maps_reverse_geocode",
+		                  "maps_geocode",
+		                  "maps_search_places",
+		                  "maps_place_details",
+		                  "maps_distance_matrix",
+		                  "maps_elevation",
+		                  "maps_directions"
+		                ]
+		              },
+		              "exa": {
+		                "command": "npx",
+		                "args": [
+		                  "-y",
+		                  "mcp-remote",
+		                  "https://mcp.exa.ai/mcp?exaApiKey=$(op item get "Exa API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
+		                ]
+		              },
+		            "comfy-ui-mcp-server": {
+		              "command": "uvx",
 		              "args": [
-		                "-y",
-		                "mcp-remote",
-		                "https://mcp.exa.ai/mcp?exaApiKey=6a7fcca3-37d9-4b24-b921-2cfd0d705a1d"
+		                "comfy-ui-mcp-server"
 		              ]
-		            }
-
+		                },
+		                "replicate-imagen4": {
+		                  "command": "npx",
+		                  "args": ["-y", "https://github.com/PierrunoYT/replicate-imagen4-mcp-server.git"],
+		                  "env": {
+		                    "REPLICATE_API_TOKEN": "$(op item get 'Replicate API Token Dev' --fields 'api key' --vault 'DevOps' --reveal)"
+		                  }
+		                  },
+		                "fal-flux-kontext-max": {
+		                  "command": "npx",
+		                  "args": [
+		                    "-y",
+		                    "https://github.com/PierrunoYT/fal-flux-kontext-max-mcp-server.git"
+		                  ],
+		                  "env": {
+		                    "FAL_KEY": "$(op item get 'FAL Key Dev' --fields 'api key' --vault 'DevOps' --reveal)"
+		                  }
+		                    }
 		  }
 		}
 	EOF
@@ -486,10 +508,12 @@ MCP_SERVERS+=$(
 
 # Note this uses brace expansion
 MCP_LOCATIONS+=(
+	# Gemini Code
+	"$HOME/.gemini/settings.json"
 	# OpenWebUI MCPO server converts MCP to an OpenAI API Comaptible Server
 	"$HOME/.config/mcp/claude-desktop.json"
 	# Claude Code MCP servers
-	"$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+	"$HOME/.claude.json"
 	# Roo Code, Cline, TNE Compass in VSCode or Code
 	"$HOME/Library/Application Support/{VSCodium,Code}/User/globalStorage/{rooveterinaryinc.roo-cline,tne-ai.tne-code,saoudrizwan.claude-dev}/settings/mcp_settings.json"
 )

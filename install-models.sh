@@ -479,7 +479,6 @@ declare -A MODEL_CONTEXT_MEM+=(
 log_verbose "Minimal Base <=2B models for machines that <=4GB GPU Memory"
 MODEL+=(
 	gemma3:1b-it-q4_K_M
-	gemma3n:e2b-it-q4_K_M
 	granite3.3:2b # reasoning model messages += []{role: control, content: thinking}]
 	granite3.2-vision:2b-q4_K_M
 	shieldgemma:2b-q4_K_M # safety of text prompts
@@ -495,6 +494,7 @@ MODEL_XSMALL+=(
 
 log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
 MODEL_SMALL+=(
+	gemma3n:e4b-it-q4_K_M
 	qwen2.5vl:7b-q4_K_M # lateste aliababa vision model
 	qwen3:4b-q4_K_M
 	qwen3:8b-q4_K_M
