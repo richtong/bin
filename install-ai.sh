@@ -75,6 +75,7 @@ PACKAGE+=(
 	pearai               # powered by Roo Code auto routing by Y-Cominator
 	void                 # ai coder
 	warp                 # ai-based shell
+	yt-dlp               # Youtube Subtitles downloader
 	zed                  # yet another ai editor
 
 )
@@ -176,7 +177,7 @@ if $EXTRAS; then
 	NODE_PACKAGE+=(
 		@receptron/graphai_cli    # graphAI command line interpreter
 		@anthropic-ai/claude-code # command line ai
-		playwrite                 # browser automation🤽‍♂️
+		playwright                # browser automation🤽‍♂️
 		mulmocast                 # graphAI based multimedia presentation, podcast and video tool
 		@google/gemini-cli        # adding the gemini-cli
 	)
@@ -334,9 +335,8 @@ MCP_SERVERS+=$(
 		      ]
 		    },
 		    "arxiv": {
-		      "command": "pipx",
+		      "command": "uvx",
 		      "args": [
-		        "run",
 		        "arxiv-mcp-server",
 		        "--storage-path",
 		        "/Users/rich/.arxiv-mcp-server/papers"
@@ -483,13 +483,6 @@ MCP_SERVERS+=$(
 		              "args": [
 		                "comfy-ui-mcp-server"
 		              ]
-		                },
-		                "replicate-imagen4": {
-		                  "command": "npx",
-		                  "args": ["-y", "https://github.com/PierrunoYT/replicate-imagen4-mcp-server.git"],
-		                  "env": {
-		                    "REPLICATE_API_TOKEN": "$(op item get 'Replicate API Token Dev' --fields 'api key' --vault 'DevOps' --reveal)"
-		                  }
 		                  },
 		                "fal-flux-kontext-max": {
 		                  "command": "npx",
@@ -500,6 +493,12 @@ MCP_SERVERS+=$(
 		                  "env": {
 		                    "FAL_KEY": "$(op item get 'FAL Key Dev' --fields 'api key' --vault 'DevOps' --reveal)"
 		                  }
+		                    },
+		                  "playwright": {
+		                        "command": "npx",
+		                        "args": [
+		                          "@playwright/mcp@latest"
+		                        ]
 		                    }
 		  }
 		}

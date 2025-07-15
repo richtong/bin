@@ -244,6 +244,7 @@ MODEL_AUDIO+=(
 )
 
 MODEL_VISION+=(
+	mistral-small3.2:24b-instruct-2506-q4_K_M
 	gemma3n:e2b-it-q4_K_M # https://ai.google.dev/gemma/docs/gemma-3n 5B with 2B minimum
 	gemma3n:e4b-it-q4_K_M
 	qwen2.5vl:32b-q4_K_M
@@ -263,6 +264,7 @@ MODEL_EMBEDDING+=(
 
 # Tool using models https://ollama.com/search?c=tools&o=newest
 MODEL_TOOL+=(
+	mistral-small3.2:24b-instruct-2506-q4_K_M
 	devstral:24b-small-2505-q4_K_M
 	qwen3:0.6b-q4_K_M
 	qwen3:1.7b-q4_K_M
@@ -400,6 +402,7 @@ declare -A MODEL_MEM+=(
 	["llama3.2-vision:90b-instruct-q4_K_M"]=55  # vision works now
 	["llama3.3:70b-instruct-q4_K_M"]=43         # 128K context
 	["lsm03624/GLM-Z1-32B-0414-Q4_K_M"]=20      # Zhipu GLM-Z1 reasoning add <think>\n  4k context? -rumination is deep research not available yet
+	["mistral-small3.2:24b-instruct-2506-q4_K_M"]=15
 	["mistral-small3.1:24b-instruct-2503-q4_K_M"]=15
 	["olmo2:7b-1124-instruct-q4_K_M"]=4.5  # compets with llama 3.1
 	["olmo2:13b-1124-instruct-q4_K_M"]=8.4 # compets with llama 3.1
@@ -438,6 +441,7 @@ declare -A MODEL_CONTEXT+=(
 	["llama-guard3"]=128
 	["llama3.2-vision"]=128
 	["llama3.3"]=128
+	["mistral-small3.2"]=128
 	["mistral-small3.1"]=128
 	["JollyLlama/GLM-4-32B-0414-Q4_K_M"]=32
 	["JollyLlama/GLM-Z1-32B-0414-Q4_K_M"]=32
@@ -519,7 +523,7 @@ MODEL_MEDIUM+=(
 	JollyLlama/GLM-Z1-32B-0414-Q4_K_M # zhipu model need to  use more
 	rhundt/GLM-4-0414-32b-128k-Q4_K_M # Rope scaling 4x or 32K base
 	deepcoder:14b-preview-q4_K_M
-	mistral-small3.1:24b-instruct-2503-q4_K_M
+	mistral-small3.2:24b-instruct-2506-q4_K_M
 	cogito:32b-v1-preview-qwen-q4_K_M   # finetuned qwen
 	gemma3:12b-it-q4_K_M                # 12B
 	gemma3:27b-it-q4_K_M                # 12B
@@ -636,7 +640,7 @@ MODEL_REMOVE+=(
 	gemma3:27b       # 27B
 	openthinker:32b  # dereict from deepseek-r1
 	olmo2:13b        # AI2 fully open no tools
-	mistral-small3.1:24b-instruct-q4_K_M
+	mistral-small3.1:24b-instruct-2503-q4_K_M
 	mistral-small3.1                  # tool and vision 128Kb
 	mistral-small3.1:latest           # claims beats gemma3
 	mistral-small3.1:24b              # can run on 32GB Mac
