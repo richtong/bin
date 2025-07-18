@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 ## vim: set noet ts=4 sw=4:
 ##
 ## install desktop AI tools like ChatGPT and Stability Diffusion
@@ -16,7 +17,7 @@ VERBOSE="${VERBOSE:-false}"
 INCLUDE_TOOL="${INCLUDE_TOOL:-false}"
 INCLUDE_VISION="${INCLUDE_VISION:-false}"
 INCLUDE_GGUF="${INCLUDE_GGUF:-false}"
-INCLUDE_MLX="${INCLUDE_MLX:-false}"
+INCLUDE_HFCO="${INCLUDE_HFCO:-false}"
 EXO_HOME="${EXO_HOME:-"$HOME/.cache/exo/downloads"}"
 OLLAMA_MODELS="${OLLAMA_MODELS:-"$HOME/.ollama/models"}"
 OLLAMA_API_BASE="${OLLAMA_API_BASE:-"http://localhost:11434"}"
@@ -58,7 +59,7 @@ flags:
 
 	speciality models:
 	-g $(! $INCLUDE_GGUF || echo "do not ")pull huggingface models GGUF for Ollama
-	-l $(! $INCLUDE_MLX || echo "do not ")pull huggingface models GGUF for Ollama
+	-l $(! $INCLUDE_HFCO || echo "do not ")pull huggingface models GGUF for Ollama
 	-t $(! $INCLUDE_TOOL || echo "do not ")pull Tool using models for ollama
 	-s $(! $INCLUDE_VISION || echo "do not ")pull Vision models for ollama
 
@@ -99,7 +100,7 @@ EOF
 		INCLUDE_GGUF="$($INCLUDE_GGUF && echo false || echo true)"
 		;;
 	l)
-		INCLUDE_MLX="$($INCLUDE_MLX && echo false || echo true)"
+		INCLUDE_HFCO="$($INCLUDE_HFCO && echo false || echo true)"
 		;;
 	t)
 		INCLUDE_TOOL="$($INCLUDE_TOOL && echo false || echo true)"
@@ -184,20 +185,35 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 # now sorted by date added from ollama as of 11-15-24
 
 # these are pre llama3.2 and subject to deprecation
-MODEL_MLX_SMALL+=(
+# >=8GB
+MODEL_HFCO_XSMALL+=(
 )
-# <=32B
-MODEL_MLX_MEDIUM+=(
+
+# >= 16GB
+MODEL_HFCO_SMALL+=(
 )
-# <=90B
-MODEL_MLX_LARGE+=(
+
+# >=32GB
+MODEL_HFCO_MEDIUM+=(
 )
-MODEL_MLX_XLARGE+=(
+
+# >=64
+MODEL_HFCO_LARGE+=(
 )
-MODEL_MLX_MEGA+=(
+
+# >=128
+MODEL_HFCO_XLARGE+=(
 )
-MODEL_MLX_REMOVE+=(
-	mlx-community/Qwen3-30B-A3B-mixed-3-4bit
+
+# >=256
+MODEL_HFCO_MEGA+=(
+)
+
+MODEL_HFCO_REMOVE+=(
+
+	sentence-transformers/all-miniLM-L6-V2   # Jan 2025 reco for openwebui embedding
+	Alibaba-NLP/gte-Qwen2-7B-instruct        # Jan 2025 reco for openwebui reranking
+	mlx-community/Qwen3-30B-A3B-mixed-3-4bit # About 30% faster than ollama
 	mlx-community/DeepSeek-R1-Distill-Qwen-7B-4bit
 	mlx-community/DeepSeek-R1-Distill-Llama-70B-4bit
 	mlx-community/gemma-3-27b-pt-4bit
@@ -222,28 +238,35 @@ MODEL_MLX_REMOVE+=(
 	mlx-community/gemma-3-4b-pt-4bit
 	mlx-community/perplexity-ai-r1-1776-4bit # do not if it will fit
 	mlx-community/plamo-2-8b-4bit            # PLaMO-13B Open source Japanese from PFN
+
 )
 
 # https://huggingface.co/models?library=gguf&sort=trending
 # deprecate this for ollama.com available models
 MODEL_GGUF+=(
-	unsloth/Qwen3-30B-A3B-128K-GGUF
+
 )
 # these models do not load in ollama for some reason, maybe they are sharded
 MODEL_GGUF_REMOVE+=(
+
+	unsloth/Qwen3-30B-A3B-128K-GGUF
 	hf.co/lmstudio-community/Qwen2-VL-7B-Instruct-GGUF
 	hf.co/lmstudio-community/Qwen2-VL-7B-Instruct-GGUF:latest
 	hf.co/HYEONii/Qwen2-VL-7B-Q4_K_M-GGUF:Q4_K_M
 	hf.co/lmstudio-community/olmOCR-7B-0225-preview-GGUF:Q4_K_M
+
 )
 
 MODEL_AUDIO+=(
+
 	# https://developers.googleblog.com/en/introducing-gemma-3n-developer-guide/
 	gemma3n:e2b-it-q4_K_M # https://ai.google.dev/gemma/docs/gemma-3n 5B with 2B minimum
 	gemma3n:e4b-it-q4_K_M # Matformer and conditional parameter loading effective 4B actual 8B
+
 )
 
 MODEL_VISION+=(
+
 	mistral-small3.2:24b-instruct-2506-q4_K_M
 	gemma3n:e2b-it-q4_K_M # https://ai.google.dev/gemma/docs/gemma-3n 5B with 2B minimum
 	gemma3n:e4b-it-q4_K_M
@@ -254,16 +277,39 @@ MODEL_VISION+=(
 	granite3.2-vision:2b-q4_K_M
 	llama3.2-vision:11b-instruct-q4_K_M # vision works now
 	llama3.2-vision:90b-instruct-q4_K_M # vision works now
+
 )
 
 MODEL_EMBEDDING+=(
-	nomic-embed-text
-	manutic/nomic-embed-code
-	mxbai-embed-large
+
+	dengcao/Qwen3-Embedding-8B:Q4_K_M # as of July 15 the Qwen3 models are at the top
+	dengcao/Qwen3-Embedding-4B:Q4_K_M
+	dengcao/Qwen3-Embedding-0.6B:Q8_0
+	dengcao/Qwen3-Reranking-8B:Q4_K_M # as of July 15 the Qwen3 models are at the top
+	dengcao/Qwen3-Reranking-4B:Q4_K_M
+	dengcao/Qwen3-Reranking-0.6B:Q8_0
+	rjmalagon/gte-qwen2-7b-instruct      # the old leader best downloading with HF
+	rjmalagon/gte-qwen2-7b-instruct:bf16 # the old leader best downloading with HF
+	nomic-embed-text:137m-v1.5-fp16      # simple for roo code
+	manutic/nomic-embed-code:7b-Q4_K_M
+	mxbai-embed-large:335m-v1-fp16 # mixed bread
+
+)
+
+declare -A MODEL_EMBED_DIMENSIONS+=(
+
+	["dengcao/Qwen3-Embedding-0.6B"]=1024
+	["dengcao/Qwen3-Embedding-4B"]=2560
+	["dengcao/Qwen3-Embedding-8B"]=4096
+	["manutic/nomic-embed-code:7b-Q4_K_M"]=3584
+	["nomic-embed-text"]=768
+	["mxbai-embed-large"]=1024
+
 )
 
 # Tool using models https://ollama.com/search?c=tools&o=newest
 MODEL_TOOL+=(
+
 	mistral-small3.2:24b-instruct-2506-q4_K_M
 	devstral:24b-small-2505-q4_K_M
 	qwen3:0.6b-q4_K_M
@@ -271,7 +317,7 @@ MODEL_TOOL+=(
 	qwen3:4b-q4_K_M
 	qwen3:8b-q4_K_M
 	qwen3:14b-q4_K_M
-	qwen3:30b-a3b_q4_K_M
+	qwen3:30b-a3b-q4_K_M
 	qwen3:32b-q4_K_M
 	qwen3:235b-q4_K_M
 	JollyLlama/GLM-4-32B-0414-Q4_K_M
@@ -288,16 +334,18 @@ MODEL_TOOL+=(
 	# command-a:111b-03-2025-q4_K_M
 	phi4-mini:3.8b-q4_K_M
 	llama3.3:70b-instruct-q4_K_M
+
 )
 
 MODEL_REASONING+=(
+
 	magistral:24b-small-2506-q4_K_M
 	qwen3:0.6b-q4_K_M
 	qwen3:1.7b-q4_K_M
 	qwen3:4b-q4_K_M
 	qwen3:8b-q4_K_M
 	qwen3:14b-q4_K_M
-	qwen3:30b-a3b_q4_K_M # 3b active parameters moe
+	qwen3:30b-a3b-q4_K_M # 3b active parameters moe
 	qwen3:32b-q4_K_M
 	qwen3:235b-q4_K_M
 	phi4-mini-reasoning:3.8b-q4_K_M
@@ -324,22 +372,34 @@ MODEL_REASONING+=(
 	deepseek-r0:70b-llama-distill-q4_K_M
 	deepseek-r1:7b-qwen-distill-q4_K_M
 	deepseek-r1:8b-llama-distill-q4_K_M
+
 )
 
 MODEL_MOE+=(
+
 	qwen3:30b-a3b-q4_K_M
 	milkey/Qwen3-UD:235B-Q2_K_XL
 	llama4:17b-maverick-128e-instruct-q4_K_M
 	llama4:17b-scout-16e-instruct-q4_K_M
+
 )
 
 # two new datasets how much memory does a model take and how much context do
 # they support. This uses fuzzy matching so you don't have to duplicate every
 # tag, it does long string matches
 declare -A MODEL_MEM+=(
+
+	["default"]="Not Found"
+	["dengcao/Qwen3-Embedding-8B"]=5 # as of July 15 the Qwen3 models are at the top
+	["dengcao/Qwen3-Reranker-8B"]=5  # as of July 15 the Qwen3 models are at the top
+	["dengcao/Qwen3-Embedding-4B"]=2.5
+	["dengcao/Qwen3-Reranker-4B"]=2.5
+	["dengcao/Qwen3-Embedding-0.6B"]=0.64
+	["dengcao/Qwen3-Reranker-0.6B"]=0.64
+	["rjmalagon/gte-qwen2-7b-instruct"]=15 # the old leader best downloading with HF
+	["nomic-embed-text"]=0.274             # need simple name for roo code/Ollama
 	["mxbai-embed-large"]=0.67
 	["manutic/nomic-embed-code"]=7.5
-	["nomic-embed-text"]=0.274
 	["gemma3n:e2b-it-q4_K_M"]=5.6
 	["gemma3n:e4b-it-q4_K_M"]=7.5
 	["magistral:24b-small-2506-q4_K_M"]=14
@@ -410,14 +470,23 @@ declare -A MODEL_MEM+=(
 	["openthinker:32b-q4_K_M"]=20          # fine tuned on openthoughts 114k dataset2
 	["openthinker:7b-q4_K_M"]=4.7
 	["bespoke-minicheck:7b-q4_K_M"]=4.7 # Fact check 7B q4_K_M
+
 )
 
 # the context length maximum of models in 000s tokens
 # for models that are close, put the more specfiic one first
 # search top most first
 declare -A MODEL_CONTEXT+=(
-	["mxbai-embed-large"]=0.512
+
+	["dengcao/Qwen3-Embedding-8B"]=40
+	["dengcao/Qwen3-Reranker-8B"]=40
+	["dengcao/Qwen3-Embedding-4B"]=40
+	["dengcao/Qwen3-Reranker-4B"]=40
+	["dengcao/Qwen3-Embedding-0.6B"]=32
+	["dengcao/Qwen3-Reranker-0.6B"]=32
+	["rjmalagon/gte-qwen2-7b-instruct"]=128 # the old leader best downloading with HF
 	["nomic-embed-text"]=2
+	["mxbai-embed-large"]=0.512
 	["manutic/nomic-embed-code"]=32
 	["gemma3n:e2b-it-q4_K_M"]=32
 	["gemma3n:e2b-it-q4_K_M"]=32
@@ -458,12 +527,15 @@ declare -A MODEL_CONTEXT+=(
 	["shield-gemma"]=8
 	["tulu3"]=128
 	["default"]=16
+
 )
 
 # memory used  per 32K tokens
 declare -A MODEL_CONTEXT_MEM+=(
+
 	["gemma"]=12
 	["default"]=6
+
 )
 
 # These are kept in most recent first from https://ollama.com/search?o=newest
@@ -482,22 +554,32 @@ declare -A MODEL_CONTEXT_MEM+=(
 # perplexity | 5.9066 | 6.4571 | 5.9061 | 5.9208 | 5.9110
 log_verbose "Minimal Base <=2B models for machines that <=4GB GPU Memory"
 MODEL+=(
+
+	dengcao/Qwen3-Embedding-0.6B:Q8_0 # try vs nomic-embed-text
 	gemma3:1b-it-q4_K_M
 	granite3.3:2b # reasoning model messages += []{role: control, content: thinking}]
 	granite3.2-vision:2b-q4_K_M
+	qwen3:1.7b-q4_K_M
 	shieldgemma:2b-q4_K_M # safety of text prompts
+
 )
 
 log_verbose "loading all models >2B and <=4B parameters, requires >=8GB of RAM"
 MODEL_XSMALL+=(
+
+	dengcao/Qwen3-Embedding-4B:Q4_K_M # try vs nomic-embed-text
 	gemma3n:e2b-it-q4_K_M
 	gemma3:4b-it-q4_K_M
-	qwen3:1.7b-q4_K_M
 	phi4-mini-reasoning:3.8b-q4_K_M
+
 )
 
 log_verbose "loading all models >4-8B parameters, requires >=16GB of RAM"
 MODEL_SMALL+=(
+
+	manutic/nomic-embed-code:7b-Q4_K_M # best for roo code
+	dengcao/Qwen3-Embedding-8B:Q4_K_M  # try vs nomic-embed-code
+	dengcao/Qwen3-Reranker-8B:Q4_K_M   # for open-webui reranking
 	gemma3n:e4b-it-q4_K_M
 	qwen2.5vl:7b-q4_K_M # lateste aliababa vision model
 	qwen3:4b-q4_K_M
@@ -505,13 +587,12 @@ MODEL_SMALL+=(
 	exaone-deep:7.8b-q4_K_M
 	granite3.3:8b
 	deepseek-r1:7b-qwen-distill-q4_K_M # competitive to o1
+
 )
 
 log_verbose "loading all models over 9B-32B parameters, requires >=32GB RAM"
 MODEL_MEDIUM+=(
-	nomic-embed-text         # 2k context for roo this fails with error
-	manutic/nomic-embed-code # for qdrant only there is no native version
-	mxbai-embed-large        # old but good only 0.5 context and still fails
+
 	magistral:24b-small-2506-q4_K_M
 	devstral:24b-small-2505-q4_K_M
 	qwen2.5vl:32b-q4_K_M
@@ -531,27 +612,36 @@ MODEL_MEDIUM+=(
 	deepseek-r1:32b-qwen-distill-q4_K_M # r1 comparable
 	phi4:14b-q4_K_M                     # no tool calling
 	llama3.2-vision:11b-instruct-q4_K_M # vision works now
+
 )
 
 log_verbose "loading all models over >32B-90B parameters, requires >=64GB RAM"
 MODEL_LARGE+=(
+
 	qwen2.5vl:72b-q4_K_M
+
 )
 
 log_verbose "Extra models over 100B parameters, requires >=128GB"
 MODEL_XLARGE+=(
+
 	llama4:17b-scout-16e-instruct-q4_K_M
+
 )
 
 log_verbose "Megalarge models over 400B parameters requires >=256GB"
 MODEL_MEGA+=(
+
 	llama4:17b-maverick-128e-instruct-q4_K_M
 	qwen3:235b-a22b-q4_K_M
 	deepseek-r1:641b-q4_K_M # 641B
+
 )
 
 # move the deprecated models here to make sure to delete them
 MODEL_REMOVE+=(
+
+	nomic-embed-text:137m-v1.5-fp16      # scores 44% on MTEB Leaderboard
 	milkey/Qwen3-UD:235B-Q2_K_XL         # too big and do not  use much
 	deepseek-r1:70b-llama-distill-q4_K_M # llama based
 	llama3.3:70b-instruct-q4_K_M         # 128K context
@@ -937,6 +1027,7 @@ MODEL_OLD+=(
 	phi:2.7b            # phi-2
 	qwen:7b             ## Qwen 1.5
 	minicpm-v:8b
+
 )
 
 if $AUTOMATIC_BY_MEMORY; then
@@ -978,32 +1069,32 @@ MODEL_LIST=("${MODEL[@]}")
 if $INCLUDE_XSMALL; then
 	log_verbose "Include extra small models"
 	MODEL_LIST+=("${MODEL_XSMALL[@]}")
-	MODEL_MLX+=("${MODEL_MLX_XSMALL[@]}")
+	MODEL_HFCO+=("${MODEL_HFCO_XSMALL[@]}")
 fi
 if $INCLUDE_SMALL; then
 	log_verbose "Include small models"
 	MODEL_LIST+=("${MODEL_SMALL[@]}")
-	MODEL_MLX+=("${MODEL_MLX_SMALL[@]}")
+	MODEL_HFCO+=("${MODEL_HFCO_SMALL[@]}")
 fi
 if $INCLUDE_MEDIUM; then
 	log_verbose "Include medium models"
 	MODEL_LIST+=("${MODEL_MEDIUM[@]}")
-	MODEL_MLX+=("${MODEL_MLX_MEDIUM[@]}")
+	MODEL_HFCO+=("${MODEL_HFCO_MEDIUM[@]}")
 fi
 if $INCLUDE_LARGE; then
 	log_verbose "Include large models"
 	MODEL_LIST+=("${MODEL_LARGE[@]}")
-	MODEL_MLX+=("${MODEL_MLX_LARGE[@]}")
+	MODEL_HFCO+=("${MODEL_HFCO_LARGE[@]}")
 fi
 if $INCLUDE_XLARGE; then
 	log_verbose "Include extra large models"
 	MODEL_LIST+=("${MODEL_XLARGE[@]}")
-	MODEL_MLX+=("${MODEL_MLX_XLARGE[@]}")
+	MODEL_HFCO+=("${MODEL_HFCO_XLARGE[@]}")
 fi
 if $INCLUDE_MEGA; then
 	log_verbose "Include extra large models"
 	MODEL_LIST+=("${MODEL_MEGA[@]}")
-	MODEL_MLX+=("${MODEL_MLX_MEGA[@]}")
+	MODEL_HFCO+=("${MODEL_HFCO_MEGA[@]}")
 fi
 
 # now install speciality models
@@ -1056,13 +1147,17 @@ ollama_action() {
 			MEMORY_AVAILABLE=$(bc <<<"$MEMORY * (1 - $MEMORY_RESERVED)")
 			log_verbose "Looking for $model in the MODEL_MEM table if it fits in $MEMORY_AVAILABLE GB"
 			for item in "${!MODEL_MEM[@]}"; do
-				# log_verbose "looking for $item is a substring of $model"
-				# is item a substring of model
+				# log_verbose "does long $model have the string $item in it"
 				if [[ $model =~ $item ]]; then
 					model_mem="${MODEL_MEM[$item]}"
 					break
 				fi
 			done
+			if [[ ! -v model_mem ]]; then
+				log_error 5 "Model memory for $model not found skipping"
+				continue
+			fi
+
 			log_verbose "model_mem=$model_mem"
 			model_context="${MODEL_CONTEXT[default]}"
 			for item in "${!MODEL_CONTEXT[@]}"; do
@@ -1074,7 +1169,7 @@ ollama_action() {
 			log_verbose "model_context=$model_context"
 			model_context_mem="${MODEL_CONTEXT_MEM[default]}"
 			for item in "${!MODEL_CONTEXT_MEM[@]}"; do
-				if [[ model =~ $item ]]; then
+				if [[ $model =~ $item ]]; then
 					model_context_mem="${MODEL_CONTEXT_MEM[$item]}"
 					break
 				fi
@@ -1115,7 +1210,7 @@ else
 			ollama_action rm "${MODEL_OLD[@]}"
 		fi
 		if ! $DRYRUN && $REMOVE_OBSOLETE_AND_OLD; then
-			log_verbose "Manually remove ${MODEL_MLX_REMOVE[*]}"
+			log_verbose "Manually remove ${MODEL_HFCO_REMOVE[*]}"
 			huggingface-cli delete-cache
 		fi
 	fi
@@ -1125,10 +1220,10 @@ else
 
 fi
 
-if in_os mac && $INCLUDE_MLX; then
-	log_verbose "Include HF MLX models"
+if in_os mac && $INCLUDE_HFCO; then
+	log_verbose "Include HF models for MLX and SentenceTransformers in OpenWebUI"
 	if ! $DRYRUN && ($FORCE || ((DISK_USED > DISK_MAX))); then
-		huggingface-cli download "${MODEL_MLX[@]}"
+		huggingface-cli download "${MODEL_HFCO[@]}"
 	fi
 fi
 
@@ -1161,7 +1256,7 @@ if $SHOW_SIZE; then
 	huggingface-cli scan-cache | tail -n +3 | sort -unk 3
 
 	if [[ -d $EXO_HOME ]]; then
-		log_verbose "Exo MLX models"
-		du -sh "${EXO_HOME:-"$HOME/.cache/exo/downloads"}"/* | sort -n
+		log_verbose "Exo models"
+		du -sh "$EXO_HOME" | sort -n
 	fi
 fi
