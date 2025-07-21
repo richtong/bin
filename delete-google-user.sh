@@ -16,6 +16,8 @@ export FLAGS="${FLAGS:-""}"
 
 DEAD_LETTER_OFFICE=${DEAD_LETTER_OFFICE:-"dead@tne.ai"}
 ARCHIVIST=${ARCHIVIST:-"admin@tne.ai"}
+WAIT_INTERVAL=${WAIT_INTERVAL:-"10"}
+WAIT_ATTEMPTS=${WAIT_ATTEMPTS:-"360"}
 
 OPTIND=1
 while getopts "hdv" opt; do
@@ -53,6 +55,28 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 
+PACKAGES+=(
+	gyb
+)
+package_install "${PACKAGES[@]}"
+
+# note that gyb catastropically fails so need to probe for the json
+# if ! gyb --email "$ARCHIVIST" --action estimate >/dev/null; then
+if [[ ! -r $HOMEBREW_PREFIX/etc/gyb/client_secrets.json ]]; then
+	log_verbose "login as $ARCHIVIST to create a client_secrets.json"
+	rm -f "$HOMEBREW_PREFIX/etc/gyb/oauth2service.json"
+	# https://github.com/GAM-team/got-your-back/wiki#performing-a-backup
+	log_verbose "After login at the API & Services Dashboard"
+	log_verbose "Select Credentials > + Create Client > Application Type > Desktop app"
+	gyb --email "$ARCHIVIST" --action create-project
+
+fi
+
+log_verbose "GAM must be bash installed"
+if ! command -v gam >/dev/null; then
+	bash <(curl -s -S -L https://gam-shortn.appspot.com/gam-install)
+fi
+
 # https://chat.deepseek.com/a/chat/s/6fc205d1-ca79-4569-b942-3dc4b067174b
 for U in "$@"; do
 	log_verbose "Checking if user $U exists"
@@ -63,19 +87,42 @@ for U in "$@"; do
 	log_verbose "Transfer GDrive and Calendar to $ARCHIVIST"
 	# GAM Data Transfer syntax: https://github.com/taers232c/GAMADV-XTD3/wiki/Users-Transfer
 	# Note: Gmail cannot be transferred via datatransfer, only Drive and Calendar
-	gam create datatransfer "$U" "drive and docs" "$ARCHIVIST"
-	gam create datatransfer "$U" calendar "$ARCHIVIST"
-	log_verbose "Wait for transfers to complete"
-	while gam show transfers | grep -q "IN_PROGRESS"; do
-		log_verbose "Waiting for transfers to complete"
-		sleep 60
-	done
+	gam create transfer "$U" "calendar,gdrive" "$ARCHIVIST" wait "$WAIT_INTERVAL" "$WAIT_ATTEMPTS"
+	log_verbose "see if they completed"
+	if gam print transfers olduser "$U" status inprogress | grep -q "In Progress"; then
+		log_error 2 "Stuck transfers"
+	fi
 
-	log_verbose "Transfer Gmail messages to $ARCHIVIST"
-	# Gmail transfer via delegation and copy - must be done before deletion
-	gam user "$ARCHIVIST" delegate to "$U"
-	gam user "$U" copy messages to "$ARCHIVIST" query "in:anywhere"
-	gam user "$ARCHIVIST" delete delegate "$U"
+	log_verbose "Backup Gmail messages using GYB and upload to $ARCHIVIST's Google Drive"
+	# Create a backup directory for this user
+	BACKUP_DIR="/tmp/gyb_backup_${U//[@.]/_}"
+	mkdir -p "$BACKUP_DIR"
+
+	# Use GYB to backup all emails
+	log_verbose "Backing up emails for $U using GYB"
+	gyb --email "$U" --action backup --local-folder "$BACKUP_DIR"
+
+	# Create a compressed archive of the backup
+	ARCHIVE_NAME="${U//[@.]/_}_backup_$(date +%Y%m%d_%H%M%S).tar.gz"
+	ARCHIVE_PATH="/tmp/$ARCHIVE_NAME"
+	log_verbose "Creating archive $ARCHIVE_NAME"
+	tar -czf "$ARCHIVE_PATH" -C "$BACKUP_DIR" .
+
+	# Upload the archive to ARCHIVIST's Google Drive
+	log_verbose "Uploading backup to $ARCHIVIST's Google Drive"
+	# Create a folder for email backups if it doesn't exist
+	FOLDER_ID=$(gam user "$ARCHIVIST" show filelist query "name='Email_Backups' and mimeType='application/vnd.google-apps.folder'" | grep "^id:" | awk '{print $2}' | head -1)
+	if [[ -z "$FOLDER_ID" ]]; then
+		log_verbose "Creating Email_Backups folder"
+		FOLDER_ID=$(gam user "$ARCHIVIST" create drivefile drivefilename "Email_Backups" mimetype gfolder | grep "id:" | awk '{print $2}')
+	fi
+
+	# Upload the archive to the folder
+	gam user "$ARCHIVIST" add drivefile localfile "$ARCHIVE_PATH" parentid "$FOLDER_ID"
+
+	# Clean up temporary files
+	log_verbose "Cleaning up temporary files"
+	rm -rf "$BACKUP_DIR" "$ARCHIVE_PATH"
 
 	log_verbose "Forward all mail and leave forward on delete"
 

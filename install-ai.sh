@@ -318,6 +318,19 @@ MCP_SERVERS+=$(
 	cat <<-EOF
 		{
 		  "mcpServers": {
+		            "tne-ci": {
+		      "command": "npx",
+		      "args": [
+		        "tne-ci-mcp@latest"
+		      ],
+		      "env": {
+		        "AWS_PROFILE": "default"
+		      },
+		      "alwaysAllow": [
+		        "deploy-app"
+		      ]
+		    },
+
 		    "browserbase": {
 		      "command": "npx",
 		      "args": [
@@ -331,7 +344,16 @@ MCP_SERVERS+=$(
 		      "alwaysAllow": [
 		        "load",
 		        "browserbase_navigate",
-		        "browserbase_click"
+		        "browserbase_click",
+		        "browserbase_session_create",
+		        "browserbase_type",
+		        "browserbase_hover",
+		        "browserbase_close",
+		        "browserbase_wait",
+		        "browserbase_get_text",
+		        "browserbase_take_screenshot",
+		        "browserbase_snapshot"
+
 		      ]
 		    },
 		    "arxiv": {
@@ -409,7 +431,9 @@ MCP_SERVERS+=$(
 		        "firecrawl_extract",
 		        "firecrawl_deep_research",
 		        "firecrawl_generate_llmstxt",
-		        "firecrawl_scrape"
+		        "firecrawl_scrape",
+		            "search",
+		            "firecrawl_map"
 		      ]
 		    },
 
@@ -451,6 +475,53 @@ MCP_SERVERS+=$(
 		            "tavily-search"
 		          ]
 		        },
+		            "context7": {
+		              "command": "npx",
+		              "args": [
+		                "-y",
+		                "@upstash/context7-mcp"
+		              ],
+		              "env": {
+		                "DEFAULT_MINIMUM_TOKENS": ""
+		              },
+		              "disabled": false,
+		              "alwaysAllow": [
+		                "resolve-library-id",
+		                "get-library-docs"
+		              ]
+		            },
+		              "sequentialthinking": {
+		                "command": "npx",
+		                "args": [
+		                  "-y",
+		                  "@modelcontextprotocol/server-sequential-thinking"
+		                ],
+		                "disabled": false,
+		                "alwaysAllow": [
+		                  "sequentialthinking"
+		                ]
+		              },
+
+		                    "apify": {
+		      "command": "npx",
+		      "args": [
+		        "-y",
+		        "@apify/actors-mcp-server"
+		      ],
+		      "env": {
+		        "APIFY_TOKEN": "$(op item get "Apify API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
+		      },
+		      "alwaysAllow": [
+		        "apify-slash-rag-web-browser",
+		        "get-actor-details",
+		        "search-actors",
+		        "search-apify-docs",
+		        "fetch-apify-docs",
+		        "add-actor"
+		      ],
+		      "disabled": false
+		    },
+
 		        "google-maps": {
 		          "command": "npx",
 		          "args": [
@@ -499,7 +570,22 @@ MCP_SERVERS+=$(
 		                        "args": [
 		                          "@playwright/mcp@latest"
 		                        ]
-		                    }
+		                    },
+		                        "youtube": {
+		                            "command": "npx",
+		                            "args": [
+		                              "-y",
+		                              "@anaisbetts/mcp-installer",
+		                              "@anaisbetts/mcp-youtube"
+		                            ],
+		                            "alwaysAllow": [
+		                              "install_repo_mcp_server",
+		                              "install_local_mcp_server"
+		                            ]
+		                      }
+		  }
+		}
+
 		  }
 		}
 	EOF

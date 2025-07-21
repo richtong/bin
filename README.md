@@ -1,5 +1,7 @@
 # Infrastructure Binary Utility commands
 
+[English](README.md) | [日本語](README-JP.md) | [中文](README-ZH.md) | [Español](README-ES.md)
+
 This repository contains a collection of convenience scripts for installing and
 managing development environments.
 

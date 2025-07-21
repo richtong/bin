@@ -13,11 +13,12 @@ VERBOSE="${VERBOSE:-false}"
 NDI_VERSION="${NDI_VERSION:-4.5.1}"
 REMOVAL_VERSION="${REMOVAL_VERSION:-v0.4.0}"
 OBS_CONTENT="${OBS_CONTENT:-/Applications/OBS.app/Contents}"
+AITUM_URL="${AITUM_URL:-https://github.com/Aitum/obs-aitum-multistream/releases/latest/download/aitum-multistream-macos-universal.pkg}"
 
 FORCE="${FORCE:-false}"
 OPTIND=1
 export FLAGS="${FLAGS:-""}"
-while getopts "hdvfn:r:" opt; do
+while getopts "hdvfn:r:a:" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
@@ -29,6 +30,7 @@ while getopts "hdvfn:r:" opt; do
 			                   -f $($FORCE && echo "no")force Homebrew install
 			                   -n NDI Version number (default: $NDI_VERSION)
 			                   -r OBS Background Removal (default: $REMOVAL_VERSION)
+				   -a Aitum Multistream URL (default: $AITUM_URL)
 		EOF
 		exit 0
 		;;
@@ -49,6 +51,9 @@ while getopts "hdvfn:r:" opt; do
 		;;
 	r)
 		REMOVAL_VERSION="$OPTARG"
+		;;
+	a)
+		AITUM_URL="$OPTARG"
 		;;
 	f)
 		FORCE="$($FORCE && echo false || echo true)"
@@ -81,15 +86,17 @@ if in_os mac; then
 
 	log_verbose "Install plugins"
 	URL+=(
-
 		"https://github.com/royshil/obs-backgroundremoval/releases/download/$REMOVAL_VERSION/obs-backgroundremoval-macosx.zip"
-
 	)
 
 	for url in "${URL[@]}"; do
-		log_verbose download_url_open "$url" "${url##*/}" "$WS_DIR/cache" "$OBS_CONTENT"
+		log_verbose "Downloading and extracting ${url##*/} to $OBS_CONTENT"
 		download_url_open "$url" "${url##*/}" "$WS_DIR/cache" "$OBS_CONTENT"
 	done
+
+	AITUM_URL="${AITUM_URL:-https://github.com/Aitum/obs-aitum-multistream/releases/latest/download/aitum-multistream-macos-universal.pkg}"
+	log_verbose "Downloading and installing Aitum Multistream from $AITUM_URL"
+	download_url_open "$AITUM_URL"
 
 elif in_os linux; then
 

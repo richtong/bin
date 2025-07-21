@@ -121,6 +121,11 @@ fi
 log_verbose installing "$HOMEBREW_JAVA"
 brew_install "$HOMEBREW_JAVA"
 
+# jbang is like npx installs non permanently and caches
+PACKAGE+=(
+	jbang
+)
+
 if ! config_mark; then
 	log_verbose "brew java is keg only so need to install it"
 	config_add <<-'EOF'
