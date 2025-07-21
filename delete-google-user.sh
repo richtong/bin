@@ -112,7 +112,7 @@ for U in "$@"; do
 	log_verbose "Uploading backup to $ARCHIVIST's Google Drive"
 	# Create a folder for email backups if it doesn't exist
 	FOLDER_ID=$(gam user "$ARCHIVIST" show filelist query "name='Email_Backups' and mimeType='application/vnd.google-apps.folder'" | grep "^id:" | awk '{print $2}' | head -1)
-	if [[ -z "$FOLDER_ID" ]]; then
+	if [[ -z $FOLDER_ID ]]; then
 		log_verbose "Creating Email_Backups folder"
 		FOLDER_ID=$(gam user "$ARCHIVIST" create drivefile drivefilename "Email_Backups" mimetype gfolder | grep "id:" | awk '{print $2}')
 	fi

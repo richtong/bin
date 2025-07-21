@@ -553,7 +553,6 @@ Configura cuotas ZFS para usuarios y conjuntos de datos.
 
 ### `install-zotero.sh`
 
-
 ### install-ztsd.sh
 
 Instala Zstandard (zstd), un algoritmo de compresión de Facebook.
