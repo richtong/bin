@@ -62,14 +62,41 @@ package_install "${PACKAGES[@]}"
 
 # note that gyb catastropically fails so need to probe for the json
 # if ! gyb --email "$ARCHIVIST" --action estimate >/dev/null; then
-if [[ ! -r $HOMEBREW_PREFIX/etc/gyb/client_secrets.json ]]; then
-	log_verbose "login as $ARCHIVIST to create a client_secrets.json"
-	rm -f "$HOMEBREW_PREFIX/etc/gyb/oauth2service.json"
-	# https://github.com/GAM-team/got-your-back/wiki#performing-a-backup
-	log_verbose "After login at the API & Services Dashboard"
-	log_verbose "Select Credentials > + Create Client > Application Type > Desktop app"
-	gyb --email "$ARCHIVIST" --action create-project
+if [[ ! -r "$HOME/.gam/oauth2service.json" ]]; then
+	if $VERBOSE; then
+		cat <<-EOF
+			    GAM service account credentials not found. Please configure GAM with a service account first.
+			    Follow these steps to set up a service account for GAM:
+			    1. Go to the Google Cloud Console: https://console.cloud.google.com/
+			    2. Create a new project or select an existing one.
+			    3. Enable the 'Admin SDK API' and 'Gmail API'.
+			    4. Create a service account with a descriptive name.
+			    5. Grant the service account the 'Domain-Wide Delegation' permission.
+			    6. Create and download a JSON key for the service account.
+			    7. Move the downloaded JSON key to '$HOME/.gam/oauth2service.json'.
+			    8. In the Google Workspace Admin console, go to 'Security > API controls > Domain-wide Delegation'."
+			    9. Add a new API client and enter the service account's client ID.
+			    10. Add the following OAuth scopes:
+			        https://www.googleapis.com/auth/gmail.backup"
+			        https://www.googleapis.com/auth/drive"
+			        https://www.googleapis.com/auth/calendar"
+			        https://www.googleapis.com/auth/admin.directory.user"
+			        https://www.googleapis.com/auth/admin.datatransfer"
+		EOF
+	fi
+fi
 
+# Check if gyb is authorized with a service account
+if [[ ! -r "$HOMEBREW_PREFIX/etc/gyb/oauth2service.json" ]]; then
+	log_verbose "GYB service account not . ound. Use GAM's credentials."
+	# Assuming GAM is configured with a service account at the default location
+	if [[ -r "$HOME/.gam/oauth2service.json" ]]; then
+		log_verbose "Found GAM service account credentials. Copying to GYB config."
+		mkdir -p "$HOMEBREW_PREFIX/etc/gyb"
+		cp "$HOME/.gam/oauth2service.json" "$HOMEBREW_PREFIX/etc/gyb/oauth2service.json"
+	else
+		log_error 2 "Could not find GAM service account at $HOME/.gam/oauth2service.json or gyb account please configure"
+	fi
 fi
 
 log_verbose "GAM must be bash installed"
@@ -100,7 +127,7 @@ for U in "$@"; do
 
 	# Use GYB to backup all emails
 	log_verbose "Backing up emails for $U using GYB"
-	gyb --email "$U" --action backup --local-folder "$BACKUP_DIR"
+	gyb --email "$U" --service-account --action backup --local-folder "$BACKUP_DIR"
 
 	# Create a compressed archive of the backup
 	ARCHIVE_NAME="${U//[@.]/_}_backup_$(date +%Y%m%d_%H%M%S).tar.gz"

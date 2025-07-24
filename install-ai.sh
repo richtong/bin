@@ -175,11 +175,12 @@ if $EXTRAS; then
 	)
 
 	NODE_PACKAGE+=(
-		@receptron/graphai_cli    # graphAI command line interpreter
-		@anthropic-ai/claude-code # command line ai
-		playwright                # browser automation🤽‍♂️
-		mulmocast                 # graphAI based multimedia presentation, podcast and video tool
-		@google/gemini-cli        # adding the gemini-cli
+		@receptron/graphai_cli         # graphAI command line interpreter
+		@anthropic-ai/claude-code      # command line ai
+		@musistudio/claude-code-router # users ~/.claude-code-router/config.json
+		playwright                     # browser automation
+		mulmocast                      # graphAI based multimedia presentation, podcast and video tool
+		@google/gemini-cli             # adding the gemini-cli
 	)
 fi
 
@@ -306,6 +307,81 @@ if ! config_mark "$WS_DIR/git/src/.envrc"; then
 		  # for mulmocast
 		  [[ -v DEFAULT_OPENAI_IMAGE_MODEL ]] || export "DEFAULT_OPENAI_IMAGE_MODEL"="gpt-image-1"
 		  [[ -v GOOGLE_PROJECT_ID ]] || export "GOOGLE_PROJECT_ID"="$(op item get "Google Project ID Dev" --fields "project id" --vault "DevOps" --reveal)"
+
+	EOF
+fi
+
+log_verbose "Install Claude code router config assume environment is set with API Keys"
+log_warning "Claude Code Router does not appear to load use scripts instead"
+mkdir -p "$HOME/.claude-code-router"
+# https://www.reddit.com/r/LocalLLaMA/comments/1lbd2jy/what_llm_is_everyone_using_in_june_2025/
+if ! config_mark "$HOME/.claude-code-router/config.json"; then
+	config_add "$HOME/.claude-code-router/config.json" <<-EOF
+
+		{
+		  "LOG": true,
+		  "Providers": [
+		    {
+		      "name": "openrouter",
+		      "api_base_url": "https://openrouter.ai/api/v1/chat/completions",
+		      "api_key": "$OPENROUTER_API_KEY",
+		      "models": [
+		        "qwen/qwen3-coder:online",
+		        "moonshot/kimi-k2:online",
+		        "qwen/qwen3-coder:free",
+		        "moonshot/kimi-k2:free"
+		      ],
+		      "transformer": {
+		        "use": ["openrouter"]
+		      }
+		    },
+		    {
+		      "name": "deepseek",
+		      "api_base_url": "https://api.deepseek.com/chat/completions",
+		      "api_key": "$DEEPSEEK_API_KEY",
+		      "models": ["deepseek-chat", "deepseek-reasoner"],
+		      "transformer": {
+		        "use": ["deepseek"],
+		        "deepseek-chat": {
+		          "use": ["tooluse"]
+		        }
+		      }
+		    },
+		    {
+		      "name": "ollama",
+		      "api_base_url": "http://localhost:11434/v1/chat/completions",
+		      "api_key": "ollama",
+		      "models": [
+		        "devstral",
+		        "qwen3:qwen3:32b",
+		        "qwen3:30b-a3b,gemma3_27b",
+		        "cogito:32b"
+		      ]
+		    },
+		    {
+		      "name": "gemini",
+		      "api_base_url": "https://generativelanguage.googleapis.com/v1beta/models/",
+		      "api_key": "$GEMINI_API_KEY",
+		      "models": ["gemini-2.5-flash", "gemini-2.5-pro"],
+		      "transformer": {
+		        "use": ["gemini"]
+		      }
+		    },
+		    {
+		      "name": "alibaba",
+		      "api_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+		      "api_key": "$ALIBABA_API_KEY",
+		      "models": ["qwen3-coder-plus", "qwen3-coder"]
+		    }
+		  ],
+		  "Router": {
+		    "default": "alibaba,qwen3-coder-plus",
+		    "background": "ollama,qwen3:32b",
+		    "think": "deepseek,deepseek-reasoner",
+		    "longContext": "alibaba,qwen3-coder-plus",
+		    "webSearch": "openrouter:moonshot/kimi-k2:online"
+		  }
+		}
 
 	EOF
 fi

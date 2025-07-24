@@ -24,19 +24,23 @@ COLIMA="${COLIMA:-true}"
 COLIMA_STABLE="${COLIMA_STABLE:-false}"
 KUBERNETES="${KUBERNETES:-false}"
 RANCHER="${RANCHER:-false}"
+UTM="${UTM:-true}"
+KRUNVM="${KRUNVM:-true}"
 DEBUGGING="${DEBUGGING:-false}"
 VERBOSE="${VERBOSE:-false}"
-while getopts "hdvqpmclsrk" opt; do
+while getopts "hdvqpmclsrkux" opt; do
 	case "$opt" in
 	h)
 		cat <<-EOF
 			Installs Docker alternatives and running Linux on Mac
-				- Podman is Redhat's CLI replacement for docker
-				- Lima is an open source replacement for a linux VM with full
-				  sharing to Linux, like Linux Subsystem for Mac (ala WSL)
+				- Podman is Redhat's CLI replacement for docker (not recommended on Mac)
+				- Lima is an app container run time
 				- Colima uses Lima to emulate docker exactly
 				- Multipass is Ubuntu virtual machines for bare metal
 				- Rancher Desktop is a graphical replacement for Docker Desktop
+				- UTM is a wrapper around QEMU for full Virtual Machines
+				- Krunvm runs microVMs (sub second startup vs others) like AWS Lambdas
+				- Incus is a fork of LXD for running containers (both app and system containers)
 
 				usage: $SCRIPTNAME [ flags ]
 				flags:
@@ -51,40 +55,51 @@ while getopts "hdvqpmclsrk" opt; do
 					   -s Colima $($COLIMA_STABLE && echo dev || echo stable) release installed
 					   -k Kubernetes $($KUBERNETES && echo not) installed
 					   -r Rancher Desktop $($RANCHER && echo "not ")installed
+					   -u UTM Virtual Machine $($UTM && echo "not ")installed
+					   -x krunvm MicroVMs from OCI images $($KRUNVM && echo "not ")installed
 		EOF
 		exit 0
 		;;
 	d)
-		export DEBUGGING="$DEBUGGING && echo false || echo true"
+		DEBUGGING="$($DEBUGGING && echo false || echo true)"
+		export DEBUGGING
 		;;
 	v)
-		export VERBOSE="$VERBOSE && echo false || echo true"
+		VERBOSE="$($VERBOSE && echo false || echo true)"
+		export VERBOSE
 		# add the -v which works for many commands
 		if $VERBOSE; then export FLAGS+=" -v "; fi
+		echo "VERBOSE=$VERBOSE"
 		;;
 	q)
-		QEMU="$QEMU && echo false || echo true"
+		QEMU="$($QEMU && echo false || echo true)"
 		;;
 	m)
-		MULTIPASS="$MULTIPASS && echo false || echo true"
+		MULTIPASS="$($MULTIPASS && echo false || echo true)"
 		;;
 	p)
-		PODMAN="$PODMAN && echo false || echo true"
+		PODMAN="$($PODMAN && echo false || echo true)"
 		;;
 	l)
-		LIMA="$LIMA && echo false || echo true"
+		LIMA="$($LIMA && echo false || echo true)"
 		;;
 	c)
-		COLIMA="$COLIMA && echo false || echo true"
+		COLIMA="$($COLIMA && echo false || echo true)"
 		;;
 	s)
-		COLIMA_STABLE="$COLIMA_STABLE && echo false || echo true"
+		COLIMA_STABLE="$($COLIMA_STABLE && echo false || echo true)"
 		;;
 	r)
-		RANCHER="$RANCHER && echo false || echo true"
+		RANCHER="$($RANCHER && echo false || echo true)"
 		;;
 	k)
-		KUBERNETES="$KUBERNETES && echo false || echo true"
+		KUBERNETES="$(KUBERNETES && echo false || echo true)"
+		;;
+	u)
+		UTM="$($UTM && echo false || echo true)"
+		;;
+	x)
+		KRUNVM="$($KRUNVM && echo false || echo true)"
 		;;
 	*)
 		echo "no flag -$opt"
@@ -96,8 +111,6 @@ shift $((OPTIND - 1))
 if [[ -e "$SCRIPT_DIR/include.sh" ]]; then source "$SCRIPT_DIR/include.sh"; fi
 
 source_lib lib-install.sh lib-util.sh lib-config.sh
-
-log_verbose "LIMA=$LIMA"
 
 if $LIMA; then
 	log_verbose "Installing Lima"
@@ -117,11 +130,11 @@ if $LIMA; then
 		if $VERBOSE; then
 			lima ls -l "/proc/sys/fs/binfmt_misc/qemu*"
 		fi
-
-		# https://github.com/containerd/nerdctl/blob/master/docs/multi-platform.md
-		log_verbose "cross platform push"
-		log_verbose "lima nerdctl build --platform=amd64,arm64 -t richt/test ."
 	fi
+	# https://github.com/containerd/nerdctl/blob/master/docs/multi-platform.md
+	log_verbose "cross platform push"
+	log_verbose "lima nerdctl build --platform=amd64,arm64 -t richt/test ."
+
 	if $VERBOSE; then
 		lima uname -a
 	fi
@@ -130,6 +143,7 @@ fi
 # https://github.com/abiosoft/colima
 #https://github.com/abiosoft/colima/issues/75
 if $COLIMA; then
+	log_verbose "Installing colima"
 	# it is also the command line which we do
 	package_install kubectl
 	# note that docker has a collision it is a cask which we do not want
@@ -154,32 +168,46 @@ if $COLIMA; then
 		COLIMA_FLAGS+=(--kubernetes)
 	fi
 	log_verbose "Starting colima with ${COLIMA_FLAGS[*]}"
-	colima start "${COLIMA_FLAGS[@]}"
+	# Check if colima is already running will generate a warning if it is
+	# already running
+	if ! colima start "${COLIMA_FLAGS[@]}" >/dev/null; then
+		log_warning "colima installed but could not start"
+	else
+		log_verbose "Set docker to use colima context"
+		log_verbose "To use Docker Desktop run docker context use default"
+		docker context use colima
 
-	log_verbose "Set docker to use colima context"
-	log_verbose "To use Docker Desktop run docker context use default"
-	docker context use colima
-	log_verbose "Create buildx instance with 50MB log"
-	# https://stackoverflow.com/questions/65819424/is-there-a-way-to-increase-the-log-size-in-docker-when-building-a-container
-	docker buildx create --name colima-buildx \
-		--driver-opt env.BUILDKIT_STEP_LOG_MAX_SIZE=500000000 --use
+		# Check if colima-buildx already exists
+		if docker buildx ls | grep -q "^colima-buildx "; then
+			log_verbose "colima-buildx already exists, switching to it"
+			docker buildx use colima-buildx
+		else
+			log_verbose "Create buildx instance with 50MB log"
+			# https://stackoverflow.com/questions/65819424/is-there-a-way-to-increase-the-log-size-in-docker-when-building-a-container
+			docker buildx create --name colima-buildx \
+				--driver-opt env.BUILDKIT_STEP_LOG_MAX_SIZE=500000000 --use
+		fi
 
-	if $VERBOSE; then
-		log_verbose "colima works kubectl using containerd"
-		colima start --runtime containerd --profile cd
-		colima delete --profile cd
-		log_verbose "cross architecture container for x86"
-		# https://github.com/abiosoft/colima/blob/main/environment/vm.go
-		colima start --runtime containerd --arch x86_64 --profile amd64
-		colima delete --profile amd64
-		log_verbose "cross architecture for M1"
-		colima start --runtime containerd --arch aarch64 --profile arm64
-		colima delete --profile arm64
-		log_verbose "run with bigger machine"
-		colima delete --profile large
-		log_verbose "colima works with kubectl using docker"
-		colima start --runtime docker --with-kubernetes --profile k8s --verbose
-		colima delete --profile k8s
+		if $VERBOSE; then
+			log_verbose "colima works kubectl using containerd"
+			colima start --runtime containerd --profile cd
+			colima delete --profile cd
+			log_verbose "cross architecture container for x86"
+			# https://github.com/abiosoft/colima/blob/main/environment/vm.go
+			colima start --runtime containerd --arch x86_64 --profile amd64
+			colima delete --profile amd64
+			log_verbose "cross architecture for M1"
+			colima start --runtime containerd --arch aarch64 --profile arm64
+			colima delete --profile arm64
+			log_verbose "run with bigger machine"
+			colima delete --profile large
+			log_verbose "colima works with kubectl using docker"
+			colima start --runtime docker --with-kubernetes --profile k8s --verbose
+			colima delete --profile k8s
+		fi
+
+		log_verbose "shutting colima down, colima start to use it"
+		colima stop
 	fi
 
 fi
@@ -263,4 +291,20 @@ if $MULTIPASS; then
 	# https://ubuntu.com/blog/docker-on-mac-and-windows-multipass
 	multipass launch docker
 	log_verbose "Run docker with Multipass with the command multipass docker"
+fi
+
+if $UTM; then
+	log_verbose "Installing UTM - Virtual machines for Mac"
+	# https://mac.getutm.app/
+	# UTM is a full featured system emulator and virtual machine host for iOS and macOS
+	cask_install utm
+	log_verbose "UTM installed - launch from Applications folder"
+fi
+
+if $KRUNVM; then
+	log_verbose "Installing krunvm - Create MicroVMs from OCI images"
+	# https://github.com/containers/krunvm
+	# krunvm is a CLI tool for creating and running MicroVMs using OCI images
+	package_install krunvm
+	log_verbose "krunvm installed - use 'krunvm create' to create VMs from container images"
 fi

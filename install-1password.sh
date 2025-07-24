@@ -270,8 +270,9 @@ ENTRY+=(
 # do not use github_token, use gh auth login
 # do not use AWS_SECRET_ACCESS_KEY, use AWS_SECRET_ACCESS_KEY use aws ssologin
 declare -A OP_API_ITEM+=(
-	[ALIBABA_API_KEY]="Alibaba Cloud API Key Dev"
-	[ANTHROPIC_API_KEY]="Anthropic API Key Dev"
+	[ALIBABA_API_KEY]="Alibaba API Key Dev"
+	# special code added so that if you have Max, you do not use this key
+	# [ANTHROPIC_API_KEY]="Anthropic API Key Dev"
 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
 	[AWS_SECRET_ACCESS_KEY]="AWS Access Key"
 	[BRAVE_SEARCH_API_KEY]="Brave Search API Key Dev"
@@ -462,6 +463,16 @@ fi
 	log_verbose "1password export to file $profile_file"
 	log_verbose "indices: ${!OP_API_ITEM[*]}"
 	log_verbose "values: ${OP_API_ITEM[*]}"
+
+	log_verbose "Special Anthropic Max code here, no API key if you have this key"
+	config_add "$profile_file" <<-EOF
+
+		export ANTHROPIC_MAX=true
+		if ! command -v claude >/dev/null && $ANTHROPIC_MAX; then
+			[[ -v ANTHROPIC_API_KEY ]] || export "ANTHROPIC_API_KEY"="$(op item get "Anthropic API Key Dev" --fields "api key" --vault "DevOps" --reveal)"
+		fi
+
+	EOF
 	for op_api_index in "${!OP_API_ITEM[@]}"; do
 		log_verbose "index $op_api_index"
 		log_verbose "item ${OP_API_ITEM[$op_api_index]}"
