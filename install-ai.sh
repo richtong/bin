@@ -175,12 +175,13 @@ if $EXTRAS; then
 	)
 
 	NODE_PACKAGE+=(
-		@receptron/graphai_cli         # graphAI command line interpreter
-		@anthropic-ai/claude-code      # command line ai
-		@musistudio/claude-code-router # users ~/.claude-code-router/config.json
-		playwright                     # browser automation
-		mulmocast                      # graphAI based multimedia presentation, podcast and video tool
-		@google/gemini-cli             # adding the gemini-cli
+		@receptron/graphai_cli           # graphAI command line interpreter
+		@anthropic-ai/claude-code        # command line ai
+		@musistudio/claude-code-router   # users ~/.claude-code-router/config.json
+		@dashscope-js/claude-code-config # https://qwenlm.github.io/blog/qwen3-coder/
+		playwright                       # browser automation
+		mulmocast                        # graphAI based multimedia presentation, podcast and video tool
+		@google/gemini-cli               # adding the gemini-cli
 	)
 fi
 
@@ -312,16 +313,39 @@ if ! config_mark "$WS_DIR/git/src/.envrc"; then
 fi
 
 log_verbose "Install Claude code router config assume environment is set with API Keys"
-log_warning "Claude Code Router does not appear to load use scripts instead"
+log_verbose "Install the dashscope transformer"
+ccr-dashscope
+
 mkdir -p "$HOME/.claude-code-router"
 # https://www.reddit.com/r/LocalLLaMA/comments/1lbd2jy/what_llm_is_everyone_using_in_june_2025/
 if ! config_mark "$HOME/.claude-code-router/config.json"; then
+	log_verbose "We blow away the dashscope config but it does the transformer installation"
 	config_add "$HOME/.claude-code-router/config.json" <<-EOF
 
 		{
 		  "LOG": true,
+		  "transformers": [
+		    {
+		      "path": "$HOME/.claude-code-router/plugins/dashscope-transformer.js",
+		      "options": {
+		        "enable_thinking": false,
+		        "stream": true
+		      }
+		    }
+		  ],
 		  "Providers": [
 		    {
+		      "name": "dashscope",
+		      "api_base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+		      "api_key": "$DASHSCOPE_API_KEY",
+		      "models": [
+		        "qwen3-coder-plus"
+		      ],
+		      "transformer": {
+		        "use": [
+		          "dashscope"
+		        ]
+		      },
 		      "name": "openrouter",
 		      "api_base_url": "https://openrouter.ai/api/v1/chat/completions",
 		      "api_key": "$OPENROUTER_API_KEY",
@@ -367,18 +391,12 @@ if ! config_mark "$HOME/.claude-code-router/config.json"; then
 		        "use": ["gemini"]
 		      }
 		    },
-		    {
-		      "name": "alibaba",
-		      "api_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
-		      "api_key": "$ALIBABA_API_KEY",
-		      "models": ["qwen3-coder-plus", "qwen3-coder"]
-		    }
 		  ],
 		  "Router": {
-		    "default": "alibaba,qwen3-coder-plus",
+		    "default": "dashscope,qwen3-coder-plus",
 		    "background": "ollama,qwen3:32b",
 		    "think": "deepseek,deepseek-reasoner",
-		    "longContext": "alibaba,qwen3-coder-plus",
+		    "longContext": "dashscope,qwen3-coder-plus",
 		    "webSearch": "openrouter:moonshot/kimi-k2:online"
 		  }
 		}

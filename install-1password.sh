@@ -270,7 +270,7 @@ ENTRY+=(
 # do not use github_token, use gh auth login
 # do not use AWS_SECRET_ACCESS_KEY, use AWS_SECRET_ACCESS_KEY use aws ssologin
 declare -A OP_API_ITEM+=(
-	[ALIBABA_API_KEY]="Alibaba API Key Dev"
+	[DASHSCOPE_API_KEY]="Alibaba Dashscope API Key Dev"
 	# special code added so that if you have Max, you do not use this key
 	# [ANTHROPIC_API_KEY]="Anthropic API Key Dev"
 	[AWS_ACCESS_KEY_ID]="AWS Access Key"
@@ -280,9 +280,11 @@ declare -A OP_API_ITEM+=(
 	[BROWSERBASE_PROJECT_ID]="Browser Base API Key Dev"
 	[BROWSERLESS_API_TOKEN]="Browserless API Key Dev"
 	# [CIVITAI_TOKEN]="Civitai API Key Dev"
+	[COMFYUI_API_KEY]="ComfyUI API Key Dev"
 	[DEEPSEEK_API_KEY]="deepseek API Key Dev"
 	# [DIGITALOCEAN_ACCESS_TOKEN]="DigitalOcean Personal Access Token"
 	[ELEVENLABS_API_KEY]="ElevenLabs API Key Dev"
+	[EXA_API_KEY]="Exa API Key Dev"
 	[FAL_KEY]="FAL API Key Dev"
 	[FIRECRAWL_API_KEY]="firecrawl API Key Dev"
 	[GITHUB_TOKEN_CLASSIC]="GitHub Personal Access Token Classic"
@@ -301,6 +303,7 @@ declare -A OP_API_ITEM+=(
 	[OPENAI_API_KEY]="OpenAI API Key Dev"
 	[OPENROUTER_API_KEY]="OpenRouter API Key Dev"
 	[PERPLEXITY_API_KEY]="Perplexity API Key Dev"
+	[QDRANT_API_KEY]="Qdrant API Key Dev"
 	[REPLICATE_API_KEY]="Replicate API Token Dev"
 	[SAMBANOVA_API_KEY]="Sambanova API Token Dev"
 	[SERPAPI_API_KEY]="SerpApi API Key Dev"
@@ -331,7 +334,7 @@ declare -A OP_API_DISABLE+=(
 # so auth token should be changed to when the plugin changes in 1password
 declare -A OP_API_FIELD+=(
 
-	[ALIBABA_API_KEY]="api key"
+	[DASHSCOPE_API_KEY]="api key"
 	[ANTHROPIC_API_KEY]="api key"
 	[AWS_ACCESS_KEY_ID]="access key id"
 	[AWS_SECRET_ACCESS_KEY]="secret access key"
@@ -340,9 +343,11 @@ declare -A OP_API_FIELD+=(
 	[BROWSERBASE_PROJECT_ID]="project id"
 	[BROWSERLESS_API_TOKEN]="api key" # yes this is correct mulmocast names it token not key
 	# [CIVITAI_TOKEN]="api key"
+	[COMFYUI_API_KEY]="api key"
 	[DEEPSEEK_API_KEY]="api key"
 	# [DIGITALOCEAN_ACCESS_TOKEN]=token
 	[ELEVENLABS_API_KEY]="api key"
+	[EXA_API_KEY]="api key"
 	[FAL_KEY]="api key"
 	[FIRECRAWL_API_KEY]="api key"
 	[GITHUB_TOKEN_CLASSIC]="personal access token"
@@ -360,6 +365,7 @@ declare -A OP_API_FIELD+=(
 	[OPENAI_API_KEY]="api key"
 	[OPENROUTER_API_KEY]="key"
 	[PERPLEXITY_API_KEY]="api key"
+	[QDRANT_API_KEY]="api key"
 	[REPLICATE_API_KEY]="api token"
 	[SAMBANOVA_API_KEY]="api token"
 	[SERPAPI_API_KEY]="api key"
@@ -372,6 +378,7 @@ declare -A OP_API_FIELD+=(
 	[WEBUI_API_KEY]="api key"
 	[WEBUI_SECRET_KEY]="secret key"
 	[MCPO_API_KEY]="api key"
+	[default]="api key"
 
 )
 # Which vault, the shared ones are in DevOps, personal in Private
@@ -379,7 +386,6 @@ declare -A OP_API_FIELD+=(
 # turn off github token as it confuses gh
 
 declare -A OP_API_VAULT=(
-	[ALIBABA_API_KEY]="DevOps"
 	[ANTHROPIC_API_KEY]="DevOps"
 	[AWS_ACCESS_KEY_ID]="DevOps"
 	[AWS_SECRET_ACCESS_KEY]="DevOps"
@@ -387,7 +393,9 @@ declare -A OP_API_VAULT=(
 	[BROWSERBASE_API_KEY]="DevOps"
 	[BROWSERBASE_PROJECT_ID]="DevOps"
 	[BROWSERLESS_API_TOKEN]="DevOps"
+	[COMFYUI_API_KEY]="DevOps"
 	# [CIVITAI_TOKEN]="Civitai API Key Dev"
+	[DASHSCOPE_API_KEY]="DevOps"
 	[DEEPSEEK_API_KEY]="DevOps"
 	# [DIGITALOCEAN_ACCESS_TOKEN]="Private"
 	[ELEVENLABS_API_KEY]="DevOps"🤽‍♂️
@@ -409,6 +417,7 @@ declare -A OP_API_VAULT=(
 	[OPENAI_API_KEY]="DevOps"
 	[OPENROUTER_API_KEY]="DevOps"
 	[PERPLEXITY_API_KEY]="DevOps"
+	[QDRANT_API_KEY]="DevOps"
 	[REPLICATE_API_KEY]="DevOps"
 	[SAMBANOVA_API_KEY]="DevOps"
 	[SERPAPI_API_KEY]="DevOps"
@@ -420,6 +429,7 @@ declare -A OP_API_VAULT=(
 	[UNBOUND_API_KEY]="DevOps"
 	[WEBUI_API_KEY]="DevOps"
 	[WEBUI_SECRET_KEY]="DevOps"
+	[default]="DevOps"
 
 )
 
