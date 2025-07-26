@@ -80,12 +80,17 @@ PACKAGE+=(
 	libdvdcss
 	exiftool
 	asciinema # terminal recording with asciinema rec demo.cast
+	# affinity-designer # these all need trial keys from Affinity.com
+	# affinity-photo
+	# affinity-publisher
 
 )
 
 log_verbose "Install ${PACKAGE[*]}"
 # shellcheck disable=SC2086
 package_install "${PACKAGE[@]}"
+
+log_verbose "Affinity apps need keys from https://affinity.com"
 
 # hugin not in snap or apt-get
 # https://ubuntuhandbook.org/index.php/2022/04/hugin-panorama-stitcher-ubuntu-22-04/

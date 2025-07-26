@@ -91,15 +91,15 @@ if $EXTRAS; then
 
 	# https://stackoverflow.com/questions/34286515/how-to-install-visual-studio-code-extensions-from-command-line
 	VSCODE+=(
-		lee2py.aider-composer # connects to aider
-		nicepkg.aide-pro
-		continue.continue         # continue.dev ai coder
-		saoudrizwan.claude-dev    # Cline ai coder
-		formulahendry.code-runner # run C, and other langauages
-		eamodio.gitlens           # supercharge gito
-		mintlify.document         # documentation writer
-		asvetliakov.vscodaterial-icon-theme
-		amazonwebservices.amazon-q-vscode
+		lee2py.aider-composer               # connects to aider
+		nicepkg.aide-pro                    # another aider tool
+		continue.continue                   # continue.dev ai coder
+		saoudrizwan.claude-dev              # Cline ai coder
+		formulahendry.code-runner           # run C, and other langauages
+		eamodio.gitlens                     # supercharge gito
+		mintlify.document                   # documentation writer
+		asvetliakov.vscodaterial-icon-theme # pretty icon
+		amazonwebservices.amazon-q-vscode   # Amazon Q AI Coder
 
 	)
 fi
@@ -182,6 +182,7 @@ if $EXTRAS; then
 		playwright                       # browser automation
 		mulmocast                        # graphAI based multimedia presentation, podcast and video tool
 		@google/gemini-cli               # adding the gemini-cli
+		@qwen-code/qwen-code             # claude with qwen backend
 	)
 fi
 
