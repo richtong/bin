@@ -56,6 +56,7 @@ source_lib lib-git.sh lib-mac.sh lib-install.sh lib-util.sh lib-config.sh
 if in_os mac; then
 	PACKAGE+=(
 		rustup
+		protobuf # needed by qdrant
 	)
 	if ! config_mark; then
 		config_add <<-'EOF'
@@ -71,3 +72,5 @@ fi
 
 log_verbose "Install ${PACKAGE[*]}"
 package_install "${PACKAGE[@]}"
+
+rustup component add rustfmt
