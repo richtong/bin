@@ -110,7 +110,7 @@ repos:
 
   # replace markdownlint-cli with markdownlint-cli2 which is supposed to be faster
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.22.1
+    rev: v0.23.2
     hooks:
       - id: markdownlint-cli2
         # needs a pinned version
@@ -188,7 +188,7 @@ repos:
   # black, flake8, and pydocstyle
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.15.14
+    rev: v0.16.6
     hooks:
       # Run the linter.
       - id: ruff
@@ -200,7 +200,7 @@ repos:
   # sync all notebooks with their corresponding markdown files
   # use ruff to format the python code and the version must match
   - repo: https://github.com/mwouts/jupytext
-    rev: v1.19.3
+    rev: v1.19.5
     hooks:
       - id: jupytext
         args: [--sync, --pipe, ruff]
@@ -233,7 +233,7 @@ repos:
   # - id: hadolint-docker
   # exclude: Dockerfile.dockerignore
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.14.0
+    rev: v2.15.1
     hooks:
       - id: hadolint
         exclude: Dockerfile.dockerignore
