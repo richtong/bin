@@ -876,7 +876,7 @@ fi
 
 if in_os mac && $INCLUDE_MLX; then
 	log_verbose "Include HF MLX models"
-	if ! $DRYRUN && ($FORCE || ((DISK_USED > DISK_MAX))); then
+	if ! $DRYRUN && ($FORCE || ((DISK_USED > DISK_MAX)) ); then
 		huggingface-cli download "${MODEL_MLX[@]}"
 	fi
 fi
