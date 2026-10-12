@@ -1222,7 +1222,7 @@ fi
 
 if in_os mac && $INCLUDE_HFCO; then
 	log_verbose "Include HF models for MLX and SentenceTransformers in OpenWebUI"
-	if ! $DRYRUN && ($FORCE || ((DISK_USED > DISK_MAX))); then
+	if ! $DRYRUN && ($FORCE || ((DISK_USED > DISK_MAX)) ); then
 		huggingface-cli download "${MODEL_HFCO[@]}"
 	fi
 fi
